@@ -19,10 +19,10 @@ import java.util.*;
 
 
 /**
- * Kiez-Atlas 1.3.3<br>
- * Requires DeepaMehta 2.0b6-post3
+ * Kiez-Atlas 1.3.4<br>
+ * Requires DeepaMehta 2.0b7-post1
  * <p>
- * Last change: 28.5.2006<br>
+ * Last change: 26.8.2006<br>
  * J&ouml;rg Richter<br>
  * jri@freenet.de
  */
@@ -30,7 +30,7 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 
 
 
-	static final String VERSION = "1.3.3";
+	static final String VERSION = "1.3.4";
 	static {
 		System.out.println(">>> Kiez-Atlas " + VERSION);
 	}
@@ -91,11 +91,7 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 			// additional command: "Reposition all"
 			commands.addCommand(ITEM_REPOSITION_ALL, CMD_REPOSITION_ALL);
 			commands.addSeparator();
-			// additional command: "Undo all Fillings"
-			int cmdState = isMapColored() ? COMMAND_STATE_DEFAULT : COMMAND_STATE_DISABLED;
-			commands.addCommand(ITEM_UNDO_ALL_FILLINGS, CMD_UNDO_ALL_FILLINGS, cmdState);
 			//
-			commands.addSeparator();
 			commands.addHelpCommand(this, session);
 		}
 		//
@@ -117,8 +113,6 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 		String cmd = st.nextToken();
 		if (cmd.equals(CMD_REPOSITION_ALL)) {
 			repositionAllInstitutions(directives);
-		} else if (cmd.equals(CMD_UNDO_ALL_FILLINGS)) {
-			undoAllFillings(directives);
 		} else {
 			return super.executeCommand(command, session, topicmapID, viewmode);
 		}
@@ -188,9 +182,12 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 
 	/**
 	 * Pre-condition: this topic map is the published version.
+	 *
+	 * @see		de.kiezatlas.deepamehta.BrowseServlet#initInstitutaionType
+	 * @see		de.kiezatlas.deepamehta.ListServlet#preparePage
 	 */
 	public BaseTopic getInstitutionType() {
-		BaseTopic workspace = as.owner(getID());
+		BaseTopic workspace = as.getTopicmapOwner(getID());
 		System.out.println(">>> map belongs to workspace " + workspace);
 		// institution type
 		Vector typeIDs = as.type(TOPICTYPE_KIEZ_INSTITUTION, 1).getSubtypeIDs();
@@ -201,6 +198,20 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 		}
 		//
 		return (BaseTopic) instTypes.firstElement();
+	}
+
+	/**
+	 * Pre-condition: this topic map is the published version.
+	 *
+	 * @see		de.kiezatlas.deepamehta.BrowseServlet#initShapeTypes
+	 */
+	public Vector getShapeTypes() {
+		BaseTopic workspace = as.getTopicmapOwner(getID());
+		// institution type
+		Vector typeIDs = as.type(TOPICTYPE_SHAPE, 1).getSubtypeIDs();
+		Vector shapeTypes = cm.getRelatedTopics(workspace.getID(), SEMANTIC_WORKSPACE_SHAPETYPE, TOPICTYPE_TOPICTYPE, 2, typeIDs, true);	// sortAssociations=true
+		//
+		return shapeTypes;
 	}
 
 	// ---
@@ -257,20 +268,6 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 				return;
 			}
 		}
-	}
-
-	// ---
-
-	private void undoAllFillings(CorporateDirectives directives) {
-		Hashtable props = new Hashtable();
-		props.put(PROPERTY_BACKGROUND_IMAGE, getProperty(PROPERTY_ORIGINAL_BACKGROUND_IMAGE));
-		props.put(PROPERTY_ORIGINAL_BACKGROUND_IMAGE, "");
-		directives.add(DIRECTIVE_SHOW_TOPIC_PROPERTIES, getID(), props, new Integer(1));
-	}
-
-	boolean isMapColored() {
-		String imagefile = getProperty(getID(), 1, PROPERTY_BACKGROUND_IMAGE);
-		return imagefile.substring(0, imagefile.lastIndexOf('.')).endsWith("-colored");
 	}
 
 	// --- lookupCityMap (3 forms) ---

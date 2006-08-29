@@ -1,9 +1,9 @@
-Kiez-Atlas Documentation
+Kiez-Atlas 1.3.4 Documentation
 
 Web Session Attributes
 
 Jšrg Richter
-17.4.2006
+26.8.2006
 
 
 
@@ -17,6 +17,8 @@ map					BaseTopic
 mapImage			String
 criterias			array of SearchCriteria
 instType			TypeTopic
+shapeTypes			Vector of ShapeType
+shapes				Vector of Shape
 searchMode			String
 						"byName"
 						"0", "1", ... (index for "criterias")

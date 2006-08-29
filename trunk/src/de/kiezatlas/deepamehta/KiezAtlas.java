@@ -5,10 +5,10 @@ import de.deepamehta.DeepaMehtaConstants;
 
 
 /**
- * Kiez-Atlas 1.3.3<br>
- * Requires DeepaMehta 2.0b6-post3
+ * Kiez-Atlas 1.3.4<br>
+ * Requires DeepaMehta 2.0b7-post1
  * <p>
- * Last change: 28.5.2006<br>
+ * Last change: 26.8.2006<br>
  * J&ouml;rg Richter<br>
  * jri@freenet.de
  */
@@ -19,6 +19,16 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	// *****************
 	// *** Constants ***
 	// *****************
+
+
+
+	// -------------------
+	// --- Preferences ---
+	// -------------------
+
+
+
+	static final int SHAPE_ALPHA = 128;		// 0-transparent ... 255-opaque
 
 
 
@@ -47,7 +57,7 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	static final String TOPICTYPE_FORUM = "tt-ka-forum";
 	static final String TOPICTYPE_COMMENT = "tt-ka-kommentar";
 	static final String TOPICTYPE_OUTLINE_POINT = "tt-ka-outlinepoint";
-	static final String TOPICTYPE_COLOR = "tt-ka-color";
+	static final String TOPICTYPE_SHAPE = "tt-ka-shape";
 
 
 
@@ -76,6 +86,9 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	// direction is from forum to comment
 	static final String SEMANTIC_FORUM_COMMENTS = ASSOCTYPE_ASSOCIATION;
 
+	// direction is from workspace to shape-subtype
+	static final String SEMANTIC_WORKSPACE_SHAPETYPE = ASSOCTYPE_ASSOCIATION;
+
 	// direction is arbitrary
 	static final String SEMANTIC_SHAPE_OUTLINE = ASSOCTYPE_OUTLINE;
 
@@ -98,8 +111,6 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	static final String PROPERTY_COMMENT_AUTHOR = "Autor";
 	static final String PROPERTY_COMMENT_DATE = "Datum";
 	static final String PROPERTY_COMMENT_TIME = "Uhrzeit";
-	//
-	static final String PROPERTY_ORIGINAL_BACKGROUND_IMAGE = "Original Background Image";
 
 
 
@@ -129,14 +140,8 @@ public interface KiezAtlas extends DeepaMehtaConstants {
     static final String ITEM_REPOSITION_ALL = "Reposition all";
     static final String  CMD_REPOSITION_ALL = "repositionAll";
 	//
-    static final String ITEM_FILL_SHAPE = "Fill";
-    static final String  CMD_FILL_SHAPE = "fillShape";
-	//
-    static final String ITEM_CHOOSE_FILL_COLOR = "Choose Color";
-    static final String  CMD_CHOOSE_FILL_COLOR = "chooseFillColor";
-	//
-    static final String ITEM_UNDO_ALL_FILLINGS = "Undo all Fillings";
-    static final String  CMD_UNDO_ALL_FILLINGS = "undoAllFillings";
+    static final String ITEM_MAKE_SHAPE = "Make Shape";
+    static final String  CMD_MAKE_SHAPE = "makeShape";
 
 
 
@@ -172,6 +177,7 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	public static final String ACTION_SHOW_INSTITUTION_FORUM = "showInstForum";
 	public static final String ACTION_SHOW_COMMENT_FORM = "showCommentForm";
 	public static final String ACTION_CREATE_COMMENT = "createComment";
+	public static final String ACTION_TOGGLE_SHAPE_DISPLAY = "toggleShapeDisplay";
 	// edit servlet
 	public static final String ACTION_TRY_LOGIN = "tryLogin";		// also used for list servlet
 	public static final String ACTION_SHOW_INSTITUTION_FORM = "showInstForm";

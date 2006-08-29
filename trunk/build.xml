@@ -10,7 +10,7 @@
 	<property name="war-test" value="${project.name}-test.war"/>
 	<property name="build" location="build"/>
 
-	<import file="../DeepaMehta/trunk/config.xml"/>
+	<import file="../../DeepaMehta/trunk/config.xml"/>
 
 	<target name="init" description="create build directory">
 		<mkdir dir="${build}"/>

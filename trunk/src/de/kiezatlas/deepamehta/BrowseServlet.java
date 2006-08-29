@@ -6,6 +6,7 @@ import de.kiezatlas.deepamehta.topics.InstitutionTopic;
 import de.deepamehta.BaseTopic;
 import de.deepamehta.DeepaMehtaException;
 import de.deepamehta.DeepaMehtaUtils;
+import de.deepamehta.PresentableTopic;
 import de.deepamehta.service.Session;
 import de.deepamehta.service.web.DeepaMehtaServlet;
 import de.deepamehta.service.web.RequestParameter;
@@ -15,16 +16,21 @@ import de.deepamehta.topics.EmailTopic;
 //
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.swing.ImageIcon;
 //
+import java.awt.Image;
+import java.awt.Point;
+import java.awt.Toolkit;
+import java.net.URL;
 import java.util.*;
 
 
 
 /**
- * Kiez-Atlas 1.3.2<br>
- * Requires DeepaMehta 2.0b6-post3
+ * Kiez-Atlas 1.3.4<br>
+ * Requires DeepaMehta 2.0b7-post1
  * <p>
- * Last change: 20.5.2006<br>
+ * Last change: 29.8.2006<br>
  * J&ouml;rg Richter<br>
  * jri@freenet.de
  */
@@ -43,6 +49,8 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 				setCityMap(CityMapTopic.lookupCityMap(alias, true, as), session);	// throwIfNotFound=true
 				initInstitutaionType(session);	// relies on city map
 				initSearchCriterias(session);	// relies on institutaion type
+				initShapeTypes(session);		// relies on city map
+				updateShapes(session);			// relies on shape types;
 				return PAGE_FRAMESET;
 			} catch (DeepaMehtaException e) {
 				System.out.println("*** BrowseServlet.performAction(): " + e);
@@ -140,6 +148,12 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 			sendNotificationEmail(inst.getID(), commentID);
 			//
 			return PAGE_INSTITUTION_FORUM;
+		// shape display
+		} else if (action.equals(ACTION_TOGGLE_SHAPE_DISPLAY)) {
+			String shapeTypeID = params.getValue("typeID");
+			toggleShapeDisplay(shapeTypeID, session);
+			updateShapes(session);
+			return PAGE_CITY_MAP;
 		} else {
 			return super.performAction(action, params, session);
 		}
@@ -286,8 +300,8 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 			as.getTopicProperty(map, PROPERTY_BACKGROUND_IMAGE);
 		session.setAttribute("map", map);
 		session.setAttribute("mapImage", mapImage);
-		System.out.println("> \"map\" stored in session: " + map);
-		System.out.println("> \"mapImage\" stored in session: " + mapImage);
+		System.out.println("  > \"map\" stored in session: " + map);
+		System.out.println("  > \"mapImage\" stored in session: " + mapImage);
 	}
 
 	private void setSearchMode(String searchMode, Session session) {
@@ -320,6 +334,18 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 			System.out.println("  > " + crit);
 		}
 		session.setAttribute("criterias", criterias);
+	}
+
+	private void initShapeTypes(Session session) {
+		Vector st = ((CityMapTopic) as.getLiveTopic(getCityMap(session))).getShapeTypes();	// ### ugly
+		System.out.println(">>> there are " + st.size() + " shape types:");
+		Vector shapeTypes = new Vector();
+		for (int i = 0; i < st.size(); i++) {
+			TypeTopic shapeType = (TypeTopic) as.getLiveTopic((BaseTopic) st.elementAt(i));
+			shapeTypes.addElement(new ShapeType(shapeType.getID(), shapeType.getPluralNaming(), false));	// isSelected=false
+			System.out.println("  > " + shapeType.getName());
+		}
+		session.setAttribute("shapeTypes", shapeTypes);
 	}
 
 	private void setSelectedInst(String instID, Session session) {
@@ -372,6 +398,59 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 
 	// ---
 
+	private void toggleShapeDisplay(String shapeTypeID, Session session) {
+		Vector shapeTypes = getShapeTypes(session);
+		Enumeration e = shapeTypes.elements();
+		while (e.hasMoreElements()) {
+			ShapeType shapeType = (ShapeType) e.nextElement();
+			if (shapeType.typeID.equals(shapeTypeID)) {
+				shapeType.isSelected = !shapeType.isSelected;
+			}
+		}
+	}
+
+	private void updateShapes(Session session) {
+		try {
+			Vector shapes = new Vector();
+			Vector shapeTypes = getShapeTypes(session);
+			String mapID = getCityMap(session).getID();
+			// for all shape types ...
+			Enumeration e = shapeTypes.elements();
+			while (e.hasMoreElements()) {
+				ShapeType shapeType = (ShapeType) e.nextElement();
+				// if type is selected ...
+				if (shapeType.isSelected) {
+					// ... query all shapes and add Shape objects to the "shapes" vector 
+					Vector shapeTopics = cm.getViewTopics(mapID, 1, shapeType.typeID);
+					Enumeration e2 = shapeTopics.elements();
+					while (e2.hasMoreElements()) {
+						PresentableTopic shapeTopic = (PresentableTopic) e2.nextElement();
+						String icon = as.getLiveTopic(shapeTopic).getIconfile();
+						// --- load shape image and calculate position ---
+						String url = as.getCorporateWebBaseURL() + FILESERVER_ICONS_PATH + icon;
+						// Note 1: Toolkit.getImage() is used here instead of createImage() in order to utilize
+						// the Toolkits caching mechanism
+						// Note 2: ImageIcon is a kluge to make sure the image is fully loaded before we proceed
+						Image image = new ImageIcon(Toolkit.getDefaultToolkit().getImage(new URL(url))).getImage();
+						int width = image.getWidth(null);
+						int height = image.getHeight(null);
+						System.out.println(">>> shape size: " + width + "x" + height);
+						Point point = shapeTopic.getGeometry();
+						point.translate(-width / 2, -height / 2);
+						//
+						shapes.addElement(new Shape(url, point));	// ### involve icon size
+					}
+				}
+			}
+			session.setAttribute("shapes", shapes);
+			System.out.println("> \"shapes\" stored in session: " + shapes.size() + " shapes");
+		} catch (Throwable e) {
+			System.out.println("*** BrowseServlet.updateShapes(): " + e);
+		}
+	}
+
+	// ---
+
 	private BaseTopic getCityMap(Session session) {
 		return (BaseTopic) session.getAttribute("map");
 	}
@@ -399,6 +478,10 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 
 	private String getSearchValue(Session session) {
 		return (String) session.getAttribute("searchValue");
+	}
+
+	private Vector getShapeTypes(Session session) {
+		return (Vector) session.getAttribute("shapeTypes");
 	}
 
 	// ---

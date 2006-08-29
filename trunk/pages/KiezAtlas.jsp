@@ -1,6 +1,8 @@
 <%@ page import="de.kiezatlas.deepamehta.KiezAtlas" %>
 <%@ page import="de.kiezatlas.deepamehta.Institution" %>
 <%@ page import="de.kiezatlas.deepamehta.SearchCriteria" %>
+<%@ page import="de.kiezatlas.deepamehta.ShapeType" %>
+<%@ page import="de.kiezatlas.deepamehta.Shape" %>
 <%@ page import="de.kiezatlas.deepamehta.Comment" %>
 
 <%@ page import="de.deepamehta.BaseTopic" %>
@@ -11,9 +13,6 @@
 <%@ page import="de.deepamehta.service.Session" %>
 <%@ page import="de.deepamehta.topics.TypeTopic" %>
 <%@ page import="de.deepamehta.service.web.HTMLGenerator" %>
-<%@ page import="de.deepamehta.service.web.TopicTree" %>
-<%@ page import="de.deepamehta.service.web.Action" %>
-<%@ page import="de.deepamehta.service.web.DisplayObject" %>
 
 <%@ page import="java.io.IOException" %>
 <%@ page import="java.util.Vector" %>
