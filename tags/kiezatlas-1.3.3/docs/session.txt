@@ -1,0 +1,91 @@
+Kiez-Atlas Documentation
+
+Web Session Attributes
+
+Jšrg Richter
+17.4.2006
+
+
+
+BrowseServlet
+=============
+
+Global
+------
+
+map					BaseTopic
+mapImage			String
+criterias			array of SearchCriteria
+instType			TypeTopic
+searchMode			String
+						"byName"
+						"0", "1", ... (index for "criterias")
+searchValue			String
+						searchMode=byName: search string
+						searchMode=0,1,..: criteria name
+
+CityMap
+-------
+
+hotspots			Vector of Vector
+						vector 2:
+							element 0     : icon url
+							element 1,2,..: PresentableTopic
+selectedInst		Institution
+
+
+CategoryList
+------------
+
+categories			Vector of BaseTopic
+selectedCats		Vector of String (IDs of selected categories)
+
+
+InstitutionsList
+----------------
+
+institutions		Vector of BaseTopic
+categories			Hashtable
+						key: institution ID
+						value: Vector of BaseTopic
+addresses			Hashtable
+						key: institution ID
+						value: Hashtable
+							key: PROPERTY_STREET, PROPERTY_POSTAL_CODE
+							value: street/postalcode
+
+InstitutionInfo
+---------------
+
+selectedInst		Institution
+forumActivition		String (SWITCH_ON, SWITCH_OFF)
+commentCount		Integer (only initialized if "activition"=SWITCH_ON)
+
+
+InstitutionForum
+----------------
+
+instComments		Vector of Comment
+
+
+error
+-----
+
+error				String
+
+
+
+EditServlet
+===========
+
+Global
+------
+
+inst				BaseTopic
+
+
+ForumAdministration
+-------------------
+
+activition			String (SWITCH_ON, SWITCH_OFF)
+comments			Vector of Comment (only initialized if "activition"=SWITCH_ON)
