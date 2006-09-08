@@ -4,6 +4,9 @@
 <head>
 	<title>Kiezatlas</title>
 	<link href="../pages/kiezatlas.css" rel="stylesheet" type="text/css">
+	<!--[if lt IE 7]>
+	<script defer type="text/javascript" src="../pages/pngfix.js"></script>
+	<![endif]-->
 </head>
 <body>
 	<%
@@ -20,7 +23,8 @@
 		while (e.hasMoreElements()) {
 			Shape shape = (Shape) e.nextElement();
 			out.println("<img src=\"" + shape.url + "\" style=\"position:absolute; top:" + shape.point.y +
-				"px; left:" + shape.point.x + "px;\">");
+				"px; left:" + shape.point.x + "px; width:" + shape.size.width + "px; height:" +
+				shape.size.height + "px;\">");
 		}
 		// --- institutions ---
 		e = hotspots.elements();
@@ -44,13 +48,16 @@
 			}
 		}
 		// --- shape display switches ---
-		out.println("<form style=\"position:fixed; left:0px; bottom:0px;\">");
-		e = shapeTypes.elements();
-		while (e.hasMoreElements()) {
-			ShapeType shapeType = (ShapeType) e.nextElement();
+		out.println("<form style=\"position:fixed; left:0px; bottom:0px; width:300px\">");
+		for (int i = 0; i < shapeTypes.size(); i++) {
+			ShapeType shapeType = (ShapeType) shapeTypes.elementAt(i);
+			int y = KiezAtlas.SHAPE_LEGEND_HEIGHT * (shapeTypes.size() - i - 1);
 			out.println("<input type=\"checkbox\"" + (shapeType.isSelected ? " checked" : "") +
-				" onclick=\"location.href='controller?action=" + KiezAtlas.ACTION_TOGGLE_SHAPE_DISPLAY +
-				"&typeID=" + shapeType.typeID + "'\"> " + shapeType.name + "<br>");
+				" style=\"position:absolute; left:0px; bottom:" + y + "px;\" onclick=\"location.href='controller?action=" +
+				KiezAtlas.ACTION_TOGGLE_SHAPE_DISPLAY + "&typeID=" + shapeType.typeID + "'\">");
+			out.println("<div style=\"position:absolute; left:20px; bottom:" + y + "px; color:" + shapeType.color +
+				"; background:" + shapeType.color + "; opacity:0.5;\">" + shapeType.name + "</div>");
+			out.println("<div style=\"position:absolute; left:20px; bottom:" + y + "px;\">" + shapeType.name + "</div>");
 		}
 		out.println("</form>");
 	%>

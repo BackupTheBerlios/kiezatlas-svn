@@ -28,7 +28,8 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 
 
 
-	static final int SHAPE_ALPHA = 128;		// 0-transparent ... 255-opaque
+	static final int SHAPE_ALPHA = 128;			// 0-transparent ... 255-opaque
+	static final int SHAPE_LEGEND_HEIGHT = 17;	// in pixel
 
 
 

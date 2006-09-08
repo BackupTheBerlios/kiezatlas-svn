@@ -25,3 +25,33 @@ INSERT INTO TopicProp VALUES ('tt-ka-shape-search', 1, 'Name', 'Flächen Suche');
 INSERT INTO Association VALUES ('at-derivation', 1, 1, 'a-ka-80', '', 'tt-topiccontainer', 1, 'tt-ka-shape-search', 1);
 -- assign search type to type
 INSERT INTO Association VALUES ('at-aggregation', 1, 1, 'a-ka-81', '', 'tt-ka-shape-search', 1, 'tt-ka-shape', 1);
+
+
+
+--------------------------------
+--- Type "Farbe" is obsolete ---
+--------------------------------
+
+-- Note: we could delete the type completely but remove just the assignment ---
+-- (see ka-1.3.3.sql)
+
+DELETE FROM Association WHERE ID='a-ka-77';
+DELETE FROM AssociationProp WHERE AssociationID='a-ka-77';
+DELETE FROM ViewAssociation WHERE AssociationID='a-ka-77';
+
+
+
+---------------------------------------------------
+--- Remove Property "Original Background Image" ---
+---------------------------------------------------
+
+-- (see ka-1.3.3.sql)
+
+DELETE FROM Topic WHERE ID='pp-ka-original-bgimage';
+DELETE FROM TopicProp WHERE TopicID='pp-ka-original-bgimage';
+DELETE FROM ViewTopic WHERE TopicID='pp-ka-original-bgimage';
+
+DELETE FROM Association WHERE ID='a-ka-78';
+DELETE FROM AssociationProp WHERE AssociationID='a-ka-78';
+DELETE FROM ViewAssociation WHERE AssociationID='a-ka-78';
+

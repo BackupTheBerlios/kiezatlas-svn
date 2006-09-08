@@ -20,6 +20,7 @@ import javax.swing.ImageIcon;
 //
 import java.awt.Image;
 import java.awt.Point;
+import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.net.URL;
 import java.util.*;
@@ -30,7 +31,7 @@ import java.util.*;
  * Kiez-Atlas 1.3.4<br>
  * Requires DeepaMehta 2.0b7-post1
  * <p>
- * Last change: 29.8.2006<br>
+ * Last change: 30.8.2006<br>
  * J&ouml;rg Richter<br>
  * jri@freenet.de
  */
@@ -342,7 +343,8 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 		Vector shapeTypes = new Vector();
 		for (int i = 0; i < st.size(); i++) {
 			TypeTopic shapeType = (TypeTopic) as.getLiveTopic((BaseTopic) st.elementAt(i));
-			shapeTypes.addElement(new ShapeType(shapeType.getID(), shapeType.getPluralNaming(), false));	// isSelected=false
+			shapeTypes.addElement(new ShapeType(shapeType.getID(), shapeType.getPluralNaming(),
+				as.getTopicProperty(shapeType, PROPERTY_COLOR), false));	// isSelected=false
 			System.out.println("  > " + shapeType.getName());
 		}
 		session.setAttribute("shapeTypes", shapeTypes);
@@ -434,11 +436,12 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 						Image image = new ImageIcon(Toolkit.getDefaultToolkit().getImage(new URL(url))).getImage();
 						int width = image.getWidth(null);
 						int height = image.getHeight(null);
-						System.out.println(">>> shape size: " + width + "x" + height);
+						// System.out.println(">>> shape size: " + width + "x" + height);
+						Dimension size = new Dimension(width, height);
 						Point point = shapeTopic.getGeometry();
 						point.translate(-width / 2, -height / 2);
 						//
-						shapes.addElement(new Shape(url, point));	// ### involve icon size
+						shapes.addElement(new Shape(url, point, size));
 					}
 				}
 			}
