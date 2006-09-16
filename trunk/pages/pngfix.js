@@ -8,6 +8,7 @@ Use in <HEAD> with DEFER keyword wrapped in conditional comments:
 <script defer type="text/javascript" src="pngfix.js"></script>
 <![endif]-->
 
+Slightly modified for Kiezatlas by Jšrg Richter, 16.9.2006
 */
 
 var arVersion = navigator.appVersion.split("MSIE")
@@ -19,7 +20,7 @@ if ((version >= 5.5) && (document.body.filters))
    {
       var img = document.images[i]
       var imgName = img.src.toUpperCase()
-      if (imgName.substring(imgName.length-3, imgName.length) == "PNG")
+      if ((imgName.substring(imgName.length-3, imgName.length) == "PNG") && (img.className == "fixpng"))
       {
          var imgID = (img.id) ? "id='" + img.id + "' " : ""
          var imgClass = (img.className) ? "class='" + img.className + "' " : ""
