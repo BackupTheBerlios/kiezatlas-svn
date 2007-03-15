@@ -5,10 +5,10 @@ import de.deepamehta.DeepaMehtaConstants;
 
 
 /**
- * Kiez-Atlas 1.3.4<br>
+ * Kiez-Atlas 1.4<br>
  * Requires DeepaMehta 2.0b7-post1
  * <p>
- * Last change: 26.8.2006<br>
+ * Last change: 4.3.2007<br>
  * J&ouml;rg Richter<br>
  * jri@freenet.de
  */
@@ -104,6 +104,7 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	static final String PROPERTY_CITY = "Stadt";
 	static final String PROPERTY_OEFFNUNGSZEITEN = "…ffnungszeiten";
 	static final String PROPERTY_SONSTIGES = "Sonstiges";
+	static final String PROPERTY_ADMINISTRATION_INFO = "Administrator Infos";
 	static final String PROPERTY_AGENCY_KIND = "Art";
 	static final String PROPERTY_YADE_X = "YADE x";
 	static final String PROPERTY_YADE_Y = "YADE y";
@@ -112,6 +113,8 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	static final String PROPERTY_COMMENT_AUTHOR = "Autor";
 	static final String PROPERTY_COMMENT_DATE = "Datum";
 	static final String PROPERTY_COMMENT_TIME = "Uhrzeit";
+	//
+	static final String PROPERTY_TARGET_WEBALIAS = "Target Web Alias";
 
 
 

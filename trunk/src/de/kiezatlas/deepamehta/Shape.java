@@ -7,10 +7,10 @@ import java.awt.Dimension;
 
 
 /**
- * Kiez-Atlas 1.3.4<br>
+ * Kiez-Atlas 1.4<br>
  * Requires DeepaMehta 2.0b7-post1
  * <p>
- * Last change: 30.8.2006<br>
+ * Last change: 4.3.2007<br>
  * J&ouml;rg Richter<br>
  * jri@freenet.de
  */
@@ -19,10 +19,12 @@ public class Shape implements Serializable {
 	public String url;
 	public Point point;
 	public Dimension size;
+	public String targetWebalias;
 
-	Shape(String url, Point point, Dimension size) {
+	Shape(String url, Point point, Dimension size, String targetWebalias) {
 		this.url = url;
 		this.point = point;
 		this.size = size;
+		this.targetWebalias = targetWebalias;
 	}
 }

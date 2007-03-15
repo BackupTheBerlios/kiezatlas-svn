@@ -22,9 +22,15 @@
 		Enumeration e = shapes.elements();
 		while (e.hasMoreElements()) {
 			Shape shape = (Shape) e.nextElement();
+			if (isSet(shape.targetWebalias)) {
+				out.println("<a href=\"" + request.getContextPath() + "/browse/" + shape.targetWebalias + "\" target=\"_top\">");
+			}
 			out.println("<img src=\"" + shape.url + "\" class=\"fixpng\" style=\"position:absolute; top:" +
 				shape.point.y + "px; left:" + shape.point.x + "px; width:" + shape.size.width + "px; height:" +
 				shape.size.height + "px;\">");
+			if (isSet(shape.targetWebalias)) {
+				out.println("</a>");
+			}
 		}
 		// --- institutions ---
 		e = hotspots.elements();

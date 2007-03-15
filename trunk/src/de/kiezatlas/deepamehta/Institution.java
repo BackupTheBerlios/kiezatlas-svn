@@ -15,10 +15,10 @@ import java.util.*;
  * A bean-like data container for passing data from the front-controler (servlet)
  * to the presentation layer (JSP engine).
  * <p>
- * Kiez-Atlas 1.3<br>
- * Requires DeepaMehta 2.0b6
+ * Kiez-Atlas 1.4<br>
+ * Requires DeepaMehta 2.0b7-post1
  * <p>
- * Last change: 19.2.2006<br>
+ * Last change: 1.3.2007<br>
  * J&ouml;rg Richter<br>
  * jri@freenet.de
  */
@@ -28,7 +28,7 @@ public class Institution implements KiezAtlas, Serializable {
 	public String street, postalCode, city;
 	public String webpageURL, person, phone, fax, email;
 	public String traeger, traegerArt;
-	public String open, misc;
+	public String open, misc, adminInfo;
 	public String imageURL;
 	public String yadeX, yadeY;
 	public Vector[] categories;		// may be null
@@ -80,8 +80,10 @@ public class Institution implements KiezAtlas, Serializable {
 		//
 		open = as.getTopicProperty(inst, PROPERTY_OEFFNUNGSZEITEN);
 		misc = as.getTopicProperty(inst, PROPERTY_SONSTIGES);
-		open = DeepaMehtaUtils.replace(open, '\r', "<br>");		// needed for "Multiline Input Field"
-		misc = DeepaMehtaUtils.replace(misc, '\r', "<br>");		// needed for "Multiline Input Field"		
+		adminInfo = as.getTopicProperty(inst, PROPERTY_ADMINISTRATION_INFO);
+		open = DeepaMehtaUtils.replaceLF(open);				// needed for "Multiline Input Field"
+		misc = DeepaMehtaUtils.replaceLF(misc);				// needed for "Multiline Input Field"		
+		adminInfo = DeepaMehtaUtils.replaceLF(adminInfo);	// needed for "Multiline Input Field"		
 		// image
 		BaseTopic image = inst.getImage();
 		if (image != null) {

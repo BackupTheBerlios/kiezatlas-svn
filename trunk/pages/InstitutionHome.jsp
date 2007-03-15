@@ -9,6 +9,7 @@
 		KiezAtlas.PROPERTY_WEB_ALIAS,
 		KiezAtlas.PROPERTY_YADE_X,
 		KiezAtlas.PROPERTY_YADE_Y,
+		KiezAtlas.PROPERTY_ADMINISTRATION_INFO,
 		"City", "Title", "Content",
 		"Width", "Height"};
 %>

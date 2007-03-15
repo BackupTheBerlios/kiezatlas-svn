@@ -28,10 +28,10 @@ import java.util.*;
 
 
 /**
- * Kiez-Atlas 1.3.4<br>
+ * Kiez-Atlas 1.4<br>
  * Requires DeepaMehta 2.0b7-post1
  * <p>
- * Last change: 30.8.2006<br>
+ * Last change: 4.3.2007<br>
  * J&ouml;rg Richter<br>
  * jri@freenet.de
  */
@@ -440,8 +440,9 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 						Dimension size = new Dimension(width, height);
 						Point point = shapeTopic.getGeometry();
 						point.translate(-width / 2, -height / 2);
+						String targetWebalias = as.getTopicProperty(shapeTopic, PROPERTY_TARGET_WEBALIAS);
 						//
-						shapes.addElement(new Shape(url, point, size));
+						shapes.addElement(new Shape(url, point, size, targetWebalias));
 					}
 				}
 			}

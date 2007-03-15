@@ -36,6 +36,10 @@
 	//
 	out.println("<p><div class=\"small\">Weitere Infos:</div>");
 	out.println(inst.misc);
+	if (isSet(inst.misc) && isSet(inst.adminInfo)) {
+		out.println("<p>");
+	}
+	out.println(inst.adminInfo);
 	//
 	if (forumActivition.equals(KiezAtlas.SWITCH_ON)) {
 		// link to forum page

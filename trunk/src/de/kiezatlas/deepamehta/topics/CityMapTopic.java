@@ -19,10 +19,10 @@ import java.util.*;
 
 
 /**
- * Kiez-Atlas 1.3.4<br>
+ * Kiez-Atlas 1.4<br>
  * Requires DeepaMehta 2.0b7-post1
  * <p>
- * Last change: 26.8.2006<br>
+ * Last change: 1.3.2007<br>
  * J&ouml;rg Richter<br>
  * jri@freenet.de
  */
@@ -30,7 +30,7 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 
 
 
-	static final String VERSION = "1.3.4";
+	static final String VERSION = "1.4";
 	static {
 		System.out.println(">>> Kiez-Atlas " + VERSION);
 	}
