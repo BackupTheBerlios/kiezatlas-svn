@@ -16,3 +16,11 @@ body {
 	color: #666666;
 	font-size: 10px;
 }
+
+.evenrow {
+	background-color: #F0F0FF;
+}
+
+.oddrow {
+	background-color: #FFFFFF;
+}

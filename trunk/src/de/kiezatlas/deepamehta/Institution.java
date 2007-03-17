@@ -15,10 +15,10 @@ import java.util.*;
  * A bean-like data container for passing data from the front-controler (servlet)
  * to the presentation layer (JSP engine).
  * <p>
- * Kiez-Atlas 1.4<br>
+ * Kiez-Atlas 1.4.1<br>
  * Requires DeepaMehta 2.0b7-post1
  * <p>
- * Last change: 1.3.2007<br>
+ * Last change: 17.3.2007<br>
  * J&ouml;rg Richter<br>
  * jri@freenet.de
  */
@@ -31,11 +31,7 @@ public class Institution implements KiezAtlas, Serializable {
 	public String open, misc, adminInfo;
 	public String imageURL;
 	public String yadeX, yadeY;
-	public Vector[] categories;		// may be null
-
-	Institution(String instID, ApplicationService as) {
-		this(instID, null, as);
-	}
+	public Vector[] categories;
 
 	/**
 	 * @param	criterias	may be null

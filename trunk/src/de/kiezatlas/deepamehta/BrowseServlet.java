@@ -28,10 +28,10 @@ import java.util.*;
 
 
 /**
- * Kiez-Atlas 1.4<br>
+ * Kiez-Atlas 1.4.1<br>
  * Requires DeepaMehta 2.0b7-post1
  * <p>
- * Last change: 4.3.2007<br>
+ * Last change: 16.3.2007<br>
  * J&ouml;rg Richter<br>
  * jri@freenet.de
  */
@@ -49,7 +49,7 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 				String alias = pathInfo.substring(1);
 				setCityMap(CityMapTopic.lookupCityMap(alias, true, as), session);	// throwIfNotFound=true
 				initInstitutaionType(session);	// relies on city map
-				initSearchCriterias(session);	// relies on institutaion type
+				initSearchCriterias(session);	// relies on city map
 				initShapeTypes(session);		// relies on city map
 				updateShapes(session);			// relies on shape types;
 				return PAGE_FRAMESET;
@@ -323,17 +323,7 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 	}
 
 	private void initSearchCriterias(Session session) {
-		BaseTopic instType = getInstitutionType(session);
-		// search criterias
-		Vector typeIDs = as.type(TOPICTYPE_CRITERIA, 1).getSubtypeIDs();
-		Vector crits = cm.getRelatedTopics(instType.getID(), SEMANTIC_RELATION_DEFINITION, TOPICTYPE_TOPICTYPE, 2, typeIDs, true);
-		SearchCriteria[] criterias = new SearchCriteria[crits.size()];
-		System.out.println(">>> there are " + crits.size() + " search criterias:");
-		for (int i = 0; i < crits.size(); i++) {
-			TypeTopic crit = (TypeTopic) as.getLiveTopic((BaseTopic) crits.elementAt(i));
-			criterias[i] = new SearchCriteria(crit, new Vector());
-			System.out.println("  > " + crit);
-		}
+		SearchCriteria[] criterias = ((CityMapTopic) as.getLiveTopic(getCityMap(session))).getSearchCriterias();	// ### ugly
 		session.setAttribute("criterias", criterias);
 	}
 

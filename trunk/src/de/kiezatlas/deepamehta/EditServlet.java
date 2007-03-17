@@ -19,10 +19,10 @@ import org.apache.commons.fileupload.FileItem;
 
 
 /**
- * Kiez-Atlas 1.3.1.<br>
- * Requires DeepaMehta 2.0b6.
+ * Kiez-Atlas 1.4.1.<br>
+ * Requires DeepaMehta 2.0b7-post1.
  * <p>
- * Last functional change: 17.4.2006<br>
+ * Last functional change: 17.3.2007<br>
  * J&ouml;rg Richter<br>
  * jri@freenet.de
  */
@@ -63,8 +63,12 @@ public class EditServlet extends DeepaMehtaServlet implements KiezAtlas {
 			return PAGE_INSTITUTION_FORM;
 			//
 		} else if (action.equals(ACTION_UPDATE_INSTITUTION)) {
-			updateTopic(getInstitution(session).getType(), params, session);
-			writeImage(params.getUploads());
+			InstitutionTopic inst = getInstitution(session);
+			updateTopic(inst.getType(), params, session);
+			String newFilename = writeImage(params.getUploads());
+			if (newFilename != null) {
+				as.setTopicProperty(inst.getImage(), PROPERTY_FILE, newFilename);
+			}
 			return PAGE_INSTITUTION_HOME;
 			//
 		} else if (action.equals(ACTION_SHOW_FORUM_ADMINISTRATION)) {
@@ -127,20 +131,38 @@ public class EditServlet extends DeepaMehtaServlet implements KiezAtlas {
 
 
 
-	private void writeImage(Vector fileItems) {
-		System.out.println(">>> EditServlet.writeImage(): " + fileItems.size() + " files uploaded");
+	private String writeImage(Vector fileItems) {
 		try {
-			Enumeration e = fileItems.elements();
-			while (e.hasMoreElements()) {
-				FileItem item = (FileItem) e.nextElement();
-				String filename = getFilename(item.getName());	// ### explorer sends path
-				System.out.println("  > EditServlet.writeImage(): \"" + filename + "\"");
-				item.write(new File("/home/jrichter/deepamehta/install/client/images/" + filename));	// ###
+			System.out.println(">>> EditServlet.writeImage(): " + fileItems.size() + " files uploaded");
+			if (fileItems.size() > 0) {
+				String path = "/home/jrichter/deepamehta/install/client/images/";	// ###
+				// ### String path = "/Users/jri/Projects/DeepaMehta/trunk/install/client/images/";
+				FileItem item = (FileItem) fileItems.firstElement();
+				String filename = getFilename(item.getName());	// ### explorer includes entire path
+				System.out.println("  > filename=\"" + filename + "\"");
+				File fileToWrite = new File(path + filename);
+				// find new filename if already exists
+				int copyCount = 0;
+				String newFilename = null;
+				int pos = filename.lastIndexOf('.');
+				while (fileToWrite.exists()) {
+					copyCount++;
+					newFilename = filename.substring(0, pos) + "-" + copyCount + filename.substring(pos);
+					fileToWrite = new File(path + newFilename);
+					System.out.println("  > file already exists, try \"" + newFilename + "\"");
+				}
+				//
+				item.write(fileToWrite);
 				// ### item.write(new File(as.getCorporateWebBaseURL().substring(5) + "images/" + filename));
+				System.out.println("  > file \"" + fileToWrite + "\" written successfully");
+				if (copyCount > 0) {
+					return newFilename;
+				}
 			}
 		} catch (Exception e) {
 			System.out.println("*** EditServlet.writeImage(): " + e);
 		}
+		return null;
 	}
 
 	// ###

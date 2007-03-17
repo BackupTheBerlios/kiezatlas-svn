@@ -14,10 +14,10 @@ import java.util.*;
 
 
 /**
- * Kiez-Atlas 1.2.5.<br>
- * Requires DeepaMehta 2.0b6.
+ * Kiez-Atlas 1.4.1.<br>
+ * Requires DeepaMehta 2.0b7-post1.
  * <p>
- * Last functional change: 30.10.2005<br>
+ * Last functional change: 17.3.2007<br>
  * J&ouml;rg Richter<br>
  * jri@freenet.de
  */
@@ -53,8 +53,10 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			CityMapTopic cityMap = (CityMapTopic) as.getLiveTopic(cityMapID, 1);
 			String instTypeID = cityMap.getInstitutionType().getID();
 			Vector insts = cm.getTopicIDs(instTypeID, cityMapID, true);		// sortByTopicName=true
+			SearchCriteria[] criterias = cityMap.getSearchCriterias();
 			session.setAttribute("mapName", cityMap.getName());
-			session.setAttribute("insts", createInstitutionBeans(insts));
+			session.setAttribute("critName", criterias[0].criteria.getPluralName());
+			session.setAttribute("insts", createInstitutionBeans(insts, criterias));
 		}
 	}
 
@@ -107,13 +109,13 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		return cityMaps;
 	}
 
-	private Vector createInstitutionBeans(Vector instIDs) {
+	private Vector createInstitutionBeans(Vector instIDs, SearchCriteria[] criterias) {
 		Vector insts = new Vector();
 		//
 		Enumeration e = instIDs.elements();
 		while (e.hasMoreElements()) {
 			String instID = (String) e.nextElement();
-			insts.addElement(new Institution(instID, as));
+			insts.addElement(new Institution(instID, criterias, as));
 		}
 		//
 		return insts;

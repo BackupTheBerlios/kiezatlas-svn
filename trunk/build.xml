@@ -31,12 +31,14 @@
    	    <jar jarfile="${jar}" basedir="${build}">
 			<include name="de/kiezatlas/deepamehta/KiezAtlas.class" />
 			<include name="de/kiezatlas/deepamehta/Comment.class" />
+			<include name="de/kiezatlas/deepamehta/SearchCriteria.class" />
 			<include name="de/kiezatlas/deepamehta/topics/*.class" />
 		</jar>
    	    <war warfile="${war}" webxml="config/default/web.xml">
 		    <classes dir="${build}">
 				<include name="de/kiezatlas/deepamehta/*.class" />
 				<exclude name="de/kiezatlas/deepamehta/Comment.class" />
+				<exclude name="de/kiezatlas/deepamehta/SearchCriteria.class" />
             </classes>
          	<fileset dir=".">
             	<include name="images/*"/>
@@ -47,6 +49,7 @@
 		    <classes dir="${build}">
 				<include name="de/kiezatlas/deepamehta/*.class" />
 				<exclude name="de/kiezatlas/deepamehta/Comment.class" />
+				<exclude name="de/kiezatlas/deepamehta/SearchCriteria.class" />
             </classes>
          	<fileset dir=".">
             	<include name="images/*"/>

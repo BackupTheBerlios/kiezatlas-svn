@@ -1,6 +1,7 @@
 package de.kiezatlas.deepamehta.topics;
 
 import de.kiezatlas.deepamehta.KiezAtlas;
+import de.kiezatlas.deepamehta.SearchCriteria;
 //
 import de.deepamehta.BaseTopic;
 import de.deepamehta.PresentableTopic;
@@ -11,6 +12,7 @@ import de.deepamehta.service.CorporateDirectives;
 import de.deepamehta.service.CorporateCommands;
 import de.deepamehta.service.Session;
 import de.deepamehta.topics.TopicMapTopic;
+import de.deepamehta.topics.TypeTopic;
 //
 import java.awt.Point;
 import java.awt.geom.Point2D;
@@ -19,10 +21,10 @@ import java.util.*;
 
 
 /**
- * Kiez-Atlas 1.4<br>
+ * Kiez-Atlas 1.4.1<br>
  * Requires DeepaMehta 2.0b7-post1
  * <p>
- * Last change: 1.3.2007<br>
+ * Last change: 16.3.2007<br>
  * J&ouml;rg Richter<br>
  * jri@freenet.de
  */
@@ -30,7 +32,7 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 
 
 
-	static final String VERSION = "1.4";
+	static final String VERSION = "1.4.1";
 	static {
 		System.out.println(">>> Kiez-Atlas " + VERSION);
 	}
@@ -198,6 +200,21 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 		}
 		//
 		return (BaseTopic) instTypes.firstElement();
+	}
+
+	public SearchCriteria[] getSearchCriterias() {
+		BaseTopic instType = getInstitutionType();
+		// search criterias
+		Vector typeIDs = as.type(TOPICTYPE_CRITERIA, 1).getSubtypeIDs();
+		Vector crits = cm.getRelatedTopics(instType.getID(), SEMANTIC_RELATION_DEFINITION, TOPICTYPE_TOPICTYPE, 2, typeIDs, true);
+		SearchCriteria[] criterias = new SearchCriteria[crits.size()];
+		System.out.println(">>> there are " + crits.size() + " search criterias:");
+		for (int i = 0; i < crits.size(); i++) {
+			TypeTopic crit = (TypeTopic) as.getLiveTopic((BaseTopic) crits.elementAt(i));
+			criterias[i] = new SearchCriteria(crit, new Vector());
+			System.out.println("  > " + crit);
+		}
+		return criterias;
 	}
 
 	/**

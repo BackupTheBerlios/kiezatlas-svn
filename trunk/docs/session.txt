@@ -1,9 +1,9 @@
-Kiez-Atlas 1.3.4 Documentation
+Kiez-Atlas 1.4.1 Documentation
 
 Web Session Attributes
 
 Jšrg Richter
-26.8.2006
+17.3.2007
 
 
 
@@ -91,3 +91,29 @@ ForumAdministration
 
 activition			String (SWITCH_ON, SWITCH_OFF)
 comments			Vector of Comment (only initialized if "activition"=SWITCH_ON)
+
+
+
+ListServlet
+===========
+
+Global
+------
+
+user				BaseTopic (logged in user)
+
+
+ListHome
+--------
+
+workspaces			Vector of BaseTopic (Kiezatlas workspaces the logged in user is a member of)
+cityMaps			Hashtable
+						key: workspace ID
+						value: Vector of BaseTopic (city maps of respective workspace)
+
+List
+----
+
+mapName				String
+critName			String (name of first search criteria)
+insts				Vector of Institution

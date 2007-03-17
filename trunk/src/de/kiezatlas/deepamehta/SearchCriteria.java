@@ -8,19 +8,19 @@ import java.util.Vector;
 
 
 /**
- * Kiez-Atlas 1.2.3.<br>
- * Requires DeepaMehta 2.0b4.
+ * Kiez-Atlas 1.4.1.<br>
+ * Requires DeepaMehta 2.0b7-post1.
  * <p>
- * Last functional change: 6.4.2005<br>
+ * Last functional change: 16.3.2007<br>
  * J&ouml;rg Richter<br>
  * jri@freenet.de
  */
 public class SearchCriteria implements Serializable {
 	
 	public TypeTopic criteria;
-	Vector selectedCategoryIDs;
+	public Vector selectedCategoryIDs;
 
-	SearchCriteria(TypeTopic criteria, Vector selectedCategoryIDs) {
+	public SearchCriteria(TypeTopic criteria, Vector selectedCategoryIDs) {
 		this.criteria = criteria;
 		this.selectedCategoryIDs = selectedCategoryIDs;
 	}
