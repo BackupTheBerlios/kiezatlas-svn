@@ -307,10 +307,6 @@ public class InstitutionTopic extends LiveTopic implements KiezAtlas {
 
 	// ---
 
-	/* ### public BaseTopic getWorkspace() {
-		return as.getRelatedTopic(getID(), ASSOCTYPE_ASSOCIATION, TOPICTYPE_WORKSPACE, 2, false);	// emptyAllowed=false
-	} */
-
 	public BaseTopic getAddress() {
 		try {
 			return as.getRelatedTopic(getID(), ASSOCTYPE_ASSOCIATION, TOPICTYPE_ADDRESS, 2, true);		// emptyAllowed=true

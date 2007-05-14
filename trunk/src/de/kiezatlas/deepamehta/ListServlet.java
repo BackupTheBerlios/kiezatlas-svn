@@ -101,7 +101,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		Enumeration e = workspaces.elements();
 		while (e.hasMoreElements()) {
 			String workspaceID = ((BaseTopic) e.nextElement()).getID();
-			BaseTopic topicmap = as.getWorkspace(workspaceID);
+			BaseTopic topicmap = as.getWorkspaceTopicmap(workspaceID);
 			Vector maps = cm.getTopics(TOPICTYPE_CITYMAP, new Hashtable(), topicmap.getID());
 			cityMaps.put(workspaceID, maps);
 		}

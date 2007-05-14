@@ -324,7 +324,7 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 		Hashtable props = new Hashtable();
 		props.put(PROPERTY_WEB_ALIAS, alias);
 		//
-		BaseTopic topicmap = as.getWorkspace(workspaceID);
+		BaseTopic topicmap = as.getWorkspaceTopicmap(workspaceID);
 		Vector maps = as.cm.getTopics(TOPICTYPE_CITYMAP, props, topicmap.getID(), true);	// caseSensitiv=true
 		// error check
 		if (maps.size() > 1) {
