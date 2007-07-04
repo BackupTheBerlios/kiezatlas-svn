@@ -14,7 +14,7 @@
 		"<td class=\"small\"></td><td class=\"small\">Stra&szlig;e</td><td class=\"small\">PLZ</td><td class=\"small\">Ort</td>" +
 		"<td class=\"small\">Website</td><td class=\"small\">Ansprechpartner/in</td><td class=\"small\">Tel</td>" +
 		"<td class=\"small\">Fax</td><td class=\"small\">Email</td><td class=\"small\">" + critName + "</td>" +
-		"<td class=\"small\">&Ouml;ffnungszeiten</td><td class=\"small\">Weitere&nbsp;Infos</td></tr>" +
+		"<td class=\"small\">&Ouml;ffnungszeiten</td><td class=\"small\">Weitere&nbsp;Infos</td>" +
 		"<td class=\"small\">Alias</td><td class=\"small\">YADE x</td><td class=\"small\">YADE y</td></tr>");
 	for (int i = 0; i < insts.size(); i++) {
 		Institution inst = (Institution) insts.elementAt(i);

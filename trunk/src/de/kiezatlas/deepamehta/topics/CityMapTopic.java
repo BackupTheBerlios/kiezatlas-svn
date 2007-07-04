@@ -193,7 +193,7 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 		System.out.println(">>> map belongs to workspace " + workspace);
 		// institution type
 		Vector typeIDs = as.type(TOPICTYPE_KIEZ_INSTITUTION, 1).getSubtypeIDs();
-		Vector instTypes = cm.getRelatedTopics(workspace.getID(), SEMANTIC_WORKGROUP_TYPES, TOPICTYPE_TOPICTYPE, 2, typeIDs, true);
+		Vector instTypes = cm.getRelatedTopics(workspace.getID(), SEMANTIC_WORKSPACE_TYPES, TOPICTYPE_TOPICTYPE, 2, typeIDs, true);
 		// error check
 		if (instTypes.size() == 0) {
 			throw new DeepaMehtaException("Administrator-Fehler: Einrichtungstyp für Workspace \"" + workspace.getName() + "\" ist nicht bekannt");

@@ -47,7 +47,7 @@ public class EditServlet extends DeepaMehtaServlet implements KiezAtlas {
 			}
 		}
 		// session timeout?
-		if (getInstitution(session) == null) {
+		if (getInstitution(session) == null) {	// ### doesn't return null but throws exception!
 			System.out.println("*** Session Expired ***");
 			session.setAttribute("error", "Timeout: Kiez-Atlas wurde mehr als " +
 				((WebSession) session).session.getMaxInactiveInterval() / 60 + " Minuten nicht benutzt");
