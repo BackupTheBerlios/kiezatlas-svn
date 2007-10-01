@@ -22,10 +22,10 @@ import java.util.*;
 
 
 /**
- * Kiez-Atlas 1.2.1.<br>
- * Requires DeepaMehta 2.0b4.
+ * Kiez-Atlas 1.4.1<br>
+ * Requires DeepaMehta 2.0b8-pre2
  * <p>
- * Last functional change: 1.1.2005<br>
+ * Last functional change: 11.9.2007<br>
  * J&ouml;rg Richter<br>
  * jri@freenet.de
  */
@@ -100,7 +100,7 @@ public class YADEPointTopic extends LiveTopic implements KiezAtlas {
 
 	public CorporateDirectives executeCommand(String command, Session session, String topicmapID, String viewmode) {
 		CorporateDirectives directives = new CorporateDirectives();
-		StringTokenizer st = new StringTokenizer(command, ":");
+		StringTokenizer st = new StringTokenizer(command, COMMAND_SEPARATOR);
 		String cmd = st.nextToken();
 		if (cmd.equals(CMD_LOCK_GEOMETRY) || cmd.equals(CMD_UNLOCK_GEOMETRY)) {
 			String value = cmd.equals(CMD_LOCK_GEOMETRY) ? SWITCH_ON : SWITCH_OFF;

@@ -127,7 +127,7 @@ public class FileImportTopic extends FileTopic implements KiezAtlas {
 			     				String topicmapID, String viewmode) {
 		CorporateDirectives directives = new CorporateDirectives();
 		//
-		StringTokenizer st = new StringTokenizer(command, ":");
+		StringTokenizer st = new StringTokenizer(command, COMMAND_SEPARATOR);
 		String cmd = st.nextToken();
 		if (cmd.equals(CMD_IMPORT_FILE)) {
 			// Hier wir der Import angestossen
@@ -278,7 +278,7 @@ public class FileImportTopic extends FileTopic implements KiezAtlas {
 	public CorporateDirectives executeChainedCommand(String command,
 								String result, String topicmapID, String viewmode,
 								Session session) {
-		StringTokenizer st = new StringTokenizer(command, ":");
+		StringTokenizer st = new StringTokenizer(command, COMMAND_SEPARATOR);
 		String cmd = st.nextToken();
 		if (cmd.equals(CMD_ASSIGN_FILE)) {	// ### to be dropped
 			CorporateDirectives directives = new CorporateDirectives();

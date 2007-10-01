@@ -23,10 +23,10 @@ import java.util.*;
 
 
 /**
- * Kiez-Atlas 1.3.2<br>
- * Requires DeepaMehta 2.0b6-post3
+ * Kiez-Atlas 1.4.1<br>
+ * Requires DeepaMehta 2.0b8-pre2
  * <p>
- * Last change: 20.5.2006<br>
+ * Last change: 11.9.2007<br>
  * J&ouml;rg Richter<br>
  * jri@freenet.de
  */
@@ -112,7 +112,7 @@ public class InstitutionTopic extends LiveTopic implements KiezAtlas {
 
 	public CorporateDirectives executeCommand(String command, Session session, String topicmapID, String viewmode) {
 		CorporateDirectives directives = new CorporateDirectives();
-		StringTokenizer st = new StringTokenizer(command, ":");
+		StringTokenizer st = new StringTokenizer(command, COMMAND_SEPARATOR);
 		String cmd = st.nextToken();
 		if (cmd.equals(CMD_LOCK_GEOMETRY) || cmd.equals(CMD_UNLOCK_GEOMETRY)) {
 			String value = cmd.equals(CMD_LOCK_GEOMETRY) ? SWITCH_ON : SWITCH_OFF;

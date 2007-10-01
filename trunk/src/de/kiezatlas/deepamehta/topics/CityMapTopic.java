@@ -22,9 +22,9 @@ import java.util.*;
 
 /**
  * Kiez-Atlas 1.4.1<br>
- * Requires DeepaMehta 2.0b7-post1
+ * Requires DeepaMehta 2.0b8-pre2
  * <p>
- * Last change: 16.3.2007<br>
+ * Last change: 11.9.2007<br>
  * J&ouml;rg Richter<br>
  * jri@freenet.de
  */
@@ -111,7 +111,7 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 	public CorporateDirectives executeCommand(String command, Session session, String topicmapID, String viewmode) {
 		CorporateDirectives directives = new CorporateDirectives();
 		//
-		StringTokenizer st = new StringTokenizer(command, ":");
+		StringTokenizer st = new StringTokenizer(command, COMMAND_SEPARATOR);
 		String cmd = st.nextToken();
 		if (cmd.equals(CMD_REPOSITION_ALL)) {
 			repositionAllInstitutions(directives);
