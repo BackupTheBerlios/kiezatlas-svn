@@ -196,7 +196,7 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 		Vector instTypes = cm.getRelatedTopics(workspace.getID(), SEMANTIC_WORKSPACE_TYPES, TOPICTYPE_TOPICTYPE, 2, typeIDs, true);
 		// error check
 		if (instTypes.size() == 0) {
-			throw new DeepaMehtaException("Administrator-Fehler: Einrichtungstyp für Workspace \"" + workspace.getName() + "\" ist nicht bekannt");
+			throw new DeepaMehtaException("Administrator-Fehler: Einrichtungstyp f√ºr Workspace \"" + workspace.getName() + "\" ist nicht bekannt");
 		}
 		//
 		return (BaseTopic) instTypes.firstElement();
@@ -270,7 +270,7 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 				Point p = inst.getPoint(getID());	// throws DME
 				// Note: if YADE is "off" p is null
 				if (p == null) {
-					String txt = "Die Einrichtungen konnten nicht neuplatziert werden. Es müssen erst 2 Referenzpunkte gesetzt werden.";
+					String txt = "Die Einrichtungen konnten nicht neuplatziert werden. Es m√ºssen erst 2 Referenzpunkte gesetzt werden.";
 					directives.add(DIRECTIVE_SHOW_MESSAGE, txt, new Integer(NOTIFICATION_WARNING));
 					System.out.println(">>> CityMapTopic.repositionAllInstitutions(): " + txt);
 					return;
@@ -328,7 +328,7 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 		Vector maps = as.cm.getTopics(TOPICTYPE_CITYMAP, props, topicmap.getID(), true);	// caseSensitiv=true
 		// error check
 		if (maps.size() > 1) {
-			throw new DeepaMehtaException("Mehrdeutigkeit: es gibt " + maps.size() + " \"" + alias + "\" Stadtpläne");
+			throw new DeepaMehtaException("Mehrdeutigkeit: es gibt " + maps.size() + " \"" + alias + "\" Stadtpl√§ne");
 		}
 		//
 		BaseTopic map = maps.size() == 1 ? (BaseTopic) maps.firstElement() : null;

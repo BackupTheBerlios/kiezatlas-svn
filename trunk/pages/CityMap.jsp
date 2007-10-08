@@ -50,7 +50,7 @@
 				out.println("<a href=\"javascript:top.frames.right.location.href='controller?action=" +
 					KiezAtlas.ACTION_SHOW_INSTITUTION_INFO + "&id=" + inst.getID() + "'\">" +
 					"<img src=\"" + icon + "\" style=\"position:absolute; top:" + (p.y - 10) + "px; left:" +
-					(p.x - 10) + "px;\" alt=\"" + inst.getName() + "\" border=\"0\"></a>");
+					(p.x - 10) + "px;\" alt=\"" + inst.getName() + "\" title=\"" + inst.getName() + "\" border=\"0\"></a>");
 			}
 		}
 		// --- shape display switches ---

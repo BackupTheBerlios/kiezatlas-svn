@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE web-app 
     PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN" 
     "http://java.sun.com/dtd/web-app_2_3.dtd">
@@ -9,7 +10,7 @@
     <display-name>Kiez-Atlas</display-name>
     <description>
       Version 1.0b1.
-      Written by J\u0x9arg Richter (jri@freenet.de)
+      Written by Jörg Richter (jri@freenet.de)
     </description>
 
     <!-- Context initialization parameters that define shared

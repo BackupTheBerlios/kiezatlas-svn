@@ -8,7 +8,7 @@ Use in <HEAD> with DEFER keyword wrapped in conditional comments:
 <script defer type="text/javascript" src="pngfix.js"></script>
 <![endif]-->
 
-Slightly modified for Kiezatlas by Jšrg Richter, 16.9.2006
+Slightly modified for Kiezatlas by JÃ¶rg Richter, 16.9.2006
 */
 
 var arVersion = navigator.appVersion.split("MSIE")

@@ -51,7 +51,7 @@ INSERT INTO AssociationProp VALUES ('a-ka-40', 1, 'Access Permission', 'create')
 --- "Stadtplan" ---
 INSERT INTO Topic VALUES ('tt-topictype', 1, 1, 'tt-ka-stadtplan', 'Stadtplan');
 INSERT INTO TopicProp VALUES ('tt-ka-stadtplan', 1, 'Name', 'Stadtplan');
-INSERT INTO TopicProp VALUES ('tt-ka-stadtplan', 1, 'Plural Name', 'Stadtpl‰ne');
+INSERT INTO TopicProp VALUES ('tt-ka-stadtplan', 1, 'Plural Name', 'Stadtpl√§ne');
 INSERT INTO TopicProp VALUES ('tt-ka-stadtplan', 1, 'Description', '<html><body><p>Ein <i>Stadtplan</i> ...</p></body></html>');
 INSERT INTO TopicProp VALUES ('tt-ka-stadtplan', 1, 'Description Query', 'Was ist ein Stadtplan?');
 -- INSERT INTO TopicProp VALUES ('tt-ka-stadtplan', 1, 'Icon', 'Kompetenzstern.gif');
@@ -113,7 +113,7 @@ INSERT INTO AssociationProp VALUES ('a-ka-34', 1, 'Association Type ID', 'at-ass
 INSERT INTO AssociationProp VALUES ('a-ka-34', 1, 'Web Info', 'Related Topic Name');
 INSERT INTO AssociationProp VALUES ('a-ka-34', 1, 'Web Form', 'Related Form');
 INSERT INTO AssociationProp VALUES ('a-ka-34', 1, 'Ordinal Number', '155');
--- relation to "Tr‰ger"
+-- relation to "Tr√§ger"
 INSERT INTO Association VALUES ('at-relation', 1, 1, 'a-ka-19', '', 'tt-ka-einrichtung', 1, 'tt-ka-traeger', 1);
 INSERT INTO AssociationProp VALUES ('a-ka-19', 1, 'Cardinality', 'many');
 INSERT INTO AssociationProp VALUES ('a-ka-19', 1, 'Association Type ID', 'at-association');
@@ -158,12 +158,12 @@ UPDATE Association SET Name='Fax' WHERE ID='a-106';
 UPDATE Association SET Name='E-mail' WHERE ID='a-406';
 UPDATE Association SET Name='Website' WHERE ID='a-417';
 
---- "Tr‰ger" ---
-INSERT INTO Topic VALUES ('tt-topictype', 1, 1, 'tt-ka-traeger', 'Tr‰ger');
-INSERT INTO TopicProp VALUES ('tt-ka-traeger', 1, 'Name', 'Tr‰ger');
--- INSERT INTO TopicProp VALUES ('tt-ka-traeger', 1, 'Plural Name', 'Tr‰ger');
+--- "Tr√§ger" ---
+INSERT INTO Topic VALUES ('tt-topictype', 1, 1, 'tt-ka-traeger', 'Tr√§ger');
+INSERT INTO TopicProp VALUES ('tt-ka-traeger', 1, 'Name', 'Tr√§ger');
+-- INSERT INTO TopicProp VALUES ('tt-ka-traeger', 1, 'Plural Name', 'Tr√§ger');
 INSERT INTO TopicProp VALUES ('tt-ka-traeger', 1, 'Description', '<html><body><p>Ein <i>Tr&auml;ger</i> ist ...</p></body></html>');
-INSERT INTO TopicProp VALUES ('tt-ka-traeger', 1, 'Description Query', 'Was ist ein Tr‰ger?');
+INSERT INTO TopicProp VALUES ('tt-ka-traeger', 1, 'Description Query', 'Was ist ein Tr√§ger?');
 -- INSERT INTO TopicProp VALUES ('tt-ka-traeger', 1, 'Icon', 'Kompetenzstern.gif');
 -- INSERT INTO TopicProp VALUES ('tt-ka-traeger', 1, 'Creation Icon', 'createKompetenzstern.gif');
 INSERT INTO TopicProp VALUES ('tt-ka-traeger', 1, 'Unique Topic Names', 'on');
@@ -174,8 +174,8 @@ INSERT INTO AssociationProp VALUES ('a-ka-37', 1, 'Ordinal Number', '110');
 -- super type
 INSERT INTO Association VALUES ('at-derivation', 1, 1, 'a-ka-14', '', 'tt-institution', 1, 'tt-ka-traeger', 1);
 -- container type
-INSERT INTO Topic VALUES ('tt-topictype', 1, 1, 'tt-ka-traegersuche', 'Tr‰ger-Suche');
-INSERT INTO TopicProp VALUES ('tt-ka-traegersuche', 1, 'Name', 'Tr‰ger-Suche');
+INSERT INTO Topic VALUES ('tt-topictype', 1, 1, 'tt-ka-traegersuche', 'Tr√§ger-Suche');
+INSERT INTO TopicProp VALUES ('tt-ka-traegersuche', 1, 'Name', 'Tr√§ger-Suche');
 -- INSERT INTO TopicProp VALUES ('tt-ka-traegersuche', 1, 'Icon', 'KompetenzsternContainer.gif');
 -- derive container type
 INSERT INTO Association VALUES ('at-derivation', 1, 1, 'a-ka-15', '', 'tt-topiccontainer', 1, 'tt-ka-traegersuche', 1);
@@ -263,9 +263,9 @@ INSERT INTO Association VALUES ('at-derivation', 1, 1, 'a-ka-39', '', 'tt-file',
 
 
 
---- "÷ffnungszeiten" (Einrichtung) ---
-INSERT INTO Topic VALUES ('tt-property', 1, 1, 'pp-ka-oeffnungszeiten', '÷ffnungszeiten');
-INSERT INTO TopicProp VALUES ('pp-ka-oeffnungszeiten', 1, 'Name', '÷ffnungszeiten');
+--- "√ñffnungszeiten" (Einrichtung) ---
+INSERT INTO Topic VALUES ('tt-property', 1, 1, 'pp-ka-oeffnungszeiten', '√ñffnungszeiten');
+INSERT INTO TopicProp VALUES ('pp-ka-oeffnungszeiten', 1, 'Name', '√ñffnungszeiten');
 INSERT INTO TopicProp VALUES ('pp-ka-oeffnungszeiten', 1, 'Visualization', 'Multiline Input Field');
 
 --- "Sonstiges" (Einrichtung) ---
@@ -273,7 +273,7 @@ INSERT INTO Topic VALUES ('tt-property', 1, 1, 'pp-ka-sonstiges', 'Sonstiges');
 INSERT INTO TopicProp VALUES ('pp-ka-sonstiges', 1, 'Name', 'Sonstiges');
 INSERT INTO TopicProp VALUES ('pp-ka-sonstiges', 1, 'Visualization', 'Multiline Input Field');
 
---- "Art" (Träger) ---
+--- "Art" (Tr¬äger) ---
 INSERT INTO Topic VALUES ('tt-property', 1, 1, 'pp-ka-kind', 'Art');
 INSERT INTO TopicProp VALUES ('pp-ka-kind', 1, 'Name', 'Art');
 INSERT INTO TopicProp VALUES ('pp-ka-kind', 1, 'Visualization', 'Option Buttons');
@@ -390,17 +390,17 @@ INSERT INTO TopicProp VALUES ('t-ka-ang5', 1, 'Name', 'Medien / Computer');
 INSERT INTO Topic VALUES ('tt-ka-angebot', 1, 1, 't-ka-ang6', 'Qualifizierung / Aus- /Weiterbildung');
 INSERT INTO TopicProp VALUES ('t-ka-ang6', 1, 'Name', 'Qualifizierung / Aus- /Weiterbildung');
 
-INSERT INTO Topic VALUES ('tt-ka-angebot', 1, 1, 't-ka-ang7', 'R‰ume / Freiraumnutzung');
-INSERT INTO TopicProp VALUES ('t-ka-ang7', 1, 'Name', 'R‰ume / Freiraumnutzung');
+INSERT INTO Topic VALUES ('tt-ka-angebot', 1, 1, 't-ka-ang7', 'R√§ume / Freiraumnutzung');
+INSERT INTO TopicProp VALUES ('t-ka-ang7', 1, 'Name', 'R√§ume / Freiraumnutzung');
 
-INSERT INTO Topic VALUES ('tt-ka-angebot', 1, 1, 't-ka-ang8', 'Spielzeug / Sportger‰te / Spiel- /Sportplatz');
-INSERT INTO TopicProp VALUES ('t-ka-ang8', 1, 'Name', 'Spielzeug / Sportger‰te / Spiel- /Sportplatz');
+INSERT INTO Topic VALUES ('tt-ka-angebot', 1, 1, 't-ka-ang8', 'Spielzeug / Sportger√§te / Spiel- /Sportplatz');
+INSERT INTO TopicProp VALUES ('t-ka-ang8', 1, 'Name', 'Spielzeug / Sportger√§te / Spiel- /Sportplatz');
 
-INSERT INTO Topic VALUES ('tt-ka-angebot', 1, 1, 't-ka-ang9', 'Technische Ger‰te / Werkzeuge / Werkst‰tten');
-INSERT INTO TopicProp VALUES ('t-ka-ang9', 1, 'Name', 'Technische Ger‰te / Werkzeuge / Werkst‰tten');
+INSERT INTO Topic VALUES ('tt-ka-angebot', 1, 1, 't-ka-ang9', 'Technische Ger√§te / Werkzeuge / Werkst√§tten');
+INSERT INTO TopicProp VALUES ('t-ka-ang9', 1, 'Name', 'Technische Ger√§te / Werkzeuge / Werkst√§tten');
 
-INSERT INTO Topic VALUES ('tt-ka-angebot', 1, 1, 't-ka-ang10', 'Transportmˆglichkeiten');
-INSERT INTO TopicProp VALUES ('t-ka-ang10', 1, 'Name', 'Transportmˆglichkeiten');
+INSERT INTO Topic VALUES ('tt-ka-angebot', 1, 1, 't-ka-ang10', 'Transportm√∂glichkeiten');
+INSERT INTO TopicProp VALUES ('t-ka-ang10', 1, 'Name', 'Transportm√∂glichkeiten');
 
 INSERT INTO Topic VALUES ('tt-ka-angebot', 1, 1, 't-ka-ang11', 'Unterhaltung');
 INSERT INTO TopicProp VALUES ('t-ka-ang11', 1, 'Name', 'Unterhaltung');
@@ -419,8 +419,8 @@ INSERT INTO TopicProp VALUES ('t-ka-ang13', 1, 'Name', 'Sonstige');
 
 
 
-INSERT INTO Topic VALUES ('tt-ka-altersgruppe', 1, 1, 't-ka-alt1', 'Familien/Alleinerziehende mit S‰uglingen');
-INSERT INTO TopicProp VALUES ('t-ka-alt1', 1, 'Name', 'Familien/Alleinerziehende mit S‰uglingen');
+INSERT INTO Topic VALUES ('tt-ka-altersgruppe', 1, 1, 't-ka-alt1', 'Familien/Alleinerziehende mit S√§uglingen');
+INSERT INTO TopicProp VALUES ('t-ka-alt1', 1, 'Name', 'Familien/Alleinerziehende mit S√§uglingen');
 
 INSERT INTO Topic VALUES ('tt-ka-altersgruppe', 1, 1, 't-ka-alt2', 'Familien/Alleinerziehende mit Kleinkindern');
 INSERT INTO TopicProp VALUES ('t-ka-alt2', 1, 'Name', 'Familien/Alleinerziehende mit Kleinkindern');
@@ -460,9 +460,9 @@ INSERT INTO TopicProp VALUES ('t-ka-alt11', 1, 'Name', 'Sonstige');
 
 
 
--- "Schöneberg-Nord"
-INSERT INTO Topic VALUES ('tt-ka-stadtplan', 1, 1, 't-ka-schoeneberg', 'Schˆneberg-Nord');
-INSERT INTO TopicProp VALUES ('t-ka-schoeneberg', 1, 'Name', 'Schˆneberg-Nord');
+-- "Sch¬öneberg-Nord"
+INSERT INTO Topic VALUES ('tt-ka-stadtplan', 1, 1, 't-ka-schoeneberg', 'Sch√∂neberg-Nord');
+INSERT INTO TopicProp VALUES ('t-ka-schoeneberg', 1, 'Name', 'Sch√∂neberg-Nord');
 INSERT INTO TopicProp VALUES ('t-ka-schoeneberg', 1, 'Background Image', 'kartepur.jpg');
 INSERT INTO TopicProp VALUES ('t-ka-schoeneberg', 1, 'Web Alias', 'schoeneberg-nord');
 INSERT INTO ViewTopic VALUES ('t-ka-workmap', 1, 't-ka-schoeneberg', 1, 120, 80);

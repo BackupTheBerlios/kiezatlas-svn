@@ -2,7 +2,7 @@ Kiez-Atlas 1.4.1 Documentation
 
 Web Session Attributes
 
-Jšrg Richter
+JÃ¶rg Richter
 17.3.2007
 
 

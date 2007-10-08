@@ -2,12 +2,12 @@
 --- New Topic Types ---
 -----------------------
 
---- "Fl‰che" ---
-INSERT INTO Topic VALUES ('tt-topictype', 1, 1, 'tt-ka-shape', 'Fl‰che');
-INSERT INTO TopicProp VALUES ('tt-ka-shape', 1, 'Name', 'Fl‰che');
-INSERT INTO TopicProp VALUES ('tt-ka-shape', 1, 'Plural Name', 'Fl‰chen');
+--- "Fl√§che" ---
+INSERT INTO Topic VALUES ('tt-topictype', 1, 1, 'tt-ka-shape', 'Fl√§che');
+INSERT INTO TopicProp VALUES ('tt-ka-shape', 1, 'Name', 'Fl√§che');
+INSERT INTO TopicProp VALUES ('tt-ka-shape', 1, 'Plural Name', 'Fl√§chen');
 INSERT INTO TopicProp VALUES ('tt-ka-shape', 1, 'Description', '<html><body><p>Eine <i>Fl&auml;che</i> ist ...</p></body></html>');
-INSERT INTO TopicProp VALUES ('tt-ka-shape', 1, 'Description Query', 'Was ist eine Fl‰che?');
+INSERT INTO TopicProp VALUES ('tt-ka-shape', 1, 'Description Query', 'Was ist eine Fl√§che?');
 -- INSERT INTO TopicProp VALUES ('tt-ka-shape', 1, 'Icon', 'shape.gif');
 -- INSERT INTO TopicProp VALUES ('tt-ka-shape', 1, 'Creation Icon', 'createKompetenzstern.gif');
 -- INSERT INTO TopicProp VALUES ('tt-ka-shape', 1, 'Unique Topic Names', 'on');
@@ -18,8 +18,8 @@ INSERT INTO TopicProp VALUES ('tt-ka-shape', 1, 'Description Query', 'Was ist ei
 -- super type
 INSERT INTO Association VALUES ('at-derivation', 1, 1, 'a-ka-79', '', 'tt-generic', 1, 'tt-ka-shape', 1);
 -- search type
-INSERT INTO Topic VALUES ('tt-topictype', 1, 1, 'tt-ka-shape-search', 'Fl‰chen Suche');
-INSERT INTO TopicProp VALUES ('tt-ka-shape-search', 1, 'Name', 'Fl‰chen Suche');
+INSERT INTO Topic VALUES ('tt-topictype', 1, 1, 'tt-ka-shape-search', 'Fl√§chen Suche');
+INSERT INTO TopicProp VALUES ('tt-ka-shape-search', 1, 'Name', 'Fl√§chen Suche');
 -- INSERT INTO TopicProp VALUES ('tt-ka-shape-search', 1, 'Icon', 'KompetenzsternContainer.gif');
 -- derive search type
 INSERT INTO Association VALUES ('at-derivation', 1, 1, 'a-ka-80', '', 'tt-topiccontainer', 1, 'tt-ka-shape-search', 1);

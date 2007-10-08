@@ -427,7 +427,7 @@ public class InstitutionTopic extends LiveTopic implements KiezAtlas {
 			yadeY2 = Float.parseFloat(as.getTopicProperty(yp[1], PROPERTY_YADE_Y));
 		} catch (NumberFormatException e) {
 			throw new DeepaMehtaException("Administrator-Fehler: ein YADE Referenzpunkt von " +
-				"Stadtplan \"" + citymap.getName() + "\" hat ungültigen Wert (" + e.getMessage() + ")");
+				"Stadtplan \"" + citymap.getName() + "\" hat ung√ºltigen Wert (" + e.getMessage() + ")");
 		}
 		// yade -> pixel
 		try {
@@ -437,7 +437,7 @@ public class InstitutionTopic extends LiveTopic implements KiezAtlas {
 			int y = (int) (y2 + (y1 - y2) * (yadeY - yadeY2) / (yadeY1 - yadeY2));
 			return new Point(x, y);
 		} catch (NumberFormatException e) {
-			throw new DeepaMehtaException("YADE Koordinate von Einrichtung \"" + getName() + "\" ist ungültig (" + e.getMessage() + ")");
+			throw new DeepaMehtaException("YADE Koordinate von Einrichtung \"" + getName() + "\" ist ung√ºltig (" + e.getMessage() + ")");
 		}
 	}
 
@@ -471,7 +471,7 @@ public class InstitutionTopic extends LiveTopic implements KiezAtlas {
 			return new Point2D.Float(yadeX, yadeY);
 		} catch (NumberFormatException e) {
 			throw new DeepaMehtaException("Administrator-Fehler: ein YADE Referenzpunkt von " +
-				"Stadtplan \"" + citymap.getName() + "\" hat ungültigen Wert (" + e.getMessage() + ")");
+				"Stadtplan \"" + citymap.getName() + "\" hat ung√ºltigen Wert (" + e.getMessage() + ")");
 		}
 	}
 

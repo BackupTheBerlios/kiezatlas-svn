@@ -157,7 +157,7 @@ public class OutlinePointTopic extends LiveTopic implements KiezAtlas {
 			DeepaMehtaServiceUtils.createImageFile(bufferedImage, file);
 		} catch (DeepaMehtaException e) {
 			System.out.println("*** OutlinePointTopic.makeShape(): " + e);
-			directives.add(DIRECTIVE_SHOW_MESSAGE, "Fehler beim Erzeugen einer Fläche: " + e.getMessage(),
+			directives.add(DIRECTIVE_SHOW_MESSAGE, "Fehler beim Erzeugen einer Fl√§che: " + e.getMessage(),
 				new Integer(NOTIFICATION_WARNING));
 		}
 	}

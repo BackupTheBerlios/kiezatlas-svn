@@ -71,7 +71,7 @@ UPDATE Association SET TopicID1='tt-ka-kriterium' WHERE ID='a-ka-10';
 UPDATE Association SET TopicID1='tt-ka-kriterium' WHERE ID='a-ka-20';
 UPDATE Association SET TopicID1='tt-ka-kriterium' WHERE ID='a-ka-27';
 
--- set "Soziale Einrichtung" as new origin of relations to "Kategorie", "Angebot", "Altersgruppe" und "Träger"
+-- set "Soziale Einrichtung" as new origin of relations to "Kategorie", "Angebot", "Altersgruppe" und "Tr√§ger"
 DELETE FROM ViewAssociation WHERE AssociationID='a-ka-23';
 DELETE FROM ViewAssociation WHERE AssociationID='a-ka-32';
 DELETE FROM ViewAssociation WHERE AssociationID='a-ka-33';

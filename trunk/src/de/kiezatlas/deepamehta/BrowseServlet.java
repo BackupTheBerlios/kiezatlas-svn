@@ -257,7 +257,7 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 			}
 			String to = email.getName();
 			// "subject"
-			String subject = "Kiezatlas: neuer Forumsbeitrag fŸr \"" + inst.getName() + "\"";
+			String subject = "Kiezatlas: neuer Forumsbeitrag fÃ¼r \"" + inst.getName() + "\"";
 			// "body"
 			Hashtable comment = cm.getTopicData(commentID, 1);
 			String body = "Dies ist eine automatische Benachrichtigung von www.kiezatlas.de\r\r" +
@@ -269,10 +269,10 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 				"Datum: " + comment.get(PROPERTY_COMMENT_DATE) + "\r" +
 				"Uhrzeit: " + comment.get(PROPERTY_COMMENT_TIME) + "\r" +
 				"------------------------------\r\r" +
-				"Im Falle des Mi§brauchs: In der \"Forum Administration\" ihres persšnlichen Kiezatlas-Zugangs haben " +
-				"Sie die Mšglichkeit, einzelne Kommentare zu lšschen, bzw. das Forum ganz zu deaktivieren.\r" +
+				"Im Falle des MiÃŸbrauchs: In der \"Forum Administration\" ihres persÃ¶nlichen Kiezatlas-Zugangs haben " +
+				"Sie die MÃ¶glichkeit, einzelne Kommentare zu lÃ¶schen, bzw. das Forum ganz zu deaktivieren.\r" +
 				"www.kiezatlas.de:8080/edit/" + inst.getWebAlias() + "\r\r" +
-				"Mit freundlichen GrŸ§en\r" +
+				"Mit freundlichen GrÃ¼ÃŸen\r" +
 				"ihr Kiezatlas-Team";
 			//
 			System.out.println(">>> send notification email");

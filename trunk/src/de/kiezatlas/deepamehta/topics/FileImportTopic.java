@@ -219,11 +219,11 @@ public class FileImportTopic extends FileTopic implements KiezAtlas {
 					}
 					// Ansprechpartner
 					importPersons(tk[11], instID, session);
-					// Trägername, Trägerart
+					// Trâ€°gername, Trâ€°gerart
 					importTraeger(tk[13], tk[12], instID, session);
 					//
 					Hashtable instProps = new Hashtable();
-					// Öffnungszeiten
+					// Ã·ffnungszeiten
 					String instOpeningHours = tk[14];
 					if (instOpeningHours.length() > 0) {
 						  instProps.put(PROPERTY_OEFFNUNGSZEITEN, instOpeningHours);
@@ -374,10 +374,10 @@ public class FileImportTopic extends FileTopic implements KiezAtlas {
 				props.put(PROPERTY_NAME, traeger);
 				//
 				if (art != null) {
-					System.out.print(">>> TrŠger: \"" + traeger + "\" (" + art + ") ");
+					System.out.print(">>> TrÃ¤ger: \"" + traeger + "\" (" + art + ") ");
 					props.put(PROPERTY_AGENCY_KIND, art);
 				} else {
-					System.out.print(">>> TrŠger: \"" + traeger + "\" (TrŠgerart nicht bekannt) ");
+					System.out.print(">>> TrÃ¤ger: \"" + traeger + "\" (TrÃ¤gerart nicht bekannt) ");
 				}
 				// add only if not exist already
 				String traegerID = null;
@@ -417,7 +417,7 @@ public class FileImportTopic extends FileTopic implements KiezAtlas {
 		catTable.put("L","t-ka-kat9");//"Kinderbetreuung"); //--
 		catTable.put("N","t-ka-kat12");//"Netzwerk"); //-e, Vereine,Verb&auml;nde");
 		// Altersgruppen
-		ageTable.put("1","t-ka-alt1"); //Familien/Alleinerziehende mit Säuglingen');
+		ageTable.put("1","t-ka-alt1"); //Familien/Alleinerziehende mit Sâ€°uglingen');
 		ageTable.put("2","t-ka-alt2"); //Familien/Alleinerziehende mit Kleinkindern');
 		ageTable.put("3","t-ka-alt3"); //Familien/Alleinerziehende mit Kindern im Schulalter');
 		ageTable.put("4","t-ka-alt4"); //Kinder im Schulalter');
@@ -435,10 +435,10 @@ public class FileImportTopic extends FileTopic implements KiezAtlas {
 		offerTable.put("Kon","t-ka-ang4"); //Kontakte');
 		offerTable.put("MC","t-ka-ang5"); //Medien / Computer');
 		offerTable.put("QB","t-ka-ang6"); //Qualifizierung / Aus- /Weiterbildung');
-		offerTable.put("RF","t-ka-ang7"); //Räume / Freiraumnutzung');
-		offerTable.put("Sp","t-ka-ang8"); //Spielzeug / Sportgeräte / Spiel- /Sportplatz');
-		offerTable.put("TGW","t-ka-ang9"); //Technische Geräte / Werkzeuge / Werkstätten');
-		offerTable.put("Tra","t-ka-ang10"); //Transportmöglichkeiten');
+		offerTable.put("RF","t-ka-ang7"); //Râ€°ume / Freiraumnutzung');
+		offerTable.put("Sp","t-ka-ang8"); //Spielzeug / Sportgerâ€°te / Spiel- /Sportplatz');
+		offerTable.put("TGW","t-ka-ang9"); //Technische Gerâ€°te / Werkzeuge / Werkstâ€°tten');
+		offerTable.put("Tra","t-ka-ang10"); //TransportmË†glichkeiten');
 		offerTable.put("Unt","t-ka-ang11"); //Unterhaltung');
 		offerTable.put("VN","t-ka-ang12"); //Vermittlung von Jobs / Nachbarschaftshilfe');
 		offerTable.put("Son","t-ka-ang13"); //Sonstige');

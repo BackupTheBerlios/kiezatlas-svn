@@ -102,7 +102,7 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 
 
 	static final String PROPERTY_CITY = "Stadt";
-	static final String PROPERTY_OEFFNUNGSZEITEN = "…ffnungszeiten";
+	static final String PROPERTY_OEFFNUNGSZEITEN = "Ã–ffnungszeiten";
 	static final String PROPERTY_SONSTIGES = "Sonstiges";
 	static final String PROPERTY_ADMINISTRATION_INFO = "Administrator Infos";
 	static final String PROPERTY_AGENCY_KIND = "Art";
