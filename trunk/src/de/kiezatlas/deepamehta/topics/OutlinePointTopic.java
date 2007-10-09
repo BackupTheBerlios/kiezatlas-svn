@@ -6,7 +6,6 @@ import de.deepamehta.BaseTopic;
 import de.deepamehta.BaseAssociation;
 import de.deepamehta.Commands;
 import de.deepamehta.DeepaMehtaException;
-import de.deepamehta.DeepaMehtaUtils;
 import de.deepamehta.PresentableTopic;
 import de.deepamehta.PropertyDefinition;
 import de.deepamehta.service.ApplicationService;
@@ -15,6 +14,7 @@ import de.deepamehta.service.CorporateCommands;
 import de.deepamehta.service.DeepaMehtaServiceUtils;
 import de.deepamehta.service.Session;
 import de.deepamehta.topics.LiveTopic;
+import de.deepamehta.util.DeepaMehtaUtils;
 //
 import java.io.File;
 import javax.swing.ImageIcon;

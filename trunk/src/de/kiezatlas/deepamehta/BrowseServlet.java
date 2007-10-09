@@ -5,7 +5,6 @@ import de.kiezatlas.deepamehta.topics.InstitutionTopic;
 //
 import de.deepamehta.BaseTopic;
 import de.deepamehta.DeepaMehtaException;
-import de.deepamehta.DeepaMehtaUtils;
 import de.deepamehta.PresentableTopic;
 import de.deepamehta.service.Session;
 import de.deepamehta.service.web.DeepaMehtaServlet;
@@ -13,6 +12,7 @@ import de.deepamehta.service.web.RequestParameter;
 import de.deepamehta.service.web.WebSession;
 import de.deepamehta.topics.TypeTopic;
 import de.deepamehta.topics.EmailTopic;
+import de.deepamehta.util.DeepaMehtaUtils;
 //
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -31,7 +31,7 @@ import java.util.*;
  * Kiez-Atlas 1.4.1<br>
  * Requires DeepaMehta 2.0b7-post1
  * <p>
- * Last change: 16.3.2007<br>
+ * Last change: 9.10.2007<br>
  * J&ouml;rg Richter<br>
  * jri@freenet.de
  */

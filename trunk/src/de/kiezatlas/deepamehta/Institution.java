@@ -3,8 +3,8 @@ package de.kiezatlas.deepamehta;
 import de.kiezatlas.deepamehta.topics.InstitutionTopic;
 //
 import de.deepamehta.BaseTopic;
-import de.deepamehta.DeepaMehtaUtils;
 import de.deepamehta.service.ApplicationService;
+import de.deepamehta.util.DeepaMehtaUtils;
 //
 import java.io.Serializable;
 import java.util.*;
@@ -18,7 +18,7 @@ import java.util.*;
  * Kiez-Atlas 1.4.1<br>
  * Requires DeepaMehta 2.0b7-post1
  * <p>
- * Last change: 17.3.2007<br>
+ * Last change: 9.10.2007<br>
  * J&ouml;rg Richter<br>
  * jri@freenet.de
  */

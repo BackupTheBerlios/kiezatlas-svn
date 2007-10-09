@@ -1,7 +1,7 @@
 package de.kiezatlas.deepamehta;
 
-import de.deepamehta.DeepaMehtaUtils;
 import de.deepamehta.service.ApplicationService;
+import de.deepamehta.util.DeepaMehtaUtils;
 //
 import java.io.Serializable;
 
@@ -14,7 +14,7 @@ import java.io.Serializable;
  * Kiez-Atlas 1.4<br>
  * Requires DeepaMehta 2.0b7-post1
  * <p>
- * Last change: 1.3.2007<br>
+ * Last change: 9.10.2007<br>
  * J&ouml;rg Richter<br>
  * jri@freenet.de
  */
