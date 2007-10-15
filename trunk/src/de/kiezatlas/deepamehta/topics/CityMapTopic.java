@@ -156,9 +156,9 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 	public PresentableTopic getPresentableTopic(BaseTopic topic, String nearTopicID) {
 		PresentableTopic pt = super.getPresentableTopic(topic, nearTopicID);
 		//
-		if (as.isInstanceOf(topic, TOPICTYPE_KIEZ_INSTITUTION)) {
+		if (as.isInstanceOf(topic, TOPICTYPE_KIEZ_GEO)) {
 			try {
-				InstitutionTopic inst = (InstitutionTopic) as.getLiveTopic(topic);
+				GeoObjectTopic inst = (GeoObjectTopic) as.getLiveTopic(topic);
 				// determine new geometry
 				Point p = inst.getPoint(getID());	// throws DME
 				// set new geometry
@@ -192,7 +192,7 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 		BaseTopic workspace = as.getTopicmapOwner(getID());
 		System.out.println(">>> map belongs to workspace " + workspace);
 		// institution type
-		Vector typeIDs = as.type(TOPICTYPE_KIEZ_INSTITUTION, 1).getSubtypeIDs();
+		Vector typeIDs = as.type(TOPICTYPE_KIEZ_GEO, 1).getSubtypeIDs();
 		Vector instTypes = cm.getRelatedTopics(workspace.getID(), SEMANTIC_WORKSPACE_TYPES, TOPICTYPE_TOPICTYPE, 2, typeIDs, true);
 		// error check
 		if (instTypes.size() == 0) {
@@ -237,8 +237,8 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 	 * @return	2-element array of YADE-reference topics, or <code>null</code> if there are no YADE-reference topics
 	 *			inside this city map (YADE is "off").
 	 *
-	 * @see		InstitutionTopic#getPoint
-	 * @see		InstitutionTopic#getYadePoint
+	 * @see		GeeObjecTopic#getPoint
+	 * @see		GeoObjectTopic#getYadePoint
 	 */
 	public PresentableTopic[] getYADEReferencePoints() throws DeepaMehtaException {
 		Vector yp = cm.getViewTopics(getID(), 1, TOPICTYPE_YADE_POINT);
@@ -260,12 +260,12 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 	 * @see		#executeCommand
 	 */
 	private void repositionAllInstitutions(CorporateDirectives directives) {
-		Vector typeIDs = as.type(TOPICTYPE_KIEZ_INSTITUTION, 1).getSubtypeIDs();
+		Vector typeIDs = as.type(TOPICTYPE_KIEZ_GEO, 1).getSubtypeIDs();
 		Vector insts = cm.getViewTopics(getID(), 1, typeIDs);	// ### BaseTopics would be sufficient, but there is no such cm call
 		Enumeration e = insts.elements();
 		while (e.hasMoreElements()) {
 			try {
-				InstitutionTopic inst = (InstitutionTopic) as.getLiveTopic((PresentableTopic) e.nextElement());
+				GeoObjectTopic inst = (GeoObjectTopic) as.getLiveTopic((PresentableTopic) e.nextElement());
 				// calculate screen coordinate
 				Point p = inst.getPoint(getID());	// throws DME
 				// Note: if YADE is "off" p is null

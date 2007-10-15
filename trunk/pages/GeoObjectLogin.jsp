@@ -3,9 +3,9 @@
 <% begin(session, out); %>
 <%
 	HTMLGenerator html = (HTMLGenerator) session.getAttribute("html");
-	BaseTopic inst = (BaseTopic) session.getAttribute("inst");
+	BaseTopic geo = (BaseTopic) session.getAttribute("geo");
 %>
-<h2><%= inst.getName() %></h2>
+<h2><%= geo.getName() %></h2>
 <form method="post">
 	<table>
 		<tr>

@@ -14,7 +14,7 @@
 		Vector hotspots = (Vector) session.getAttribute("hotspots");
 		Vector shapeTypes = (Vector) session.getAttribute("shapeTypes");
 		Vector shapes = (Vector) session.getAttribute("shapes");
-		Institution selectedInst = (Institution) session.getAttribute("selectedInst");
+		GeoObject selectedInst = (GeoObject) session.getAttribute("selectedGeo");
 	%>
 	<img src="<%= mapImage %>" style="position:absolute; top:0px; left:0px;">
 	<%
@@ -42,13 +42,13 @@
 				PresentableTopic inst = (PresentableTopic) e2.nextElement();
 				Point p = inst.getGeometry();
 				// marker
-				if (selectedInst != null && selectedInst.id.equals(inst.getID())) {
+				if (selectedInst != null && selectedInst.geoID.equals(inst.getID())) {
 					out.println("<img src=\"../images/marker.gif\" style=\"position:absolute; top:" +
 						(p.y - 20) + "px; left:" + (p.x - 20) + "px;\">");
 				}
 				// hotspot
 				out.println("<a href=\"javascript:top.frames.right.location.href='controller?action=" +
-					KiezAtlas.ACTION_SHOW_INSTITUTION_INFO + "&id=" + inst.getID() + "'\">" +
+					KiezAtlas.ACTION_SHOW_GEO_INFO + "&id=" + inst.getID() + "'\">" +
 					"<img src=\"" + icon + "\" style=\"position:absolute; top:" + (p.y - 10) + "px; left:" +
 					(p.x - 10) + "px;\" alt=\"" + inst.getName() + "\" title=\"" + inst.getName() + "\" border=\"0\"></a>");
 			}

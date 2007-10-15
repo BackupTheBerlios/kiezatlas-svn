@@ -152,7 +152,7 @@ public class FileImportTopic extends FileTopic implements KiezAtlas {
 					System.out.println(">>> Name: " + instName);
 					//
 					String instID = cm.getNewTopicID();
-					LiveTopic inst = as.createLiveTopic(instID, TOPICTYPE_KIEZ_INSTITUTION, instName, session);
+					LiveTopic inst = as.createLiveTopic(instID, TOPICTYPE_KIEZ_GEO, instName, session);
 					as.setTopicProperty(inst, PROPERTY_NAME, instName);
 					as.createViewTopic(TOPICMAP_ID, 1, null, instID, 1, p.x, p.y, false);	// ### version=1
 					//

@@ -1,8 +1,17 @@
 package de.kiezatlas.deepamehta;
 
-import de.kiezatlas.deepamehta.topics.CityMapTopic;
-import de.kiezatlas.deepamehta.topics.InstitutionTopic;
-//
+import java.awt.Dimension;
+import java.awt.Image;
+import java.awt.Point;
+import java.awt.Toolkit;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
+
+import javax.servlet.ServletException;
+import javax.swing.ImageIcon;
+
 import de.deepamehta.BaseTopic;
 import de.deepamehta.DeepaMehtaException;
 import de.deepamehta.PresentableTopic;
@@ -10,30 +19,21 @@ import de.deepamehta.service.Session;
 import de.deepamehta.service.web.DeepaMehtaServlet;
 import de.deepamehta.service.web.RequestParameter;
 import de.deepamehta.service.web.WebSession;
-import de.deepamehta.topics.TypeTopic;
 import de.deepamehta.topics.EmailTopic;
+import de.deepamehta.topics.TypeTopic;
 import de.deepamehta.util.DeepaMehtaUtils;
-//
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.swing.ImageIcon;
-//
-import java.awt.Image;
-import java.awt.Point;
-import java.awt.Dimension;
-import java.awt.Toolkit;
-import java.net.URL;
-import java.util.*;
+import de.kiezatlas.deepamehta.topics.CityMapTopic;
+import de.kiezatlas.deepamehta.topics.GeoObjectTopic;
 
 
 
 /**
- * Kiez-Atlas 1.4.1<br>
+ * Kiez-Atlas 1.5<br>
  * Requires DeepaMehta 2.0b7-post1
  * <p>
- * Last change: 9.10.2007<br>
- * J&ouml;rg Richter<br>
- * jri@freenet.de
+ * Last change: 15.10.2007<br>
+ * Malte Rei&szlig;ig<br>
+ * mre@deepamehta.de
  */
 public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 
@@ -80,7 +80,7 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 					// otherwise list all institutions
 					setSearchMode(SEARCHMODE_BY_NAME, session);
 					setSearchValue("", session);	// searching for "" retrieves all institutions
-					return PAGE_INSTITUTION_LIST;
+					return PAGE_GEO_LIST;
 				}
 			} else {
 				throw new DeepaMehtaException("unexpected frame \"" + frame + "\"");
@@ -89,7 +89,7 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 		} else if (action.equals(ACTION_SEARCH)) {
 			setSearchMode(SEARCHMODE_BY_NAME, session);
 			setSearchValue(params.getValue("search"), session);
-			return PAGE_INSTITUTION_LIST;
+			return PAGE_GEO_LIST;
 		// show
 		} else if (action.equals(ACTION_SHOW_CATEGORIES)) {
 			String critNr = params.getValue("critNr");
@@ -114,22 +114,23 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 			// ### setSearchMode(SEARCHMODE_BY_CATEGORY, session);		// needed for "cross-links"
 			Vector selCats = getSelectedCats(session);
 			switchOn(selCats, catID);
-			return PAGE_INSTITUTION_LIST;
+			return PAGE_GEO_LIST;
 		// info
-		} else if (action.equals(ACTION_SHOW_INSTITUTION_INFO)) {
-			String instID = params.getValue("id");
-			setSelectedInst(instID, session);
-			//
-			InstitutionTopic inst = (InstitutionTopic) as.getLiveTopic(instID, 1);
-			boolean isForumActivated = inst.isForumActivated();
-			session.setAttribute("forumActivition", isForumActivated ? SWITCH_ON : SWITCH_OFF);
-			if (isForumActivated) {
-				session.setAttribute("commentCount", new Integer(inst.getComments().size()));
-			}
-			return PAGE_INSTITUTION_INFO;
-		// show forum
-		} else if (action.equals(ACTION_SHOW_INSTITUTION_FORUM)) {
-			return PAGE_INSTITUTION_FORUM;
+		} else if (action.equals(ACTION_SHOW_GEO_INFO)) {
+				String geoID = params.getValue("id");
+				System.out.println("@params: " + params.getValue("id"));
+				setSelectedGeo(geoID, session);
+				//
+				GeoObjectTopic geo = (GeoObjectTopic) as.getLiveTopic(geoID, 1);
+				boolean isForumActivated = geo.isForumActivated();
+				session.setAttribute("forumActivition", isForumActivated ? SWITCH_ON : SWITCH_OFF);
+				if (isForumActivated) {
+					session.setAttribute("commentCount", new Integer(geo.getComments().size()));
+				}
+				return PAGE_GEO_INFO;
+		// TODO show forum if wanted
+		} else if (action.equals(ACTION_SHOW_GEO_FORUM)) {
+			return PAGE_GEO_FORUM;
 		// show comment form
 		} else if (action.equals(ACTION_SHOW_COMMENT_FORM)) {
 			// Note: "instComments" are still in the session
@@ -141,20 +142,23 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 			as.setTopicProperty(commentID, 1, PROPERTY_COMMENT_DATE, DeepaMehtaUtils.getDate());
 			as.setTopicProperty(commentID, 1, PROPERTY_COMMENT_TIME, DeepaMehtaUtils.getTime());
 			// associate comment with forum
-			InstitutionTopic inst = getSelectedInst(session);
-			String forumID = inst.getForum().getID();
+			GeoObjectTopic geo = getSelectedGeo(session);
+			String forumID = geo.getForum().getID();
 			String assocID = as.getNewAssociationID();
 			cm.createAssociation(assocID, 1, SEMANTIC_FORUM_COMMENTS, 1, forumID, 1, commentID, 1);
 			// send notification email
-			sendNotificationEmail(inst.getID(), commentID);
+			// sendNotificationEmail(inst.getID(), commentID);
 			//
-			return PAGE_INSTITUTION_FORUM;
+			return PAGE_GEO_FORUM;
 		// shape display
 		} else if (action.equals(ACTION_TOGGLE_SHAPE_DISPLAY)) {
 			String shapeTypeID = params.getValue("typeID");
 			toggleShapeDisplay(shapeTypeID, session);
 			updateShapes(session);
 			return PAGE_CITY_MAP;
+		} else if (action.equals(ACTION_SHOW_GEO_FORM)) {
+			//should this  be possible from the browseServlet, if so the action has to redirect to edit/GeoLogin or am i wrong? 
+			return PAGE_GEO_FORM;
 		} else {
 			return super.performAction(action, params, session);
 		}
@@ -169,8 +173,8 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 			// hotspots
 			setCategoryHotspots(session);
 			// clear marker
-			setSelectedInst(null, session);
-		} else if (page.equals(PAGE_INSTITUTION_LIST)) {
+			setSelectedGeo(null, session);
+		} else if (page.equals(PAGE_GEO_LIST)) {
 			// institutions
 			String mapID = getCityMap(session).getID();
 			String instTypeID = getInstitutionType(session).getID();
@@ -193,28 +197,28 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 			for (int i = 0; i < insts.size(); i++) {
 				BaseTopic t = (BaseTopic) insts.elementAt(i);
 				try {
-					InstitutionTopic inst = (InstitutionTopic) as.getLiveTopic(t);
+					GeoObjectTopic inst = (GeoObjectTopic) as.getLiveTopic(t);
 					// categories
 					String critTypeID = getCriteria(0, session).criteria.getID();
 					categories.put(inst.getID(), inst.getCategories(critTypeID));
 					// address
-					BaseTopic address = inst.getAddress();
-					if (address != null) {
-						Hashtable addressProps = as.getTopicProperties(address);
-						addressProps.put(PROPERTY_CITY, inst.getCity());
-						addresses.put(inst.getID(), addressProps);
-					}
+//					BaseTopic address = inst.getAddress();
+//					if (address != null) {
+//						Hashtable addressProps = as.getTopicProperties(address);
+//						addressProps.put(PROPERTY_CITY, inst.getCity());
+//						addresses.put(inst.getID(), addressProps);
+//					}
 				} catch (ClassCastException e) {
 					System.out.println("*** BrowseServlet.preparePage(): " + t + ": " + e);
-					// ### happens if institution type is not up to date
+					// ### happens if geo object type is not up to date
 				}
 			}
 			session.setAttribute("categories", categories);
-			session.setAttribute("addresses", addresses);
+//			session.setAttribute("addresses", addresses);
 			// clear marker
-			setSelectedInst(null, session);
-		} else if (page.equals(PAGE_INSTITUTION_FORUM)) {
-			session.setAttribute("instComments", getSelectedInst(session).getCommentBeans());
+			setSelectedGeo(null, session);
+		} else if (page.equals(PAGE_GEO_FORUM)) {
+			session.setAttribute("geoComments", getSelectedGeo(session).getCommentBeans());
 		}
 	}
 
@@ -242,49 +246,49 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 
 	// ---
 
-	private void sendNotificationEmail(String instID, String commentID) {
-		try {
-			InstitutionTopic inst = (InstitutionTopic) as.getLiveTopic(instID, 1);
-			// "from"
-			String from = as.getEmailAddress("t-rootuser");		// ###
-			if (from == null || from.equals("")) {
-				throw new DeepaMehtaException("email address of root user is unknown");
-			}
-			// "to"
-			BaseTopic email = inst.getEmail();
-			if (email == null || email.getName().equals("")) {
-				throw new DeepaMehtaException("email address of \"" + inst.getName() + "\" is unknown");
-			}
-			String to = email.getName();
-			// "subject"
-			String subject = "Kiezatlas: neuer Forumsbeitrag für \"" + inst.getName() + "\"";
-			// "body"
-			Hashtable comment = cm.getTopicData(commentID, 1);
-			String body = "Dies ist eine automatische Benachrichtigung von www.kiezatlas.de\r\r" +
-				"Im Forum der Einrichtung \"" + inst.getName() + "\" wurde ein neuer Kommentar eingetragen:\r\r" +
-				"------------------------------\r" +
-				comment.get(PROPERTY_TEXT) + "\r\r" +
-				"Autor: " + comment.get(PROPERTY_COMMENT_AUTHOR) + "\r" +
-				"Email: " + comment.get(PROPERTY_EMAIL_ADDRESS) + "\r" +
-				"Datum: " + comment.get(PROPERTY_COMMENT_DATE) + "\r" +
-				"Uhrzeit: " + comment.get(PROPERTY_COMMENT_TIME) + "\r" +
-				"------------------------------\r\r" +
-				"Im Falle des Mißbrauchs: In der \"Forum Administration\" ihres persönlichen Kiezatlas-Zugangs haben " +
-				"Sie die Möglichkeit, einzelne Kommentare zu löschen, bzw. das Forum ganz zu deaktivieren.\r" +
-				"www.kiezatlas.de:8080/edit/" + inst.getWebAlias() + "\r\r" +
-				"Mit freundlichen Grüßen\r" +
-				"ihr Kiezatlas-Team";
-			//
-			System.out.println(">>> send notification email");
-			System.out.println("  > SMTP server: \"" + as.getSMTPServer() + "\"");	// as.getSMTPServer() throws DME
-			System.out.println("  > from: \"" + from + "\"");
-			System.out.println("  > to: \"" + to + "\"");
-			// send email
-			EmailTopic.sendMail(as.getSMTPServer(), from, to, subject, body);		// EmailTopic.sendMail() throws DME
-		} catch (Exception e) {
-			System.out.println("*** notification email not send (" + e + ")");
-		}
-	}
+//	private void sendNotificationEmail(String instID, String commentID) {
+//		try {
+//			GeoObjectTopic inst = (GeoObjectTopic) as.getLiveTopic(instID, 1);
+//			// "from"
+//			String from = as.getEmailAddress("t-rootuser");		// ###
+//			if (from == null || from.equals("")) {
+//				throw new DeepaMehtaException("email address of root user is unknown");
+//			}
+//			// "to"
+//			BaseTopic email = inst.getEmail();
+//			if (email == null || email.getName().equals("")) {
+//				throw new DeepaMehtaException("email address of \"" + inst.getName() + "\" is unknown");
+//			}
+//			String to = email.getName();
+//			// "subject"
+//			String subject = "Kiezatlas: neuer Forumsbeitrag für \"" + inst.getName() + "\"";
+//			// "body"
+//			Hashtable comment = cm.getTopicData(commentID, 1);
+//			String body = "Dies ist eine automatische Benachrichtigung von www.kiezatlas.de\r\r" +
+//				"Im Forum der Einrichtung \"" + inst.getName() + "\" wurde ein neuer Kommentar eingetragen:\r\r" +
+//				"------------------------------\r" +
+//				comment.get(PROPERTY_TEXT) + "\r\r" +
+//				"Autor: " + comment.get(PROPERTY_COMMENT_AUTHOR) + "\r" +
+//				"Email: " + comment.get(PROPERTY_EMAIL_ADDRESS) + "\r" +
+//				"Datum: " + comment.get(PROPERTY_COMMENT_DATE) + "\r" +
+//				"Uhrzeit: " + comment.get(PROPERTY_COMMENT_TIME) + "\r" +
+//				"------------------------------\r\r" +
+//				"Im Falle des Mißbrauchs: In der \"Forum Administration\" ihres persönlichen Kiezatlas-Zugangs haben " +
+//				"Sie die Möglichkeit, einzelne Kommentare zu löschen, bzw. das Forum ganz zu deaktivieren.\r" +
+//				"www.kiezatlas.de:8080/edit/" + inst.getWebAlias() + "\r\r" +
+//				"Mit freundlichen Grüßen\r" +
+//				"ihr Kiezatlas-Team";
+//			//
+//			System.out.println(">>> send notification email");
+//			System.out.println("  > SMTP server: \"" + as.getSMTPServer() + "\"");	// as.getSMTPServer() throws DME
+//			System.out.println("  > from: \"" + from + "\"");
+//			System.out.println("  > to: \"" + to + "\"");
+//			// send email
+//			EmailTopic.sendMail(as.getSMTPServer(), from, to, subject, body);		// EmailTopic.sendMail() throws DME
+//		} catch (Exception e) {
+//			System.out.println("*** notification email not send (" + e + ")");
+//		}
+//	}
 
 
 
@@ -340,10 +344,10 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 		session.setAttribute("shapeTypes", shapeTypes);
 	}
 
-	private void setSelectedInst(String instID, Session session) {
-		Institution institution = instID != null ? new Institution(instID, getCriterias(session), as) : null;
-		session.setAttribute("selectedInst", institution);
-		System.out.println("> \"selectedInst\" stored in session: " + institution);
+	private void setSelectedGeo(String geoID, Session session) {
+		GeoObject geo = geoID != null ? new GeoObject(geoID, getCriterias(session), as) : null;
+		session.setAttribute("selectedGeo", geo);
+		System.out.println("> \"selectedGeoObject\" stored in session: " + geo);
 	}
 
 	// ---
@@ -480,8 +484,8 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 
 	// ---
 
-	private InstitutionTopic getSelectedInst(Session session) {
-		return (InstitutionTopic) as.getLiveTopic(((Institution) session.getAttribute("selectedInst")).id, 1);
+	private GeoObjectTopic getSelectedGeo(Session session) {
+		return (GeoObjectTopic) as.getLiveTopic(((GeoObject) session.getAttribute("selectedGeo")).geoID, 1);
 	}
 
 	private Vector getSelectedCats(Session session) {

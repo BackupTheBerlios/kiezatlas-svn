@@ -1,5 +1,5 @@
 <%@ page import="de.kiezatlas.deepamehta.KiezAtlas" %>
-<%@ page import="de.kiezatlas.deepamehta.Institution" %>
+<%@ page import="de.kiezatlas.deepamehta.GeoObject" %>
 <%@ page import="de.kiezatlas.deepamehta.SearchCriteria" %>
 <%@ page import="de.kiezatlas.deepamehta.ShapeType" %>
 <%@ page import="de.kiezatlas.deepamehta.Shape" %>

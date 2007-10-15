@@ -6,22 +6,18 @@
 		"Name",
 		KiezAtlas.PROPERTY_DESCRIPTION,
 		KiezAtlas.PROPERTY_ICON,
-		KiezAtlas.PROPERTY_WEB_ALIAS,
-		KiezAtlas.PROPERTY_BIRTHDAY,
-		KiezAtlas.PROPERTY_YADE_X,
-		KiezAtlas.PROPERTY_YADE_Y,
 		KiezAtlas.PROPERTY_ADMINISTRATION_INFO,
 		"City", "Title", "Content",
 		"Width", "Height"};
 %>
 <%
 	HTMLGenerator html = (HTMLGenerator) session.getAttribute("html");
-	BaseTopic inst = (BaseTopic) session.getAttribute("inst");
+	BaseTopic geo = (BaseTopic) session.getAttribute("geo");
 	//
 	// institution form
-	out.println("<H2>" + inst.getName() + "</H2>");
+	out.println("<H2>" + geo.getName() + "</H2>");
 	out.println("<H3>&Auml;nderungsformular</H3>");
-	out.println(html.form(inst.getType(), KiezAtlas.ACTION_UPDATE_INSTITUTION,
-						  inst.getID(), hiddenProps, true));
+	out.println(html.form(geo.getType(), KiezAtlas.ACTION_UPDATE_GEO,
+						  geo.getID(), hiddenProps, true));
 %>
 <% end(out); %>

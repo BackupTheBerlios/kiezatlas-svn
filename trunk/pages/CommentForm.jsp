@@ -3,8 +3,8 @@
 <% begin(session, out, false); %>
 <%
 	HTMLGenerator html = (HTMLGenerator) session.getAttribute("html");
-	Institution inst = (Institution) session.getAttribute("selectedInst");
-	Vector comments = (Vector) session.getAttribute("instComments");
+	GeoObject inst = (GeoObject) session.getAttribute("selectedGeo");
+	Vector comments = (Vector) session.getAttribute("geoComments");
 %>
 	<br><br>
 	<p><b><%= inst.name %> -- Forum</b></p>
@@ -38,5 +38,5 @@
 		}
 	%>
 	<br>
-	<p><%= html.link("Zur&uuml;ck zu " + inst.name, KiezAtlas.ACTION_SHOW_INSTITUTION_INFO, "id=" + inst.id) %></p>
+	<p><%= html.link("Zur&uuml;ck zu " + inst.name, KiezAtlas.ACTION_SHOW_GEO_INFO, "id=" + inst.geoID) %></p>
 <% end(out); %>

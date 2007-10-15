@@ -3,7 +3,7 @@
 <% begin(session, out); %>
 <%
 	HTMLGenerator html = (HTMLGenerator) session.getAttribute("html");
-	BaseTopic inst = (BaseTopic) session.getAttribute("inst");
+	BaseTopic inst = (BaseTopic) session.getAttribute("geo");
 	String activition = (String) session.getAttribute("activition");
 	Vector comments = (Vector) session.getAttribute("comments");
 %>

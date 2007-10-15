@@ -50,8 +50,8 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 
 
 	static final String TOPICTYPE_CITYMAP = "tt-ka-stadtplan";
-	static final String TOPICTYPE_KIEZ_INSTITUTION = "tt-ka-einrichtung";
-	static final String TOPICTYPE_KIEZ_INSTITUTION_SEARCH = "tt-ka-einrichtungsuche";
+	static final String TOPICTYPE_KIEZ_GEO = "tt-ka-geoobject";
+	static final String TOPICTYPE_KIEZ_GEO_SEARCH = "tt-ka-geoobject-search";
 	static final String TOPICTYPE_AGENCY = "tt-ka-traeger";
 	static final String TOPICTYPE_CRITERIA = "tt-ka-kriterium";
 	static final String TOPICTYPE_YADE_POINT = "tt-ka-yadepoint";
@@ -174,18 +174,20 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	// browse servlet
 	public static final String ACTION_INIT_FRAME = "initFrame";
 	public static final String ACTION_SHOW_CATEGORIES = "showCategories";
-	public static final String ACTION_SHOW_INSTITUTION_INFO = "showInstInfo";
-	public static final String ACTION_SEARCH = "search";
+	//public static final String ACTION_SHOW_INSTITUTION_INFO = "showInstInfo";
+	public static final String ACTION_SHOW_GEO_INFO = "showGeoObjectInfo";
+	public static final String ACTION_SEARCH = "search";		
 	public static final String ACTION_SEARCH_BY_CATEGORY = "searchByCategory";
 	public static final String ACTION_SELECT_CATEGORY = "selectCategory";
-	public static final String ACTION_SHOW_INSTITUTION_FORUM = "showInstForum";
+	public static final String ACTION_SHOW_GEO_FORUM = "showGeoObjectForum";
 	public static final String ACTION_SHOW_COMMENT_FORM = "showCommentForm";
 	public static final String ACTION_CREATE_COMMENT = "createComment";
 	public static final String ACTION_TOGGLE_SHAPE_DISPLAY = "toggleShapeDisplay";
 	// edit servlet
 	public static final String ACTION_TRY_LOGIN = "tryLogin";		// also used for list servlet
-	public static final String ACTION_SHOW_INSTITUTION_FORM = "showInstForm";
-	public static final String ACTION_UPDATE_INSTITUTION = "updateInst";
+	//public static final String ACTION_SHOW_INSTITUTION_FORM = "showInstForm";
+	public static final String ACTION_SHOW_GEO_FORM = "showGeoObjectForm";
+	public static final String ACTION_UPDATE_GEO = "updateGeo";
 	public static final String ACTION_SHOW_FORUM_ADMINISTRATION = "showForumAdmin";
 	public static final String ACTION_ACTIVATE_FORUM = "activateForum";
 	public static final String ACTION_DEACTIVATE_FORUM = "deactivateForum";
@@ -228,14 +230,15 @@ public interface KiezAtlas extends DeepaMehtaConstants {
     static final String PAGE_FRAMESET = "frameset";
     static final String PAGE_CITY_MAP = "CityMap";
     static final String PAGE_CATEGORY_LIST = "CategoryList";
-    static final String PAGE_INSTITUTION_LIST = "InstitutionList";
-    static final String PAGE_INSTITUTION_INFO = "InstitutionInfo";
-    static final String PAGE_INSTITUTION_FORUM = "InstitutionForum";
+    static final String PAGE_GEO_LIST = "GeoObjectList";
+    //static final String PAGE_INSTITUTION_INFO = "InstitutionInfo";
+    static final String PAGE_GEO_INFO = "GeoObjectInfo";
+    static final String PAGE_GEO_FORUM = "GeoObjectForum";
     static final String PAGE_COMMENT_FORM = "CommentForm";
     // edit
-    static final String PAGE_INSTITUTION_LOGIN = "InstitutionLogin";
-    static final String PAGE_INSTITUTION_HOME = "InstitutionHome";
-    static final String PAGE_INSTITUTION_FORM = "InstitutionForm";
+    static final String PAGE_GEO_LOGIN = "GeoObjectLogin";
+    static final String PAGE_GEO_HOME = "GeoObjectHome";
+    static final String PAGE_GEO_FORM = "GeoObjectForm";
     static final String PAGE_FORUM_ADMINISTRATION = "ForumAdministration";
     // list
     static final String PAGE_LIST_LOGIN = "ListLogin";
