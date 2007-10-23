@@ -43,7 +43,7 @@ categories			Vector of BaseTopic
 selectedCats		Vector of String (IDs of selected categories)
 
 
-InstitutionsList
+GeoObjectList
 ----------------
 
 institutions		Vector of BaseTopic
@@ -56,7 +56,7 @@ addresses			Hashtable
 							key: PROPERTY_STREET, PROPERTY_POSTAL_CODE
 							value: street/postalcode
 
-InstitutionInfo
+GeoObjectInfo
 ---------------
 
 selectedInst		Institution
@@ -64,7 +64,7 @@ forumActivition		String (SWITCH_ON, SWITCH_OFF)
 commentCount		Integer (only initialized if "activition"=SWITCH_ON)
 
 
-InstitutionForum
+GeoObjectForum
 ----------------
 
 instComments		Vector of Comment

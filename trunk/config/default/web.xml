@@ -21,7 +21,7 @@
 
     <context-param>
       <param-name>service</param-name>
-      <param-value>default</param-value>
+      <param-value>mysql5</param-value>
       <description>
         Selects a DeepaMehta service.
         If this parameter is not set the "default" service will be used.

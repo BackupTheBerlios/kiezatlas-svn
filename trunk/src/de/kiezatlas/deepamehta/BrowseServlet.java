@@ -16,10 +16,10 @@ import de.deepamehta.BaseTopic;
 import de.deepamehta.DeepaMehtaException;
 import de.deepamehta.PresentableTopic;
 import de.deepamehta.service.Session;
+import de.deepamehta.service.TopicBean;
 import de.deepamehta.service.web.DeepaMehtaServlet;
 import de.deepamehta.service.web.RequestParameter;
 import de.deepamehta.service.web.WebSession;
-import de.deepamehta.topics.EmailTopic;
 import de.deepamehta.topics.TypeTopic;
 import de.deepamehta.util.DeepaMehtaUtils;
 import de.kiezatlas.deepamehta.topics.CityMapTopic;
@@ -118,9 +118,9 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 		// info
 		} else if (action.equals(ACTION_SHOW_GEO_INFO)) {
 				String geoID = params.getValue("id");
-				System.out.println("@params: " + params.getValue("id"));
 				setSelectedGeo(geoID, session);
-				//
+				TopicBean topicBean = as.createTopicBean(geoID, 1);
+				session.setAttribute("topicBean", topicBean);
 				GeoObjectTopic geo = (GeoObjectTopic) as.getLiveTopic(geoID, 1);
 				boolean isForumActivated = geo.isForumActivated();
 				session.setAttribute("forumActivition", isForumActivated ? SWITCH_ON : SWITCH_OFF);

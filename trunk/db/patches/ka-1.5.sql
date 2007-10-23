@@ -45,13 +45,23 @@ INSERT INTO Association VALUES ('at-derivation', 1, 1, 'a-ka-96', '', 'tt-topicc
 INSERT INTO Association VALUES ('at-aggregation', 1, 1, 'a-ka-97', '', 'tt-ka-geoobject-search', 1, 'tt-ka-geoobject', 1);
 
 
+-- relation to "Image"
+INSERT INTO Association VALUES ('at-relation', 1, 1, 'a-ka-98', '', 'tt-ka-geoobject', 1, 'tt-image', 1);
+INSERT INTO AssociationProp VALUES ('a-ka-98', 1, 'Cardinality', 'one');
+INSERT INTO AssociationProp VALUES ('a-ka-98', 1, 'Association Type ID', 'at-association');
+INSERT INTO AssociationProp VALUES ('a-ka-98', 1, 'Web Info', 'Related Info');
+INSERT INTO AssociationProp VALUES ('a-ka-98', 1, 'Web Form', 'Related Form');
+INSERT INTO AssociationProp VALUES ('a-ka-98', 1, 'Ordinal Number', '109');
+--
+
 -- relation to "Ansprechpartner"
--- INSERT INTO Association VALUES ('at-relation', 1, 1, 'a-ka-34', 'Ansprechpartner/in', 'tt-ka-geoobject', 1, 'tt-person', 1);
--- INSERT INTO AssociationProp VALUES ('a-ka-34', 1, 'Name', 'Ansprechpartner/in');
--- INSERT INTO AssociationProp VALUES ('a-ka-34', 1, 'Cardinality', 'many');
--- INSERT INTO AssociationProp VALUES ('a-ka-34', 1, 'Association Type ID', 'at-association');
--- INSERT INTO AssociationProp VALUES ('a-ka-34', 1, 'Web Info', 'Related Topic Name');
--- INSERT INTO AssociationProp VALUES ('a-ka-34', 1, 'Web Form', 'Related Form');
--- INSERT INTO AssociationProp VALUES ('a-ka-34', 1, 'Ordinal Number', '155');
+-- INSERT INTO Association VALUES ('at-relation', 1, 1, 'a-ka-99', 'Ansprechpartner/in', 'tt-ka-geoobject', 1, 'tt-person', 1);
+-- INSERT INTO AssociationProp VALUES ('a-ka-99', 1, 'Name', 'Ansprechpartner/in');
+-- INSERT INTO AssociationProp VALUES ('a-ka-99', 1, 'Cardinality', 'many');
+-- INSERT INTO AssociationProp VALUES ('a-ka-99', 1, 'Association Type ID', 'at-association');
+-- INSERT INTO AssociationProp VALUES ('a-ka-99', 1, 'Web Info', 'Related Topic Name');
+-- INSERT INTO AssociationProp VALUES ('a-ka-99', 1, 'Web Form', 'Related Form');
+-- INSERT INTO AssociationProp VALUES ('a-ka-99', 1, 'Ordinal Number', '155');
+
 
 

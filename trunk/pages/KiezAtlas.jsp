@@ -1,3 +1,4 @@
+<%@page import="de.deepamehta.service.TopicBean" %>
 <%@ page import="de.kiezatlas.deepamehta.KiezAtlas" %>
 <%@ page import="de.kiezatlas.deepamehta.GeoObject" %>
 <%@ page import="de.kiezatlas.deepamehta.SearchCriteria" %>
@@ -130,9 +131,13 @@
 				streetname = street;
 				hnr = "";
 			}
-			//
+			//assemble the html block with streetname, postal code and city with the fahrplan img as a link in a block
 			String mapURL = "http://www.fahrinfo-berlin.de/gis/index.jsp?adr_zip=" + postalCode + "&adr_street=" + streetname + "&adr_house=" + hnr;
-			return street + " <a href=\"" + mapURL + "\" target=\"fahrinfo\"><img src=\"../images/fahrinfo.gif\" border=\"0\" hspace=\"20\"></a>";
+			String imageLink = " <a href=\"" + mapURL + "\" target=\"fahrinfo\"><img src=\"../images/fahrinfo.gif\" border=\"0\" hspace=\"20\"></a>";
+			String blockString = street + " " + imageLink + "</br>" + postalCode + " " + city;			
+			return blockString;
+		} else if (city.startsWith("Stadt")){
+			return street + " in unbekannter Stadt"; 
 		} else {
 			return street;
 		}

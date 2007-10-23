@@ -18,6 +18,7 @@
 	if (imagefile != null) {
 		out.println("<img src=\"" + imagefile + "\"><p>");
 	}
+	//hier die topic bean rinne
 	out.println(html.info(geo.getID(), hiddenProps, true));
 	//
 	// link to form page

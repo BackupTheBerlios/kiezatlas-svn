@@ -115,7 +115,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		Enumeration e = instIDs.elements();
 		while (e.hasMoreElements()) {
 			String instID = (String) e.nextElement();
-			insts.addElement(new Institution(instID, criterias, as));
+			insts.addElement(new GeoObject(instID, criterias, as));
 		}
 		//
 		return insts;

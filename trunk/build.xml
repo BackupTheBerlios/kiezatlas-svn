@@ -10,7 +10,7 @@
 	<property name="war-test" value="${project.name}-test.war"/>
 	<property name="build" location="build"/>
 
-	<property name="dm.base-dir" location="../../DeepaMehta/trunk"/>
+	<property name="dm.base-dir" location="/home/tito/source/deepaMehtaTrunk"/>
 	<import file="${dm.base-dir}/config.xml" />
 
 	<target name="init" description="create build directory">
@@ -23,7 +23,7 @@
 				<pathelement location="${web.lib.dir}/DeepaMehtaService.jar"/>
 				<pathelement location="${web.lib.dir}/DeepaMehtaTopics.jar"/>
 				<pathelement location="${web.servlet.lib}"/>
-				<pathelement location="${libpath}/commons-fileupload-1.0.jar"/>
+				<pathelement location="${web.lib.dir}/commons-fileupload-1.0.jar"/>
 			</classpath>
 		</javac>
 	</target>
