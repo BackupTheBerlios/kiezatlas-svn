@@ -59,7 +59,7 @@ addresses			Hashtable
 GeoObjectInfo
 ---------------
 
-selectedInst		Institution
+topicBean			TopicBean
 forumActivition		String (SWITCH_ON, SWITCH_OFF)
 commentCount		Integer (only initialized if "activition"=SWITCH_ON)
 
@@ -79,6 +79,13 @@ error				String
 
 EditServlet
 ===========
+
+GeoObjectHome
+----------------
+
+topicBean			Instance of TopicBean
+html				Instance of HTML Generator
+
 
 Global
 ------

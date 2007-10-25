@@ -15,7 +15,9 @@
 	topicBean.removeFieldsContaining("Password");
 	topicBean.removeFieldsContaining("YADE");
 	topicBean.removeFieldsContaining("Owner");
+	topicBean.removeFieldsContaining("Web Alias");
 	topicBean.removeFieldsContaining("Locked Geometry");
+	topicBean.removeFieldsContaining("Description");
 	
 	//render image if available from the virtual tomcat directory 8080/dm-images
 	String imageFile = topicBean.getValue("Image / File");
@@ -23,26 +25,18 @@
 		String relativePath = "../../dm-images/images/";
 		String imageHtmlString = "<img src=" + relativePath + imageFile + ">";
 		out.println(imageHtmlString);
-		String imageDescr = topicBean.getValue("Image / Description");
-		if (imageDescr != null) {
-			out.println("<br><i><font-size=-2>" + imageDescr + "</font></i>");	
-		}
-		
-		
 	}
 	
 	//Print Name
-	out.println("<h3>" + topicBean.getValue("Name") + "</br></h3>");
+	out.println("<b>" + topicBean.getValue("Name") + "</b></br>");
 	
 	//Print Adress if available on this Topic includind directlink to bvg
-	try{ 
+	try { 
 		if (topicBean.getValue("Address / Street") != null) {
-			String city = topicBean.getValues("Address / City").elementAt(0).toString();
-			System.out.println("Stadt: " + city);
-			//Falls noch keine city zugewiesen wurde
-			if (city == null) {
-				city = "Stadt ist noch nicht zugewiesen."; 
-			} else {
+			Vector tmp = topicBean.getValues("Address / City");
+			String city = "";
+			if (tmp.size() > 0) {
+				city = tmp.elementAt(0).toString();
 				int beginQuoteMarks = city.indexOf("\"")+1;
 				int endQuoteMarks  = city.lastIndexOf("\"");
 				city = city.substring(beginQuoteMarks, endQuoteMarks);
@@ -52,7 +46,7 @@
 			//fetch maplink block
 			out.println(mapLink(street, postalCode, city));
 		}
-	}catch (DeepaMehtaException ex){
+	} catch (DeepaMehtaException ex){
 		out.println("Bitte Entschuldigung Sie, es ist ein Fehler aufgetreten: " + ex);	
 	}
 	
@@ -60,6 +54,7 @@
 	topicBean.removeFieldsContaining("Address");
 	topicBean.removeField("Name");
 	//print properties which were not removed, starting generic content rendering 
+	out.println("<br/><br/>");
 	out.println(html.info(topicBean));
 	//If forum is activated by the owner, it will be shown a link here
 	if (forumActivition.equals(KiezAtlas.SWITCH_ON)) {

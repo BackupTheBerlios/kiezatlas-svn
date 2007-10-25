@@ -5,6 +5,7 @@ import de.kiezatlas.deepamehta.topics.GeoObjectTopic;
 import de.deepamehta.BaseTopic;
 import de.deepamehta.DeepaMehtaException;
 import de.deepamehta.service.Session;
+import de.deepamehta.service.TopicBean;
 import de.deepamehta.service.web.DeepaMehtaServlet;
 import de.deepamehta.service.web.RequestParameter;
 import de.deepamehta.service.web.WebSession;
@@ -37,7 +38,7 @@ public class EditServlet extends DeepaMehtaServlet implements KiezAtlas {
 				}
 				//
 				String alias = pathInfo.substring(1);
-				setInstitution(GeoObjectTopic.lookupInstitution(alias, as), session);
+				setGeoObject(GeoObjectTopic.lookupInstitution(alias, as), session);
 				return PAGE_GEO_LOGIN;
 			} catch (DeepaMehtaException e) {
 				System.out.println("*** EditServlet.performAction(): " + e);
@@ -54,8 +55,11 @@ public class EditServlet extends DeepaMehtaServlet implements KiezAtlas {
 		}
 		//
 		if (action.equals(ACTION_TRY_LOGIN)) {
+			GeoObjectTopic geo = getGeoObject(session);
 			String password = params.getValue(PROPERTY_PASSWORD);
-			String geoPw = as.getTopicProperty(getGeoObject(session), PROPERTY_PASSWORD);
+			String geoPw = as.getTopicProperty(geo, PROPERTY_PASSWORD);
+			TopicBean topicBean = as.createTopicBean(geo.getID(), 1);
+			session.setAttribute("topicBean", topicBean);
 			return password.equals(geoPw) ? PAGE_GEO_HOME : PAGE_GEO_LOGIN;
 			//
 		} else if (action.equals(ACTION_SHOW_GEO_FORM)) {
@@ -102,6 +106,17 @@ public class EditServlet extends DeepaMehtaServlet implements KiezAtlas {
 			return PAGE_FORUM_ADMINISTRATION;
 			//
 		} else if (action.equals(ACTION_GO_HOME)) {
+			GeoObjectTopic geo = getGeoObject(session);
+			// error check
+			System.out.println("geo is: " + geo.getID());
+			if (geo != null) {
+				TopicBean topicBean = as.createTopicBean(geo.getID(), 1);
+				System.out.println("TopicBeanCreated with id " + topicBean.id );
+				session.setAttribute("topicBean", topicBean);
+			} else {
+				System.out.println(">>>> Could not retrieve GeoObjectTopic from Session");
+			}
+			//
 			return PAGE_GEO_HOME;
 			//
 		} else {
@@ -181,7 +196,7 @@ public class EditServlet extends DeepaMehtaServlet implements KiezAtlas {
 
 
 
-	private void setInstitution(BaseTopic geo, Session session) {
+	private void setGeoObject(BaseTopic geo, Session session) {
 		session.setAttribute("geo", geo);
 		System.out.println("> \"geo\" stored in session: " + geo);
 	}
