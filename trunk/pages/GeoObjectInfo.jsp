@@ -18,29 +18,32 @@
 	topicBean.removeFieldsContaining("Web Alias");
 	topicBean.removeFieldsContaining("Locked Geometry");
 	topicBean.removeFieldsContaining("Description");
-	
+	out.println("<br />");
 	//render image if available from the virtual tomcat directory 8080/dm-images
 	String imageFile = topicBean.getValue("Image / File");
+	out.println("");
 	if (imageFile != null) {
 		String relativePath = "../../dm-images/images/";
-		String imageHtmlString = "<img src=" + relativePath + imageFile + ">";
+		String imageHtmlString = "<img src=" + relativePath + imageFile + "><br />";
 		out.println(imageHtmlString);
 	}
 	
 	//Print Name
-	out.println("<b>" + topicBean.getValue("Name") + "</b></br>");
+	out.println("<b>" + topicBean.getValue("Name") + "</b><br />");
 	
 	//Print Adress if available on this Topic includind directlink to bvg
 	try { 
 		if (topicBean.getValue("Address / Street") != null) {
 			Vector tmp = topicBean.getValues("Address / City");
 			String city = "";
-			if (tmp.size() > 0) {
-				city = tmp.elementAt(0).toString();
-				int beginQuoteMarks = city.indexOf("\"")+1;
-				int endQuoteMarks  = city.lastIndexOf("\"");
-				city = city.substring(beginQuoteMarks, endQuoteMarks);
+			if (tmp != null) {
+				if (tmp.size() > 0) {
+					city = ((BaseTopic) tmp.elementAt(0)).getName();
+				}
+			} else {
+				city = topicBean.getValue("Stadt");
 			}
+			 
 			String street = topicBean.getValue("Address / Street");
 			String postalCode = topicBean.getValue("Address / Postal Code");
 			//fetch maplink block
@@ -53,6 +56,8 @@
 	topicBean.removeFieldsContaining("Image");
 	topicBean.removeFieldsContaining("Address");
 	topicBean.removeField("Name");
+	topicBean.removeFieldsContaining("Icon");
+	topicBean.removeField("Stadt");
 	//print properties which were not removed, starting generic content rendering 
 	out.println("<br/><br/>");
 	out.println(html.info(topicBean));
@@ -62,5 +67,7 @@
 		out.println("<p>\r<hr>\rDas " + html.link("Forum", KiezAtlas.ACTION_SHOW_GEO_FORUM) +
 			" enth&auml;lt "+ commentCount + " Kommentare</p>");
 	}
+	// cleanup session for switching maps within one session
+	session.setAttribute("topicBean", null);
 %>
 <% end(out); %>

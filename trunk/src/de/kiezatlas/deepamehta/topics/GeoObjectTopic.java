@@ -232,6 +232,22 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 		return commentBeans;
 	}
 	
+	public BaseTopic getAddress() {
+		try {
+			return as.getRelatedTopic(getID(), ASSOCTYPE_ASSOCIATION, TOPICTYPE_ADDRESS, 2, true);		// emptyAllowed=true
+		} catch (AmbiguousSemanticException e) {
+			System.out.println("*** GeoObjectTopic.getAddress(): " + e);
+			return e.getDefaultTopic();
+		}
+	}
+	
+	
+	
+	public String getCity() {
+		return getProperty(PROPERTY_CITY);
+	}
+
+	
 	/**
 	 * Converts the YADE-coordinate of this institution into a screen coordinate.
 	 *

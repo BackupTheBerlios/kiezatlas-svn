@@ -5,12 +5,12 @@ import de.deepamehta.DeepaMehtaConstants;
 
 
 /**
- * Kiez-Atlas 1.4<br>
- * Requires DeepaMehta 2.0b7-post1
+ * Kiez-Atlas 1.5<br>
+ * Requires DeepaMehta 2.0b7-post1.
  * <p>
- * Last change: 4.3.2007<br>
- * J&ouml;rg Richter<br>
- * jri@freenet.de
+ * Last change: 15.10.2007<br>
+ * Malte Rei&szlig;ig<br>
+ * mre@deepamehta.de
  */
 public interface KiezAtlas extends DeepaMehtaConstants {
 
@@ -174,7 +174,7 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	// browse servlet
 	public static final String ACTION_INIT_FRAME = "initFrame";
 	public static final String ACTION_SHOW_CATEGORIES = "showCategories";
-	//public static final String ACTION_SHOW_INSTITUTION_INFO = "showInstInfo";
+	public static final String ACTION_SHOW_INFO_EXTERNAL = "showInfo";
 	public static final String ACTION_SHOW_GEO_INFO = "showGeoObjectInfo";
 	public static final String ACTION_SEARCH = "search";		
 	public static final String ACTION_SEARCH_BY_CATEGORY = "searchByCategory";

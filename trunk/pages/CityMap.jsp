@@ -32,7 +32,7 @@
 				out.println("</a>");
 			}
 		}
-		// --- institutions ---
+		// --- geoObjects ---
 		e = hotspots.elements();
 		while (e.hasMoreElements()) {
 			Vector presentables = (Vector) e.nextElement();

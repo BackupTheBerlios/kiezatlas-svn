@@ -40,14 +40,27 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 	protected String performAction(String action, RequestParameter params, Session session) throws ServletException {
 		if (action == null) {
 			try {
+				//first visit regular or special 
 				String pathInfo = params.getPathInfo();
+				String alias = pathInfo.substring(1);
+				//extension for optional parameters needed for a special visit
+				String geoID = params.getParameter("id");
+				String kiez = params.getParameter("kiez");
 				// error check
 				if (pathInfo == null || pathInfo.length() == 1) {
 					throw new DeepaMehtaException("Fehler in URL");
 				}
-				//
-				String alias = pathInfo.substring(1);
-				setCityMap(CityMapTopic.lookupCityMap(alias, true, as), session);	// throwIfNotFound=true
+				//handling for single geoObjectUrls in the right CityMap, the old url scheme was not applicable for this task
+				//cause of incorrect paths to icons and css files, if relative to /browse/nk-reuter/controller?action=showInfo....
+				//for this task now a special kiez param was introduced, for the code it means, eliminating redundancy
+				if(geoID != null && kiez != null) {
+					TopicBean topicBean = as.createTopicBean(geoID, 1);
+					session.setAttribute("topicBean", topicBean);
+					setCityMap(CityMapTopic.lookupCityMap(kiez, true, as), session);	// throwIfNotFound=true
+				} else {
+					System.out.println("@init::regular visit alias " + alias);
+					setCityMap(CityMapTopic.lookupCityMap(alias, true, as), session);	// throwIfNotFound=true
+				}
 				initInstitutaionType(session);	// relies on city map
 				initSearchCriterias(session);	// relies on city map
 				initShapeTypes(session);		// relies on city map
@@ -58,7 +71,8 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 				session.setAttribute("error", e.getMessage());
 				return PAGE_ERROR;
 			}
-		}
+			
+		} 		
 		// session timeout?
 		if (getCityMap(session) == null) {
 			System.out.println("*** Session Expired ***");
@@ -69,13 +83,30 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 		//
 		if (action.equals(ACTION_INIT_FRAME)) {
 			String frame = params.getValue("frame");
+			String id = params.getValue("id");
 			if (frame.equals(FRAME_LEFT)) {
+				//selectMarker
 				return PAGE_CITY_MAP;
 			} else if (frame.equals(FRAME_RIGHT)) {
-				// list categories of 1st search criteria, if there is a criteria at all
-				if (getCriterias(session).length > 0) {
-					setSearchMode("0", session);	// ### was SEARCHMODE_BY_CATEGORY
-					return PAGE_CATEGORY_LIST;
+				if (id != null) {
+					//try to show a given GeoObject, have to set a hotspot
+					String mapID = getCityMap(session).getID(); // ### just for the hotspot
+					String instTypeID = getInstitutionType(session).getID(); // ### just for the hotspot 
+					setSearchMode("0", session); // ### i have to set a searchmode
+					GeoObjectTopic geo = (GeoObjectTopic) as.getLiveTopic(id, 1);
+					boolean isForumActivated = geo.isForumActivated();
+					session.setAttribute("forumActivition", isForumActivated ? SWITCH_ON : SWITCH_OFF);
+					if (isForumActivated) {
+						session.setAttribute("commentCount", new Integer(geo.getComments().size()));
+					}
+					//just trial and error, somehow it looks good, but don´t now what i did exactly here
+					Vector insts = cm.getViewTopics(mapID, 1, instTypeID, getSearchValue(session));
+					setHotspots(insts, ICON_HOTSPOT, session);
+					return PAGE_GEO_INFO;
+				} else if (getCriterias(session).length > 0) {
+					// list categories of 1st search criteria, if there is a criteria at all
+					setSearchMode("1", session);	// ### was SEARCHMODE_BY_CATEGORY
+					return PAGE_CATEGORY_LIST; 
 				} else {
 					// otherwise list all institutions
 					setSearchMode(SEARCHMODE_BY_NAME, session);
@@ -194,6 +225,7 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 			// categories & addresses
 			Hashtable categories = new Hashtable();
 			Hashtable addresses = new Hashtable();
+			// wenn kein stadt property vorhanden ist, dann gehe weiter zu related topic address
 			for (int i = 0; i < insts.size(); i++) {
 				BaseTopic t = (BaseTopic) insts.elementAt(i);
 				try {
@@ -202,19 +234,19 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 					String critTypeID = getCriteria(0, session).criteria.getID();
 					categories.put(inst.getID(), inst.getCategories(critTypeID));
 					// address
-//					BaseTopic address = inst.getAddress();
-//					if (address != null) {
-//						Hashtable addressProps = as.getTopicProperties(address);
-//						addressProps.put(PROPERTY_CITY, inst.getCity());
-//						addresses.put(inst.getID(), addressProps);
-//					}
+					BaseTopic address = inst.getAddress();
+					if (address != null) {
+						Hashtable addressProps = as.getTopicProperties(address);
+						addressProps.put(PROPERTY_CITY, inst.getCity());
+						addresses.put(inst.getID(), addressProps);
+					}
 				} catch (ClassCastException e) {
 					System.out.println("*** BrowseServlet.preparePage(): " + t + ": " + e);
 					// ### happens if geo object type is not up to date
 				}
 			}
 			session.setAttribute("categories", categories);
-//			session.setAttribute("addresses", addresses);
+			session.setAttribute("addresses", addresses);
 			// clear marker
 			setSelectedGeo(null, session);
 		} else if (page.equals(PAGE_GEO_FORUM)) {
