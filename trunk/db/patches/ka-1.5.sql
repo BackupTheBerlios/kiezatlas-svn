@@ -143,53 +143,17 @@ INSERT INTO AssociationProp VALUES ('a-ka-104', 1, 'Web Form', 'Related Form');
 INSERT INTO AssociationProp VALUES ('a-ka-104', 1, 'Ordinal Number', '109');
 
 --- Update for Person Ansprechpartner Ordinal Number for InfoPage
--- UPDATE AssociationProp SET PropValue='170' WHERE AssociationID='a-ka-34' AND PropName='Ordinal Number';
+UPDATE AssociationProp SET PropValue='170' WHERE AssociationID='a-ka-34' AND PropName='Ordinal Number';
 
 
 --- Version Change
--- UPDATE TopicProp SET PropValue='Kiezatlas--Test'         WHERE TopicID='t-deepamehtainstallation' AND PropName='Client Name';
--- UPDATE TopicProp SET PropValue='DeepaMehtaServer 2.0b8'   WHERE TopicID='t-deepamehtainstallation' AND PropName='Server Name';
+--UPDATE TopicProp SET PropValue='Kiezatlas--Test'         WHERE TopicID='t-deepamehtainstallation' AND PropName='Client Name';
+--UPDATE TopicProp SET PropValue='DeepaMehtaServer 2.0b8'   WHERE TopicID='t-deepamehtainstallation' AND PropName='Server Name';
 
 --- assign properties to association type "Membership"
 --- update membership properties for the compatibility of the old kiezatlas publishing, for memberships
 --- carefully to handle for developers, no association publisher property should be set yet
-Insert AssociationProp (AssociationID, AssociationVersion, PropName, PropValue) SELECT Association.ID, 1, 'Publisher', 'on' FROM Association WHERE Association.TypeID = 'at-membership';
---- didn´t checked yet
---Insert AssociationProp SELECT ID, 1, 'Publisher', 'on' FROM Association WHERE Association.TypeID = 'at-membership';
+Insert AssociationProp (AssociationID, AssociationVersion, PropName, PropValue) SELECT ID, 1, 'Publisher', 'on' FROM Association WHERE TypeID = 'at-membership';
 
-
-
-
-
--- INSERT INTO Association VALUES ('at-composition', 1, 1, 'a-93', '', 'at-membership', 1, 'pp-editor', 1);
--- INSERT INTO AssociationProp VALUES ('a-93', 1, 'Ordinal Number', '10');
--- INSERT INTO Association VALUES ('at-composition', 1, 1, 'a-94', '', 'at-membership', 1, 'pp-publisher', 1);
--- INSERT INTO AssociationProp VALUES ('a-94', 1, 'Ordinal Number', '20');
-
-
-
--- relation to "Ansprechpartner"
--- INSERT INTO Association VALUES ('at-relation', 1, 1, 'a-ka-34', 'Ansprechpartner/in', 'tt-ka-einrichtung', 1, 'tt-person', 1);
--- INSERT INTO AssociationProp VALUES ('a-ka-34', 1, 'Name', 'Ansprechpartner/in');
--- INSERT INTO AssociationProp VALUES ('a-ka-34', 1, 'Cardinality', 'many');
--- INSERT INTO AssociationProp VALUES ('a-ka-34', 1, 'Association Type ID', 'at-association');
--- INSERT INTO AssociationProp VALUES ('a-ka-34', 1, 'Web Info', 'Related Topic Name');
--- INSERT INTO AssociationProp VALUES ('a-ka-34', 1, 'Web Form', 'Related Form');
--- INSERT INTO AssociationProp VALUES (---
---- New "Membership" Properties: "Editor" and "Publisher"
----
--- create properties
--- INSERT INTO Topic VALUES ('tt-property', 1, 1, 'pp-editor', 'Editor');
--- INSERT INTO TopicProp VALUES ('pp-editor', 1, 'Name', 'Editor');
--- INSERT INTO TopicProp VALUES ('pp-editor', 1, 'Visualization', 'Switch');
--- INSERT INTO Topic VALUES ('tt-property', 1, 1, 'pp-publisher', 'Publisher');
--- INSERT INTO TopicProp VALUES ('pp-publisher', 1, 'Name', 'Publisher');
--- INSERT INTO TopicProp VALUES ('pp-publisher', 1, 'Visualization', 'Switch');
--- assign properties to association type "Membership"
--- INSERT INTO Association VALUES ('at-composition', 1, 1, 'a-93', '', 'at-membership', 1, 'pp-editor', 1);
--- INSERT INTO AssociationProp VALUES ('a-93', 1, 'Ordinal Number', '10');
--- INSERT INTO Association VALUES ('at-composition', 1, 1, 'a-94', '', 'at-membership', 1, 'pp-publisher', 1);
--- INSERT INTO AssociationProp VALUES ('a-94', 1, 'Ordinal Number', '20');
--- 'a-ka-34', 1, 'Ordinal Number', '155');
 
 
