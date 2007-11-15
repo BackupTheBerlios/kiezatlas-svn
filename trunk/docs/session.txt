@@ -33,7 +33,7 @@ hotspots			Vector of Vector
 						vector 2:
 							element 0     : icon url
 							element 1,2,..: PresentableTopic
-selectedInst		Institution
+selectedGeo			GeoObject
 
 
 CategoryList
@@ -67,6 +67,8 @@ commentCount		Integer (only initialized if "activition"=SWITCH_ON)
 GeoObjectForum
 ----------------
 
+html				HMTLGenerator
+selectedGeo			GeoObject
 instComments		Vector of Comment
 
 
@@ -75,6 +77,11 @@ error
 
 error				String
 
+CommentForm
+----------------
+
+selectedGeo			GeoObject
+comments			Vector of comments
 
 
 EditServlet

@@ -1,4 +1,5 @@
-<%@page import="de.deepamehta.service.TopicBean" %>
+<%@ page import="de.deepamehta.DeepaMehtaConstants" %>
+<%@ page import="de.deepamehta.service.TopicBean" %>
 <%@ page import="de.kiezatlas.deepamehta.KiezAtlas" %>
 <%@ page import="de.kiezatlas.deepamehta.GeoObject" %>
 <%@ page import="de.kiezatlas.deepamehta.SearchCriteria" %>

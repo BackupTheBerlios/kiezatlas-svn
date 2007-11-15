@@ -29,9 +29,9 @@ import de.kiezatlas.deepamehta.topics.GeoObjectTopic;
 
 /**
  * Kiez-Atlas 1.5<br>
- * Requires DeepaMehta 2.0b7-post1
+ * Requires DeepaMehta 2.0b8
  * <p>
- * Last change: 15.10.2007<br>
+ * Last change: 12.11.2007<br>
  * Malte Rei&szlig;ig<br>
  * mre@deepamehta.de
  */
@@ -58,7 +58,6 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 					session.setAttribute("topicBean", topicBean);
 					setCityMap(CityMapTopic.lookupCityMap(kiez, true, as), session);	// throwIfNotFound=true
 				} else {
-					System.out.println("@init::regular visit alias " + alias);
 					setCityMap(CityMapTopic.lookupCityMap(alias, true, as), session);	// throwIfNotFound=true
 				}
 				initInstitutaionType(session);	// relies on city map

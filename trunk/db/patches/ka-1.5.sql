@@ -90,13 +90,15 @@ INSERT INTO Association VALUES ('at-derivation', 1, 1, 'a-ka-98', '', 'tt-ka-geo
 
 --- adding the new relations for the tt-ka-einrichtung to webpage, phonenumber, fax and emailaddress, these properties where formerly derived from the institution type
 
+--- cardinalities for the new order are oeffnungszeiten, tel, fax, ansprechpartner, email, website, categories, träger, weitere infos, ...
+
 INSERT INTO Association VALUES ('at-relation', 1, 1, 'a-ka-99', 'Website', 'tt-ka-einrichtung', 1, 'tt-webpage', 1);
 INSERT INTO AssociationProp VALUES ('a-ka-99', 1, 'Name', 'Website');
 INSERT INTO AssociationProp VALUES ('a-ka-99', 1, 'Cardinality', 'many');
 INSERT INTO AssociationProp VALUES ('a-ka-99', 1, 'Association Type ID', 'at-association');
 INSERT INTO AssociationProp VALUES ('a-ka-99', 1, 'Web Info', 'Related Topic Name');
 INSERT INTO AssociationProp VALUES ('a-ka-99', 1, 'Web Form', 'Related Form');
-INSERT INTO AssociationProp VALUES ('a-ka-99', 1, 'Ordinal Number', '150');
+INSERT INTO AssociationProp VALUES ('a-ka-99', 1, 'Ordinal Number', '185');
 
 INSERT INTO Association VALUES ('at-relation', 1, 1, 'a-ka-100', 'Telefon', 'tt-ka-einrichtung', 1, 'tt-phonenumber', 1);
 INSERT INTO AssociationProp VALUES ('a-ka-100', 1, 'Name', 'Telefon');
@@ -120,7 +122,7 @@ INSERT INTO AssociationProp VALUES ('a-ka-102', 1, 'Cardinality', 'many');
 INSERT INTO AssociationProp VALUES ('a-ka-102', 1, 'Association Type ID', 'at-association');
 INSERT INTO AssociationProp VALUES ('a-ka-102', 1, 'Web Info', 'Related Topic Name');
 INSERT INTO AssociationProp VALUES ('a-ka-102', 1, 'Web Form', 'Related Form');
-INSERT INTO AssociationProp VALUES ('a-ka-102', 1, 'Ordinal Number', '170');
+INSERT INTO AssociationProp VALUES ('a-ka-102', 1, 'Ordinal Number', '175');
 
 INSERT INTO Association VALUES ('at-relation', 1, 1, 'a-ka-103', 'Adresse', 'tt-ka-einrichtung', 1, 'tt-address', 1);
 INSERT INTO AssociationProp VALUES ('a-ka-103', 1, 'Name', 'Adresse');
@@ -139,6 +141,9 @@ INSERT INTO AssociationProp VALUES ('a-ka-104', 1, 'Association Type ID', 'at-as
 INSERT INTO AssociationProp VALUES ('a-ka-104', 1, 'Web Info', 'Related Info');
 INSERT INTO AssociationProp VALUES ('a-ka-104', 1, 'Web Form', 'Related Form');
 INSERT INTO AssociationProp VALUES ('a-ka-104', 1, 'Ordinal Number', '109');
+
+--- Update for Person Ansprechpartner Ordinal Number for InfoPage
+-- UPDATE AssociationProp SET PropValue='170' WHERE AssociationID='a-ka-34' AND PropName='Ordinal Number';
 
 
 --- Version Change

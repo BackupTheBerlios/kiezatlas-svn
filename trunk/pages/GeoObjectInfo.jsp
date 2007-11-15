@@ -34,12 +34,13 @@
 	//Print Adress if available on this Topic includind directlink to bvg
 	try { 
 		if (topicBean.getValue("Address / Street") != null) {
+			// turnaround if no property "Stadt" grab related Address / City
 			Vector tmp = topicBean.getValues("Address / City");
 			String city = "";
 			if (tmp != null) {
 				if (tmp.size() > 0) {
 					city = ((BaseTopic) tmp.elementAt(0)).getName();
-				}
+				}	
 			} else {
 				city = topicBean.getValue("Stadt");
 			}
@@ -60,7 +61,7 @@
 	topicBean.removeField("Stadt");
 	//print properties which were not removed, starting generic content rendering 
 	out.println("<br/><br/>");
-	out.println(html.info(topicBean));
+	out.println(html.info(topicBean, 2));
 	//If forum is activated by the owner, it will be shown a link here
 	if (forumActivition.equals(KiezAtlas.SWITCH_ON)) {
 		// link to forum page

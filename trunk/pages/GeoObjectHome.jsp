@@ -13,11 +13,13 @@
 	}
 	topicBean.removeFieldsContaining("Image");
 	topicBean.removeField("Web Alias");
-	topicBean.removeField("Password");	
-	topicBean.removeField("Owner ID");
-	topicBean.removeField("Description");
-	topicBean.removeField("Locked Geometry");
-	topicBean.removeField("Icon");
+	topicBean.removeField("Password");
+	topicBean.removeField("Address / Name");
+	topicBean.removeField("Address / Description");
+	topicBean.removeFieldsContaining("Owner ID");
+	topicBean.removeFieldsContaining("Description");
+	topicBean.removeFieldsContaining("Locked Geometry");
+	topicBean.removeFieldsContaining("Icon");
 	topicBean.removeFieldsContaining("YADE");
 	// Name as Headline
 	out.println("<H2>" + topicBean.getValue("Name") + "</H2>");
