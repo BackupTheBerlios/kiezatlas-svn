@@ -6,7 +6,14 @@ import de.deepamehta.service.ApplicationService;
 import de.kiezatlas.deepamehta.topics.GeoObjectTopic;
 import de.kiezatlas.deepamehta.KiezAtlas;
 
-
+/**
+ * Kiez-Atlas 1.5<br>
+ * Requires DeepaMehta 2.0b7-post1.
+ * <p>
+ * Last change: 15.10.2007<br>
+ * Malte Rei&szlig;ig<br>
+ * mre@deepamehta.de
+ */
 public class GeoObject implements KiezAtlas, Serializable{
 	/**
 	 *  Value Object/ Bean

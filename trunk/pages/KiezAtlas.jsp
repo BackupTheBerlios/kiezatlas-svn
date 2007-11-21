@@ -136,9 +136,10 @@
 			String mapURL = "http://www.fahrinfo-berlin.de/gis/index.jsp?adr_zip=" + postalCode + "&adr_street=" + streetname + "&adr_house=" + hnr;
 			String imageLink = " <a href=\"" + mapURL + "\" target=\"fahrinfo\"><img src=\"../images/fahrinfo.gif\" border=\"0\" hspace=\"20\"></a>";
 			String blockString = street + " " + imageLink + "</br>" + postalCode + " " + city;			
-			return blockString; 
+			return blockString;
 		} else {
-			return street;
+			String blockString = street + "</br>" +  postalCode + " " +city;
+			return blockString;
 		}
 	}
 

@@ -144,6 +144,8 @@ INSERT INTO AssociationProp VALUES ('a-ka-104', 1, 'Ordinal Number', '109');
 
 --- Update for Person Ansprechpartner Ordinal Number for InfoPage
 UPDATE AssociationProp SET PropValue='170' WHERE AssociationID='a-ka-34' AND PropName='Ordinal Number';
+UPDATE AssociationProp SET PropValue='155' WHERE AssociationID='a-ka-8' AND PropName='Ordinal Number';
+UPDATE AssociationProp SET PropValue='198' WHERE AssociationID='a-ka-19' AND PropName='Ordinal Number';
 
 
 --- Version Change

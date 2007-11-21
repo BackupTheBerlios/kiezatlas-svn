@@ -97,7 +97,7 @@ html				Instance of HTML Generator
 Global
 ------
 
-inst				BaseTopic
+geo				BaseTopic
 
 
 ForumAdministration

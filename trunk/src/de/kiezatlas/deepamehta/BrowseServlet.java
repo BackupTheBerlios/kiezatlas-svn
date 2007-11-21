@@ -13,6 +13,7 @@ import javax.servlet.ServletException;
 import javax.swing.ImageIcon;
 
 import de.deepamehta.BaseTopic;
+import de.deepamehta.DeepaMehtaConstants;
 import de.deepamehta.DeepaMehtaException;
 import de.deepamehta.PresentableTopic;
 import de.deepamehta.service.Session;
@@ -31,7 +32,7 @@ import de.kiezatlas.deepamehta.topics.GeoObjectTopic;
  * Kiez-Atlas 1.5<br>
  * Requires DeepaMehta 2.0b8
  * <p>
- * Last change: 12.11.2007<br>
+ * Last change: 15.11.2007<br>
  * Malte Rei&szlig;ig<br>
  * mre@deepamehta.de
  */
@@ -58,6 +59,7 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 					session.setAttribute("topicBean", topicBean);
 					setCityMap(CityMapTopic.lookupCityMap(kiez, true, as), session);	// throwIfNotFound=true
 				} else {
+					session.setAttribute("topicBean", null);
 					setCityMap(CityMapTopic.lookupCityMap(alias, true, as), session);	// throwIfNotFound=true
 				}
 				initInstitutaionType(session);	// relies on city map
@@ -82,17 +84,21 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 		//
 		if (action.equals(ACTION_INIT_FRAME)) {
 			String frame = params.getValue("frame");
-			String id = params.getValue("id");
+			TopicBean topicBean = (TopicBean) session.getAttribute("topicBean");
 			if (frame.equals(FRAME_LEFT)) {
-				//selectMarker
+				//selectMarker if topicBean is set / form external call
+				if(topicBean != null){
+					setSelectedGeo(topicBean.id, session);
+				}					
 				return PAGE_CITY_MAP;
 			} else if (frame.equals(FRAME_RIGHT)) {
-				if (id != null) {
+				if (topicBean != null) {
 					//try to show a given GeoObject, have to set a hotspot
 					String mapID = getCityMap(session).getID(); // ### just for the hotspot
 					String instTypeID = getInstitutionType(session).getID(); // ### just for the hotspot 
 					setSearchMode("0", session); // ### i have to set a searchmode
-					GeoObjectTopic geo = (GeoObjectTopic) as.getLiveTopic(id, 1);
+					
+					GeoObjectTopic geo = (GeoObjectTopic) as.getLiveTopic(topicBean.id, 1);
 					boolean isForumActivated = geo.isForumActivated();
 					session.setAttribute("forumActivition", isForumActivated ? SWITCH_ON : SWITCH_OFF);
 					if (isForumActivated) {
@@ -104,7 +110,7 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 					return PAGE_GEO_INFO;
 				} else if (getCriterias(session).length > 0) {
 					// list categories of 1st search criteria, if there is a criteria at all
-					setSearchMode("1", session);	// ### was SEARCHMODE_BY_CATEGORY
+					setSearchMode("0", session);	// ### was SEARCHMODE_BY_CATEGORY
 					return PAGE_CATEGORY_LIST; 
 				} else {
 					// otherwise list all institutions
@@ -224,21 +230,19 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 			// categories & addresses
 			Hashtable categories = new Hashtable();
 			Hashtable addresses = new Hashtable();
-			// wenn kein stadt property vorhanden ist, dann gehe weiter zu related topic address
 			for (int i = 0; i < insts.size(); i++) {
 				BaseTopic t = (BaseTopic) insts.elementAt(i);
 				try {
-					GeoObjectTopic inst = (GeoObjectTopic) as.getLiveTopic(t);
+					GeoObjectTopic geo = (GeoObjectTopic) as.getLiveTopic(t);
 					// categories
 					String critTypeID = getCriteria(0, session).criteria.getID();
-					categories.put(inst.getID(), inst.getCategories(critTypeID));
-					// address
-					BaseTopic address = inst.getAddress();
-					if (address != null) {
-						Hashtable addressProps = as.getTopicProperties(address);
-						addressProps.put(PROPERTY_CITY, inst.getCity());
-						addresses.put(inst.getID(), addressProps);
-					}
+					categories.put(geo.getID(), geo.getCategories(critTypeID));
+					// address		
+					BaseTopic address = geo.getAddress();
+					// if no related address put new hashtable in it for property city
+					Hashtable addressProps = address != null ?  as.getTopicProperties(address) : new Hashtable(); 
+					addressProps.put(PROPERTY_CITY, geo.getCity());
+					addresses.put(geo.getID(), addressProps);
 				} catch (ClassCastException e) {
 					System.out.println("*** BrowseServlet.preparePage(): " + t + ": " + e);
 					// ### happens if geo object type is not up to date

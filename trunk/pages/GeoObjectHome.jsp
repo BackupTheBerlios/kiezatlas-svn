@@ -8,7 +8,7 @@
 	String imageFile = topicBean.getValue("Image / File");
 	if (imageFile != null) {
 		String relativePath = "../../dm-images/images/";
-		String imageHtmlString = "<img src=" + relativePath + imageFile + ">";
+		String imageHtmlString = "</br><img src=" + relativePath + imageFile + ">";
 		out.println(imageHtmlString);
 	}
 	topicBean.removeFieldsContaining("Image");
@@ -24,7 +24,7 @@
 	// Name as Headline
 	out.println("<H2>" + topicBean.getValue("Name") + "</H2>");
 	//hier die topic bean rinne
-	out.println(html.info(topicBean));
+	out.println(html.info(topicBean, DeepaMehtaConstants.BEAN_LAYOUT_BOX));
 	// link to form page
 	out.println("<p>\r" + html.link("Zum &Auml;nderungsformular", KiezAtlas.ACTION_SHOW_GEO_FORM) + "</p>");
 	// link to forum administration page

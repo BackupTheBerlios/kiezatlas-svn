@@ -34,21 +34,29 @@
 	//Print Adress if available on this Topic includind directlink to bvg
 	try { 
 		if (topicBean.getValue("Address / Street") != null) {
-			// turnaround if no property "Stadt" grab related Address / City
-			Vector tmp = topicBean.getValues("Address / City");
-			String city = "";
-			if (tmp != null) {
+			// first comes the property and as second the possible related address topic 
+			String city = topicBean.getValue("Stadt");
+			if (city == null) {
+				Vector tmp = topicBean.getValues("Address / City");
 				if (tmp.size() > 0) {
 					city = ((BaseTopic) tmp.elementAt(0)).getName();
-				}	
-			} else {
-				city = topicBean.getValue("Stadt");
+				} else {
+					city = "";
+				}
 			}
-			 
+			
 			String street = topicBean.getValue("Address / Street");
 			String postalCode = topicBean.getValue("Address / Postal Code");
-			//fetch maplink block
+			// fetch maplink block
 			out.println(mapLink(street, postalCode, city));
+		} else {
+			// Trotzdem die Stadt rausschreiben wenn keine adresse da ist..
+			String city = topicBean.getValue("Stadt");
+			Vector tmp = topicBean.getValues("Address / City");
+			if (city == null && tmp.size() > 0) {
+				city = ((BaseTopic) tmp.elementAt(0)).getName();
+			}
+			out.println(city);
 		}
 	} catch (DeepaMehtaException ex){
 		out.println("Bitte Entschuldigung Sie, es ist ein Fehler aufgetreten: " + ex);	
@@ -69,6 +77,5 @@
 			" enth&auml;lt "+ commentCount + " Kommentare</p>");
 	}
 	// cleanup session for switching maps within one session
-	session.setAttribute("topicBean", null);
 %>
 <% end(out); %>

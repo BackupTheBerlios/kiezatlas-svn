@@ -19,12 +19,13 @@ import org.apache.commons.fileupload.FileItem;
 
 
 /**
- * Kiez-Atlas 1.4.1.<br>Institution
- * Requires DeepaMehta 2.0b7-post1.
+ * Kiez-Atlas 1.5<br>
+ * Requires DeepaMehta 2.0b8.
  * <p>
- * Last functional change: 17.3.2007<br>
- * J&ouml;rg Richter<br>
- * jri@freenet.de
+ * Last functional change: 15.11.2007<br>
+ * Last change: 15.10.2007<br>
+ * Malte Rei&szlig;ig<br>
+ * mre@deepamehta.de
  */
 public class EditServlet extends DeepaMehtaServlet implements KiezAtlas {
 
@@ -68,6 +69,8 @@ public class EditServlet extends DeepaMehtaServlet implements KiezAtlas {
 		} else if (action.equals(ACTION_UPDATE_GEO)) {
 			GeoObjectTopic geo = getGeoObject(session);
 			updateTopic(geo.getType(), params, session);
+			TopicBean topicBean = as.createTopicBean(geo.getID(), 1);
+			session.setAttribute("topicBean", topicBean);
 			String newFilename = writeImage(params.getUploads());
 			if (newFilename != null) {
 				as.setTopicProperty(geo.getImage(), PROPERTY_FILE, newFilename);
@@ -108,10 +111,9 @@ public class EditServlet extends DeepaMehtaServlet implements KiezAtlas {
 		} else if (action.equals(ACTION_GO_HOME)) {
 			GeoObjectTopic geo = getGeoObject(session);
 			// error check
-			System.out.println("geo is: " + geo.getID());
+			// System.out.println("geo is: " + geo.getID());
 			if (geo != null) {
 				TopicBean topicBean = as.createTopicBean(geo.getID(), 1);
-				System.out.println("TopicBeanCreated with id " + topicBean.id );
 				session.setAttribute("topicBean", topicBean);
 			} else {
 				System.out.println(">>>> Could not retrieve GeoObjectTopic from Session");
@@ -126,6 +128,8 @@ public class EditServlet extends DeepaMehtaServlet implements KiezAtlas {
 
 	protected void preparePage(String page, RequestParameter params, Session session) {
 		if (page.equals(PAGE_GEO_HOME)) {
+			//GeoObjectTopic geoId = (BaseTopic) session.getAttribute("geo");
+			
 			updateImagefile(session);
 		} else if (page.equals(PAGE_FORUM_ADMINISTRATION)) {
 			GeoObjectTopic geo = getGeoObject(session);

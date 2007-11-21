@@ -9,6 +9,7 @@ import java.util.Vector;
 
 import de.deepamehta.AmbiguousSemanticException;
 import de.deepamehta.BaseTopic;
+import de.deepamehta.DeepaMehtaConstants;
 import de.deepamehta.DeepaMehtaException;
 import de.deepamehta.PresentableTopic;
 import de.deepamehta.service.ApplicationService;
@@ -244,7 +245,26 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 	
 	
 	public String getCity() {
-		return getProperty(PROPERTY_CITY);
+		// if a geoobject has a stadt property, take it and return it
+		// else if a geoobject has an addressTopic assigned, check if there is a city, if so return this city
+		//
+		String city = getProperty(PROPERTY_CITY);
+		BaseTopic address = getAddress();
+		try {
+			if (!city.equals("")) {
+				return city;
+			} else if (address != null) {
+				BaseTopic town = as.getRelatedTopic(address.getID(), ASSOCTYPE_ASSOCIATION, "tt-city", 2, true);
+				if (town != null) {
+					city = town.getName();
+					return city;
+				}				
+			}
+			return "";
+		} catch (AmbiguousSemanticException aex) {
+			System.out.println("*** GeoObjectTopic.getCity(): " + aex);
+			return aex.getDefaultTopic().getName();
+		}
 	}
 
 	

@@ -1,7 +1,10 @@
+body, td {
+	font-family: Verdana, Arial, Lucida Sans;
+	font-size: 12px;
+}
+
 body {
 	background-color: #FFFFFF;
-	font-family: Verdana, Arial;
-	font-size: 12px;
 }
 
 .big {
@@ -24,7 +27,7 @@ body {
 
 /* used to display the label/key/name of the property */
 .label {
-	font-family: Verdana, Arial;
+	font-family: Verdana, Arial, Lucida Sans;
 	font-size: 10px;
 	color: #666;
 	font-weight: bold;
@@ -32,14 +35,14 @@ body {
 
 /* used to display the value of the property for every layout mostly typo */
 .content {
-	color: #000;
-	font-family: Verdana, Arial;
+	font-color: #000;
+	font-family: Verdana, Arial, Lucida Sans;
 	font-size: 12px;
 }
 
 /* used in the Flow and Box Layout as the background for the one big div container instead of table, starts below the image and fahrplan link */
-/* rename to infoContainer and integrate into table layout*/
-.wholeInfo {
+
+.infoContainer {
 	align: left;
 	width: 95%;
 	text-align: left;
@@ -53,7 +56,7 @@ body {
 .multiBox {
 	position: relative;
 	color: #000;
-	font-family: Verdana, Arial;
+	font-family: Verdana, Arial, Lucida Sans;
 	font-size: 12px;
 	#padding-left: 20px; 
 	padding: 10px;

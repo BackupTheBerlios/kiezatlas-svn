@@ -29,14 +29,11 @@
 			"\">" + inst.getName() + "</a>");
 		// address
 		Hashtable address = (Hashtable) addresses.get(inst.getID());
-		if (address != null) {
-			String street = (String) address.get(KiezAtlas.PROPERTY_STREET);
-	    	String postcode = (String) address.get(KiezAtlas.PROPERTY_POSTAL_CODE);
-			String city = (String) address.get(KiezAtlas.PROPERTY_CITY);
-			if (street != null || postcode != null || city != null) {
-				out.println("<br><small>" + street + "&nbsp;&nbsp;&nbsp;" + postcode + " " + city + "</small>");
-			}
-		}
+		
+		String street = (String) address.get(KiezAtlas.PROPERTY_STREET);
+	    String postcode = (String) address.get(KiezAtlas.PROPERTY_POSTAL_CODE);
+		String city = (String) address.get(KiezAtlas.PROPERTY_CITY);
+		out.println("<br><small>" + (street != null ? street + "&nbsp;&nbsp;&nbsp;" : "") + (postcode != null ? postcode + " " : "") + city + "</small>");
 		out.println("</td>");
 		out.println("</tr>");
 	}
