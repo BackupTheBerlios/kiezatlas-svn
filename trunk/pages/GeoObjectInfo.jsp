@@ -5,7 +5,8 @@
 <%
 	//html render engine
 	HTMLGenerator html = (HTMLGenerator) session.getAttribute("html");
-	
+	String imagePath = (String) session.getAttribute("imagePath");	
+
 	//ForumSpecific
 	String forumActivition = (String) session.getAttribute("forumActivition");
 	Integer commentCount = (Integer) session.getAttribute("commentCount");
@@ -23,8 +24,8 @@
 	String imageFile = topicBean.getValue("Image / File");
 	out.println("");
 	if (imageFile != null) {
-		String relativePath = "../../dm-images/images/";
-		String imageHtmlString = "<img src=" + relativePath + imageFile + "><br />";
+		//String relativePath = "../../dm-images/images/";
+		String imageHtmlString = "<img src=" + imagePath + imageFile + "><br />";
 		out.println(imageHtmlString);
 	}
 	

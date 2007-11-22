@@ -61,7 +61,8 @@ GeoObjectInfo
 
 topicBean			TopicBean
 forumActivition		String (SWITCH_ON, SWITCH_OFF)
-commentCount		Integer (only initialized if "activition"=SWITCH_ON)
+commentCount		Integer (only initialized if "activition"=SWITCH_ON
+imagePath 			String to Base Image Folder, append the imageFileName to this
 
 
 GeoObjectForum
@@ -130,4 +131,4 @@ List
 
 mapName				String
 critName			String (name of first search criteria)
-insts				Vector of Institution
+topics				Vector of TopicBeans

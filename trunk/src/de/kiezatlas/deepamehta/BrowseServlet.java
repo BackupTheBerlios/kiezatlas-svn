@@ -97,7 +97,8 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 					String mapID = getCityMap(session).getID(); // ### just for the hotspot
 					String instTypeID = getInstitutionType(session).getID(); // ### just for the hotspot 
 					setSearchMode("0", session); // ### i have to set a searchmode
-					
+					String imagePath = as.getCorporateWebBaseURL() + FILESERVER_IMAGES_PATH;
+					session.setAttribute("imagePath", imagePath);
 					GeoObjectTopic geo = (GeoObjectTopic) as.getLiveTopic(topicBean.id, 1);
 					boolean isForumActivated = geo.isForumActivated();
 					session.setAttribute("forumActivition", isForumActivated ? SWITCH_ON : SWITCH_OFF);
@@ -157,6 +158,10 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 				setSelectedGeo(geoID, session);
 				TopicBean topicBean = as.createTopicBean(geoID, 1);
 				session.setAttribute("topicBean", topicBean);
+				String imagePath = as.getCorporateWebBaseURL() + FILESERVER_IMAGES_PATH;
+				System.out.println("***imagePath: "+imagePath);
+				
+				session.setAttribute("imagePath", imagePath);
 				GeoObjectTopic geo = (GeoObjectTopic) as.getLiveTopic(geoID, 1);
 				boolean isForumActivated = geo.isForumActivated();
 				session.setAttribute("forumActivition", isForumActivated ? SWITCH_ON : SWITCH_OFF);

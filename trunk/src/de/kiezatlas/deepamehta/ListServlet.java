@@ -1,15 +1,18 @@
 package de.kiezatlas.deepamehta;
 
-import de.kiezatlas.deepamehta.topics.CityMapTopic;
-//
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
+
+import javax.servlet.ServletException;
+
 import de.deepamehta.BaseTopic;
-import de.deepamehta.DeepaMehtaException;
+import de.deepamehta.DeepaMehtaConstants;
 import de.deepamehta.service.Session;
+import de.deepamehta.service.TopicBean;
 import de.deepamehta.service.web.DeepaMehtaServlet;
 import de.deepamehta.service.web.RequestParameter;
-//
-import javax.servlet.ServletException;
-import java.util.*;
+import de.kiezatlas.deepamehta.topics.CityMapTopic;
 
 
 
@@ -56,7 +59,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			SearchCriteria[] criterias = cityMap.getSearchCriterias();
 			session.setAttribute("mapName", cityMap.getName());
 			session.setAttribute("critName", criterias[0].criteria.getPluralName());
-			session.setAttribute("insts", createInstitutionBeans(insts, criterias));
+			session.setAttribute("topics", createBaseTopicBeans(insts, criterias, instTypeID));
 		}
 	}
 
@@ -109,19 +112,31 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		return cityMaps;
 	}
 
-	private Vector createInstitutionBeans(Vector instIDs, SearchCriteria[] criterias) {
+	private Vector createBaseTopicBeans(Vector instIDs, SearchCriteria[] criterias, String instTypeID) {
 		Vector insts = new Vector();
 		//
 		Enumeration e = instIDs.elements();
 		while (e.hasMoreElements()) {
 			String instID = (String) e.nextElement();
-			insts.addElement(new GeoObject(instID, criterias, as));
+			GeoObject geo = new GeoObject(instID, criterias, as);
+			insts.addElement(new BaseTopic(instID, 1, instTypeID, 1, geo.name));
 		}
 		//
 		return insts;
 	}
-
-
+	
+	private Vector createTopicBeans(Vector topicIDs) {
+		Vector topics = new Vector();
+		//
+		Enumeration e = topicIDs.elements();
+		while (e.hasMoreElements()) {
+			String instID = (String) e.nextElement();
+			TopicBean topicBean = as.createTopicBean(instID, 1);
+			topics.addElement(topicBean);
+		}
+		//
+		return topics;
+	}
 
 	// *************************
 	// *** Session Utilities ***
