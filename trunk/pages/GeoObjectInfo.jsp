@@ -34,37 +34,24 @@
 	
 	//Print Adress if available on this Topic includind directlink to bvg
 	try { 
-		if (topicBean.getValue("Address / Street") != null) {
-			// first comes the property and as second the possible related address topic 
-			String city = topicBean.getValue("Stadt");
-			if (city == null) {
-				Vector tmp = topicBean.getValues("Address / City");
-				if (tmp != null) {
-					if (tmp.size() > 0){
-						city = ((BaseTopic) tmp.elementAt(0)).getName();
-					} else {
-						// yes, this case exists
-						city = " ";
-					}						
-				} else {
-					city = " ";
-				}
-			}
-			
-			String street = topicBean.getValue("Address / Street");
-			String postalCode = topicBean.getValue("Address / Postal Code");
-			if (postalCode == null)	postalCode = "";
-			// fetch maplink block
-			out.println(mapLink(street, postalCode, city));
-		} else {
-			// Trotzdem die Stadt rausschreiben wenn keine adresse da ist..
-			String city = topicBean.getValue("Stadt");
+		// first comes the property and as second the possible related address topic 
+		String city = topicBean.getValue("Stadt");
+		if (city == null) {
 			Vector tmp = topicBean.getValues("Address / City");
-			if (city == null && tmp.size() > 0) {
-				city = ((BaseTopic) tmp.elementAt(0)).getName();
+			if (tmp != null) {
+				if (tmp.size() > 0){
+					city = ((BaseTopic) tmp.elementAt(0)).getName();
+				} else {
+					city = "";
+				}						
+			} else {
+				city = "";
 			}
-			out.println(city);
-		}
+		}			
+		String street = topicBean.getValue("Address / Street");
+		String postalCode = topicBean.getValue("Address / Postal Code");
+		// fetch maplink block
+		out.println(mapLink(street, postalCode, city));
 	} catch (DeepaMehtaException ex){
 		out.println("Bitte Entschuldigung Sie, es ist ein Fehler aufgetreten: " + ex);	
 	}

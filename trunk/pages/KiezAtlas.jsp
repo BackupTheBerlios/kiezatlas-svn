@@ -135,11 +135,43 @@
 			//assemble the html block with streetname, postal code and city with the fahrplan img as a link in a block
 			String mapURL = "http://www.fahrinfo-berlin.de/gis/index.jsp?adr_zip=" + postalCode + "&adr_street=" + streetname + "&adr_house=" + hnr;
 			String imageLink = " <a href=\"" + mapURL + "\" target=\"fahrinfo\"><img src=\"../images/fahrinfo.gif\" border=\"0\" hspace=\"20\"></a>";
-			String blockString = street + " " + imageLink + "</br>" + postalCode + " " + city;			
-			return blockString;
+			StringBuffer blockString = new StringBuffer("");
+			
+			if (street == null) {
+				//wenn street null dann nur stadt und postalCode zurückgeben
+				if (postalCode == null){
+					// strasse und plz gleich null, dann nur Berlin schreiben
+					return city;	
+				} else {
+					// ansonsten plz und berlin schreiben ohne mapLink
+					return postalCode + " " + city;
+				}				 
+			} else {
+				// wenn straße vorhanden, dann maplink schreiben, auch ohne plz
+				if (postalCode != null) {
+					// mit plz
+					blockString.append(street + imageLink + "</br>" + postalCode + " " + city);	
+				} else {
+					// ohne plz
+					blockString.append(street + imageLink + "</br>" + city);
+				}
+				return blockString.toString();
+			}	
+			
+			//String blockString = street + " " + imageLink + "</br>" + postalCode + " " + city;
+			//return blockString.toString();
 		} else {
-			String blockString = street + "</br>" +  postalCode + " " +city;
-			return blockString;
+			StringBuffer blockString = new StringBuffer("");
+			if (street != null) {
+				blockString.append(street + "</br>"); 
+			} 
+			if (postalCode != null) {
+				blockString.append(postalCode + " ");	
+			}
+			if (city != null) {
+				blockString.append(city);
+			}
+			return blockString.toString();
 		}
 	}
 
