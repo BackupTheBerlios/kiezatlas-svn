@@ -39,8 +39,8 @@
 			String city = topicBean.getValue("Stadt");
 			if (city == null) {
 				Vector tmp = topicBean.getValues("Address / City");
-				if (tmp.size() > 0) {
-					city = ((BaseTopic) tmp.elementAt(0)).getName();
+				if (tmp != null) {
+					if (tmp.size() > 0) city = ((BaseTopic) tmp.elementAt(0)).getName();	
 				} else {
 					city = "";
 				}
