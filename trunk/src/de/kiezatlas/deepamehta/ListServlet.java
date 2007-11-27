@@ -58,7 +58,6 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			Vector insts = cm.getTopicIDs(instTypeID, cityMapID, true);		// sortByTopicName=true
 			SearchCriteria[] criterias = cityMap.getSearchCriterias();
 			session.setAttribute("mapName", cityMap.getName());
-			session.setAttribute("critName", criterias[0].criteria.getPluralName());
 			session.setAttribute("topics", createBaseTopicBeans(insts, criterias, instTypeID));
 		}
 	}

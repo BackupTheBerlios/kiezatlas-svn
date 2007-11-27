@@ -92,6 +92,7 @@ GeoObjectHome
 ----------------
 
 topicBean			Instance of TopicBean
+imagefile			full path to image 			
 html				Instance of HTML Generator
 
 
@@ -130,5 +131,4 @@ List
 ----
 
 mapName				String
-critName			String (name of first search criteria)
 topics				Vector of TopicBeans
