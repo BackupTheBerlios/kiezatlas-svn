@@ -5,10 +5,10 @@
 	HTMLGenerator html = (HTMLGenerator) session.getAttribute("html");
 	TopicBean topicBean = (TopicBean) session.getAttribute("topicBean");
 	//render image if available from the virtual tomcat directory 8080/dm-images
-	String imageFile = topicBean.getValue("Image / File");
+	String imageFile = (String) session.getAttribute("imagefile");
+	
 	if (imageFile != null) {
-		String relativePath = "../../dm-images/images/";
-		String imageHtmlString = "</br><img src=" + relativePath + imageFile + ">";
+		String imageHtmlString = "</br><img src=" + imageFile + ">";
 		out.println(imageHtmlString);
 	}
 	topicBean.removeFieldsContaining("Image");
