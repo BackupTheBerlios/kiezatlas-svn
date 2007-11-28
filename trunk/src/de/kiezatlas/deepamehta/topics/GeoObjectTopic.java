@@ -9,15 +9,16 @@ import java.util.Vector;
 
 import de.deepamehta.AmbiguousSemanticException;
 import de.deepamehta.BaseTopic;
-import de.deepamehta.DeepaMehtaConstants;
 import de.deepamehta.DeepaMehtaException;
 import de.deepamehta.PresentableTopic;
+import de.deepamehta.PropertyDefinition;
 import de.deepamehta.service.ApplicationService;
 import de.deepamehta.service.CorporateCommands;
 import de.deepamehta.service.CorporateDirectives;
 import de.deepamehta.service.Session;
 import de.deepamehta.topics.LiveTopic;
 import de.deepamehta.topics.TopicTypeTopic;
+import de.deepamehta.topics.TypeTopic;
 import de.kiezatlas.deepamehta.Comment;
 import de.kiezatlas.deepamehta.KiezAtlas;
 
@@ -38,15 +39,21 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 	 */
 	static final String DEFAULT_PASSWORD = "geheim";
 	
+	
+	
 	// ------------------
 	// --- Constructor ---
 	// ------------------
+	
+	
 	
 	public GeoObjectTopic(BaseTopic topic, ApplicationService as) {
 		super(topic, as);
 		// TODO Auto-generated constructor stub
 	}
-	
+
+
+
 	// **********************
 	// *** Defining Hooks ***
 	// **********************
@@ -141,47 +148,119 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 		//
 		return directives;
 	}
+
+
 	
-	// ---
-	
-	public Vector getCategories(String critTypeID) {
-		return as.getRelatedTopics(getID(), ASSOCTYPE_ASSOCIATION, critTypeID, 2);
+	// ---------------------------
+	// --- Handling Properties ---
+	// ---------------------------
+
+
+
+	public boolean propertiesChangeAllowed(Hashtable oldProps, Hashtable newProps, CorporateDirectives directives) {
+		String alias = (String) newProps.get(PROPERTY_WEB_ALIAS);
+		if (alias != null) {
+			// ### compare to lookupInstitution()
+			Vector typeIDs = as.type(TOPICTYPE_KIEZ_GEO, 1).getSubtypeIDs();
+			Hashtable props = new Hashtable();
+			props.put(PROPERTY_WEB_ALIAS, alias);
+			Vector insts = cm.getTopics(typeIDs, props, true);	// caseSensitive=true
+			//
+			if (insts.size() > 0) {
+				BaseTopic inst = (BaseTopic) insts.firstElement();
+				String errText = "Web Alias \"" + alias + "\" ist bereits an Einrichtung \"" +
+					inst.getName() + "\" vergeben -- Bitte anderen Web Alias verwenden";
+				directives.add(DIRECTIVE_SHOW_MESSAGE, errText, new Integer(NOTIFICATION_WARNING));
+				System.out.println("*** InstitutionTopic.propertiesChangeAllowed(): " + errText);
+				return false;
+			}
+		}
+		return super.propertiesChangeAllowed(oldProps, newProps, directives);
 	}
-	
-	public BaseTopic getImage() {
-		try {
-			return as.getRelatedTopic(getID(), ASSOCTYPE_ASSOCIATION, TOPICTYPE_IMAGE, 2, true);		// emptyAllowed=true
-		} catch (AmbiguousSemanticException e) {
-			System.out.println("*** GeoObjectTopic.getImage(): " + e);
-			return e.getDefaultTopic();
+
+	public CorporateDirectives propertiesChanged(Hashtable newProps, Hashtable oldProps,
+											String topicmapID, String viewmode, Session session) {
+		CorporateDirectives directives = super.propertiesChanged(newProps, oldProps, topicmapID, viewmode, session);
+		// --- "YADE" ---
+		if (newProps.get(PROPERTY_YADE_X) != null || newProps.get(PROPERTY_YADE_Y) != null) {
+			// determine new geometry
+			Point p = getPoint(topicmapID);	// throws DME
+			// set new geometry
+			if (p != null) {	// Note: p is null if YADE is "off"
+				directives.add(DIRECTIVE_SET_TOPIC_GEOMETRY, getID(), p, topicmapID);
+			}
+		}
+		//
+		return directives;
+	}
+
+	public static Vector hiddenProperties(TypeTopic type) {
+		Vector props = new Vector();
+		props.addElement(PROPERTY_DESCRIPTION);
+		return props;
+	}
+
+	public static Vector hiddenProperties(TypeTopic type, String relTopicTypeID) {
+		Vector props = null;
+		if (relTopicTypeID.equals(TOPICTYPE_EMAIL_ADDRESS)) {
+			props = new Vector();
+			props.addElement(PROPERTY_MAILBOX_URL);
+		} else if (relTopicTypeID.equals(TOPICTYPE_IMAGE)) {
+			props = new Vector();
+			props.addElement(PROPERTY_NAME);
+		}
+		return props;
+	}
+
+	public static void propertyLabel(PropertyDefinition propDef, ApplicationService as, Session session) {
+		String propName = propDef.getPropertyName();
+		if (propName.equals(PROPERTY_SONSTIGES)) {
+			propDef.setPropertyLabel("Weitere Infos");
 		}
 	}
-	
-	public Vector getComments() {
-		BaseTopic forum = getForum();
-		if (forum == null) {
-			throw new DeepaMehtaException("Institution " + getID() + " has no forum topic");
+
+	public static String propertyLabel(PropertyDefinition propDef, String relTopicTypeID, ApplicationService as) {
+		String propName = propDef.getPropertyName();
+		if (relTopicTypeID.equals(TOPICTYPE_ADDRESS)) {
+			if (propName.equals(PROPERTY_STREET)) {
+				return "Stra&szlig;e";
+			} else if (propName.equals(PROPERTY_POSTAL_CODE)) {
+				return "Postleitzahl";
+			}
+		} else if (relTopicTypeID.equals(TOPICTYPE_WEBPAGE)) {
+			if (propName.equals(PROPERTY_URL)) {
+				return "Website (URL)";
+			}
+		} else if (relTopicTypeID.equals(TOPICTYPE_AGENCY)) {
+			if (propName.equals(PROPERTY_NAME)) {
+				return "Tr&auml;ger";
+			} else if (propName.equals(PROPERTY_AGENCY_KIND)) {
+				return "Art des Tr&auml;gers";
+			}
+		} else if (relTopicTypeID.equals(TOPICTYPE_PERSON)) {
+			if (propName.equals(PROPERTY_FIRST_NAME)) {
+				return "Ansprechpartner/in (Vorname)";
+			} else if (propName.equals(PROPERTY_NAME)) {
+				return "Ansprechpartner/in (Nachname)";
+			} else if (propName.equals(PROPERTY_GENDER)) {
+				return "Ansprechpartner/in";
+			}
+		} else if (relTopicTypeID.equals(TOPICTYPE_PHONE_NUMBER)) {
+			if (propName.equals(PROPERTY_NAME)) {
+				return "Telefon";
+			}
+		} else if (relTopicTypeID.equals(TOPICTYPE_FAX_NUMBER)) {
+			if (propName.equals(PROPERTY_NAME)) {
+				return "Fax";
+			}
+		} else if (relTopicTypeID.equals(TOPICTYPE_EMAIL_ADDRESS)) {
+			if (propName.equals(PROPERTY_EMAIL_ADDRESS)) {
+				return "E-mail";
+			}
 		}
-		String[] sortProps = {PROPERTY_COMMENT_DATE, PROPERTY_COMMENT_TIME};
-		return cm.getRelatedTopics(forum.getID(), SEMANTIC_FORUM_COMMENTS, TOPICTYPE_COMMENT, 2, sortProps, true);	// descending=true
+		return LiveTopic.propertyLabel(propDef, relTopicTypeID, as);
 	}
 	
-	public boolean isForumActivated() {
-		BaseTopic forum = getForum();
-		if (forum == null) {
-			return false;
-		}
-		return as.getTopicProperty(forum, PROPERTY_FORUM_ACTIVITION).equals(SWITCH_ON);
-	}
-	
-	public BaseTopic getForum() {
-		try {
-			return as.getRelatedTopic(getID(), SEMANTIC_INSTITUTION_FORUM, TOPICTYPE_FORUM, 2, true);		// emptyAllowed=true
-		} catch (AmbiguousSemanticException e) {
-			System.out.println("*** GeoObjectTopic.getForum(): " + e);
-			return e.getDefaultTopic();
-		}
-	}
 	
 	
 	// ------------------------
@@ -200,10 +279,13 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 	}
 	
 	
+	
 	// **********************
 	// *** Custom Methods ***
 	// **********************
 
+	
+	
 	public static BaseTopic lookupInstitution(String alias, ApplicationService as) throws DeepaMehtaException {
 		Vector typeIDs = as.type(TOPICTYPE_KIEZ_GEO, 1).getSubtypeIDs();
 		Hashtable props = new Hashtable();
@@ -221,17 +303,7 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 		return inst;
 	}
 	
-	public Vector getCommentBeans() {
-		Vector commentBeans = new Vector();
-		//
-		Enumeration e = getComments().elements();
-		while (e.hasMoreElements()) {
-			BaseTopic comment = (BaseTopic) e.nextElement();
-			commentBeans.addElement(new Comment(comment.getID(), as));
-		}
-		//
-		return commentBeans;
-	}
+	// ---
 	
 	public BaseTopic getAddress() {
 		try {
@@ -240,9 +312,7 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 			System.out.println("*** GeoObjectTopic.getAddress(): " + e);
 			return e.getDefaultTopic();
 		}
-	}
-	
-	
+	}	
 	
 	public String getCity() {
 		// if a geoobject has a stadt property, take it and return it
@@ -266,6 +336,20 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 			return aex.getDefaultTopic().getName();
 		}
 	}
+	
+	public Vector getCategories(String critTypeID) {
+		return as.getRelatedTopics(getID(), ASSOCTYPE_ASSOCIATION, critTypeID, 2);
+	}
+	
+	public BaseTopic getImage() {
+		try {
+			return as.getRelatedTopic(getID(), ASSOCTYPE_ASSOCIATION, TOPICTYPE_IMAGE, 2, true);		// emptyAllowed=true
+		} catch (AmbiguousSemanticException e) {
+			System.out.println("*** GeoObjectTopic.getImage(): " + e);
+			return e.getDefaultTopic();
+		}
+	}
+
 
 	
 	/**
@@ -345,6 +429,42 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 				"Stadtplan \"" + citymap.getName() + "\" hat ungültigen Wert (" + e.getMessage() + ")");
 		}
 	}
+	
+	public boolean isForumActivated() {
+		BaseTopic forum = getForum();
+		if (forum == null) {
+			return false;
+		}
+		return as.getTopicProperty(forum, PROPERTY_FORUM_ACTIVITION).equals(SWITCH_ON);
+	}
+	
+	public Vector getComments() {
+		BaseTopic forum = getForum();
+		if (forum == null) {
+			throw new DeepaMehtaException("Institution " + getID() + " has no forum topic");
+		}
+		String[] sortProps = {PROPERTY_COMMENT_DATE, PROPERTY_COMMENT_TIME};
+		return cm.getRelatedTopics(forum.getID(), SEMANTIC_FORUM_COMMENTS, TOPICTYPE_COMMENT, 2, sortProps, true);	// descending=true
+	}
+	
+	public BaseTopic getForum() {
+		try {
+			return as.getRelatedTopic(getID(), SEMANTIC_INSTITUTION_FORUM, TOPICTYPE_FORUM, 2, true);		// emptyAllowed=true
+		} catch (AmbiguousSemanticException e) {
+			System.out.println("*** GeoObjectTopic.getForum(): " + e);
+			return e.getDefaultTopic();
+		}
+	}
 
-
+	public Vector getCommentBeans() {
+		Vector commentBeans = new Vector();
+		//
+		Enumeration e = getComments().elements();
+		while (e.hasMoreElements()) {
+			BaseTopic comment = (BaseTopic) e.nextElement();
+			commentBeans.addElement(new Comment(comment.getID(), as));
+		}
+		//
+		return commentBeans;
+	}
 }
