@@ -21,7 +21,7 @@
 
     <context-param>
       <param-name>service</param-name>
-      <param-value>mysql5</param-value>
+      <param-value>katest</param-value>
       <description>
         Selects a DeepaMehta service.
         If this parameter is not set the "default" service will be used.
@@ -40,7 +40,7 @@
 
     <context-param>
       <param-name>stylesheet</param-name>
-      <param-value>browser/browser.xsl</param-value>
+      <param-value>../../client/stylesheets/deepaMehtaWeb.css</param-value>
       <description>
         Sets the stylesheet for the XSL transformation.
 		This parameter is required if the XSLT generator method is used, see parameter "generator"
@@ -68,11 +68,24 @@
       <description>List Servlet Controller</description>
       <servlet-class>de.kiezatlas.deepamehta.ListServlet</servlet-class>
     </servlet>
+ 
+    <servlet>
+        <servlet-name>UploadDataServlet</servlet-name>
+        <description>UploadDataServlet</description>
+        <servlet-class>de.swers.kiezatlas.tools.UploadDataServlet</servlet-class>
+    </servlet>
+
 
     <!-- Define mappings that are used by the servlet container to
          translate a particular request URI (context-relative) to a
          particular servlet.
     -->
+
+    <servlet-mapping>
+        <servlet-name>UploadDataServlet</servlet-name>
+        <url-pattern>/upload/*</url-pattern>
+    </servlet-mapping>
+    
 
     <servlet-mapping>
       <servlet-name>Edit Servlet</servlet-name>

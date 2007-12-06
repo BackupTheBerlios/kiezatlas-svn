@@ -18,7 +18,7 @@
 	</target>
 
 	<target name="compile" depends="init">
-		<javac srcdir="src" destdir="${build}" debug="on" listfiles="yes">
+		<javac srcdir="src" destdir="${build}" debug="on" listfiles="yes" source="1.4" target="1.4">
 			<classpath>
 				<pathelement location="${web.lib.dir}/DeepaMehtaService.jar"/>
 				<pathelement location="${web.lib.dir}/DeepaMehtaTopics.jar"/>
@@ -37,7 +37,8 @@
 		</jar>
    	    <war warfile="${war}" webxml="config/default/web.xml">
 		    <classes dir="${build}">
-				<include name="de/kiezatlas/deepamehta/*.class" />
+		    	<include name="de/kiezatlas/deepamehta/*.class" />
+		    	<include name="de/swers/kiezatlas/tools/*.class" />
 				<exclude name="de/kiezatlas/deepamehta/Comment.class" />
 				<exclude name="de/kiezatlas/deepamehta/SearchCriteria.class" />
             </classes>
@@ -49,6 +50,7 @@
    	    <war warfile="${war-test}" webxml="config/test/web.xml">
 		    <classes dir="${build}">
 				<include name="de/kiezatlas/deepamehta/*.class" />
+		    	<include name="de/swers/kiezatlas/tools/*.class" />
 				<exclude name="de/kiezatlas/deepamehta/Comment.class" />
 				<exclude name="de/kiezatlas/deepamehta/SearchCriteria.class" />
             </classes>
