@@ -7,13 +7,13 @@ import java.awt.Toolkit;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Vector;
 
 import javax.servlet.ServletException;
 import javax.swing.ImageIcon;
 
 import de.deepamehta.BaseTopic;
-import de.deepamehta.DeepaMehtaConstants;
 import de.deepamehta.DeepaMehtaException;
 import de.deepamehta.PresentableTopic;
 import de.deepamehta.service.Session;
@@ -59,6 +59,8 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 					session.setAttribute("topicBean", topicBean);
 					setCityMap(CityMapTopic.lookupCityMap(kiez, true, as), session);	// throwIfNotFound=true
 				} else {
+					//
+					
 					session.setAttribute("topicBean", null);
 					setCityMap(CityMapTopic.lookupCityMap(alias, true, as), session);	// throwIfNotFound=true
 				}
@@ -398,6 +400,7 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 		Vector selCats = getSelectedCats(session);
 		//
 		Vector hotspots = new Vector();
+		Vector cluster = new Vector();
 		Enumeration e = selCats.elements();
 		while (e.hasMoreElements()) {
 			String catID = (String) e.nextElement();
@@ -414,6 +417,8 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 			presentables.insertElementAt(as.getCorporateWebBaseURL() + FILESERVER_ICONS_PATH + icon, 0);
 			hotspots.addElement(presentables);
 		}
+		makeCluster(hotspots, cluster);
+		session.setAttribute("cluster", cluster);
 		session.setAttribute("hotspots", hotspots);
 		System.out.println("> \"hotspots\" stored in session: institutions for " + selCats.size() + " categories");
 	}
@@ -425,13 +430,84 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 	 */
 	private void setHotspots(Vector topics, String icon, Session session) {
 		Vector hotspots = new Vector();
+		Vector cluster = new Vector();
 		Vector presentables = new Vector(topics);
 		presentables.insertElementAt(as.getCorporateWebBaseURL() + FILESERVER_ICONS_PATH + icon, 0);
 		hotspots.addElement(presentables);
+		//System.out.println("Have to handle clusters in here");
+		makeCluster(hotspots, cluster);
+		session.setAttribute("cluster", cluster);
 		session.setAttribute("hotspots", hotspots);
 		System.out.println("> \"hotspots\" stored in session: " + topics.size() + " institutions");
 	}
 
+	// ---
+	
+	/**
+	 * @param	hotspots should be a vector of vector of PresentableTopics
+	 * @param	cluster is first an empty vector, afterwards it should be a vector of clusters
+	 */
+	public void makeCluster(Vector hotspots, Vector clusters) {
+		Iterator vectorOfHotspots = hotspots.iterator();
+		while ( vectorOfHotspots.hasNext() ) {
+			//for size of hotspot vectors in vector hotspot
+			Vector currentHotspots = (Vector) vectorOfHotspots.next();
+			Iterator presentableTopics = currentHotspots.iterator();
+			//System.out.println("size of current Hotspot " + currentHotspots.toString() +" : "+ currentHotspots.size());
+			//jump over the string, and make sure something is there as first item in our vector
+			if (presentableTopics.hasNext()) presentableTopics.next();
+			while( presentableTopics.hasNext() ) {
+				// the first element is always the icon path of the following hotspots
+				PresentableTopic currentPT = (PresentableTopic) presentableTopics.next();
+				Cluster foundCluster = findAndCheckClusters(currentPT, clusters);
+				if (foundCluster != null)  {
+					//System.out.println("added " + currentPT.getID() + " into " + foundCluster.getPoint());
+					//addPresentable, checks for doubles
+					foundCluster.addPresentable(currentPT);
+				} else {	
+					// es gibt noch kein cluster oder es wurde kein passendes gefunden also suchen, nach dem ersten auftreten von dem gleichen Point in allen hotspots
+					PresentableTopic foundPT = findPT(currentPT, hotspots);
+					if ( foundPT != null ){
+						// create Cluster, with two points
+						clusters.add(new Cluster(currentPT, foundPT));
+					}
+				}
+			}
+			System.out.println("fetched "+clusters.size()+" Clusters "+ clusters.toString());
+		}
+	}
+	
+	private Cluster findAndCheckClusters(PresentableTopic currentPT, Vector clusters){
+			for (int c=0; c < clusters.size(); c++) {	
+				//checking each cluster for point of current pt
+				Cluster currentCluster = (Cluster) clusters.get(c);
+				//System.out.println(currentCluster.presentables.size() + " topics in current Cluster" + currentCluster.getPoint());
+				//System.out.println("point to Check " + currentPT.getName() +", "+ currentPT.getGeometry());
+				if (currentCluster.getPoint().equals(currentPT.getGeometry())) {
+					//System.out.println("found cluster to return for adding pt");
+					return currentCluster;
+				}
+			}
+			return null;
+	}
+	
+	private PresentableTopic findPT(PresentableTopic pt, Vector hotspots) {
+		for(int p=0; p < hotspots.size(); p++){
+			Vector scnd = (Vector)hotspots.get(p);
+			for(int o=1; o < scnd.size(); o++){
+				PresentableTopic toCheck = (PresentableTopic) scnd.get(o);
+				//System.out.println("searching for the dubs with: " + pt.getGeometry() + " toCheck: " + toCheck.getGeometry());
+				if (toCheck.getGeometry().equals(pt.getGeometry()) & toCheck.getID() != pt.getID()){
+					// System.out.println("found pts for creating new cluster: " + toCheck.getName() + ":" + pt.getName());
+					// the folowing line, removes the new found topic in the hotspot vector
+					// System.out.println("removed: "+((PresentableTopic)scnd.remove(o)).getName());
+					return toCheck;
+				} 			
+			}			
+		}		
+		return null;
+	}
+	
 	// ---
 
 	private void toggleShapeDisplay(String shapeTypeID, Session session) {

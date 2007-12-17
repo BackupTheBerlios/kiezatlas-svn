@@ -7,6 +7,24 @@
 	<!--[if lt IE 7]>
 	<script defer type="text/javascript" src="../pages/pngfix.js"></script>
 	<![endif]-->
+	<script type="text/javascript">
+		var hidden = true;
+		function showMenu(id) {
+			var currentMenu = "clusterMenu"+id;
+			if (hidden) {
+				if (document.getElementById) {
+					document.getElementById(currentMenu).style.visibility = 'visible';
+					hidden=false;
+				}
+			} else {
+				if (document.getElementById) {
+					document.getElementById(currentMenu).style.visibility = 'hidden';
+					hidden=true;
+				}
+			}
+			
+		}
+	</script>
 </head>
 <body>
 	<%
@@ -14,6 +32,7 @@
 		Vector hotspots = (Vector) session.getAttribute("hotspots");
 		Vector shapeTypes = (Vector) session.getAttribute("shapeTypes");
 		Vector shapes = (Vector) session.getAttribute("shapes");
+		Vector cluster = (Vector) session.getAttribute("cluster");
 		GeoObject selectedInst = (GeoObject) session.getAttribute("selectedGeo");
 	%>
 	<img src="<%= mapImage %>" style="position:absolute; top:0px; left:0px;">
@@ -42,17 +61,38 @@
 				PresentableTopic inst = (PresentableTopic) e2.nextElement();
 				Point p = inst.getGeometry();
 				// marker
+				// marker and hotspot can't overlap exactly, caus of the new icons don't fit in the old convention of 20x20px
 				if (selectedInst != null && selectedInst.geoID.equals(inst.getID())) {
 					out.println("<img src=\"../images/marker.gif\" style=\"position:absolute; top:" +
-						(p.y - 20) + "px; left:" + (p.x - 20) + "px;\">");
+						(p.y - 18) + "px; left:" + (p.x - 18) + "px;\">");
 				}
 				// hotspot
 				out.println("<a href=\"javascript:top.frames.right.location.href='controller?action=" +
 					KiezAtlas.ACTION_SHOW_GEO_INFO + "&id=" + inst.getID() + "'\">" +
-					"<img src=\"" + icon + "\" style=\"position:absolute; top:" + (p.y - 10) + "px; left:" +
-					(p.x - 10) + "px;\" alt=\"" + inst.getName() + "\" title=\"" + inst.getName() + "\" border=\"0\"></a>");
+					"<img src=\"" + icon + "\" style=\"position:absolute; top:" + (p.y - 7) + "px; left:" +
+					(p.x - 7) + "px;\" alt=\"" + inst.getName() + "\" title=\"" + inst.getName() + "\" border=\"0\"></a>");
 			}
 		}
+		//cluster
+		e = cluster.elements();
+		while (e.hasMoreElements()) {
+			//entered vector of cluster
+			Cluster myCluster = (Cluster) e.nextElement();
+			Point p = myCluster.getPoint();
+			Vector presentables = myCluster.getPresentables();
+			Enumeration e2 = presentables.elements();
+			String iconPath = myCluster.getIcon();
+			out.println("<span onMouseOver=\"showMenu('"+p.x+"."+p.y+"')\"><img src=\""+iconPath+"\" style=\"position:absolute; top:" + (p.y - 10) + "px; left:" + (p.x - 10) + "px;\" alt=\"Cluster\" border=\"0\"></span>");
+			out.println("<div id=\"clusterMenu"+p.x+"."+p.y+"\" onMouseOut=\"showMenu('"+p.x+"."+p.y+"')\" style=\"position:fixed; visibility:hidden; border:1px; dashed black; padding:5px; top:"+ (p.y -10) + "px; left:" + (p.x + 10)+ "px; overflow:visible; background-color:#b0b0ea;\">");
+			while(e2.hasMoreElements()) {
+				PresentableTopic currentTopic = (PresentableTopic) e2.nextElement();
+				out.println("<a href=\"javascript:top.frames.right.location.href='controller?action=" +
+						KiezAtlas.ACTION_SHOW_GEO_INFO + "&id=" + currentTopic.getID() + "'\" font-color=\"black\" font-style=\"none\" font-size=\"10px\">"+currentTopic.getName()+"</a></br>");
+			}
+			out.println("</div>");
+				
+		}
+
 		// --- shape display switches ---
 		if (shapeTypes.size() > 0) {
 			out.println("<form style=\"position:fixed; left:0px; bottom:0px; width:300px\">");
