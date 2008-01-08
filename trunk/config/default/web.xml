@@ -21,7 +21,7 @@
 
     <context-param>
       <param-name>service</param-name>
-      <param-value>katest</param-value>
+      <param-value>kiezatlas</param-value>
       <description>
         Selects a DeepaMehta service.
         If this parameter is not set the "default" service will be used.
@@ -35,15 +35,6 @@
       <description>
         Selects the HTML generator method.
         Supported values are "jsp" (default) and "xslt" (experimental)
-      </description>
-    </context-param>
-
-    <context-param>
-      <param-name>stylesheet</param-name>
-      <param-value>../../client/stylesheets/deepaMehtaWeb.css</param-value>
-      <description>
-        Sets the stylesheet for the XSL transformation.
-		This parameter is required if the XSLT generator method is used, see parameter "generator"
       </description>
     </context-param>
 
