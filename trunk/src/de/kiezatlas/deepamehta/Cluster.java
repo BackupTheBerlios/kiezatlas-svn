@@ -11,11 +11,11 @@ public class Cluster {
 	private String icon;
 	private Vector presentables = new Vector();
 	
-	public Cluster (PresentableTopic presentableOne, PresentableTopic presentableTwo) {
+	public Cluster (PresentableTopic presentableOne, PresentableTopic presentableTwo, String clusterIconPath) {
 		
 		// first object is the point of this cluster
 		p = presentableOne.getGeometry();
-		icon = "../../dm-images/icons/application.gif";
+		icon = clusterIconPath + "redball-bigger.gif";
 		presentables.add(presentableOne);
 		presentables.add(presentableTwo);
 				

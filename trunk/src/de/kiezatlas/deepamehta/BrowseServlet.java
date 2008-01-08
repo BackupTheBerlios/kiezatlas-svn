@@ -60,7 +60,6 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 					setCityMap(CityMapTopic.lookupCityMap(kiez, true, as), session);	// throwIfNotFound=true
 				} else {
 					//
-					
 					session.setAttribute("topicBean", null);
 					setCityMap(CityMapTopic.lookupCityMap(alias, true, as), session);	// throwIfNotFound=true
 				}
@@ -439,6 +438,7 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 		session.setAttribute("cluster", cluster);
 		session.setAttribute("hotspots", hotspots);
 		System.out.println("> \"hotspots\" stored in session: " + topics.size() + " institutions");
+		System.out.println("> \"clusters\" "+cluster.size()+" stored in session");
 	}
 
 	// ---
@@ -468,12 +468,12 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 					// es gibt noch kein cluster oder es wurde kein passendes gefunden also suchen, nach dem ersten auftreten von dem gleichen Point in allen hotspots
 					PresentableTopic foundPT = findPT(currentPT, hotspots);
 					if ( foundPT != null ){
-						// create Cluster, with two points
-						clusters.add(new Cluster(currentPT, foundPT));
+						// create Cluster, with two points, and the respective dm server icon path
+						clusters.add(new Cluster(currentPT, foundPT, as.getCorporateWebBaseURL() + FILESERVER_ICONS_PATH));
 					}
 				}
 			}
-			System.out.println("fetched "+clusters.size()+" Clusters "+ clusters.toString());
+			//System.out.println("> \"clusters\": "+clusters.toString());
 		}
 	}
 	

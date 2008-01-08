@@ -6,24 +6,56 @@
 	<link href="../pages/kiezatlas.css" rel="stylesheet" type="text/css">
 	<!--[if lt IE 7]>
 	<script defer type="text/javascript" src="../pages/pngfix.js"></script>
+	<script defer type="text/javascript" src="../pages/fixed.js"></script>
 	<![endif]-->
 	<script type="text/javascript">
-		var hidden = true;
+		var currentActiveMenu = "";
+		var YOffset = 0;
+		var XOffset = 0;
 		function showMenu(id) {
-			var currentMenu = "clusterMenu"+id;
-			if (hidden) {
-				if (document.getElementById) {
-					document.getElementById(currentMenu).style.visibility = 'visible';
-					hidden=false;
-				}
-			} else {
-				if (document.getElementById) {
-					document.getElementById(currentMenu).style.visibility = 'hidden';
-					hidden=true;
-				}
+			
+			if (currentActiveMenu != "") {
+				hideMenu(currentActiveMenu);
+			}
+			
+			if (document.getElementById) {
+				var currentMenu = "clusterMenu"+id;
+				originalPosition = id.split(".");
+				var xPosition = parseInt(originalPosition[0]);
+				var yPosition = parseInt(originalPosition[1]);
+				
+				document.getElementById(currentMenu).style.top = yPosition - independentY();
+				document.getElementById(currentMenu).style.left = xPosition - independentX();
+				document.getElementById(currentMenu).style.visibility = 'visible';
+				currentActiveMenu = id;
 			}
 			
 		}
+		
+		function hideMenu(id) {
+			if (document.getElementById) {
+				var currentMenu = "clusterMenu"+id;
+				document.getElementById(currentMenu).style.visibility = 'hidden';
+				currentActiveMenu = "";
+			}
+		}
+		//helper called for browser independency
+		function independentY() {
+			if (navigator.appName == "Microsoft Internet Explorer") {
+				return document.body.scrollTop;
+			} else {
+				return window.pageYOffset;
+			}
+		}
+		
+		function independentX() {
+			if (navigator.appName == "Microsoft Internet Explorer") {
+					return document.body.scrollLeft;
+			} else {
+					return window.pageXOffset;
+			}
+		}		
+
 	</script>
 </head>
 <body>
@@ -61,7 +93,7 @@
 				PresentableTopic inst = (PresentableTopic) e2.nextElement();
 				Point p = inst.getGeometry();
 				// marker
-				// marker and hotspot can't overlap exactly, caus of the new icons don't fit in the old convention of 20x20px
+				// marker and hotspot can't overlap exactly, cause of the new icons don't fit in the old convention of 20x20px chel
 				if (selectedInst != null && selectedInst.geoID.equals(inst.getID())) {
 					out.println("<img src=\"../images/marker.gif\" style=\"position:absolute; top:" +
 						(p.y - 18) + "px; left:" + (p.x - 18) + "px;\">");
@@ -73,7 +105,7 @@
 					(p.x - 7) + "px;\" alt=\"" + inst.getName() + "\" title=\"" + inst.getName() + "\" border=\"0\"></a>");
 			}
 		}
-		//cluster
+		//cluster icons
 		e = cluster.elements();
 		while (e.hasMoreElements()) {
 			//entered vector of cluster
@@ -82,15 +114,33 @@
 			Vector presentables = myCluster.getPresentables();
 			Enumeration e2 = presentables.elements();
 			String iconPath = myCluster.getIcon();
-			out.println("<span onMouseOver=\"showMenu('"+p.x+"."+p.y+"')\"><img src=\""+iconPath+"\" style=\"position:absolute; top:" + (p.y - 10) + "px; left:" + (p.x - 10) + "px;\" alt=\"Cluster\" border=\"0\"></span>");
-			out.println("<div id=\"clusterMenu"+p.x+"."+p.y+"\" onMouseOut=\"showMenu('"+p.x+"."+p.y+"')\" style=\"position:fixed; visibility:hidden; border:1px; dashed black; padding:5px; top:"+ (p.y -10) + "px; left:" + (p.x + 10)+ "px; overflow:visible; background-color:#b0b0ea;\">");
+			out.println("<a href=\"#\" onMouseOver=\"showMenu('"+p.x+"."+p.y+"')\"><img src=\""+iconPath+"\" style=\"position:absolute; top:" + (p.y - 10) + "px; left:" + (p.x - 10) + "px;\" alt=\"Cluster\" border=\"0\"></a>");
+			//out.println("<div id=\"clusterMenu"+p.x+"."+p.y+"\" onMouseOut=\"hideMenu('"+p.x+"."+p.y+"')\" style=\"position:fixed; visibility:hidden; border:1px; dashed black; padding:5px; top:"+ (p.y -10) + "px; left:" + (p.x + 10)+ "px; overflow:visible; background-color:#b0b0ea;\">");
+			//while(e2.hasMoreElements()) {
+			//	PresentableTopic currentTopic = (PresentableTopic) e2.nextElement();
+			//	out.println("<a href=\"javascript:top.frames.right.location.href='controller?action=" +
+			//			KiezAtlas.ACTION_SHOW_GEO_INFO + "&id=" + currentTopic.getID() + "'\" onMouseOver=\"showMenu('"+p.x+"."+p.y+"')\">"+currentTopic.getName()+"</a></br>");
+			//}
+			//out.println("</div>");
+		}
+		
+		//cluster menus are rendered in an extra loop after the cluster images for optic reasons
+		e = cluster.elements();
+		while (e.hasMoreElements()) {
+			//entered vector of cluster
+			Cluster myCluster = (Cluster) e.nextElement();
+			Point p = myCluster.getPoint();
+			Vector presentables = myCluster.getPresentables();
+			Enumeration e2 = presentables.elements();
+			//String iconPath = myCluster.getIcon();
+			//out.println("<a href=\"#\" onMouseOver=\"showMenu('"+p.x+"."+p.y+"')\"><img src=\""+iconPath+"\" style=\"position:absolute; top:" + (p.y - 10) + "px; left:" + (p.x - 10) + "px;\" alt=\"Cluster\" border=\"0\"></a>");
+			out.println("<div id=\"clusterMenu"+p.x+"."+p.y+"\" onMouseOut=\"hideMenu('"+p.x+"."+p.y+"')\" style=\"position:fixed; visibility:hidden; border:1px; dashed black; padding:5px; top:"+ (p.y -10) + "px; left:" + (p.x + 10) + "px; white-space:nowrap; overflow:visible; background-color:#b0b0ea;\">");
 			while(e2.hasMoreElements()) {
 				PresentableTopic currentTopic = (PresentableTopic) e2.nextElement();
 				out.println("<a href=\"javascript:top.frames.right.location.href='controller?action=" +
-						KiezAtlas.ACTION_SHOW_GEO_INFO + "&id=" + currentTopic.getID() + "'\" font-color=\"black\" font-style=\"none\" font-size=\"10px\">"+currentTopic.getName()+"</a></br>");
+						KiezAtlas.ACTION_SHOW_GEO_INFO + "&id=" + currentTopic.getID() + "'\" onMouseOver=\"showMenu('"+p.x+"."+p.y+"')\">"+currentTopic.getName()+"</a></br>");
 			}
 			out.println("</div>");
-				
 		}
 
 		// --- shape display switches ---
