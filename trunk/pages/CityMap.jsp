@@ -23,11 +23,17 @@
 				originalPosition = id.split(".");
 				var xPosition = parseInt(originalPosition[0]);
 				var yPosition = parseInt(originalPosition[1]);
-				
-				document.getElementById(currentMenu).style.top = yPosition - independentY();
-				document.getElementById(currentMenu).style.left = xPosition - independentX();
+				if (navigator.appName != "Microsoft Internet Explorer") {
+					//not ie, recalculate position after scrolling
+					document.getElementById(currentMenu).style.top = yPosition - independentY();
+					document.getElementById(currentMenu).style.left = xPosition - independentX();
+				} else {
+					// ie, no recalculation, handled by included 'fixed.js' script
+					document.getElementById(currentMenu).style.top = yPosition;
+					document.getElementById(currentMenu).style.left = xPosition;
+				}
 				document.getElementById(currentMenu).style.visibility = 'visible';
-				currentActiveMenu = id;
+					currentActiveMenu = id;
 			}
 			
 		}
