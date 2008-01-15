@@ -80,8 +80,9 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 			commands.addCreateCommands(viewmode, session, directives);
 			commands.addSeparator();
 			//
-			commands.addHideAllCommands(topicmapID, viewmode, session);
 			commands.addCloseCommand(session);
+			commands.addHideAllCommands(topicmapID, viewmode, session);
+			commands.addDeleteTopicmapCommand();
 			commands.addSeparator();
 			//
 			commands.addPublishCommand(getID(), session, directives);
@@ -91,10 +92,13 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 			commands.addSeparator();
 			//
 			// additional command: "Reposition all"
-			commands.addCommand(ITEM_REPOSITION_ALL, CMD_REPOSITION_ALL);
+			commands.addCommand(ITEM_REPOSITION_ALL, CMD_REPOSITION_ALL, FILESERVER_ICONS_PATH, ICON_REPOSITION_ALL);
 			commands.addSeparator();
 			//
 			commands.addHelpCommand(this, session);
+		} else if (editorContext == EDITOR_CONTEXT_WORKGROUP) {
+		} else {
+			throw new DeepaMehtaException(this + " has unexpected editor context: " + editorContext);
 		}
 		//
 		return commands;

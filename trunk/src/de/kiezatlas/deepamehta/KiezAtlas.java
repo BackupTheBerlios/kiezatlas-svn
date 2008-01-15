@@ -6,9 +6,9 @@ import de.deepamehta.DeepaMehtaConstants;
 
 /**
  * Kiez-Atlas 1.5<br>
- * Requires DeepaMehta 2.0b7-post1.
+ * Requires DeepaMehta 2.0b8.
  * <p>
- * Last change: 15.10.2007<br>
+ * Last change: 15.1.2008<br>
  * Malte Rei&szlig;ig<br>
  * mre@deepamehta.de
  */
@@ -143,6 +143,7 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	//
     static final String ITEM_REPOSITION_ALL = "Reposition all";
     static final String  CMD_REPOSITION_ALL = "repositionAll";
+    static final String ICON_REPOSITION_ALL = "location.png";
 	//
     static final String ITEM_MAKE_SHAPE = "Make Shape";
     static final String  CMD_MAKE_SHAPE = "makeShape";
