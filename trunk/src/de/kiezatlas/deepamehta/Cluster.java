@@ -28,6 +28,7 @@ public class Cluster {
 	
 	public void addPresentable(PresentableTopic presentable) {
 		if (!presentables.contains(presentable)) {
+			//System.out.println("added "+ presentable.getID()+" into " + this.p);
 			presentables.add(presentable);
 		}
 		// else {

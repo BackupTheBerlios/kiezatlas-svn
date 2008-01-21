@@ -460,15 +460,16 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 				// the first element is always the icon path of the following hotspots
 				PresentableTopic currentPT = (PresentableTopic) presentableTopics.next();
 				Cluster foundCluster = findAndCheckClusters(currentPT, clusters);
-				if (foundCluster != null)  {
-					//System.out.println("added " + currentPT.getID() + " into " + foundCluster.getPoint());
+				if (foundCluster != null) {
 					//addPresentable, checks for doubles
 					foundCluster.addPresentable(currentPT);
-				} else {	
-					// es gibt noch kein cluster oder es wurde kein passendes gefunden also suchen, nach dem ersten auftreten von dem gleichen Point in allen hotspots
+				} else {
+					// es gibt noch kein cluster oder es wurde kein passendes gefunden also suchen, 
+					// nach dem ersten auftreten von dem gleichen Point in allen hotspots
 					PresentableTopic foundPT = findPT(currentPT, hotspots);
-					if ( foundPT != null ){
-						// create Cluster, with two points, and the respective dm server icon path
+					if ( foundPT != null ) {
+						// create Cluster, with two points, if they don't have the same ID add the respective dm server icon path
+						// System.out.println("created new cluster with " + currentPT.getID() + " and " + foundPT.getID());
 						clusters.add(new Cluster(currentPT, foundPT, as.getCorporateWebBaseURL() + FILESERVER_ICONS_PATH));
 					}
 				}
@@ -496,11 +497,8 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 			Vector scnd = (Vector)hotspots.get(p);
 			for(int o=1; o < scnd.size(); o++){
 				PresentableTopic toCheck = (PresentableTopic) scnd.get(o);
-				//System.out.println("searching for the dubs with: " + pt.getGeometry() + " toCheck: " + toCheck.getGeometry());
-				if (toCheck.getGeometry().equals(pt.getGeometry()) & toCheck.getID() != pt.getID()){
-					// System.out.println("found pts for creating new cluster: " + toCheck.getName() + ":" + pt.getName());
-					// the folowing line, removes the new found topic in the hotspot vector
-					// System.out.println("removed: "+((PresentableTopic)scnd.remove(o)).getName());
+				if (toCheck.getGeometry().equals(pt.getGeometry()) & (!toCheck.getID().equals(pt.getID()))) {
+					// if the topics don't have the same id but have the same point, they belong together
 					return toCheck;
 				} 			
 			}			
