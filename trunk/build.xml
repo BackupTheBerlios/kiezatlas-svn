@@ -11,6 +11,7 @@
 	<property name="build" location="build"/>
 
 	<property name="dm.base-dir" location="/home/tito/source/deepaMehtaTrunk"/>
+	<!-- <property name="dm.base-dir" location="../../DeepaMehta/trunk"/> --> <!-- for jri -->
 	<import file="${dm.base-dir}/config.xml" />
 
 	<target name="init" description="create build directory">
@@ -20,10 +21,10 @@
 	<target name="compile" depends="init">
 		<javac srcdir="src" destdir="${build}" debug="on" listfiles="yes" source="1.4" target="1.4">
 			<classpath>
-				<pathelement location="${web.lib.dir}/DeepaMehtaService.jar"/>
-				<pathelement location="${web.lib.dir}/DeepaMehtaTopics.jar"/>
+				<pathelement location="${server}/DeepaMehtaService.jar"/>
+				<pathelement location="${server}/DeepaMehtaTopics.jar"/>
+				<pathelement location="${libpath}/commons-fileupload-1.0.jar"/>
 				<pathelement location="${web.servlet.lib}"/>
-				<pathelement location="${web.lib.dir}/commons-fileupload-1.0.jar"/>
 			</classpath>
 		</javac>
 	</target>

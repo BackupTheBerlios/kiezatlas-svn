@@ -21,10 +21,10 @@ import java.util.*;
 
 
 /**
- * Kiez-Atlas 1.4.1<br>
- * Requires DeepaMehta 2.0b8-pre2
+ * Kiez-Atlas 1.5<br>
+ * Requires DeepaMehta 2.0b8
  * <p>
- * Last change: 11.9.2007<br>
+ * Last change: 29.1.2008<br>
  * J&ouml;rg Richter<br>
  * jri@freenet.de
  */
@@ -82,7 +82,7 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 			//
 			commands.addCloseCommand(session);
 			commands.addHideAllCommands(topicmapID, viewmode, session);
-			commands.addDeleteTopicmapCommand();
+			commands.addDeleteTopicmapCommand(session);
 			commands.addSeparator();
 			//
 			commands.addPublishCommand(getID(), session, directives);
