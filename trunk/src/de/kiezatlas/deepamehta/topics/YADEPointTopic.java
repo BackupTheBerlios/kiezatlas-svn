@@ -22,10 +22,10 @@ import java.util.*;
 
 
 /**
- * Kiez-Atlas 1.4.1<br>
- * Requires DeepaMehta 2.0b8-pre2
+ * Kiez-Atlas 1.5<br>
+ * Requires DeepaMehta 2.0b8
  * <p>
- * Last functional change: 11.9.2007<br>
+ * Last functional change: 25.3.2008<br>
  * J&ouml;rg Richter<br>
  * jri@freenet.de
  */
@@ -58,7 +58,7 @@ public class YADEPointTopic extends LiveTopic implements KiezAtlas {
 
 
 	public CorporateDirectives evoke(Session session, String topicmapID, String viewmode) {
-		setTopicData(PROPERTY_LOCKED_GEOMETRY, SWITCH_ON);
+		setProperty(PROPERTY_LOCKED_GEOMETRY, SWITCH_ON);
 		return super.evoke(session, topicmapID, viewmode);
 	}
 

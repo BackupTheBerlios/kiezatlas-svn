@@ -25,9 +25,9 @@ import de.kiezatlas.deepamehta.KiezAtlas;
 /**
  * 
  * Kiez-Atlas 1.5<br>
- * Requires DeepaMehta 2.0b8-pre2
+ * Requires DeepaMehta 2.0b8
  * <p>
- * Last change: 10.10.2007<br>
+ * Last change: 25.3.2008<br>
  * Malte Reißig<br>
  * mre@deepamehta.de
  * 
@@ -67,8 +67,8 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 
 
 	public CorporateDirectives evoke(Session session, String topicmapID, String viewmode) {
-		setTopicData(PROPERTY_LOCKED_GEOMETRY, SWITCH_ON);
-		setTopicData(PROPERTY_PASSWORD, DEFAULT_PASSWORD);
+		setProperty(PROPERTY_LOCKED_GEOMETRY, SWITCH_ON);
+		setProperty(PROPERTY_PASSWORD, DEFAULT_PASSWORD);
 		return super.evoke(session, topicmapID, viewmode);
 	}
 
