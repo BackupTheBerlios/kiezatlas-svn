@@ -1,0 +1,71 @@
+body, td {
+	font-family: Verdana, Arial, Lucida Sans;
+	font-size: 12px;
+}
+
+body {
+	background-color: #FFFFFF;
+}
+
+.big {
+	font-size: 14px;
+	font-weight: bold;
+}
+
+.small {
+	color: #666666;
+	font-size: 10px;
+}
+	
+.evenrow {
+	background-color: #F0F0FF;
+}
+
+.oddrow {
+	background-color: #FFFFFF;
+}
+
+/* used to display the label/key/name of the property */
+.label {
+	font-family: Verdana, Arial, Lucida Sans;
+	font-size: 10px;
+	color: #666;
+	font-weight: bold;
+}
+
+/* used to display the value of the property for every layout mostly typo */
+.content {
+	font-color: #000;
+	font-family: Verdana, Arial, Lucida Sans;
+	font-size: 12px;
+}
+
+/* used in the Flow and Box Layout as the background for the one big div container instead of table, starts below the image and fahrplan link */
+
+.infoContainer {
+	align: left;
+	width: 95%;
+	text-align: left;
+	white-space: normal;
+	background-color: #EEE;
+	padding: 10px;
+  	border: 1px dashed silver;
+}
+
+/* used in the Box Layout as a container for Fields  */
+.multiBox {
+	position: relative;
+	color: #000;
+	font-family: Verdana, Arial, Lucida Sans;
+	font-size: 12px;
+	#padding-left: 20px; 
+	padding: 10px;
+	align: left;
+	width: 97%;
+	text-align: left;
+	white-space: pre-wrap;
+	background-color: #FFF;
+	padding: 5px;
+  	border: 1px dashed silver;
+}
+	
