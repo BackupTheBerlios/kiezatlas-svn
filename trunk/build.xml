@@ -1,7 +1,7 @@
-<project name="Kiez-Atlas" default="deploy" basedir=".">
+<project name="Kiezatlas" default="deploy" basedir=".">
 
 	<description>
-		Kiez-Atlas
+		Kiezatlas
 	</description>
 
 	<property name="project.name" value="kiezatlas"/>
@@ -10,8 +10,9 @@
 	<property name="war-test" value="${project.name}-test.war"/>
 	<property name="build" location="build"/>
 
-	<property name="dm.base-dir" location="/home/tito/source/deepaMehtaTrunk"/>
-	<!-- <property name="dm.base-dir" location="../../DeepaMehta/trunk"/> --> <!-- for jri -->
+	<!-- <property name="dm.base-dir" location="/home/tito/source/deepaMehtaTrunk"/> --> <!-- for mre -->
+	<property name="dm.base-dir" location="../../DeepaMehta/trunk"/>
+
 	<import file="${dm.base-dir}/config.xml" />
 
 	<target name="init" description="create build directory">

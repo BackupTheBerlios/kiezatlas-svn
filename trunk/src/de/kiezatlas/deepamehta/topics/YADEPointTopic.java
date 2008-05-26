@@ -104,8 +104,7 @@ public class YADEPointTopic extends LiveTopic implements KiezAtlas {
 		String cmd = st.nextToken();
 		if (cmd.equals(CMD_LOCK_GEOMETRY) || cmd.equals(CMD_UNLOCK_GEOMETRY)) {
 			String value = cmd.equals(CMD_LOCK_GEOMETRY) ? SWITCH_ON : SWITCH_OFF;
-			directives.add(as.setTopicProperty(getID(), getVersion(), PROPERTY_LOCKED_GEOMETRY, value,
-				topicmapID, viewmode, session));
+			directives.add(as.setTopicProperty(this, PROPERTY_LOCKED_GEOMETRY, value, topicmapID, session));
 		} else {
 			return super.executeCommand(command, session, topicmapID, viewmode);
 		}
