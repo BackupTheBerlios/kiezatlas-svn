@@ -5,10 +5,10 @@ import de.deepamehta.DeepaMehtaConstants;
 
 
 /**
- * Kiez-Atlas 1.5<br>
+ * Kiez-Atlas 1.5.1<br>
  * Requires DeepaMehta 2.0b8.
  * <p>
- * Last change: 15.1.2008<br>
+ * Last change: 26.5.2008<br>
  * Malte Rei&szlig;ig<br>
  * mre@deepamehta.de
  */
@@ -185,10 +185,9 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	public static final String ACTION_CREATE_COMMENT = "createComment";
 	public static final String ACTION_TOGGLE_SHAPE_DISPLAY = "toggleShapeDisplay";
 	// edit servlet
-	public static final String ACTION_TRY_LOGIN = "tryLogin";		// also used for list servlet
-	//public static final String ACTION_SHOW_INSTITUTION_FORM = "showInstForm";
-	public static final String ACTION_SHOW_GEO_FORM = "showGeoObjectForm";
-	public static final String ACTION_UPDATE_GEO = "updateGeo";
+	public static final String ACTION_TRY_LOGIN = "tryLogin";				// also used for list servlet
+	public static final String ACTION_SHOW_GEO_FORM = "showGeoObjectForm";	// also used for list servlet
+	public static final String ACTION_UPDATE_GEO = "updateGeo";				// also used for list servlet
 	public static final String ACTION_SHOW_FORUM_ADMINISTRATION = "showForumAdmin";
 	public static final String ACTION_ACTIVATE_FORUM = "activateForum";
 	public static final String ACTION_DEACTIVATE_FORUM = "deactivateForum";
@@ -232,7 +231,6 @@ public interface KiezAtlas extends DeepaMehtaConstants {
     static final String PAGE_CITY_MAP = "CityMap";
     static final String PAGE_CATEGORY_LIST = "CategoryList";
     static final String PAGE_GEO_LIST = "GeoObjectList";
-    //static final String PAGE_INSTITUTION_INFO = "InstitutionInfo";
     static final String PAGE_GEO_INFO = "GeoObjectInfo";
     static final String PAGE_GEO_FORUM = "GeoObjectForum";
     static final String PAGE_COMMENT_FORM = "CommentForm";
@@ -245,6 +243,7 @@ public interface KiezAtlas extends DeepaMehtaConstants {
     static final String PAGE_LIST_LOGIN = "ListLogin";
     static final String PAGE_LIST_HOME = "ListHome";
     static final String PAGE_LIST = "List";
+    static final String PAGE_GEO_ADMIN_FORM = "GeoObjectAdminForm";
 	// error
     static final String PAGE_ERROR = "error";
 }

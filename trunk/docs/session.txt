@@ -1,9 +1,9 @@
-Kiez-Atlas 1.4.1 Documentation
+Kiez-Atlas 1.5.1 Documentation
 
 Web Session Attributes
 
 Jörg Richter
-17.3.2007
+26.5.2008
 
 
 
@@ -45,7 +45,7 @@ selectedCats		Vector of String (IDs of selected categories)
 
 
 GeoObjectList
-----------------
+-------------
 
 institutions		Vector of BaseTopic
 categories			Hashtable
@@ -58,7 +58,7 @@ addresses			Hashtable
 							value: street/postalcode
 
 GeoObjectInfo
----------------
+-------------
 
 topicBean			TopicBean
 forumActivition		String (SWITCH_ON, SWITCH_OFF)
@@ -67,39 +67,41 @@ imagePath 			String to Base Image Folder, append the imageFileName to this
 
 
 GeoObjectForum
-----------------
+--------------
 
 html				HMTLGenerator
 selectedGeo			GeoObject
 instComments		Vector of Comment
+
 
 error
 -----
 
 error				String
 
+
 CommentForm
-----------------
+-----------
 
 selectedGeo			GeoObject
 comments			Vector of comments
 
 
+
 EditServlet
 ===========
-
-GeoObjectHome
-----------------
-
-topicBean			Instance of TopicBean
-imagefile			full path to image 			
-html				Instance of HTML Generator
-
 
 Global
 ------
 
-geo				BaseTopic
+geo					BaseTopic
+
+
+GeoObjectHome
+-------------
+
+topicBean			TopicBean
+imagefile			full path to image 			
 
 
 ForumAdministration
@@ -130,5 +132,12 @@ cityMaps			Hashtable
 List
 ----
 
-mapName				String
-topics				Vector of TopicBeans
+cityMap				selected city map (BaseTopic)
+instTypeID			corresponding institution type ID (String)
+topics				IDs of geo objects to list (Vector of String)
+
+
+GeoObjectAdminForm
+------------------
+
+geo					BaseTopic (geo object to edit)

@@ -3,24 +3,26 @@ package de.kiezatlas.deepamehta;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
-
+//
 import javax.servlet.ServletException;
-
+//
 import de.deepamehta.BaseTopic;
 import de.deepamehta.DeepaMehtaConstants;
 import de.deepamehta.service.Session;
 import de.deepamehta.service.TopicBean;
 import de.deepamehta.service.web.DeepaMehtaServlet;
 import de.deepamehta.service.web.RequestParameter;
+//
 import de.kiezatlas.deepamehta.topics.CityMapTopic;
+import de.kiezatlas.deepamehta.topics.GeoObjectTopic;
 
 
 
 /**
- * Kiez-Atlas 1.4.1.<br>
- * Requires DeepaMehta 2.0b7-post1.
+ * Kiez-Atlas 1.5<br>
+ * Requires DeepaMehta 2.0b8
  * <p>
- * Last functional change: 17.3.2007<br>
+ * Last functional change: 26.5.2008<br>
  * J&ouml;rg Richter<br>
  * jri@freenet.de
  */
@@ -39,6 +41,22 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 				return PAGE_LIST_LOGIN;
 			}
 		} else if (action.equals(ACTION_SHOW_INSTITUTIONS)) {
+			BaseTopic cityMap = cm.getTopic(params.getValue("cityMapID"), 1);
+			String instTypeID = ((CityMapTopic) as.getLiveTopic(cityMap)).getInstitutionType().getID();
+			setCityMap(cityMap, session);
+			setInstTypeID(instTypeID, session);
+			return PAGE_LIST;
+		} else if (action.equals(ACTION_SHOW_GEO_FORM)) {
+			String geoID = params.getValue("id");
+			setGeoObject(cm.getTopic(geoID, 1), session);
+			return PAGE_GEO_ADMIN_FORM;
+		} else if (action.equals(ACTION_UPDATE_GEO)) {
+			GeoObjectTopic geo = getGeoObject(session);
+			updateTopic(geo.getType(), params, session);
+			String newFilename = EditServlet.writeImage(params.getUploads());
+			if (newFilename != null) {
+				as.setTopicProperty(geo.getImage(), PROPERTY_FILE, newFilename);
+			}
 			return PAGE_LIST;
 		}
 		//
@@ -52,13 +70,10 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			session.setAttribute("workspaces", workspaces);
 			session.setAttribute("cityMaps", cityMaps);
 		} else if (page.equals(PAGE_LIST)) {
-			String cityMapID = params.getValue("cityMapID");
-			CityMapTopic cityMap = (CityMapTopic) as.getLiveTopic(cityMapID, 1);
-			String instTypeID = cityMap.getInstitutionType().getID();
+			String cityMapID = getCityMap(session).getID();
+			String instTypeID = getInstTypeID(session);
 			Vector insts = cm.getTopicIDs(instTypeID, cityMapID, true);		// sortByTopicName=true
-			SearchCriteria[] criterias = cityMap.getSearchCriterias();
-			session.setAttribute("mapName", cityMap.getName());
-			session.setAttribute("topics", createBaseTopicBeans(insts, criterias, instTypeID));
+			session.setAttribute("topics", insts);
 		}
 	}
 
@@ -111,31 +126,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		return cityMaps;
 	}
 
-	private Vector createBaseTopicBeans(Vector instIDs, SearchCriteria[] criterias, String instTypeID) {
-		Vector insts = new Vector();
-		//
-		Enumeration e = instIDs.elements();
-		while (e.hasMoreElements()) {
-			String instID = (String) e.nextElement();
-			GeoObject geo = new GeoObject(instID, criterias, as);
-			insts.addElement(new BaseTopic(instID, 1, instTypeID, 1, geo.name));
-		}
-		//
-		return insts;
-	}
-	
-	private Vector createTopicBeans(Vector topicIDs) {
-		Vector topics = new Vector();
-		//
-		Enumeration e = topicIDs.elements();
-		while (e.hasMoreElements()) {
-			String instID = (String) e.nextElement();
-			TopicBean topicBean = as.createTopicBean(instID, 1);
-			topics.addElement(topicBean);
-		}
-		//
-		return topics;
-	}
+
 
 	// *************************
 	// *** Session Utilities ***
@@ -148,5 +139,34 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 	private void setUser(BaseTopic user, Session session) {
 		session.setAttribute("user", user);
 		System.out.println("> \"user\" stored in session: " + user);
+	}
+
+	private void setCityMap(BaseTopic cityMap, Session session) {
+		session.setAttribute("cityMap", cityMap);
+		System.out.println("> \"cityMap\" stored in session: " + cityMap);
+	}
+
+	private void setInstTypeID(String instTypeID, Session session) {
+		session.setAttribute("instTypeID", instTypeID);
+		System.out.println("> \"instTypeID\" stored in session: " + instTypeID);
+	}
+
+	private void setGeoObject(BaseTopic geo, Session session) {
+		session.setAttribute("geo", geo);
+		System.out.println("> \"geo\" stored in session: " + geo);
+	}
+
+	// ---
+
+	private BaseTopic getCityMap(Session session) {
+		return (BaseTopic) session.getAttribute("cityMap");
+	}
+
+	private String getInstTypeID(Session session) {
+		return (String) session.getAttribute("instTypeID");
+	}
+
+	private GeoObjectTopic getGeoObject(Session session) {
+		return (GeoObjectTopic) as.getLiveTopic((BaseTopic) session.getAttribute("geo"));
 	}
 }

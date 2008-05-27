@@ -7,6 +7,9 @@ import java.awt.Dimension;
 
 
 /**
+ * A bean-like data container for passing data from the front-controller (servlet)
+ * to the presentation layer (JSP engine).
+ * <p>
  * Kiez-Atlas 1.4<br>
  * Requires DeepaMehta 2.0b7-post1
  * <p>

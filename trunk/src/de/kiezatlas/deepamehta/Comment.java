@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 
 /**
- * A bean-like data container for passing data from the front-controler (servlet)
+ * A bean-like data container for passing data from the front-controller (servlet)
  * to the presentation layer (JSP engine).
  * <p>
  * Kiez-Atlas 1.4<br>

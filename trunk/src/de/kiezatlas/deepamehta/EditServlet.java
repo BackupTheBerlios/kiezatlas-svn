@@ -147,16 +147,13 @@ public class EditServlet extends DeepaMehtaServlet implements KiezAtlas {
 	// *** Utilities ***
 	// *****************
 
-	// not sure when this method is triggered
-	// uses not configurable file path to write image/s to disk  
 
-	private String writeImage(Vector fileItems) {
+
+	static String writeImage(Vector fileItems) {
 		try {
 			System.out.println(">>> EditServlet.writeImage(): " + fileItems.size() + " files uploaded");
 			if (fileItems.size() > 0) {
-				
-				//CAUTION
-				String path = "/home/jrichter/deepamehta/install/client/images/";	// ###
+				String path = "/home/jrichter/deepamehta/install/client/images/";	// ### hardcoded
 				// ### String path = "/Users/jri/Projects/DeepaMehta/trunk/install/client/images/";
 				FileItem item = (FileItem) fileItems.firstElement();
 				String filename = getFilename(item.getName());	// ### explorer includes entire path
@@ -187,7 +184,7 @@ public class EditServlet extends DeepaMehtaServlet implements KiezAtlas {
 	}
 
 	// ###
-	String getFilename(String path) {
+	static String getFilename(String path) {
 		int pos = path.lastIndexOf('\\');
 		return pos != -1 ? path.substring(pos + 1) : path;
 	}

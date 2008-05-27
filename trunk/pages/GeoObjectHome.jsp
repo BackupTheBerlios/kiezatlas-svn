@@ -4,13 +4,13 @@
 <%
 	HTMLGenerator html = (HTMLGenerator) session.getAttribute("html");
 	TopicBean topicBean = (TopicBean) session.getAttribute("topicBean");
-	//render image if available from the virtual tomcat directory 8080/dm-images
 	String imageFile = (String) session.getAttribute("imagefile");
-	
+	//
+	// render image if available
 	if (imageFile != null) {
-		String imageHtmlString = "</br><img src=" + imageFile + ">";
-		out.println(imageHtmlString);
+		out.println("</br><img src=" + imageFile + ">");
 	}
+	//
 	topicBean.removeFieldsContaining("Image");
 	topicBean.removeField("Web Alias");
 	topicBean.removeField("Password");
@@ -21,13 +21,12 @@
 	topicBean.removeFieldsContaining("Locked Geometry");
 	topicBean.removeFieldsContaining("Icon");
 	topicBean.removeFieldsContaining("YADE");
-	// Name as Headline
+	//
 	out.println("<H2>" + topicBean.getValue("Name") + "</H2>");
-	//hier die topic bean rinne
 	out.println(html.info(topicBean, DeepaMehtaConstants.BEAN_LAYOUT_BOX));
-	// link to form page
+	//
+	// links to form page and forum administration
 	out.println("<p>\r" + html.link("Zum &Auml;nderungsformular", KiezAtlas.ACTION_SHOW_GEO_FORM) + "</p>");
-	// link to forum administration page
 	out.println("<p>\r<hr>\r" + html.link("Zur Forum Administration", KiezAtlas.ACTION_SHOW_FORUM_ADMINISTRATION) + "</p>");
 %>
 <% end(out); %>

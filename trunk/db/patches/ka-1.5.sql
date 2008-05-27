@@ -45,52 +45,52 @@ INSERT INTO Association VALUES ('at-derivation', 1, 1, 'a-ka-96', '', 'tt-topicc
 INSERT INTO Association VALUES ('at-aggregation', 1, 1, 'a-ka-97', '', 'tt-ka-geoobject-search', 1, 'tt-ka-geoobject', 1);
 
 
---- starting conversion part
---- 'eliminating the derivation from einrichtung to super type institution a-ka-11', keine AssociationProp
+
+-----------------------
+--- Conversion Part ---
+-----------------------
+
+
+
+--- delete "Einrichtung"s derivation from "Institution"
 
 DELETE FROM Association WHERE ID = 'a-ka-11';
 DELETE from AssociationProp WHERE AssociationID = 'a-ka-11';
-DELETE FROM ViewAssociation WHERE AssociationID ='a-ka-11';
+DELETE FROM ViewAssociation WHERE AssociationID = 'a-ka-11';
 
-
---- eliminating the association to the fromer einrichtungs-properties which are now derived from new supertype geoobject
---- 'a-ka-58';, a-ka-18, a-ka-54, a-ka-53, password, webalias, yadeX and yadeY
+--- delete assignments of "Einrichtung"s properties which are now assigned to supertype "Geo Objekt"
+--- "Web Alias", "Password", "YADE x", and "YADE y"
 
 DELETE FROM Association WHERE ID = 'a-ka-18';
-DELETE FROM Association WHERE ID = 'a-ka-54';
-DELETE FROM Association WHERE ID = 'a-ka-53';
 DELETE FROM Association WHERE ID = 'a-ka-58';
-
---- not to forget their properties, in this case their ordinal number
+DELETE FROM Association WHERE ID = 'a-ka-53';
+DELETE FROM Association WHERE ID = 'a-ka-54';
 
 DELETE FROM AssociationProp WHERE AssociationID = 'a-ka-18';
+DELETE FROM AssociationProp WHERE AssociationID = 'a-ka-58';
 DELETE FROM AssociationProp WHERE AssociationID = 'a-ka-53';
 DELETE FROM AssociationProp WHERE AssociationID = 'a-ka-54';
-DELETE FROM AssociationProp WHERE AssociationID = 'a-ka-58';
-
---- the views of these association
 
 DELETE FROM ViewAssociation WHERE AssociationID = 'a-ka-18';
+DELETE FROM ViewAssociation WHERE AssociationID = 'a-ka-58';
 DELETE FROM ViewAssociation WHERE AssociationID = 'a-ka-53';
 DELETE FROM ViewAssociation WHERE AssociationID = 'a-ka-54';
-DELETE FROM ViewAssociation WHERE AssociationID = 'a-ka-58';
 
---- eliminating the image relation with all props and views
+--- delete "Einrichtung"s relation to "Image"
 
 DELETE FROM Association WHERE ID = 'a-ka-38';
 DELETE FROM AssociationProp WHERE AssociationID = 'a-ka-38';
 DELETE FROM ViewAssociation WHERE AssociationID = 'a-ka-38';
 
---- eliminating the customimplementation class from einrichtung, it's now derived from geoobject
+--- delete "Custom Implementation" from "Einrichtung", it's now derived from "Geo Objekt"
 DELETE FROM TopicProp WHERE TopicID='tt-ka-einrichtung' AND PropName = 'Custom Implementation';
 DELETE FROM TopicProp WHERE TopicID='tt-ka-color' AND PropName = 'Custom Implementation';
 
---- add the new super type derivation association from geoobject to tt-ka-einrichtung, start counting after 97
+--- derive "Einrichtung" from "Geo Objekt"
 INSERT INTO Association VALUES ('at-derivation', 1, 1, 'a-ka-98', '', 'tt-ka-geoobject', 1, 'tt-ka-einrichtung', 1);
 
---- adding the new relations for the tt-ka-einrichtung to webpage, phonenumber, fax and emailaddress, these properties where formerly derived from the institution type
-
---- cardinalities for the new order are oeffnungszeiten, tel, fax, ansprechpartner, email, website, categories, träger, weitere infos, ...
+--- relate "Einrichtung" to "Webpage", "Phone Number", "Fax Number", "Email Address", and "Address"
+-- (these relations where formerly derived from the "Institution" type)
 
 INSERT INTO Association VALUES ('at-relation', 1, 1, 'a-ka-99', 'Website', 'tt-ka-einrichtung', 1, 'tt-webpage', 1);
 INSERT INTO AssociationProp VALUES ('a-ka-99', 1, 'Name', 'Website');
@@ -133,7 +133,7 @@ INSERT INTO AssociationProp VALUES ('a-ka-103', 1, 'Web Info', 'Related Info');
 INSERT INTO AssociationProp VALUES ('a-ka-103', 1, 'Web Form', 'Related Form');
 INSERT INTO AssociationProp VALUES ('a-ka-103', 1, 'Ordinal Number', '140');
 
---- here follows up the image relation, from geeobject to image
+--- relate "Geo Objekt" to "Image"
 INSERT INTO Association VALUES ('at-relation', 1, 1, 'a-ka-104', 'Image', 'tt-ka-geoobject', 1, 'tt-image', 1);
 INSERT INTO AssociationProp VALUES ('a-ka-104', 1, 'Name', 'Image');
 INSERT INTO AssociationProp VALUES ('a-ka-104', 1, 'Cardinality', 'one');
@@ -142,7 +142,10 @@ INSERT INTO AssociationProp VALUES ('a-ka-104', 1, 'Web Info', 'Related Info');
 INSERT INTO AssociationProp VALUES ('a-ka-104', 1, 'Web Form', 'Related Form');
 INSERT INTO AssociationProp VALUES ('a-ka-104', 1, 'Ordinal Number', '109');
 
---- Update for Person Ansprechpartner Ordinal Number for InfoPage
+--- Update ordinal numbers for 3 types/properties:
+-- "Ansprechpartner" (relation from "Einrichtung" to "Person")
+-- "Öffnungszeiten" (property of "Einrichtung")
+-- "Träger" (relation from "Soziale Einrichtung" to "Träger")
 UPDATE AssociationProp SET PropValue='170' WHERE AssociationID='a-ka-34' AND PropName='Ordinal Number';
 UPDATE AssociationProp SET PropValue='155' WHERE AssociationID='a-ka-8' AND PropName='Ordinal Number';
 UPDATE AssociationProp SET PropValue='198' WHERE AssociationID='a-ka-19' AND PropName='Ordinal Number';
@@ -152,10 +155,6 @@ UPDATE AssociationProp SET PropValue='198' WHERE AssociationID='a-ka-19' AND Pro
 --UPDATE TopicProp SET PropValue='Kiezatlas--Test'         WHERE TopicID='t-deepamehtainstallation' AND PropName='Client Name';
 --UPDATE TopicProp SET PropValue='DeepaMehtaServer 2.0b8'   WHERE TopicID='t-deepamehtainstallation' AND PropName='Server Name';
 
---- assign properties to association type "Membership"
---- update membership properties for the compatibility of the old kiezatlas publishing, for memberships
---- carefully to handle for developers, no association publisher property should be set yet
-Insert AssociationProp (AssociationID, AssociationVersion, PropName, PropValue) SELECT ID, 1, 'Publisher', 'on' FROM Association WHERE TypeID = 'at-membership';
-
-
-
+--- assure compatibility of the old kiezatlas publishing scheme
+-- set 'Publisher' property for all existing memberships
+INSERT AssociationProp (AssociationID, AssociationVersion, PropName, PropValue) SELECT ID, 1, 'Publisher', 'on' FROM Association WHERE TypeID = 'at-membership';
