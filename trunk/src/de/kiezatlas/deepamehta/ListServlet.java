@@ -19,10 +19,10 @@ import de.kiezatlas.deepamehta.topics.GeoObjectTopic;
 
 
 /**
- * Kiez-Atlas 1.5<br>
+ * Kiez-Atlas 1.5.1<br>
  * Requires DeepaMehta 2.0b8
  * <p>
- * Last functional change: 26.5.2008<br>
+ * Last functional change: 27.5.2008<br>
  * J&ouml;rg Richter<br>
  * jri@freenet.de
  */
@@ -58,6 +58,12 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 				as.setTopicProperty(geo.getImage(), PROPERTY_FILE, newFilename);
 			}
 			return PAGE_LIST;
+		} else if (action.equals(ACTION_SHOW_EMPTY_GEO_FORM)) {
+			return PAGE_GEO_EMPTY_FORM;
+		} else if (action.equals(ACTION_CREATE_GEO)) {
+			return PAGE_LIST;
+		} else if (action.equals(ACTION_GO_HOME)) {
+			return PAGE_LIST_HOME;
 		}
 		//
 		return super.performAction(action, params, session);

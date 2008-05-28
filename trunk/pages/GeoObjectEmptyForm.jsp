@@ -10,11 +10,10 @@
 %>
 <%
 	HTMLGenerator html = (HTMLGenerator) session.getAttribute("html");
-	BaseTopic geo = (BaseTopic) session.getAttribute("geo");
+	String instTypeID = (String) session.getAttribute("instTypeID");
 	//
 	// institution form
-	out.println("<H2>" + geo.getName() + "</H2>");
-	out.println(html.form(geo.getType(), KiezAtlas.ACTION_UPDATE_GEO,
-						  geo.getID(), hiddenProps, true));
+	out.println("<H2>Neues Objekt eingeben</H2>");
+	out.println(html.form(instTypeID, KiezAtlas.ACTION_CREATE_GEO, hiddenProps, true));
 %>
 <% end(out); %>

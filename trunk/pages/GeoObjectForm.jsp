@@ -19,7 +19,6 @@
 	//
 	// institution form
 	out.println("<H2>" + geo.getName() + "</H2>");
-	out.println("<H3>&Auml;nderungsformular</H3>");
 	out.println(html.form(geo.getType(), KiezAtlas.ACTION_UPDATE_GEO,
 						  geo.getID(), hiddenProps, true));
 %>

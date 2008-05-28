@@ -8,7 +8,7 @@ import de.deepamehta.DeepaMehtaConstants;
  * Kiez-Atlas 1.5.1<br>
  * Requires DeepaMehta 2.0b8.
  * <p>
- * Last change: 26.5.2008<br>
+ * Last change: 27.5.2008<br>
  * Malte Rei&szlig;ig<br>
  * mre@deepamehta.de
  */
@@ -188,13 +188,15 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	public static final String ACTION_TRY_LOGIN = "tryLogin";				// also used for list servlet
 	public static final String ACTION_SHOW_GEO_FORM = "showGeoObjectForm";	// also used for list servlet
 	public static final String ACTION_UPDATE_GEO = "updateGeo";				// also used for list servlet
+	public static final String ACTION_GO_HOME = "goHome";					// also used for list servlet
 	public static final String ACTION_SHOW_FORUM_ADMINISTRATION = "showForumAdmin";
 	public static final String ACTION_ACTIVATE_FORUM = "activateForum";
 	public static final String ACTION_DEACTIVATE_FORUM = "deactivateForum";
 	public static final String ACTION_DELETE_COMMENT = "deleteComment";
-	public static final String ACTION_GO_HOME = "goHome";
 	// list servlet
 	public static final String ACTION_SHOW_INSTITUTIONS = "showInstitutions";
+	public static final String ACTION_SHOW_EMPTY_GEO_FORM = "showEmptyGeoObjectForm";
+	public static final String ACTION_CREATE_GEO = "createGeo";
 
 
 
@@ -244,6 +246,7 @@ public interface KiezAtlas extends DeepaMehtaConstants {
     static final String PAGE_LIST_HOME = "ListHome";
     static final String PAGE_LIST = "List";
     static final String PAGE_GEO_ADMIN_FORM = "GeoObjectAdminForm";
+    static final String PAGE_GEO_EMPTY_FORM = "GeoObjectEmptyForm";
 	// error
     static final String PAGE_ERROR = "error";
 }

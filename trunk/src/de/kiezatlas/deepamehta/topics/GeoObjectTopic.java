@@ -1,11 +1,7 @@
 package de.kiezatlas.deepamehta.topics;
 
-import java.awt.Point;
-import java.awt.geom.Point2D;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.StringTokenizer;
-import java.util.Vector;
+import de.kiezatlas.deepamehta.Comment;
+import de.kiezatlas.deepamehta.KiezAtlas;
 
 import de.deepamehta.AmbiguousSemanticException;
 import de.deepamehta.BaseTopic;
@@ -19,37 +15,46 @@ import de.deepamehta.service.Session;
 import de.deepamehta.topics.LiveTopic;
 import de.deepamehta.topics.TopicTypeTopic;
 import de.deepamehta.topics.TypeTopic;
-import de.kiezatlas.deepamehta.Comment;
-import de.kiezatlas.deepamehta.KiezAtlas;
+
+import java.awt.Point;
+import java.awt.geom.Point2D;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.StringTokenizer;
+import java.util.Vector;
+
+
 
 /**
- * 
- * Kiez-Atlas 1.5<br>
+ * Kiez-Atlas 1.5.1<br>
  * Requires DeepaMehta 2.0b8
  * <p>
- * Last change: 25.3.2008<br>
- * Malte Reißig<br>
- * mre@deepamehta.de
- * 
+ * Last change: 27.5.2008<br>
+ * J&ouml;rg Richter<br>
+ * jri@freenet.de
  */
 public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 
-	/**
-	 * 
-	 */
+
+
+	// *****************
+	// *** Constants ***
+	// *****************
+
+
+
 	static final String DEFAULT_PASSWORD = "geheim";
-	
-	
-	
-	// ------------------
-	// --- Constructor ---
-	// ------------------
-	
-	
-	
+
+
+
+	// *******************
+	// *** Constructor ***
+	// *******************
+
+
+
 	public GeoObjectTopic(BaseTopic topic, ApplicationService as) {
 		super(topic, as);
-		// TODO Auto-generated constructor stub
 	}
 
 
@@ -120,7 +125,7 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 		}
 		return directives;
 	}
-		
+
 
 
 	// ------------------------------------------
@@ -149,7 +154,7 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 	}
 
 
-	
+
 	// ---------------------------
 	// --- Handling Properties ---
 	// ---------------------------
@@ -259,9 +264,9 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 		}
 		return LiveTopic.propertyLabel(propDef, relTopicTypeID, as);
 	}
-	
-	
-	
+
+
+
 	// ------------------------
 	// --- Topic Type Hooks ---
 	// ------------------------
@@ -269,22 +274,22 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 
 
 	/**
-	 * @return  the ID of the search type
+	 * @return	the ID of the search type
 	 *
-	 * @see     TopicTypeTopic#createSearchType
+	 * @see		TopicTypeTopic#createSearchType
 	 */
 	public static String getSearchTypeID() {
 		return TOPICTYPE_KIEZ_GEO_SEARCH;
 	}
-	
-	
-	
+
+
+
 	// **********************
 	// *** Custom Methods ***
 	// **********************
 
-	
-	
+
+
 	public static BaseTopic lookupInstitution(String alias, ApplicationService as) throws DeepaMehtaException {
 		Vector typeIDs = as.type(TOPICTYPE_KIEZ_GEO, 1).getSubtypeIDs();
 		Hashtable props = new Hashtable();
@@ -301,9 +306,9 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 		BaseTopic inst = (BaseTopic) institutions.firstElement();
 		return inst;
 	}
-	
+
 	// ---
-	
+
 	public BaseTopic getAddress() {
 		try {
 			return as.getRelatedTopic(getID(), ASSOCTYPE_ASSOCIATION, TOPICTYPE_ADDRESS, 2, true);		// emptyAllowed=true
@@ -311,8 +316,8 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 			System.out.println("*** GeoObjectTopic.getAddress(): " + e);
 			return e.getDefaultTopic();
 		}
-	}	
-	
+	}
+
 	public String getCity() {
 		// if a geoobject has a stadt property, take it and return it
 		// else if a geoobject has an addressTopic assigned, check if there is a city, if so return this city
@@ -327,7 +332,7 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 				if (town != null) {
 					city = town.getName();
 					return city;
-				}				
+				}
 			}
 			return "";
 		} catch (AmbiguousSemanticException aex) {
@@ -335,11 +340,28 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 			return aex.getDefaultTopic().getName();
 		}
 	}
-	
+
+	public BaseTopic getEmail() {
+		try {
+			return as.getRelatedTopic(getID(), ASSOCTYPE_ASSOCIATION, TOPICTYPE_EMAIL_ADDRESS, 2, true);		// emptyAllowed=true
+		} catch (AmbiguousSemanticException e) {
+			System.out.println("*** GeoObjectTopic.getEmail(): " + e);
+			return e.getDefaultTopic();
+		}
+	}
+
+	public String getWebAlias() {
+		return getProperty(PROPERTY_WEB_ALIAS);
+	}
+
+	// ---
+
 	public Vector getCategories(String critTypeID) {
 		return as.getRelatedTopics(getID(), ASSOCTYPE_ASSOCIATION, critTypeID, 2);
 	}
-	
+
+	// ---
+
 	public BaseTopic getImage() {
 		try {
 			return as.getRelatedTopic(getID(), ASSOCTYPE_ASSOCIATION, TOPICTYPE_IMAGE, 2, true);		// emptyAllowed=true
@@ -349,8 +371,8 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 		}
 	}
 
+	// ---
 
-	
 	/**
 	 * Converts the YADE-coordinate of this institution into a screen coordinate.
 	 *
@@ -428,7 +450,9 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 				"Stadtplan \"" + citymap.getName() + "\" hat ungültigen Wert (" + e.getMessage() + ")");
 		}
 	}
-	
+
+	// ---
+
 	public boolean isForumActivated() {
 		BaseTopic forum = getForum();
 		if (forum == null) {
@@ -436,7 +460,7 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 		}
 		return as.getTopicProperty(forum, PROPERTY_FORUM_ACTIVITION).equals(SWITCH_ON);
 	}
-	
+
 	public Vector getComments() {
 		BaseTopic forum = getForum();
 		if (forum == null) {
@@ -445,7 +469,7 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 		String[] sortProps = {PROPERTY_COMMENT_DATE, PROPERTY_COMMENT_TIME};
 		return cm.getRelatedTopics(forum.getID(), SEMANTIC_FORUM_COMMENTS, TOPICTYPE_COMMENT, 2, sortProps, true);	// descending=true
 	}
-	
+
 	public BaseTopic getForum() {
 		try {
 			return as.getRelatedTopic(getID(), SEMANTIC_INSTITUTION_FORUM, TOPICTYPE_FORUM, 2, true);		// emptyAllowed=true

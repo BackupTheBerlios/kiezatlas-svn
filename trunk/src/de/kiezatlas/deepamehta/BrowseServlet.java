@@ -21,20 +21,22 @@ import de.deepamehta.service.TopicBean;
 import de.deepamehta.service.web.DeepaMehtaServlet;
 import de.deepamehta.service.web.RequestParameter;
 import de.deepamehta.service.web.WebSession;
+import de.deepamehta.topics.EmailTopic;
 import de.deepamehta.topics.TypeTopic;
 import de.deepamehta.util.DeepaMehtaUtils;
+
 import de.kiezatlas.deepamehta.topics.CityMapTopic;
 import de.kiezatlas.deepamehta.topics.GeoObjectTopic;
 
 
 
 /**
- * Kiez-Atlas 1.5<br>
+ * Kiez-Atlas 1.5.1<br>
  * Requires DeepaMehta 2.0b8
  * <p>
- * Last change: 15.11.2007<br>
- * Malte Rei&szlig;ig<br>
- * mre@deepamehta.de
+ * Last change: 27.5.2008<br>
+ * J&ouml;rg Richter<br>
+ * jri@freenet.de
  */
 public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 
@@ -160,8 +162,6 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 				TopicBean topicBean = as.createTopicBean(geoID, 1);
 				session.setAttribute("topicBean", topicBean);
 				String imagePath = as.getCorporateWebBaseURL() + FILESERVER_IMAGES_PATH;
-				System.out.println("***imagePath: "+imagePath);
-				
 				session.setAttribute("imagePath", imagePath);
 				GeoObjectTopic geo = (GeoObjectTopic) as.getLiveTopic(geoID, 1);
 				boolean isForumActivated = geo.isForumActivated();
@@ -189,7 +189,7 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 			String assocID = as.getNewAssociationID();
 			cm.createAssociation(assocID, 1, SEMANTIC_FORUM_COMMENTS, 1, forumID, 1, commentID, 1);
 			// send notification email
-			// sendNotificationEmail(inst.getID(), commentID);
+			sendNotificationEmail(geo.getID(), commentID);
 			//
 			return PAGE_GEO_FORUM;
 		// shape display
@@ -198,9 +198,6 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 			toggleShapeDisplay(shapeTypeID, session);
 			updateShapes(session);
 			return PAGE_CITY_MAP;
-		} else if (action.equals(ACTION_SHOW_GEO_FORM)) {
-			//should this  be possible from the browseServlet, if so the action has to redirect to edit/GeoLogin or am i wrong? 
-			return PAGE_GEO_FORM;
 		} else {
 			return super.performAction(action, params, session);
 		}
@@ -287,49 +284,49 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 
 	// ---
 
-//	private void sendNotificationEmail(String instID, String commentID) {
-//		try {
-//			GeoObjectTopic inst = (GeoObjectTopic) as.getLiveTopic(instID, 1);
-//			// "from"
-//			String from = as.getEmailAddress("t-rootuser");		// ###
-//			if (from == null || from.equals("")) {
-//				throw new DeepaMehtaException("email address of root user is unknown");
-//			}
-//			// "to"
-//			BaseTopic email = inst.getEmail();
-//			if (email == null || email.getName().equals("")) {
-//				throw new DeepaMehtaException("email address of \"" + inst.getName() + "\" is unknown");
-//			}
-//			String to = email.getName();
-//			// "subject"
-//			String subject = "Kiezatlas: neuer Forumsbeitrag für \"" + inst.getName() + "\"";
-//			// "body"
-//			Hashtable comment = cm.getTopicData(commentID, 1);
-//			String body = "Dies ist eine automatische Benachrichtigung von www.kiezatlas.de\r\r" +
-//				"Im Forum der Einrichtung \"" + inst.getName() + "\" wurde ein neuer Kommentar eingetragen:\r\r" +
-//				"------------------------------\r" +
-//				comment.get(PROPERTY_TEXT) + "\r\r" +
-//				"Autor: " + comment.get(PROPERTY_COMMENT_AUTHOR) + "\r" +
-//				"Email: " + comment.get(PROPERTY_EMAIL_ADDRESS) + "\r" +
-//				"Datum: " + comment.get(PROPERTY_COMMENT_DATE) + "\r" +
-//				"Uhrzeit: " + comment.get(PROPERTY_COMMENT_TIME) + "\r" +
-//				"------------------------------\r\r" +
-//				"Im Falle des Mißbrauchs: In der \"Forum Administration\" ihres persönlichen Kiezatlas-Zugangs haben " +
-//				"Sie die Möglichkeit, einzelne Kommentare zu löschen, bzw. das Forum ganz zu deaktivieren.\r" +
-//				"www.kiezatlas.de:8080/edit/" + inst.getWebAlias() + "\r\r" +
-//				"Mit freundlichen Grüßen\r" +
-//				"ihr Kiezatlas-Team";
-//			//
-//			System.out.println(">>> send notification email");
-//			System.out.println("  > SMTP server: \"" + as.getSMTPServer() + "\"");	// as.getSMTPServer() throws DME
-//			System.out.println("  > from: \"" + from + "\"");
-//			System.out.println("  > to: \"" + to + "\"");
-//			// send email
-//			EmailTopic.sendMail(as.getSMTPServer(), from, to, subject, body);		// EmailTopic.sendMail() throws DME
-//		} catch (Exception e) {
-//			System.out.println("*** notification email not send (" + e + ")");
-//		}
-//	}
+	private void sendNotificationEmail(String instID, String commentID) {
+		try {
+			GeoObjectTopic inst = (GeoObjectTopic) as.getLiveTopic(instID, 1);
+			// "from"
+			String from = as.getEmailAddress("t-rootuser");		// ###
+			if (from == null || from.equals("")) {
+				throw new DeepaMehtaException("email address of root user is unknown");
+			}
+			// "to"
+			BaseTopic email = inst.getEmail();
+			if (email == null || email.getName().equals("")) {
+				throw new DeepaMehtaException("email address of \"" + inst.getName() + "\" is unknown");
+			}
+			String to = email.getName();
+			// "subject"
+			String subject = "Kiezatlas: neuer Forumsbeitrag für \"" + inst.getName() + "\"";
+			// "body"
+			Hashtable comment = cm.getTopicData(commentID, 1);
+			String body = "Dies ist eine automatische Benachrichtigung von www.kiezatlas.de\r\r" +
+				"Im Forum der Einrichtung \"" + inst.getName() + "\" wurde ein neuer Kommentar eingetragen:\r\r" +
+				"------------------------------\r" +
+				comment.get(PROPERTY_TEXT) + "\r\r" +
+				"Autor: " + comment.get(PROPERTY_COMMENT_AUTHOR) + "\r" +
+				"Email: " + comment.get(PROPERTY_EMAIL_ADDRESS) + "\r" +
+				"Datum: " + comment.get(PROPERTY_COMMENT_DATE) + "\r" +
+				"Uhrzeit: " + comment.get(PROPERTY_COMMENT_TIME) + "\r" +
+				"------------------------------\r\r" +
+				"Im Falle des Mißbrauchs: In der \"Forum Administration\" ihres persönlichen Kiezatlas-Zugangs haben " +
+				"Sie die Möglichkeit, einzelne Kommentare zu löschen, bzw. das Forum ganz zu deaktivieren.\r" +
+				"www.kiezatlas.de:8080/edit/" + inst.getWebAlias() + "\r\r" +
+				"Mit freundlichen Grüßen\r" +
+				"ihr Kiezatlas-Team";
+			//
+			System.out.println(">>> send notification email");
+			System.out.println("  > SMTP server: \"" + as.getSMTPServer() + "\"");	// as.getSMTPServer() throws DME
+			System.out.println("  > from: \"" + from + "\"");
+			System.out.println("  > to: \"" + to + "\"");
+			// send email
+			EmailTopic.sendMail(as.getSMTPServer(), from, to, subject, body);		// EmailTopic.sendMail() throws DME
+		} catch (Exception e) {
+			System.out.println("*** notification email not send (" + e + ")");
+		}
+	}
 
 
 
