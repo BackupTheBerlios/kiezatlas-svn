@@ -15,6 +15,7 @@ import de.deepamehta.service.Session;
 import de.deepamehta.topics.LiveTopic;
 import de.deepamehta.topics.TopicTypeTopic;
 import de.deepamehta.topics.TypeTopic;
+import de.deepamehta.util.DeepaMehtaUtils;
 
 import java.awt.Point;
 import java.awt.geom.Point2D;
@@ -26,12 +27,12 @@ import java.util.Vector;
 
 
 /**
- * Kiez-Atlas 1.5.1<br>
+ * Kiezatlas 1.5.1<br>
  * Requires DeepaMehta 2.0b8
  * <p>
- * Last change: 27.5.2008<br>
+ * Last change: 25.6.2008<br>
  * J&ouml;rg Richter<br>
- * jri@freenet.de
+ * jri@deepamehta.de
  */
 public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 
@@ -74,6 +75,7 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 	public CorporateDirectives evoke(Session session, String topicmapID, String viewmode) {
 		setProperty(PROPERTY_LOCKED_GEOMETRY, SWITCH_ON);
 		setProperty(PROPERTY_PASSWORD, DEFAULT_PASSWORD);
+		setProperty(PROPERTY_LAST_MODIFIED, DeepaMehtaUtils.getDate());
 		return super.evoke(session, topicmapID, viewmode);
 	}
 
@@ -175,7 +177,7 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 				String errText = "Web Alias \"" + alias + "\" ist bereits an Einrichtung \"" +
 					inst.getName() + "\" vergeben -- Bitte anderen Web Alias verwenden";
 				directives.add(DIRECTIVE_SHOW_MESSAGE, errText, new Integer(NOTIFICATION_WARNING));
-				System.out.println("*** InstitutionTopic.propertiesChangeAllowed(): " + errText);
+				System.out.println("*** GeoObjectTopic.propertiesChangeAllowed(): " + errText);
 				return false;
 			}
 		}
@@ -192,6 +194,9 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 			// set new geometry
 			if (p != null) {	// Note: p is null if YADE is "off"
 				directives.add(DIRECTIVE_SET_TOPIC_GEOMETRY, getID(), p, topicmapID);
+			} else {
+				// ###
+				System.out.println(">>> GeoObjectTopic.propertiesChanged(): " + this + " not (re)positioned (VADE is off)");
 			}
 		}
 		//
@@ -374,9 +379,16 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 	// ---
 
 	/**
-	 * Converts the YADE-coordinate of this institution into a screen coordinate.
+	 * Converts the YADE-coordinates of this geo object into screen coordinates.
 	 *
-	 * @return	the screen coordinate, or <code>null</code> if YADE is "off".
+	 * @return	the screen coordinates, or <code>null</code> if YADE is "off".
+	 *			YADE is regarded as "off" if there are no YADE-reference points defined in the
+	 *			specified city map.
+	 *
+	 * @throws	DeepaMehtaException	if topicmapID is <code>null</code>.
+	 * @throws	DeepaMehtaException	if there is only one or more than 2 YADE-reference points.
+	 * @throws	DeepaMehtaException	if a YADE-reference point has invalid coordinates (no float format).
+	 * @throws	DeepaMehtaException	if this geo object has invalid coordinates (no float format).
 	 *
 	 * @see		#propertiesChanged
 	 * @see		CityMapTopic#getPresentableTopic
@@ -384,7 +396,7 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 	 */
 	Point getPoint(String topicmapID) throws DeepaMehtaException {
 		// ### copied
-		CityMapTopic citymap = (CityMapTopic) as.getLiveTopic(topicmapID, 1);
+		CityMapTopic citymap = (CityMapTopic) as.getLiveTopic(topicmapID, 1);	// throws DME
 		int x1, y1, x2, y2;
 		float yadeX1, yadeY1, yadeX2, yadeY2;
 		try {
@@ -413,7 +425,8 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 			int y = (int) (y2 + (y1 - y2) * (yadeY - yadeY2) / (yadeY1 - yadeY2));
 			return new Point(x, y);
 		} catch (NumberFormatException e) {
-			throw new DeepaMehtaException("YADE Koordinate von Einrichtung \"" + getName() + "\" ist ungültig (" + e.getMessage() + ")");
+			throw new DeepaMehtaException("YADE Koordinate von Einrichtung \"" + getName() + "\" ist ungültig (" +
+				e.getMessage() + ")");
 		}
 	}
 

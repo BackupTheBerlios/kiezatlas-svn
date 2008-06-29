@@ -31,7 +31,7 @@ import de.kiezatlas.deepamehta.topics.GeoObjectTopic;
 
 
 /**
- * Kiez-Atlas 1.5.1<br>
+ * Kiezatlas 1.5.1<br>
  * Requires DeepaMehta 2.0b8
  * <p>
  * Last change: 27.5.2008<br>
@@ -80,7 +80,7 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 		// session timeout?
 		if (getCityMap(session) == null) {
 			System.out.println("*** Session Expired ***");
-			session.setAttribute("error", "Timeout: Kiez-Atlas wurde mehr als " +
+			session.setAttribute("error", "Timeout: Kiezatlas wurde mehr als " +
 				((WebSession) session).session.getMaxInactiveInterval() / 60 + " Minuten nicht benutzt");
 			return PAGE_ERROR;
 		}
@@ -170,7 +170,7 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 					session.setAttribute("commentCount", new Integer(geo.getComments().size()));
 				}
 				return PAGE_GEO_INFO;
-		// TODO show forum if wanted
+		// show forum if wanted
 		} else if (action.equals(ACTION_SHOW_GEO_FORUM)) {
 			return PAGE_GEO_FORUM;
 		// show comment form
@@ -404,7 +404,7 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 			String icon;
 			if (getSearchMode(session).equals("0")) {	// ### first search criteria uses distinct visualization
 				icon = as.getLiveTopic(catID, 1).getIconfile();
-				if (icon.startsWith("ka-")) {	// use only small icon if standard Kiez-Atlas category icons is used
+				if (icon.startsWith("ka-")) {	// use only small icon if standard Kiezatlas category icons is used
 					icon = icon.substring(0, icon.length() - 4) + "-small.gif";		// ### could be property
 				}
 			} else {

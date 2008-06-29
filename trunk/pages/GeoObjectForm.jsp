@@ -10,6 +10,7 @@
 		KiezAtlas.PROPERTY_WEB_ALIAS,
 		KiezAtlas.PROPERTY_YADE_X,
 		KiezAtlas.PROPERTY_YADE_Y,
+		KiezAtlas.PROPERTY_LAST_MODIFIED,
 		"Title", "Content",
 		"Width", "Height"};
 %>

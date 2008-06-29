@@ -1,28 +1,27 @@
 package de.kiezatlas.deepamehta;
 
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
+import de.kiezatlas.deepamehta.topics.CityMapTopic;
+import de.kiezatlas.deepamehta.topics.GeoObjectTopic;
+//
+import de.deepamehta.BaseTopic;
+import de.deepamehta.service.Session;
+import de.deepamehta.service.web.DeepaMehtaServlet;
+import de.deepamehta.service.web.RequestParameter;
+import de.deepamehta.util.DeepaMehtaUtils;
 //
 import javax.servlet.ServletException;
 //
-import de.deepamehta.BaseTopic;
-import de.deepamehta.DeepaMehtaConstants;
-import de.deepamehta.service.Session;
-import de.deepamehta.service.TopicBean;
-import de.deepamehta.service.web.DeepaMehtaServlet;
-import de.deepamehta.service.web.RequestParameter;
-//
-import de.kiezatlas.deepamehta.topics.CityMapTopic;
-import de.kiezatlas.deepamehta.topics.GeoObjectTopic;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
 
 
 /**
- * Kiez-Atlas 1.5.1<br>
+ * Kiezatlas 1.5.1<br>
  * Requires DeepaMehta 2.0b8
  * <p>
- * Last functional change: 27.5.2008<br>
+ * Last functional change: 27.6.2008<br>
  * J&ouml;rg Richter<br>
  * jri@freenet.de
  */
@@ -47,12 +46,17 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			setInstTypeID(instTypeID, session);
 			return PAGE_LIST;
 		} else if (action.equals(ACTION_SHOW_GEO_FORM)) {
-			String geoID = params.getValue("id");
-			setGeoObject(cm.getTopic(geoID, 1), session);
+			String geoObjectID = params.getValue("id");
+			setGeoObject(cm.getTopic(geoObjectID, 1), session);
 			return PAGE_GEO_ADMIN_FORM;
 		} else if (action.equals(ACTION_UPDATE_GEO)) {
+			// update geo object
 			GeoObjectTopic geo = getGeoObject(session);
-			updateTopic(geo.getType(), params, session);
+			String cityMapID = getCityMap(session).getID();
+			updateTopic(geo.getType(), params, session, cityMapID, VIEWMODE_USE);
+			// update timestamp
+			cm.setTopicData(geo.getID(), 1, PROPERTY_LAST_MODIFIED, DeepaMehtaUtils.getDate());
+			// store image
 			String newFilename = EditServlet.writeImage(params.getUploads());
 			if (newFilename != null) {
 				as.setTopicProperty(geo.getImage(), PROPERTY_FILE, newFilename);
@@ -61,6 +65,11 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		} else if (action.equals(ACTION_SHOW_EMPTY_GEO_FORM)) {
 			return PAGE_GEO_EMPTY_FORM;
 		} else if (action.equals(ACTION_CREATE_GEO)) {
+			String geoObjectID = as.getNewTopicID();
+			String cityMapID = getCityMap(session).getID();
+			cm.createViewTopic(cityMapID, 1, VIEWMODE_USE, geoObjectID, 1, 0, 0, false);	// performExistenceCheck=false
+			createTopic(getInstTypeID(session), params, session, cityMapID, geoObjectID);
+			setGeoObject(cm.getTopic(geoObjectID, 1), session);
 			return PAGE_LIST;
 		} else if (action.equals(ACTION_GO_HOME)) {
 			return PAGE_LIST_HOME;

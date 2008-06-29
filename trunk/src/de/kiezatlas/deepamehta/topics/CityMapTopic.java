@@ -21,7 +21,7 @@ import java.util.*;
 
 
 /**
- * Kiez-Atlas 1.5.1<br>
+ * Kiezatlas 1.5.1<br>
  * Requires DeepaMehta 2.0b8
  * <p>
  * Last change: 29.1.2008<br>
@@ -34,7 +34,7 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 
 	static final String VERSION = "1.5.1";
 	static {
-		System.out.println(">>> Kiez-Atlas " + VERSION);
+		System.out.println(">>> Kiezatlas " + VERSION);
 	}
 
 
@@ -300,7 +300,7 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 
 	public static BaseTopic lookupCityMap(String alias, boolean throwIfNotFound, ApplicationService as)
 																				throws DeepaMehtaException {
-		// search "Kiez-Atlas" workspace
+		// search "Kiezatlas" workspace
 		BaseTopic map = lookupCityMap(alias, WORKSPACE_KIEZATLAS, as);
 		// search sub-workspaces
 		if (map == null) {

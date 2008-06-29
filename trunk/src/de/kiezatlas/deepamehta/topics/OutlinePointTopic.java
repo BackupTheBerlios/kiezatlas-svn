@@ -26,7 +26,7 @@ import java.util.*;
 
 
 /**
- * Kiez-Atlas 1.4.1.<br>
+ * Kiezatlas 1.4.1.<br>
  * Requires DeepaMehta 2.0b8-pre2.
  * <p>
  * Last functional change: 11.9.2007<br>

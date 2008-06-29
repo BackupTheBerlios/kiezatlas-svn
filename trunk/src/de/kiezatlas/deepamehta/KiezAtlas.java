@@ -5,12 +5,12 @@ import de.deepamehta.DeepaMehtaConstants;
 
 
 /**
- * Kiez-Atlas 1.5.1<br>
+ * Kiezatlas 1.5.1<br>
  * Requires DeepaMehta 2.0b8.
  * <p>
- * Last change: 27.5.2008<br>
- * Malte Rei&szlig;ig<br>
- * mre@deepamehta.de
+ * Last change: 25.6.2008<br>
+ * J&ouml;rg Richter<br>
+ * jri@deepamehta.de
  */
 public interface KiezAtlas extends DeepaMehtaConstants {
 
@@ -108,6 +108,7 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	static final String PROPERTY_AGENCY_KIND = "Art";
 	static final String PROPERTY_YADE_X = "YADE x";
 	static final String PROPERTY_YADE_Y = "YADE y";
+	static final String PROPERTY_LAST_MODIFIED = "Zuletzt geändert";
 	//
 	static final String PROPERTY_FORUM_ACTIVITION = "Aktivierung";
 	static final String PROPERTY_COMMENT_AUTHOR = "Autor";

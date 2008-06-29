@@ -5,6 +5,7 @@
 	static String[] hiddenProps = {
 		KiezAtlas.PROPERTY_DESCRIPTION,
 		KiezAtlas.PROPERTY_ICON,
+		KiezAtlas.PROPERTY_LAST_MODIFIED,
 		"Title", "Content",
 		"Width", "Height"};
 %>
@@ -13,7 +14,7 @@
 	String instTypeID = (String) session.getAttribute("instTypeID");
 	//
 	// institution form
-	out.println("<H2>Neues Objekt eingeben</H2>");
+	out.println("<h2>Neues Objekt eingeben</h2>");
 	out.println(html.form(instTypeID, KiezAtlas.ACTION_CREATE_GEO, hiddenProps, true));
 %>
 <% end(out); %>

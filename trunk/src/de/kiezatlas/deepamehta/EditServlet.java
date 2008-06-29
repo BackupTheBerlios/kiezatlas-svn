@@ -9,23 +9,25 @@ import de.deepamehta.service.TopicBean;
 import de.deepamehta.service.web.DeepaMehtaServlet;
 import de.deepamehta.service.web.RequestParameter;
 import de.deepamehta.service.web.WebSession;
+import de.deepamehta.util.DeepaMehtaUtils;
 //
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+//
 import java.io.File;
 import java.util.*;
 //
 import org.apache.commons.fileupload.FileItem;
 
 
+
 /**
- * Kiez-Atlas 1.5<br>
+ * Kiezatlas 1.5.1<br>
  * Requires DeepaMehta 2.0b8.
  * <p>
- * Last functional change: 15.11.2007<br>
- * Last change: 15.10.2007<br>
- * Malte Rei&szlig;ig<br>
- * mre@deepamehta.de
+ * Last change: 27.6.2008<br>
+ * J&ouml;rg Richter<br>
+ * jri@deepamehta.de
  */
 public class EditServlet extends DeepaMehtaServlet implements KiezAtlas {
 
@@ -50,7 +52,7 @@ public class EditServlet extends DeepaMehtaServlet implements KiezAtlas {
 		// session timeout?
 		if (getGeoObject(session) == null) {	// ### doesn't return null but throws exception!
 			System.out.println("*** Session Expired ***");
-			session.setAttribute("error", "Timeout: Kiez-Atlas wurde mehr als " +
+			session.setAttribute("error", "Timeout: Kiezatlas wurde mehr als " +
 				((WebSession) session).session.getMaxInactiveInterval() / 60 + " Minuten nicht benutzt");
 			return PAGE_ERROR;
 		}
@@ -59,18 +61,18 @@ public class EditServlet extends DeepaMehtaServlet implements KiezAtlas {
 			GeoObjectTopic geo = getGeoObject(session);
 			String password = params.getValue(PROPERTY_PASSWORD);
 			String geoPw = as.getTopicProperty(geo, PROPERTY_PASSWORD);
-			TopicBean topicBean = as.createTopicBean(geo.getID(), 1);
-			session.setAttribute("topicBean", topicBean);
 			return password.equals(geoPw) ? PAGE_GEO_HOME : PAGE_GEO_LOGIN;
 			//
 		} else if (action.equals(ACTION_SHOW_GEO_FORM)) {
 			return PAGE_GEO_FORM;
 			//
 		} else if (action.equals(ACTION_UPDATE_GEO)) {
+			// update geo object
 			GeoObjectTopic geo = getGeoObject(session);
 			updateTopic(geo.getType(), params, session);
-			TopicBean topicBean = as.createTopicBean(geo.getID(), 1);
-			session.setAttribute("topicBean", topicBean);
+			// update timestamp
+			cm.setTopicData(geo.getID(), 1, PROPERTY_LAST_MODIFIED, DeepaMehtaUtils.getDate());
+			// store image
 			String newFilename = writeImage(params.getUploads());
 			if (newFilename != null) {
 				as.setTopicProperty(geo.getImage(), PROPERTY_FILE, newFilename);
@@ -81,15 +83,15 @@ public class EditServlet extends DeepaMehtaServlet implements KiezAtlas {
 			return PAGE_FORUM_ADMINISTRATION;
 			//
 		} else if (action.equals(ACTION_ACTIVATE_FORUM)) {
-			GeoObjectTopic inst = getGeoObject(session);
+			GeoObjectTopic geo = getGeoObject(session);
 			// create forum topic if not yet exist
-			BaseTopic forum = inst.getForum();
+			BaseTopic forum = geo.getForum();
 			String forumID;
 			if (forum == null) {
 				forumID = as.getNewTopicID();
 				cm.createTopic(forumID, 1, TOPICTYPE_FORUM, 1, "");
 				String assocID = as.getNewAssociationID();
-				cm.createAssociation(assocID, 1, SEMANTIC_INSTITUTION_FORUM, 1, inst.getID(), 1, forumID, 1);
+				cm.createAssociation(assocID, 1, SEMANTIC_INSTITUTION_FORUM, 1, geo.getID(), 1, forumID, 1);
 			} else {
 				forumID = forum.getID();
 			}
@@ -109,16 +111,6 @@ public class EditServlet extends DeepaMehtaServlet implements KiezAtlas {
 			return PAGE_FORUM_ADMINISTRATION;
 			//
 		} else if (action.equals(ACTION_GO_HOME)) {
-			GeoObjectTopic geo = getGeoObject(session);
-			// error check
-			// System.out.println("geo is: " + geo.getID());
-			if (geo != null) {
-				TopicBean topicBean = as.createTopicBean(geo.getID(), 1);
-				session.setAttribute("topicBean", topicBean);
-			} else {
-				System.out.println(">>>> Could not retrieve GeoObjectTopic from Session");
-			}
-			//
 			return PAGE_GEO_HOME;
 			//
 		} else {
@@ -128,8 +120,9 @@ public class EditServlet extends DeepaMehtaServlet implements KiezAtlas {
 
 	protected void preparePage(String page, RequestParameter params, Session session) {
 		if (page.equals(PAGE_GEO_HOME)) {
-			//GeoObjectTopic geoId = (BaseTopic) session.getAttribute("geo");
-			
+			String geoID = getGeoObject(session).getID();
+			TopicBean topicBean = as.createTopicBean(geoID, 1);
+			session.setAttribute("topicBean", topicBean);
 			updateImagefile(session);
 		} else if (page.equals(PAGE_FORUM_ADMINISTRATION)) {
 			GeoObjectTopic geo = getGeoObject(session);

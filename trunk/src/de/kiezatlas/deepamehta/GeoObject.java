@@ -13,7 +13,7 @@ import de.kiezatlas.deepamehta.KiezAtlas;
  * A bean-like data container for passing data from the front-controller (servlet)
  * to the presentation layer (JSP engine).
  * <p>
- * Kiez-Atlas 1.5<br>
+ * Kiezatlas 1.5<br>
  * Requires DeepaMehta 2.0b7-post1.
  * <p>
  * Last change: 15.10.2007<br>

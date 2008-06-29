@@ -22,7 +22,7 @@ import java.util.*;
 
 
 /**
- * Kiez-Atlas 1.5<br>
+ * Kiezatlas 1.5<br>
  * Requires DeepaMehta 2.0b8
  * <p>
  * Last functional change: 25.3.2008<br>
