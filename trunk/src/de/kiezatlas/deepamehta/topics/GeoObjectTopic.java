@@ -163,25 +163,26 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 
 
 
-	public boolean propertiesChangeAllowed(Hashtable oldProps, Hashtable newProps, CorporateDirectives directives) {
-		String alias = (String) newProps.get(PROPERTY_WEB_ALIAS);
-		if (alias != null) {
+	public boolean propertyChangeAllowed(String propName, String propValue, Session session, CorporateDirectives directives) {
+		// compare to CityMapTopic.propertyChangeAllowed()
+		if (propName.equals(PROPERTY_WEB_ALIAS)) {
+			String webAlias = propValue;
 			// ### compare to lookupInstitution()
 			Vector typeIDs = as.type(TOPICTYPE_KIEZ_GEO, 1).getSubtypeIDs();
 			Hashtable props = new Hashtable();
-			props.put(PROPERTY_WEB_ALIAS, alias);
+			props.put(PROPERTY_WEB_ALIAS, webAlias);
 			Vector insts = cm.getTopics(typeIDs, props, true);	// caseSensitive=true
 			//
 			if (insts.size() > 0) {
 				BaseTopic inst = (BaseTopic) insts.firstElement();
-				String errText = "Web Alias \"" + alias + "\" ist bereits an Einrichtung \"" +
-					inst.getName() + "\" vergeben -- Bitte anderen Web Alias verwenden";
+				String errText = "Web Alias \"" + webAlias + "\" ist bereits an \"" + inst.getName() +
+					"\" vergeben -- Für \"" + getName() + "\" bitte anderen Web Alias verwenden";
 				directives.add(DIRECTIVE_SHOW_MESSAGE, errText, new Integer(NOTIFICATION_WARNING));
-				System.out.println("*** GeoObjectTopic.propertiesChangeAllowed(): " + errText);
+				System.out.println("*** GeoObjectTopic.propertyChangeAllowed(): " + errText);
 				return false;
 			}
 		}
-		return super.propertiesChangeAllowed(oldProps, newProps, directives);
+		return super.propertyChangeAllowed(propName, propValue, session, directives);
 	}
 
 	public CorporateDirectives propertiesChanged(Hashtable newProps, Hashtable oldProps,
@@ -379,13 +380,13 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 	// ---
 
 	/**
-	 * Converts the YADE-coordinates of this geo object into screen coordinates.
+	 * Converts the YADE-coordinates of this geo object into screen coordinates for the specified citymap.
 	 *
 	 * @return	the screen coordinates, or <code>null</code> if YADE is "off".
 	 *			YADE is regarded as "off" if there are no YADE-reference points defined in the
 	 *			specified city map.
 	 *
-	 * @throws	DeepaMehtaException	if topicmapID is <code>null</code>.
+	 * @throws	DeepaMehtaException	if citymapID is <code>null</code>.
 	 * @throws	DeepaMehtaException	if there is only one or more than 2 YADE-reference points.
 	 * @throws	DeepaMehtaException	if a YADE-reference point has invalid coordinates (no float format).
 	 * @throws	DeepaMehtaException	if this geo object has invalid coordinates (no float format).
@@ -394,9 +395,9 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 	 * @see		CityMapTopic#getPresentableTopic
 	 * @see		CityMapTopic#repositionAllInstitutions
 	 */
-	Point getPoint(String topicmapID) throws DeepaMehtaException {
+	Point getPoint(String citymapID) throws DeepaMehtaException {
 		// ### copied
-		CityMapTopic citymap = (CityMapTopic) as.getLiveTopic(topicmapID, 1);	// throws DME
+		CityMapTopic citymap = (CityMapTopic) as.getLiveTopic(citymapID, 1);	// throws DME
 		int x1, y1, x2, y2;
 		float yadeX1, yadeY1, yadeX2, yadeY2;
 		try {
@@ -438,9 +439,9 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 	 * @see		#moved
 	 * @see		CityMapTopic#updateYADECoordinates
 	 */
-	Point2D.Float getYadePoint(int x, int y, String topicmapID) throws DeepaMehtaException {
+	Point2D.Float getYadePoint(int x, int y, String citymapID) throws DeepaMehtaException {
 		// ### copied
-		CityMapTopic citymap = (CityMapTopic) as.getLiveTopic(topicmapID, 1);
+		CityMapTopic citymap = (CityMapTopic) as.getLiveTopic(citymapID, 1);
 		try {
 			PresentableTopic[] yp = citymap.getYADEReferencePoints();	// throws DME
 			if (yp == null) {

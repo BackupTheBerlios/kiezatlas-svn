@@ -133,8 +133,9 @@ List
 ----
 
 cityMap				selected city map (BaseTopic)
-instTypeID			corresponding institution type ID (String)
 topics				IDs of geo objects to list (Vector of String)
+geo					geo object to highlight (BaseTopic)
+notifications		error notifications (Vector of Notification)
 
 
 GeoObjectAdminForm

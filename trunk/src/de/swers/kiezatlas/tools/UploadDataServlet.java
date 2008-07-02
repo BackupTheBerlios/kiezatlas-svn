@@ -23,6 +23,7 @@ import org.apache.commons.fileupload.FileItem;
 import de.deepamehta.BaseAssociation;
 import de.deepamehta.BaseTopic;
 import de.deepamehta.DeepaMehtaException;
+import de.deepamehta.service.CorporateDirectives;
 import de.deepamehta.service.Session;
 import de.deepamehta.service.web.DeepaMehtaServlet;
 import de.deepamehta.service.web.RequestParameter;
@@ -52,7 +53,7 @@ public class UploadDataServlet extends DeepaMehtaServlet implements de.kiezatlas
             super.doPost(request, response);	// ###
         }
         
-	protected String performAction(String action, RequestParameter params, Session session) throws ServletException {
+	protected String performAction(String action, RequestParameter params, Session session, CorporateDirectives directives) throws ServletException {
 		if (action == null) {
 			System.out.println("Hello from the external UploadServlet");
 			return PAGE_LOGIN;
@@ -82,7 +83,7 @@ public class UploadDataServlet extends DeepaMehtaServlet implements de.kiezatlas
 			//
 		}
 		//
-		return super.performAction(action, params, session);
+		return super.performAction(action, params, session, directives);
 	}
 
 	// **********************

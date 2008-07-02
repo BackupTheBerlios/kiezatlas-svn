@@ -7,6 +7,14 @@ body {
 	background-color: #FFFFFF;
 }
 
+.header-box {
+	background-color: #DDDDDD;
+}
+
+.footer-box {
+	background-color: #DDDDDD;
+}
+
 .big {
 	font-size: 14px;
 	font-weight: bold;
@@ -59,4 +67,20 @@ body {
 	padding: 5px;
 	background-color: #FFFFFF;
   	border: 1px dashed silver;
+}
+
+.notification {
+	color: red;
+}
+
+.notification-info:before {
+	content: url("../images/notification-info.gif")" ";
+}
+
+.notification-warning:before {
+	content: url("../images/notification-warning.gif")" ";
+}
+
+.notification-error:before {
+	content: url("../images/notification-error.gif")" ";
 }

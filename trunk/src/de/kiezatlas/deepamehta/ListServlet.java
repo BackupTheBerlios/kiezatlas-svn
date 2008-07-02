@@ -4,6 +4,7 @@ import de.kiezatlas.deepamehta.topics.CityMapTopic;
 import de.kiezatlas.deepamehta.topics.GeoObjectTopic;
 //
 import de.deepamehta.BaseTopic;
+import de.deepamehta.service.CorporateDirectives;
 import de.deepamehta.service.Session;
 import de.deepamehta.service.web.DeepaMehtaServlet;
 import de.deepamehta.service.web.RequestParameter;
@@ -21,13 +22,14 @@ import java.util.Vector;
  * Kiezatlas 1.5.1<br>
  * Requires DeepaMehta 2.0b8
  * <p>
- * Last functional change: 27.6.2008<br>
+ * Last change: 29.6.2008<br>
  * J&ouml;rg Richter<br>
- * jri@freenet.de
+ * jri@deepamehta.de
  */
 public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 
-	protected String performAction(String action, RequestParameter params, Session session) throws ServletException {
+	protected String performAction(String action, RequestParameter params, Session session, CorporateDirectives directives)
+																									throws ServletException {
 		if (action == null) {
 			return PAGE_LIST_LOGIN;
 		} else if (action.equals(ACTION_TRY_LOGIN)) {
@@ -53,7 +55,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			// update geo object
 			GeoObjectTopic geo = getGeoObject(session);
 			String cityMapID = getCityMap(session).getID();
-			updateTopic(geo.getType(), params, session, cityMapID, VIEWMODE_USE);
+			updateTopic(geo.getType(), params, session, directives, cityMapID, VIEWMODE_USE);
 			// update timestamp
 			cm.setTopicData(geo.getID(), 1, PROPERTY_LAST_MODIFIED, DeepaMehtaUtils.getDate());
 			// store image
@@ -68,17 +70,17 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			String geoObjectID = as.getNewTopicID();
 			String cityMapID = getCityMap(session).getID();
 			cm.createViewTopic(cityMapID, 1, VIEWMODE_USE, geoObjectID, 1, 0, 0, false);	// performExistenceCheck=false
-			createTopic(getInstTypeID(session), params, session, cityMapID, geoObjectID);
+			createTopic(getInstTypeID(session), params, session, directives, cityMapID, geoObjectID);
 			setGeoObject(cm.getTopic(geoObjectID, 1), session);
 			return PAGE_LIST;
 		} else if (action.equals(ACTION_GO_HOME)) {
 			return PAGE_LIST_HOME;
 		}
 		//
-		return super.performAction(action, params, session);
+		return super.performAction(action, params, session, directives);
 	}
 
-	protected void preparePage(String page, RequestParameter params, Session session) {
+	protected void preparePage(String page, RequestParameter params, Session session, CorporateDirectives directives) {
 		if (page.equals(PAGE_LIST_HOME)) {
 			Vector workspaces = getWorkspaces(getUserID(session));
 			Hashtable cityMaps = getCityMaps(workspaces);
@@ -89,6 +91,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			String instTypeID = getInstTypeID(session);
 			Vector insts = cm.getTopicIDs(instTypeID, cityMapID, true);		// sortByTopicName=true
 			session.setAttribute("topics", insts);
+			session.setAttribute("notifications", directives.getNotifications());
 		}
 	}
 

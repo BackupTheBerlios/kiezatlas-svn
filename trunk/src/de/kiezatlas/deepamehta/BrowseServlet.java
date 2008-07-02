@@ -16,6 +16,7 @@ import javax.swing.ImageIcon;
 import de.deepamehta.BaseTopic;
 import de.deepamehta.DeepaMehtaException;
 import de.deepamehta.PresentableTopic;
+import de.deepamehta.service.CorporateDirectives;
 import de.deepamehta.service.Session;
 import de.deepamehta.service.TopicBean;
 import de.deepamehta.service.web.DeepaMehtaServlet;
@@ -34,13 +35,14 @@ import de.kiezatlas.deepamehta.topics.GeoObjectTopic;
  * Kiezatlas 1.5.1<br>
  * Requires DeepaMehta 2.0b8
  * <p>
- * Last change: 27.5.2008<br>
+ * Last change: 29.6.2008<br>
  * J&ouml;rg Richter<br>
  * jri@freenet.de
  */
 public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 
-	protected String performAction(String action, RequestParameter params, Session session) throws ServletException {
+	protected String performAction(String action, RequestParameter params, Session session, CorporateDirectives directives)
+																									throws ServletException {
 		if (action == null) {
 			try {
 				//first visit regular or special 
@@ -180,7 +182,7 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 		// create comment
 		} else if (action.equals(ACTION_CREATE_COMMENT)) {
 			// create comment and set date & time
-			String commentID = createTopic(TOPICTYPE_COMMENT, params, session);
+			String commentID = createTopic(TOPICTYPE_COMMENT, params, session, directives);
 			as.setTopicProperty(commentID, 1, PROPERTY_COMMENT_DATE, DeepaMehtaUtils.getDate());
 			as.setTopicProperty(commentID, 1, PROPERTY_COMMENT_TIME, DeepaMehtaUtils.getTime());
 			// associate comment with forum
@@ -199,11 +201,11 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 			updateShapes(session);
 			return PAGE_CITY_MAP;
 		} else {
-			return super.performAction(action, params, session);
+			return super.performAction(action, params, session, directives);
 		}
 	}
 
-	protected void preparePage(String page, RequestParameter params, Session session) {
+	protected void preparePage(String page, RequestParameter params, Session session, CorporateDirectives directives) {
 		if (page.equals(PAGE_CATEGORY_LIST)) {
 			Vector categories = cm.getTopics(getCurrentCriteria(session).criteria.getID());
 			Vector selectedCats = getSelectedCats(session);

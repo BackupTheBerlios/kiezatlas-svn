@@ -24,7 +24,7 @@ import java.util.*;
  * Kiezatlas 1.5.1<br>
  * Requires DeepaMehta 2.0b8
  * <p>
- * Last change: 29.1.2008<br>
+ * Last change: 30.6.2008<br>
  * J&ouml;rg Richter<br>
  * jri@freenet.de
  */
@@ -134,19 +134,20 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 
 
 
-	public boolean propertiesChangeAllowed(Hashtable oldProps, Hashtable newProps, CorporateDirectives directives) {
-		String webAlias = (String) newProps.get(PROPERTY_WEB_ALIAS);
-		if (webAlias != null) {
+	public boolean propertyChangeAllowed(String propName, String propValue, Session session, CorporateDirectives directives) {
+		// compare to GeoObjectTopic.propertyChangeAllowed()
+		if (propName.equals(PROPERTY_WEB_ALIAS)) {
+			String webAlias = propValue;
 			BaseTopic cityMap = lookupCityMap(webAlias, as);	// DME (Mehrdeutigkeit) ###
 			if (cityMap != null) {
-				String errText = "Web Alias \"" + webAlias + "\" ist bereits an Stadtplan \"" +
-					cityMap.getName() + "\" vergeben -- Bitte anderen Web Alias verwenden";
+				String errText = "Web Alias \"" + webAlias + "\" ist bereits an Stadtplan \"" + cityMap.getName() +
+					"\" vergeben -- Für \"" + getName() + "\" bitte anderen Web Alias verwenden";
 				directives.add(DIRECTIVE_SHOW_MESSAGE, errText, new Integer(NOTIFICATION_WARNING));
-				System.out.println("*** CityMapTopic.propertiesChangeAllowed(): " + errText);
+				System.out.println("*** CityMapTopic.propertyChangeAllowed(): " + errText);
 				return false;
 			}
 		}
-		return super.propertiesChangeAllowed(oldProps, newProps, directives);
+		return super.propertyChangeAllowed(propName, propValue, session, directives);
 	}
 
 
@@ -241,7 +242,7 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 	 * @return	2-element array of YADE-reference topics, or <code>null</code> if there are no YADE-reference topics
 	 *			inside this city map (YADE is "off").
 	 *
-	 * @see		GeeObjecTopic#getPoint
+	 * @see		GeeObjectTopic#getPoint
 	 * @see		GeoObjectTopic#getYadePoint
 	 */
 	public PresentableTopic[] getYADEReferencePoints() throws DeepaMehtaException {
@@ -250,7 +251,8 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 			// Note: this is not an error (YADE is "off").
 			return null;
 		} else if (yp.size() != 2) {
-			throw new DeepaMehtaException("Administrator-Fehler: Stadtplan \"" + getName() + "\" hat " + yp.size() + " YADE Referenzpunkte. Notwendig sind 0 oder 2.");
+			throw new DeepaMehtaException("Administrator-Fehler: Stadtplan \"" + getName() + "\" hat " +
+				yp.size() + " YADE Referenzpunkte. Notwendig sind 0 oder 2.");
 		}
 		PresentableTopic[] yt = new PresentableTopic[2];
 		yt[0] = (PresentableTopic) yp.elementAt(0);

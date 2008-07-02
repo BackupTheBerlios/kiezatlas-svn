@@ -29,7 +29,7 @@
 	void begin(HttpSession session, JspWriter out) throws IOException {
 		out.println("<html>\r<head>\r<title>Kiezatlas</title>\r" +
 			"<link href=\"../pages/kiezatlas.css\" rel=\"stylesheet\" type=\"text/css\">\r</head>\r" +
-			"<body>\r<a href=\"http://www.kiezatlas.de/\" target=\"_blank\"><img src=\"../images/logo.jpg\" border=\"0\"></a>");
+			"<body>\r<a href=\"http://www.kiezatlas.de/\" target=\"_blank\"><img src=\"../images/kiezatlas-logo.png\" border=\"0\"></a>");
 	}
 
 	// browse
@@ -43,10 +43,10 @@
 			"</head>\r" +
 			"<body" + (refreshMap ? " onLoad=\"top.frames.left.location.href='controller?action=initFrame&frame=" +
 				KiezAtlas.FRAME_LEFT + "'\"" : "") + ">\r");
-		//
-		out.println("<table width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" bgcolor=\"#F0E8E0\"><tr valign=\"top\">");
+		// --- header box ---
+		out.println("<table class=\"header-box\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\"><tr valign=\"top\">");
 		out.println("<td rowspan=\"" + (criterias.length + 1) + "\">");
-		out.println("<a href=\"http://www.kiezatlas.de/\" target=\"_top\"><img src=\"../images/logo.jpg\" border=\"0\"></a>");
+		out.println("<a href=\"http://www.kiezatlas.de/\" target=\"_top\"><img src=\"../images/kiezatlas-logo.png\" border=\"0\"></a>");
 		out.println("<div class=\"big\">" + map.getName() + "</div>");
 		out.println("</td>");
 		//
@@ -64,7 +64,7 @@
 	}
 
 	void end(JspWriter out) throws IOException {
-		out.println("<br><br>\r<hr>\r<table width=\"100%\" cellpadding=\"4\" bgcolor=\"#F0E8E0\"><tr><td class=\"small\">Powered by<br><a href=\"http://www.deepamehta.de/\" target=\"_blank\"><b>DeepaMehta</b></a></td>\r" +
+		out.println("<br><br>\r<hr>\r<table class=\"footer-box\" width=\"100%\" cellpadding=\"4\"><tr><td class=\"small\">Powered by<br><a href=\"http://www.deepamehta.de/\" target=\"_blank\"><b>DeepaMehta</b></a></td>\r" +
 			"<td class=\"small\" align=\"right\"><a href=\"http://www.kiezatlas.de/impressum.html\" target=\"_top\">Impressum +<br>Haftungshinweise</a></td>" +
 			"</tr></table>\r</body>\r</html>");
 	}

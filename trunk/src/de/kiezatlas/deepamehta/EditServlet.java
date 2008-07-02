@@ -4,6 +4,7 @@ import de.kiezatlas.deepamehta.topics.GeoObjectTopic;
 //
 import de.deepamehta.BaseTopic;
 import de.deepamehta.DeepaMehtaException;
+import de.deepamehta.service.CorporateDirectives;
 import de.deepamehta.service.Session;
 import de.deepamehta.service.TopicBean;
 import de.deepamehta.service.web.DeepaMehtaServlet;
@@ -25,13 +26,14 @@ import org.apache.commons.fileupload.FileItem;
  * Kiezatlas 1.5.1<br>
  * Requires DeepaMehta 2.0b8.
  * <p>
- * Last change: 27.6.2008<br>
+ * Last change: 29.6.2008<br>
  * J&ouml;rg Richter<br>
  * jri@deepamehta.de
  */
 public class EditServlet extends DeepaMehtaServlet implements KiezAtlas {
 
-	protected String performAction(String action, RequestParameter params, Session session) throws ServletException {
+	protected String performAction(String action, RequestParameter params, Session session, CorporateDirectives directives)
+																									throws ServletException {
 		if (action == null) {
 			try {
 				String pathInfo = params.getPathInfo();
@@ -69,7 +71,7 @@ public class EditServlet extends DeepaMehtaServlet implements KiezAtlas {
 		} else if (action.equals(ACTION_UPDATE_GEO)) {
 			// update geo object
 			GeoObjectTopic geo = getGeoObject(session);
-			updateTopic(geo.getType(), params, session);
+			updateTopic(geo.getType(), params, session, directives);
 			// update timestamp
 			cm.setTopicData(geo.getID(), 1, PROPERTY_LAST_MODIFIED, DeepaMehtaUtils.getDate());
 			// store image
@@ -114,11 +116,11 @@ public class EditServlet extends DeepaMehtaServlet implements KiezAtlas {
 			return PAGE_GEO_HOME;
 			//
 		} else {
-			return super.performAction(action, params, session);
+			return super.performAction(action, params, session, directives);
 		}
 	}
 
-	protected void preparePage(String page, RequestParameter params, Session session) {
+	protected void preparePage(String page, RequestParameter params, Session session, CorporateDirectives directives) {
 		if (page.equals(PAGE_GEO_HOME)) {
 			String geoID = getGeoObject(session).getID();
 			TopicBean topicBean = as.createTopicBean(geoID, 1);
