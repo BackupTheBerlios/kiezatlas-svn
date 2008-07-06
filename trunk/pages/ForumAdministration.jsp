@@ -1,6 +1,6 @@
 <%@ include file="KiezAtlas.jsp" %>
 
-<% begin(session, out); %>
+<% begin(KiezAtlas.SERVLET_EDIT, session, out); %>
 <%
 	HTMLGenerator html = (HTMLGenerator) session.getAttribute("html");
 	BaseTopic inst = (BaseTopic) session.getAttribute("geo");

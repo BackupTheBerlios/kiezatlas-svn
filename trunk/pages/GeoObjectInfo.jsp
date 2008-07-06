@@ -63,7 +63,7 @@
 	topicBean.removeField("Stadt");
 	//print properties which were not removed, starting generic content rendering 
 	out.println("<br/><br/>");
-	out.println(html.info(topicBean, 2));
+	out.println(html.info(topicBean, DeepaMehtaConstants.LAYOUT_STYLE_FLOW));
 	//If forum is activated by the owner, it will be shown a link here
 	if (forumActivition.equals(KiezAtlas.SWITCH_ON)) {
 		// link to forum page

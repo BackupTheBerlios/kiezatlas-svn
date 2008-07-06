@@ -1,6 +1,6 @@
 <%@ include file="KiezAtlas.jsp" %>
 
-<% begin(session, out); %>
+<% begin(KiezAtlas.SERVLET_LIST, session, out); %>
 <%
 	Vector workspaces = (Vector) session.getAttribute("workspaces");
 	Hashtable cityMaps = (Hashtable) session.getAttribute("cityMaps");

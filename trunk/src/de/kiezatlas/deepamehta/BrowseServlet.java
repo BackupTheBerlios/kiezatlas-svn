@@ -35,9 +35,9 @@ import de.kiezatlas.deepamehta.topics.GeoObjectTopic;
  * Kiezatlas 1.5.1<br>
  * Requires DeepaMehta 2.0b8
  * <p>
- * Last change: 29.6.2008<br>
+ * Last change: 4.7.2008<br>
  * J&ouml;rg Richter<br>
- * jri@freenet.de
+ * jri@deepamehta.de
  */
 public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 
@@ -45,19 +45,19 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 																									throws ServletException {
 		if (action == null) {
 			try {
-				//first visit regular or special 
+				// first visit regular or special 
 				String pathInfo = params.getPathInfo();
 				String alias = pathInfo.substring(1);
-				//extension for optional parameters needed for a special visit
+				// extension for optional parameters needed for a special visit
 				String geoID = params.getParameter("id");
 				String kiez = params.getParameter("kiez");
 				// error check
 				if (pathInfo == null || pathInfo.length() == 1) {
 					throw new DeepaMehtaException("Fehler in URL");
 				}
-				//handling for single geoObjectUrls in the right CityMap, the old url scheme was not applicable for this task
-				//cause of incorrect paths to icons and css files, if relative to /browse/nk-reuter/controller?action=showInfo....
-				//for this task now a special kiez param was introduced, for the code it means, eliminating redundancy
+				// handling for single geoObjectUrls in the right CityMap, the old url scheme was not applicable for this task
+				// cause of incorrect paths to icons and css files, if relative to /browse/nk-reuter/controller?action=showInfo...
+				// for this task now a special kiez param was introduced, for the code it means, eliminating redundancy
 				if(geoID != null && kiez != null) {
 					TopicBean topicBean = as.createTopicBean(geoID, 1);
 					session.setAttribute("topicBean", topicBean);
@@ -91,17 +91,17 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 			String frame = params.getValue("frame");
 			TopicBean topicBean = (TopicBean) session.getAttribute("topicBean");
 			if (frame.equals(FRAME_LEFT)) {
-				//selectMarker if topicBean is set / form external call
-				if(topicBean != null){
+				// selectMarker if topicBean is set / form external call
+				if(topicBean != null) {
 					setSelectedGeo(topicBean.id, session);
 				}					
 				return PAGE_CITY_MAP;
 			} else if (frame.equals(FRAME_RIGHT)) {
 				if (topicBean != null) {
-					//try to show a given GeoObject, have to set a hotspot
-					String mapID = getCityMap(session).getID(); // ### just for the hotspot
-					String instTypeID = getInstitutionType(session).getID(); // ### just for the hotspot 
-					setSearchMode("0", session); // ### i have to set a searchmode
+					// try to show a given GeoObject, have to set a hotspot
+					String mapID = getCityMap(session).getID();					// ### just for the hotspot
+					String instTypeID = getInstitutionType(session).getID();	// ### just for the hotspot 
+					setSearchMode("0", session);								// ### i have to set a searchmode
 					String imagePath = as.getCorporateWebBaseURL() + FILESERVER_IMAGES_PATH;
 					session.setAttribute("imagePath", imagePath);
 					GeoObjectTopic geo = (GeoObjectTopic) as.getLiveTopic(topicBean.id, 1);
@@ -110,7 +110,7 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 					if (isForumActivated) {
 						session.setAttribute("commentCount", new Integer(geo.getComments().size()));
 					}
-					//just trial and error, somehow it looks good, but don´t now what i did exactly here
+					// just trial and error, somehow it looks good, but don't now what i did exactly here (mre)
 					Vector insts = cm.getViewTopics(mapID, 1, instTypeID, getSearchValue(session));
 					setHotspots(insts, ICON_HOTSPOT, session);
 					return PAGE_GEO_INFO;
@@ -245,7 +245,7 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 					// address		
 					BaseTopic address = geo.getAddress();
 					// if no related address put new hashtable in it for property city
-					Hashtable addressProps = address != null ?  as.getTopicProperties(address) : new Hashtable(); 
+					Hashtable addressProps = address != null ? as.getTopicProperties(address) : new Hashtable(); 
 					addressProps.put(PROPERTY_CITY, geo.getCity());
 					addresses.put(geo.getID(), addressProps);
 				} catch (ClassCastException e) {
@@ -360,8 +360,7 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 	}
 
 	private void initInstitutaionType(Session session) {
-		BaseTopic instT = ((CityMapTopic) as.getLiveTopic(getCityMap(session))).getInstitutionType();	// ### ugly
-		TypeTopic instType = (TypeTopic) as.getLiveTopic(instT);
+		BaseTopic instType = ((CityMapTopic) as.getLiveTopic(getCityMap(session))).getInstitutionType();	// ### ugly
 		session.setAttribute("instType", instType);
 		System.out.println(">>> \"instType\" stored in session: " + instType);
 	}
@@ -432,7 +431,7 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 		Vector presentables = new Vector(topics);
 		presentables.insertElementAt(as.getCorporateWebBaseURL() + FILESERVER_ICONS_PATH + icon, 0);
 		hotspots.addElement(presentables);
-		//System.out.println("Have to handle clusters in here");
+		// ### System.out.println("Have to handle clusters in here");
 		makeCluster(hotspots, cluster);
 		session.setAttribute("cluster", cluster);
 		session.setAttribute("hotspots", hotspots);
@@ -449,18 +448,18 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 	public void makeCluster(Vector hotspots, Vector clusters) {
 		Iterator vectorOfHotspots = hotspots.iterator();
 		while ( vectorOfHotspots.hasNext() ) {
-			//for size of hotspot vectors in vector hotspot
+			// for size of hotspot vectors in vector hotspot
 			Vector currentHotspots = (Vector) vectorOfHotspots.next();
 			Iterator presentableTopics = currentHotspots.iterator();
-			//System.out.println("size of current Hotspot " + currentHotspots.toString() +" : "+ currentHotspots.size());
-			//jump over the string, and make sure something is there as first item in our vector
+			// ### System.out.println("size of current Hotspot " + currentHotspots.toString() +" : "+ currentHotspots.size());
+			// jump over the string, and make sure something is there as first item in our vector
 			if (presentableTopics.hasNext()) presentableTopics.next();
 			while( presentableTopics.hasNext() ) {
 				// the first element is always the icon path of the following hotspots
 				PresentableTopic currentPT = (PresentableTopic) presentableTopics.next();
 				Cluster foundCluster = findAndCheckClusters(currentPT, clusters);
 				if (foundCluster != null) {
-					//addPresentable, checks for doubles
+					// addPresentable, checks for doubles
 					foundCluster.addPresentable(currentPT);
 				} else {
 					// es gibt noch kein cluster oder es wurde kein passendes gefunden also suchen, 
@@ -468,23 +467,23 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 					PresentableTopic foundPT = findPT(currentPT, hotspots);
 					if ( foundPT != null ) {
 						// create Cluster, with two points, if they don't have the same ID add the respective dm server icon path
-						// System.out.println("created new cluster with " + currentPT.getID() + " and " + foundPT.getID());
+						// ### System.out.println("created new cluster with " + currentPT.getID() + " and " + foundPT.getID());
 						clusters.add(new Cluster(currentPT, foundPT, as.getCorporateWebBaseURL() + FILESERVER_ICONS_PATH));
 					}
 				}
 			}
-			//System.out.println("> \"clusters\": "+clusters.toString());
+			// ### System.out.println("> \"clusters\": "+clusters.toString());
 		}
 	}
 	
 	private Cluster findAndCheckClusters(PresentableTopic currentPT, Vector clusters){
 			for (int c=0; c < clusters.size(); c++) {	
-				//checking each cluster for point of current pt
+				// checking each cluster for point of current pt
 				Cluster currentCluster = (Cluster) clusters.get(c);
-				//System.out.println(currentCluster.presentables.size() + " topics in current Cluster" + currentCluster.getPoint());
-				//System.out.println("point to Check " + currentPT.getName() +", "+ currentPT.getGeometry());
+				// ### System.out.println(currentCluster.presentables.size() + " topics in current Cluster" + currentCluster.getPoint());
+				// ### System.out.println("point to Check " + currentPT.getName() +", "+ currentPT.getGeometry());
 				if (currentCluster.getPoint().equals(currentPT.getGeometry())) {
-					//System.out.println("found cluster to return for adding pt");
+					// ### System.out.println("found cluster to return for adding pt");
 					return currentCluster;
 				}
 			}
@@ -579,8 +578,8 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 		return getCriteria(i, session);
 	}
 
-	private TypeTopic getInstitutionType(Session session) {
-		return (TypeTopic) session.getAttribute("instType");
+	private BaseTopic getInstitutionType(Session session) {
+		return (BaseTopic) session.getAttribute("instType");
 	}
 
 	private String getSearchMode(Session session) {

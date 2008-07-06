@@ -1,6 +1,6 @@
 <%@ include file="KiezAtlas.jsp" %>
 
-<% begin(session, out); %>
+<% begin(KiezAtlas.SERVLET_UPLOAD, session, out); %>
 <h2>Zugang zum Upload von Neuk&ouml;lln-Stadtinfo-Daten</h2>
 <form method="post">
 	<table>

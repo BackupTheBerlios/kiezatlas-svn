@@ -1,6 +1,6 @@
 <%@ include file="KiezAtlas.jsp" %>
 
-<% begin(session, out); %>
+<% begin(KiezAtlas.SERVLET_LIST, session, out); %>
 <h2>Zugang zu den Listen</h2>
 <form method="post">
 	<table>

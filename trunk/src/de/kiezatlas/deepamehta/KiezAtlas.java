@@ -8,7 +8,7 @@ import de.deepamehta.DeepaMehtaConstants;
  * Kiezatlas 1.5.1<br>
  * Requires DeepaMehta 2.0b8.
  * <p>
- * Last change: 25.6.2008<br>
+ * Last change: 6.7.2008<br>
  * J&ouml;rg Richter<br>
  * jri@deepamehta.de
  */
@@ -157,6 +157,19 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 
 
 
+	// ----------------
+	// --- Servlets ---
+	// ----------------
+
+
+
+	public static final int SERVLET_BROWSE = 1;
+	public static final int SERVLET_EDIT = 2;
+	public static final int SERVLET_LIST = 3;
+	public static final int SERVLET_UPLOAD = 4;
+
+
+
 	// -------------
 	// --- Icons ---
 	// -------------
@@ -164,6 +177,7 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 
 
 	public static final String ICON_HOTSPOT = "redball-middle.gif";
+	public static final String ICON_CLUSTER = "redball-bigger.gif";
 
 
 

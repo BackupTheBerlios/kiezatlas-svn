@@ -1,34 +1,32 @@
 package de.kiezatlas.deepamehta;
 
-import java.awt.Point;
-import java.util.Vector;
-//
 import de.deepamehta.PresentableTopic;
+//
+import java.awt.Point;
+import java.io.Serializable;
+import java.util.Vector;
 
 
 
-public class Cluster {
+public class Cluster implements KiezAtlas, Serializable {
 
 	private Point p;
 	private String icon;
 	private Vector presentables = new Vector();
 
-	public Cluster (PresentableTopic presentableOne, PresentableTopic presentableTwo, String clusterIconPath) {		
-		// first object is the point of this cluster
+	public Cluster(PresentableTopic presentableOne, PresentableTopic presentableTwo, String clusterIconPath) {		
 		p = presentableOne.getGeometry();
-		icon = clusterIconPath + "redball-bigger.gif";
+		icon = clusterIconPath + ICON_CLUSTER;
 		presentables.add(presentableOne);
 		presentables.add(presentableTwo);
 	}
 
-	// Override
 	public String toString() {
 		return ":: " + presentables.toString() + " :: ";
 	}
 
 	public void addPresentable(PresentableTopic presentable) {
 		if (!presentables.contains(presentable)) {
-			//System.out.println("added "+ presentable.getID()+" into " + this.p);
 			presentables.add(presentable);
 		}
 	}

@@ -1,6 +1,6 @@
 <%@ include file="KiezAtlas.jsp" %>
 
-<% begin(session, out); %>
+<% begin(KiezAtlas.SERVLET_EDIT, session, out); %>
 <%
 	HTMLGenerator html = (HTMLGenerator) session.getAttribute("html");
 	TopicBean topicBean = (TopicBean) session.getAttribute("topicBean");
@@ -23,7 +23,7 @@
 	topicBean.removeFieldsContaining("YADE");
 	//
 	out.println("<H2>" + topicBean.getValue("Name") + "</H2>");
-	out.println(html.info(topicBean, DeepaMehtaConstants.BEAN_LAYOUT_BOX));
+	out.println(html.info(topicBean, DeepaMehtaConstants.LAYOUT_STYLE_FLOW));
 	//
 	// links to form page and forum administration
 	out.println("<p>\r" + html.link("Zum &Auml;nderungsformular", KiezAtlas.ACTION_SHOW_GEO_FORM) + "</p>");

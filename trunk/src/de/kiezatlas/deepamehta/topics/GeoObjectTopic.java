@@ -30,7 +30,7 @@ import java.util.Vector;
  * Kiezatlas 1.5.1<br>
  * Requires DeepaMehta 2.0b8
  * <p>
- * Last change: 25.6.2008<br>
+ * Last change: 3.7.2008<br>
  * J&ouml;rg Richter<br>
  * jri@deepamehta.de
  */
@@ -190,14 +190,20 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 		CorporateDirectives directives = super.propertiesChanged(newProps, oldProps, topicmapID, viewmode, session);
 		// --- "YADE" ---
 		if (newProps.get(PROPERTY_YADE_X) != null || newProps.get(PROPERTY_YADE_Y) != null) {
-			// determine new geometry
-			Point p = getPoint(topicmapID);	// throws DME
-			// set new geometry
-			if (p != null) {	// Note: p is null if YADE is "off"
-				directives.add(DIRECTIVE_SET_TOPIC_GEOMETRY, getID(), p, topicmapID);
-			} else {
-				// ###
-				System.out.println(">>> GeoObjectTopic.propertiesChanged(): " + this + " not (re)positioned (VADE is off)");
+			try {
+				// determine new geometry
+				Point p = getPoint(topicmapID);	// throws DME
+				// set new geometry
+				if (p != null) {	// Note: p is null if YADE is "off"
+					directives.add(DIRECTIVE_SET_TOPIC_GEOMETRY, getID(), p, topicmapID);
+				} else {
+					// ###
+					System.out.println(">>> GeoObjectTopic.propertiesChanged(): " + this +
+						" not (re)positioned (VADE is \"off\")");
+				}
+			} catch (DeepaMehtaException e) {
+				throw new DeepaMehtaException("\"" + getName() + "\" konnte nicht automatisch positioniert werden (" +
+					e.getMessage() + ")");
 			}
 		}
 		//
@@ -303,7 +309,7 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 		Vector institutions = as.cm.getTopics(typeIDs, props, true);		// caseSensitiv=true
 		// error check
 		if (institutions.size() == 0) {
-			throw new DeepaMehtaException("Fehler in URL: Einrichtung \"" + alias + "\" ist nicht bekannt");
+			throw new DeepaMehtaException("Fehler in URL: \"" + alias + "\" ist nicht bekannt");
 		}
 		if (institutions.size() > 1) {
 			throw new DeepaMehtaException("Mehrdeutigkeit: es gibt " + institutions.size() + " \"" + alias + "\" Einrichtungen");
@@ -415,8 +421,8 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 			yadeX2 = Float.parseFloat(as.getTopicProperty(yp[1], PROPERTY_YADE_X));
 			yadeY2 = Float.parseFloat(as.getTopicProperty(yp[1], PROPERTY_YADE_Y));
 		} catch (NumberFormatException e) {
-			throw new DeepaMehtaException("Administrator-Fehler: ein YADE Referenzpunkt von " +
-				"Stadtplan \"" + citymap.getName() + "\" hat ungültigen Wert (" + e.getMessage() + ")");
+			throw new DeepaMehtaException("ein YADE-Referenzpunkt von Stadtplan \"" + citymap.getName() +
+				"\" hat ungültigen Wert (" + e.getMessage() + ")");
 		}
 		// yade -> pixel
 		try {
@@ -426,7 +432,7 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 			int y = (int) (y2 + (y1 - y2) * (yadeY - yadeY2) / (yadeY1 - yadeY2));
 			return new Point(x, y);
 		} catch (NumberFormatException e) {
-			throw new DeepaMehtaException("YADE Koordinate von Einrichtung \"" + getName() + "\" ist ungültig (" +
+			throw new DeepaMehtaException("YADE-Koordinate von \"" + getName() + "\" ist ungültig (" +
 				e.getMessage() + ")");
 		}
 	}
@@ -437,7 +443,6 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 	 * @return	the YADE-coordinate, or <code>null</code> if YADE is "off".
 	 *
 	 * @see		#moved
-	 * @see		CityMapTopic#updateYADECoordinates
 	 */
 	Point2D.Float getYadePoint(int x, int y, String citymapID) throws DeepaMehtaException {
 		// ### copied
@@ -460,8 +465,8 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 			float yadeY = yadeY2 + (yadeY1 - yadeY2) * (y2 - y) / (y2 - y1);
 			return new Point2D.Float(yadeX, yadeY);
 		} catch (NumberFormatException e) {
-			throw new DeepaMehtaException("Administrator-Fehler: ein YADE Referenzpunkt von " +
-				"Stadtplan \"" + citymap.getName() + "\" hat ungültigen Wert (" + e.getMessage() + ")");
+			throw new DeepaMehtaException("ein YADE-Referenzpunkt von Stadtplan \"" + citymap.getName() +
+				"\" hat ungültigen Wert (" + e.getMessage() + ")");
 		}
 	}
 

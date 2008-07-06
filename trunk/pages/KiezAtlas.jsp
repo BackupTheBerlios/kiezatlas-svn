@@ -25,11 +25,22 @@
 <%@ page import="java.awt.Point" %>
 
 <%!
-	// edit / list
-	void begin(HttpSession session, JspWriter out) throws IOException {
-		out.println("<html>\r<head>\r<title>Kiezatlas</title>\r" +
-			"<link href=\"../pages/kiezatlas.css\" rel=\"stylesheet\" type=\"text/css\">\r</head>\r" +
-			"<body>\r<a href=\"http://www.kiezatlas.de/\" target=\"_blank\"><img src=\"../images/kiezatlas-logo.png\" border=\"0\"></a>");
+	// edit / list / upload
+	void begin(int servlet, HttpSession session, JspWriter out) throws IOException {
+		String title = "Kiezatlas";
+		switch (servlet) {
+		case KiezAtlas.SERVLET_EDIT:
+			BaseTopic geo = (BaseTopic) session.getAttribute("geo");
+			title = title + " - " + geo.getName();
+			break;
+		case KiezAtlas.SERVLET_LIST:
+			title = title + " - Listenzugang";
+			break;
+		}
+		out.println("<html>\r<head>\r<title>" + title + "</title>\r" +
+			"<link href=\"../pages/kiezatlas.css\" rel=\"stylesheet\" type=\"text/css\">\r</head>\r<body>\r" +
+			"<a href=\"http://www.kiezatlas.de/\" target=\"_blank\"><img src=\"../images/kiezatlas-logo.png\" border=\"0\">" +
+			"</a>\r<br><br>");
 	}
 
 	// browse
@@ -138,11 +149,11 @@
 			}
 			//assemble the html block with streetname, postal code and city with the fahrplan img as a link in a block
 			String mapURL = (postalCode == null) ? 
-					"http://www.fahrinfo-berlin.de/gis/index.jsp?adr_zip=&adr_street=" + streetname + "&adr_house=" + hnr :
-					"http://www.fahrinfo-berlin.de/gis/index.jsp?adr_zip=" + postalCode + "&adr_street=" + streetname + "&adr_house=" + hnr;
+				"http://www.fahrinfo-berlin.de/gis/index.jsp?adr_zip=&adr_street=" + streetname + "&adr_house=" + hnr :
+				"http://www.fahrinfo-berlin.de/gis/index.jsp?adr_zip=" + postalCode + "&adr_street=" + streetname + "&adr_house=" + hnr;
 			//
 			String imageLink = " <a href=\"" + mapURL + "\" target=\"fahrinfo\"><img src=\"../images/fahrinfo.gif\" border=\"0\" hspace=\"20\"></a>";
-			blockString.append((postalCode == null) ? street + imageLink + "</br>" + city : street + imageLink + "</br>" + postalCode + " " + city);	
+			blockString.append((postalCode == null) ? street + imageLink + "</br>" + city : street + imageLink + "</br>" + postalCode + " " + city);
 			return blockString.toString();
 		} else {
 			//else render what is available

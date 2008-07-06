@@ -4,6 +4,7 @@ import de.kiezatlas.deepamehta.topics.GeoObjectTopic;
 //
 import de.deepamehta.BaseTopic;
 import de.deepamehta.DeepaMehtaException;
+import de.deepamehta.service.ApplicationService;
 import de.deepamehta.service.CorporateDirectives;
 import de.deepamehta.service.Session;
 import de.deepamehta.service.TopicBean;
@@ -26,7 +27,7 @@ import org.apache.commons.fileupload.FileItem;
  * Kiezatlas 1.5.1<br>
  * Requires DeepaMehta 2.0b8.
  * <p>
- * Last change: 29.6.2008<br>
+ * Last change: 4.7.2008<br>
  * J&ouml;rg Richter<br>
  * jri@deepamehta.de
  */
@@ -75,10 +76,8 @@ public class EditServlet extends DeepaMehtaServlet implements KiezAtlas {
 			// update timestamp
 			cm.setTopicData(geo.getID(), 1, PROPERTY_LAST_MODIFIED, DeepaMehtaUtils.getDate());
 			// store image
-			String newFilename = writeImage(params.getUploads());
-			if (newFilename != null) {
-				as.setTopicProperty(geo.getImage(), PROPERTY_FILE, newFilename);
-			}
+			writeImage(params.getUploads(), geo.getImage(), PROPERTY_FILE, as);
+			//
 			return PAGE_GEO_HOME;
 			//
 		} else if (action.equals(ACTION_SHOW_FORUM_ADMINISTRATION)) {
@@ -144,7 +143,11 @@ public class EditServlet extends DeepaMehtaServlet implements KiezAtlas {
 
 
 
-	static String writeImage(Vector fileItems) {
+	/**
+	 * @see		#performAction
+	 * @see		ListServlet#performAction
+	 */
+	static String writeImage(Vector fileItems, BaseTopic topic, String propName, ApplicationService as) {
 		try {
 			System.out.println(">>> EditServlet.writeImage(): " + fileItems.size() + " files uploaded");
 			if (fileItems.size() > 0) {
@@ -169,6 +172,9 @@ public class EditServlet extends DeepaMehtaServlet implements KiezAtlas {
 				// ### item.write(new File(as.getCorporateWebBaseURL().substring(5) + "images/" + filename));
 				System.out.println("  > file \"" + fileToWrite + "\" written successfully");
 				if (copyCount > 0) {
+					if (newFilename != null) {
+						as.setTopicProperty(topic, propName, newFilename);
+					}
 					return newFilename;
 				}
 			}

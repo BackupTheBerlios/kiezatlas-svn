@@ -21,8 +21,8 @@
 
 	<context-param>
 		<param-name>service</param-name>
-		<param-value>mysql5</param-value><!-- jri's default instance -->
-		<!-- <param-value>kiezatlas</param-value> --><!-- www.kiezatlas.de production instance -->
+		<!-- <param-value>mysql5</param-value> -->	<!-- jri's default instance -->
+		<param-value>kiezatlas</param-value>		<!-- www.kiezatlas.de production instance -->
 		<description>
 			Selects a DeepaMehta service.
 			If this parameter is not set the "default" service will be used.

@@ -24,9 +24,9 @@ import java.util.*;
  * Kiezatlas 1.5.1<br>
  * Requires DeepaMehta 2.0b8
  * <p>
- * Last change: 30.6.2008<br>
+ * Last change: 3.7.2008<br>
  * J&ouml;rg Richter<br>
- * jri@freenet.de
+ * jri@deepamehta.de
  */
 public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 
@@ -168,7 +168,6 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 				Point p = inst.getPoint(getID());	// throws DME
 				// set new geometry
 				if (p != null) {	// Note: p is null if YADE is "off"
-					// ### System.out.println(">>> CityMapTopic.getPresentableTopic(): " + topic + " prgramatically placed to " + p);
 					pt.setGeometry(p);
 				}
 			} catch (DeepaMehtaException e) {
@@ -238,6 +237,10 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 
 	// ---
 
+	public boolean isYADEOn() {
+		return getYADERefPoints().size() == 2;
+	}
+
 	/**
 	 * @return	2-element array of YADE-reference topics, or <code>null</code> if there are no YADE-reference topics
 	 *			inside this city map (YADE is "off").
@@ -246,13 +249,15 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 	 * @see		GeoObjectTopic#getYadePoint
 	 */
 	public PresentableTopic[] getYADEReferencePoints() throws DeepaMehtaException {
-		Vector yp = cm.getViewTopics(getID(), 1, TOPICTYPE_YADE_POINT);
+		Vector yp = getYADERefPoints();
 		if (yp.size() == 0) {
 			// Note: this is not an error (YADE is "off").
 			return null;
 		} else if (yp.size() != 2) {
-			throw new DeepaMehtaException("Administrator-Fehler: Stadtplan \"" + getName() + "\" hat " +
-				yp.size() + " YADE Referenzpunkte. Notwendig sind 0 oder 2.");
+			String errText = yp.size() == 1 ? "Stadtplan \"" + getName() + "\" hat nur einen YADE-Referenzpunkt. " +
+				"Notwendig sind zwei."		: "Stadtplan \"" + getName() + "\" hat " + yp.size() + " YADE-Referenzpunkte. " +
+				"Notwendig sind zwei.";
+			throw new DeepaMehtaException(errText);
 		}
 		PresentableTopic[] yt = new PresentableTopic[2];
 		yt[0] = (PresentableTopic) yp.elementAt(0);
@@ -276,7 +281,8 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 				Point p = inst.getPoint(getID());	// throws DME
 				// Note: if YADE is "off" p is null
 				if (p == null) {
-					String txt = "Die Einrichtungen konnten nicht neuplatziert werden. Es müssen erst 2 Referenzpunkte gesetzt werden.";
+					String txt = "Die Einrichtungen konnten nicht neupositioniert werden. " +
+						"Es müssen erst 2 YADE-Referenzpunkte gesetzt werden.";
 					directives.add(DIRECTIVE_SHOW_MESSAGE, txt, new Integer(NOTIFICATION_WARNING));
 					System.out.println(">>> CityMapTopic.repositionAllInstitutions(): " + txt);
 					return;
@@ -285,12 +291,16 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 				directives.add(DIRECTIVE_SET_TOPIC_GEOMETRY, inst.getID(), p, getID());
 				System.out.println(">>> CityMapTopic.repositionAllInstitutions(): " + inst + " -> moved to " + p.x + " " + p.y);
 			} catch (DeepaMehtaException dme) {
-				String txt = "Die Neuplatzierung der Einrichtungen wurde abgebrochen (" + dme.getMessage() + ")";
+				String txt = "Die Neupositionierung der Einrichtungen wurde abgebrochen (" + dme.getMessage() + ")";
 				directives.add(DIRECTIVE_SHOW_MESSAGE, txt, new Integer(NOTIFICATION_WARNING));
 				System.out.println(">>> CityMapTopic.repositionAllInstitutions(): " + txt);
 				return;
 			}
 		}
+	}
+
+	private Vector getYADERefPoints() {
+		return cm.getViewTopics(getID(), 1, TOPICTYPE_YADE_POINT);
 	}
 
 	// --- lookupCityMap (3 forms) ---

@@ -1,6 +1,6 @@
 <%@ include file="KiezAtlas.jsp" %>
 
-<% begin(session, out); %>
+<% begin(KiezAtlas.SERVLET_EDIT, session, out); %>
 <%!
 	static String[] hiddenProps = {
 		"Name",

@@ -7,6 +7,7 @@ import de.deepamehta.BaseTopic;
 import de.deepamehta.service.CorporateDirectives;
 import de.deepamehta.service.Session;
 import de.deepamehta.service.web.DeepaMehtaServlet;
+import de.deepamehta.service.web.Notification;
 import de.deepamehta.service.web.RequestParameter;
 import de.deepamehta.util.DeepaMehtaUtils;
 //
@@ -22,7 +23,7 @@ import java.util.Vector;
  * Kiezatlas 1.5.1<br>
  * Requires DeepaMehta 2.0b8
  * <p>
- * Last change: 29.6.2008<br>
+ * Last change: 6.7.2008<br>
  * J&ouml;rg Richter<br>
  * jri@deepamehta.de
  */
@@ -52,26 +53,42 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			setGeoObject(cm.getTopic(geoObjectID, 1), session);
 			return PAGE_GEO_ADMIN_FORM;
 		} else if (action.equals(ACTION_UPDATE_GEO)) {
-			// update geo object
 			GeoObjectTopic geo = getGeoObject(session);
-			String cityMapID = getCityMap(session).getID();
-			updateTopic(geo.getType(), params, session, directives, cityMapID, VIEWMODE_USE);
-			// update timestamp
+			CityMapTopic cityMap = getCityMap(session);
+			// --- notification ---
+			// Note: the check for warnings is performed before the form input is processed
+			// because the processing eat the parameters up.
+			checkForWarnings(params, session, directives);
+			// --- update geo object ---
+			updateTopic(geo.getType(), params, session, directives, cityMap.getID(), VIEWMODE_USE);
+			// --- update timestamp ---
 			cm.setTopicData(geo.getID(), 1, PROPERTY_LAST_MODIFIED, DeepaMehtaUtils.getDate());
-			// store image
-			String newFilename = EditServlet.writeImage(params.getUploads());
-			if (newFilename != null) {
-				as.setTopicProperty(geo.getImage(), PROPERTY_FILE, newFilename);
-			}
+			// --- store image ---
+			EditServlet.writeImage(params.getUploads(), geo.getImage(), PROPERTY_FILE, as);
+			//
 			return PAGE_LIST;
 		} else if (action.equals(ACTION_SHOW_EMPTY_GEO_FORM)) {
 			return PAGE_GEO_EMPTY_FORM;
 		} else if (action.equals(ACTION_CREATE_GEO)) {
 			String geoObjectID = as.getNewTopicID();
-			String cityMapID = getCityMap(session).getID();
-			cm.createViewTopic(cityMapID, 1, VIEWMODE_USE, geoObjectID, 1, 0, 0, false);	// performExistenceCheck=false
-			createTopic(getInstTypeID(session), params, session, directives, cityMapID, geoObjectID);
+			CityMapTopic cityMap = getCityMap(session);
+			// --- notification ---
+			// Note: the check for warnings is performed before the form input is processed
+			// because the processing eat the parameters up.
+			checkForWarnings(params, session, directives);
+			// --- place in city map ---
+			// Note: the geo object is placed in city map before it is actually created.
+			// This way YADE-based autopositioning can perform through geo object's propertiesChanged() hook.
+			cm.createViewTopic(cityMap.getID(), 1, VIEWMODE_USE, geoObjectID, 1, 0, 0, false);	// performExistenceCheck=false
+			// --- create geo object ---
+			// Note: timestamp, password, and geometry-lock are initialized through geo object's evoke() hook.
+			createTopic(getInstTypeID(session), params, session, directives, cityMap.getID(), geoObjectID);
+			// --- get geo object ---
 			setGeoObject(cm.getTopic(geoObjectID, 1), session);
+			GeoObjectTopic geo = getGeoObject(session);
+			// --- store image ---
+			EditServlet.writeImage(params.getUploads(), geo.getImage(), PROPERTY_FILE, as);
+			//
 			return PAGE_LIST;
 		} else if (action.equals(ACTION_GO_HOME)) {
 			return PAGE_LIST_HOME;
@@ -87,10 +104,12 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			session.setAttribute("workspaces", workspaces);
 			session.setAttribute("cityMaps", cityMaps);
 		} else if (page.equals(PAGE_LIST)) {
+			// geo objects
 			String cityMapID = getCityMap(session).getID();
 			String instTypeID = getInstTypeID(session);
 			Vector insts = cm.getTopicIDs(instTypeID, cityMapID, true);		// sortByTopicName=true
 			session.setAttribute("topics", insts);
+			// notifications
 			session.setAttribute("notifications", directives.getNotifications());
 		}
 	}
@@ -144,6 +163,19 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		return cityMaps;
 	}
 
+	private void checkForWarnings(RequestParameter params, Session session, CorporateDirectives directives) {
+		CityMapTopic cityMap = getCityMap(session);
+		String geoName = params.getValue(PROPERTY_NAME);
+		// warning if YADE is "off"
+		if (!cityMap.isYADEOn()) {
+			directives.add(DIRECTIVE_SHOW_MESSAGE, "\"" + geoName + "\" wurde hilfsweise in die Ecke oben/links positioniert " +
+				"(Stadtplan \"" + cityMap.getName() + "\" hat keine YADE-Referenzpunkte)", new Integer(NOTIFICATION_WARNING));
+		} else if (params.getValue(PROPERTY_YADE_X).equals("") && params.getValue(PROPERTY_YADE_Y).equals("")) {
+			directives.add(DIRECTIVE_SHOW_MESSAGE, "\"" + geoName + "\" wurde hilfsweise in die Ecke oben/links positioniert " +
+				"-- Bitte YADE-Koordinaten angeben", new Integer(NOTIFICATION_WARNING));
+		}
+	}
+
 
 
 	// *************************
@@ -176,8 +208,8 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 
 	// ---
 
-	private BaseTopic getCityMap(Session session) {
-		return (BaseTopic) session.getAttribute("cityMap");
+	private CityMapTopic getCityMap(Session session) {
+		return (CityMapTopic) as.getLiveTopic((BaseTopic) session.getAttribute("cityMap"));
 	}
 
 	private String getInstTypeID(Session session) {
