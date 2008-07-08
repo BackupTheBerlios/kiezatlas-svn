@@ -27,10 +27,10 @@ import java.util.Vector;
 
 
 /**
- * Kiezatlas 1.5.1<br>
+ * Kiezatlas 1.6<br>
  * Requires DeepaMehta 2.0b8
  * <p>
- * Last change: 3.7.2008<br>
+ * Last change: 8.7.2008<br>
  * J&ouml;rg Richter<br>
  * jri@deepamehta.de
  */
@@ -206,6 +206,8 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 					e.getMessage() + ")");
 			}
 		}
+		// --- update timestamp ---
+		cm.setTopicData(getID(), 1, PROPERTY_LAST_MODIFIED, DeepaMehtaUtils.getDate());
 		//
 		return directives;
 	}

@@ -24,9 +24,9 @@
 %>
 <h2>Zugang zum Upload von Neuk&ouml;lln-Stadtinfo-Daten</h2>
     <form name="StadtinfoData" method="POST" enctype="multipart/form-data">
-        W&auml;hlen Sie eine Datei aus :<br/><br/>
-        <input type="file" name="File2Upload" value="" width="20" /><br/><br/>
-        <input type="submit" value="UploadDataAction" name="Upload" />
-        <input type="hidden" name="action" value="UploadDataAction" />
+        W&auml;hlen Sie eine Datei aus:<br><br>
+        <input type="file" name="File2Upload" value="" width="20"><br><br>
+        <input type="submit" value="UploadDataAction" name="Upload">
+        <input type="hidden" name="action" value="UploadDataAction">
     </form>
 <% end(out); %>

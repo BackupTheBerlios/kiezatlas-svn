@@ -21,7 +21,7 @@ import java.util.*;
 
 
 /**
- * Kiezatlas 1.5.1<br>
+ * Kiezatlas 1.6<br>
  * Requires DeepaMehta 2.0b8
  * <p>
  * Last change: 3.7.2008<br>
@@ -32,7 +32,7 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 
 
 
-	static final String VERSION = "1.5.1";
+	static final String VERSION = "1.6";
 	static {
 		System.out.println(">>> Kiezatlas " + VERSION);
 	}

@@ -20,10 +20,10 @@ import java.util.Vector;
 
 
 /**
- * Kiezatlas 1.5.1<br>
+ * Kiezatlas 1.6<br>
  * Requires DeepaMehta 2.0b8
  * <p>
- * Last change: 6.7.2008<br>
+ * Last change: 8.7.2008<br>
  * J&ouml;rg Richter<br>
  * jri@deepamehta.de
  */
@@ -57,12 +57,11 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			CityMapTopic cityMap = getCityMap(session);
 			// --- notification ---
 			// Note: the check for warnings is performed before the form input is processed
-			// because the processing eat the parameters up.
+			// because the processing (updateTopic()) eat the parameters up.
 			checkForWarnings(params, session, directives);
 			// --- update geo object ---
+			// Note: the timestamp is updated through geo object's propertiesChanged() hook
 			updateTopic(geo.getType(), params, session, directives, cityMap.getID(), VIEWMODE_USE);
-			// --- update timestamp ---
-			cm.setTopicData(geo.getID(), 1, PROPERTY_LAST_MODIFIED, DeepaMehtaUtils.getDate());
 			// --- store image ---
 			EditServlet.writeImage(params.getUploads(), geo.getImage(), PROPERTY_FILE, as);
 			//
@@ -74,14 +73,14 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			CityMapTopic cityMap = getCityMap(session);
 			// --- notification ---
 			// Note: the check for warnings is performed before the form input is processed
-			// because the processing eat the parameters up.
+			// because the processing (createTopic()) eat the parameters up.
 			checkForWarnings(params, session, directives);
 			// --- place in city map ---
 			// Note: the geo object is placed in city map before it is actually created.
 			// This way YADE-based autopositioning can perform through geo object's propertiesChanged() hook.
 			cm.createViewTopic(cityMap.getID(), 1, VIEWMODE_USE, geoObjectID, 1, 0, 0, false);	// performExistenceCheck=false
 			// --- create geo object ---
-			// Note: timestamp, password, and geometry-lock are initialized through geo object's evoke() hook.
+			// Note: timestamp, password, and geometry-lock are initialized through geo object's evoke() hook
 			createTopic(getInstTypeID(session), params, session, directives, cityMap.getID(), geoObjectID);
 			// --- get geo object ---
 			setGeoObject(cm.getTopic(geoObjectID, 1), session);

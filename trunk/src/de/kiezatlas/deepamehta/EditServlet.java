@@ -24,10 +24,10 @@ import org.apache.commons.fileupload.FileItem;
 
 
 /**
- * Kiezatlas 1.5.1<br>
+ * Kiezatlas 1.6<br>
  * Requires DeepaMehta 2.0b8.
  * <p>
- * Last change: 4.7.2008<br>
+ * Last change: 8.7.2008<br>
  * J&ouml;rg Richter<br>
  * jri@deepamehta.de
  */
@@ -70,12 +70,11 @@ public class EditServlet extends DeepaMehtaServlet implements KiezAtlas {
 			return PAGE_GEO_FORM;
 			//
 		} else if (action.equals(ACTION_UPDATE_GEO)) {
-			// update geo object
 			GeoObjectTopic geo = getGeoObject(session);
+			// --- update geo object ---
+			// Note: the timestamp is updated through geo object's propertiesChanged() hook
 			updateTopic(geo.getType(), params, session, directives);
-			// update timestamp
-			cm.setTopicData(geo.getID(), 1, PROPERTY_LAST_MODIFIED, DeepaMehtaUtils.getDate());
-			// store image
+			// --- store image ---
 			writeImage(params.getUploads(), geo.getImage(), PROPERTY_FILE, as);
 			//
 			return PAGE_GEO_HOME;
