@@ -1,0 +1,78 @@
+body, td {
+	font-family: Verdana, Arial, Lucida Sans;
+	font-size: 12px;
+}
+
+body {
+	background-color: #FFFFFF;
+}
+
+.header-box {
+	background-color: #F3F3F3;
+}
+
+.footer-box {
+	background-color: #F3F3F3;
+}
+
+.big {
+	font-size: 14px;
+	font-weight: bold;
+}
+
+.small {
+	color: #666666;
+	font-size: 10px;
+}
+
+.heading {
+	font-size: 18px;
+	font-weight: bold;
+}
+	
+.list-highlight {
+	background-color: #FFE0E0;
+}
+
+.list-evenrow {
+	background-color: #E0E0FF;
+}
+
+.list-oddrow {
+	background-color: #FFFFFF;
+}
+
+/* container for entire geo object info (public website and owner interface) */
+.info-container {
+}
+
+/* label of a single geo object info field (public website and owner interface) */
+.info-label {
+	font-size: 10px;
+	font-weight: bold;
+	color: #666666;
+}
+
+/* content of a single geo object info field (public website and owner interface) */
+.info-content {
+}
+
+/* container for a geo object multi-field, e.g. "Telefon" (public website and owner interface) */
+.info-multibox {
+}
+
+.notification {
+	color: red;
+}
+
+.notification-info:before {
+	content: url("../images/notification-info.gif")" ";
+}
+
+.notification-warning:before {
+	content: url("../images/notification-warning.gif")" ";
+}
+
+.notification-error:before {
+	content: url("../images/notification-error.gif")" ";
+}
