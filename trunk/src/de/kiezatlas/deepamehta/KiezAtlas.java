@@ -5,10 +5,10 @@ import de.deepamehta.DeepaMehtaConstants;
 
 
 /**
- * Kiezatlas 1.6<br>
+ * Kiezatlas 1.6.1<br>
  * Requires DeepaMehta 2.0b8.
  * <p>
- * Last change: 6.7.2008<br>
+ * Last change: 10.8.2008<br>
  * J&ouml;rg Richter<br>
  * jri@deepamehta.de
  */
@@ -59,6 +59,7 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	static final String TOPICTYPE_COMMENT = "tt-ka-kommentar";
 	static final String TOPICTYPE_OUTLINE_POINT = "tt-ka-outlinepoint";
 	static final String TOPICTYPE_SHAPE = "tt-ka-shape";
+	static final String TOPICTYPE_STYLESHEET = "tt-ka-stylesheet";
 
 
 
@@ -90,6 +91,9 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	// direction is from workspace to shape-subtype
 	static final String SEMANTIC_WORKSPACE_SHAPETYPE = ASSOCTYPE_ASSOCIATION;
 
+	// direction is from workspace to stylesheet
+	static final String SEMANTIC_WORKSPACE_STYLESHEET = ASSOCTYPE_ASSOCIATION;
+
 	// direction is arbitrary
 	static final String SEMANTIC_SHAPE_OUTLINE = ASSOCTYPE_OUTLINE;
 
@@ -116,6 +120,8 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	static final String PROPERTY_COMMENT_TIME = "Uhrzeit";
 	//
 	static final String PROPERTY_TARGET_WEBALIAS = "Target Web Alias";
+	//
+	static final String PROPERTY_CSS = "CSS";
 
 
 

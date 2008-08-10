@@ -1,9 +1,9 @@
-Kiez-Atlas 1.5.1 Documentation
+Kiez-Atlas 1.6.1 Documentation
 
 Web Session Attributes
 
 Jörg Richter
-26.5.2008
+10.8.2008
 
 
 
@@ -25,6 +25,8 @@ searchMode			String
 searchValue			String
 						searchMode=byName: search string
 						searchMode=0,1,..: criteria name
+stylesheet			CSS (String)
+
 
 CityMap
 -------

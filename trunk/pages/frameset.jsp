@@ -1,7 +1,10 @@
 <%@ include file="KiezAtlas.jsp" %>
+<%
+	BaseTopic map = (BaseTopic) session.getAttribute("map");
+%>
 <html>
 <head>
-	<title>Kiezatlas</title>
+	<title>Kiezatlas - <%= map.getName() %></title>
 </head>
 <frameset cols="*,320">
 	<frame name="left" src="../pages/blank.html">

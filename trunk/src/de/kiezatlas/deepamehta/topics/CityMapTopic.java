@@ -21,10 +21,10 @@ import java.util.*;
 
 
 /**
- * Kiezatlas 1.6<br>
+ * Kiezatlas 1.6.1<br>
  * Requires DeepaMehta 2.0b8
  * <p>
- * Last change: 3.7.2008<br>
+ * Last change: 10.8.2008<br>
  * J&ouml;rg Richter<br>
  * jri@deepamehta.de
  */
@@ -32,7 +32,7 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 
 
 
-	static final String VERSION = "1.6";
+	static final String VERSION = "1.6.1";
 	static {
 		System.out.println(">>> Kiezatlas " + VERSION);
 	}
@@ -228,11 +228,27 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 	 */
 	public Vector getShapeTypes() {
 		BaseTopic workspace = as.getTopicmapOwner(getID());
-		// institution type
+		// shape types
 		Vector typeIDs = as.type(TOPICTYPE_SHAPE, 1).getSubtypeIDs();
 		Vector shapeTypes = cm.getRelatedTopics(workspace.getID(), SEMANTIC_WORKSPACE_SHAPETYPE, TOPICTYPE_TOPICTYPE, 2, typeIDs, true);	// sortAssociations=true
 		//
 		return shapeTypes;
+	}
+
+	public BaseTopic getStylesheet() {
+		String workspaceID = as.getTopicmapOwner(getID()).getID();
+		BaseTopic stylesheet = getStylesheet(workspaceID);
+		// if there is no custom stylesheet use the default stylesheet
+		if (stylesheet == null && !workspaceID.equals(WORKSPACE_KIEZATLAS)) {
+			// the default workspace is that assigned to the "Kiezatlas" workspace
+			stylesheet = getStylesheet(WORKSPACE_KIEZATLAS);
+		}
+		//
+		return stylesheet;
+	}
+
+	public BaseTopic getStylesheet(String workspaceID) {
+		return as.getRelatedTopic(workspaceID, SEMANTIC_WORKSPACE_STYLESHEET, TOPICTYPE_STYLESHEET, 2, true);	// emptyAllowed=true
 	}
 
 	// ---

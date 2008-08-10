@@ -1,30 +1,41 @@
 <%@ include file="KiezAtlas.jsp" %>
+<%
+	String mapImage = (String) session.getAttribute("mapImage");
+	Vector hotspots = (Vector) session.getAttribute("hotspots");
+	Vector shapeTypes = (Vector) session.getAttribute("shapeTypes");
+	Vector shapes = (Vector) session.getAttribute("shapes");
+	Vector cluster = (Vector) session.getAttribute("cluster");
+	GeoObject selectedInst = (GeoObject) session.getAttribute("selectedGeo");
+	String stylesheet = (String) session.getAttribute("stylesheet");
+%>
 
 <html>
 <head>
 	<title>Kiezatlas</title>
-	<link href="../pages/kiezatlas.css" rel="stylesheet" type="text/css">
+	<style type="text/css">
+	<%= stylesheet %>
+	</style>
 	<!--[if lt IE 7]>
 	<script defer type="text/javascript" src="../pages/pngfix.js"></script>
 	<script defer type="text/javascript" src="../pages/fixed.js"></script>
 	<![endif]-->
 	<script type="text/javascript">
+
 		var currentActiveMenu = "";
 		var YOffset = 0;
 		var XOffset = 0;
-		function showMenu(id) {
-			
+
+		function showMenu(id) {			
 			if (currentActiveMenu != "") {
 				hideMenu(currentActiveMenu);
 			}
-			
 			if (document.getElementById) {
 				var currentMenu = "clusterMenu"+id;
 				originalPosition = id.split(".");
 				var xPosition = parseInt(originalPosition[0]);
 				var yPosition = parseInt(originalPosition[1]);
 				if (navigator.appName != "Microsoft Internet Explorer") {
-					//not ie, recalculate position after scrolling
+					// not ie, recalculate position after scrolling
 					document.getElementById(currentMenu).style.top = yPosition - independentY();
 					document.getElementById(currentMenu).style.left = xPosition - independentX();
 				} else {
@@ -35,7 +46,6 @@
 				document.getElementById(currentMenu).style.visibility = 'visible';
 					currentActiveMenu = id;
 			}
-			
 		}
 		
 		function hideMenu(id) {
@@ -45,7 +55,8 @@
 				currentActiveMenu = "";
 			}
 		}
-		//helper called for browser independency
+
+		// helper called for browser independency
 		function independentY() {
 			if (navigator.appName == "Microsoft Internet Explorer") {
 				return document.body.scrollTop;
@@ -56,23 +67,15 @@
 		
 		function independentX() {
 			if (navigator.appName == "Microsoft Internet Explorer") {
-					return document.body.scrollLeft;
+				return document.body.scrollLeft;
 			} else {
-					return window.pageXOffset;
+				return window.pageXOffset;
 			}
 		}		
 
 	</script>
 </head>
 <body>
-	<%
-		String mapImage = (String) session.getAttribute("mapImage");
-		Vector hotspots = (Vector) session.getAttribute("hotspots");
-		Vector shapeTypes = (Vector) session.getAttribute("shapeTypes");
-		Vector shapes = (Vector) session.getAttribute("shapes");
-		Vector cluster = (Vector) session.getAttribute("cluster");
-		GeoObject selectedInst = (GeoObject) session.getAttribute("selectedGeo");
-	%>
 	<img src="<%= mapImage %>" style="position:absolute; top:0px; left:0px;">
 	<%
 		// --- shapes ---
@@ -111,7 +114,7 @@
 					(p.x - 7) + "px;\" alt=\"" + inst.getName() + "\" title=\"" + inst.getName() + "\" border=\"0\"></a>");
 			}
 		}
-		//cluster icons
+		// cluster icons
 		e = cluster.elements();
 		while (e.hasMoreElements()) {
 			//entered vector of cluster
@@ -129,8 +132,7 @@
 			//}
 			//out.println("</div>");
 		}
-		
-		//cluster menus are rendered in an extra loop after the cluster images for optic reasons
+		// cluster menus are rendered in an extra loop after the cluster images for optic reasons
 		e = cluster.elements();
 		while (e.hasMoreElements()) {
 			//entered vector of cluster
@@ -148,7 +150,6 @@
 			}
 			out.println("</div>");
 		}
-
 		// --- shape display switches ---
 		if (shapeTypes.size() > 0) {
 			out.println("<form style=\"position:fixed; left:0px; bottom:0px; width:300px\">");

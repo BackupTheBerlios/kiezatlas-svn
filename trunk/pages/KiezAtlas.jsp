@@ -8,7 +8,6 @@
 <%@ page import="de.kiezatlas.deepamehta.Comment" %>
 <%@ page import="de.kiezatlas.deepamehta.Cluster" %>
 
-
 <%@ page import="de.deepamehta.BaseTopic" %>
 <%@ page import="de.deepamehta.BaseAssociation" %>
 <%@ page import="de.deepamehta.DeepaMehtaException" %>
@@ -49,8 +48,11 @@
 		SearchCriteria[] criterias = (SearchCriteria[]) session.getAttribute("criterias");
 		String searchMode = (String) session.getAttribute("searchMode");
 		String searchValue = (String) session.getAttribute("searchValue");
+		String stylesheet = (String) session.getAttribute("stylesheet");
 		out.println("<html>\r<head>\r<title>Kiezatlas</title>\r" +
-			"<link href=\"../pages/kiezatlas.css\" rel=\"stylesheet\" type=\"text/css\">\r"+
+			"<style type=\"text/css\">\r" +
+			stylesheet +
+			"</style>\r" +
 			"</head>\r" +
 			"<body" + (refreshMap ? " onLoad=\"top.frames.left.location.href='controller?action=initFrame&frame=" +
 				KiezAtlas.FRAME_LEFT + "'\"" : "") + ">\r");
