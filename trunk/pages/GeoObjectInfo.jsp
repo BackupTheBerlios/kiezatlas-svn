@@ -16,14 +16,12 @@
 	topicBean.removeFieldsContaining("Locked Geometry");
 	topicBean.removeFieldsContaining("Description");
 	out.println("<br>");
-	// render image if available
+	// image
 	String imageFile = topicBean.getValue("Image / File");
-	out.println("");
-	if (imageFile != null) {
-		String imageHtmlString = "<img src=" + imagePath + imageFile + "><br>";
-		out.println(imageHtmlString);
+	if (!imageFile.equals("")) {
+		out.println("<img src=" + imagePath + imageFile + "><br>");
 	}	
-	// print name
+	// name
 	out.println("<b>" + topicBean.getValue("Name") + "</b><br>");
 	// print address if available on this topic including fahrinfo-link
 	try { 
