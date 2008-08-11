@@ -238,17 +238,33 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 	public BaseTopic getStylesheet() {
 		String workspaceID = as.getTopicmapOwner(getID()).getID();
 		BaseTopic stylesheet = getStylesheet(workspaceID);
-		// if there is no custom stylesheet use the default stylesheet
+		// if there is no custom stylesheet use the default one
 		if (stylesheet == null && !workspaceID.equals(WORKSPACE_KIEZATLAS)) {
-			// the default workspace is that assigned to the "Kiezatlas" workspace
+			// the default stylesheet is that assigned to the "Kiez-Atlas" workspace
 			stylesheet = getStylesheet(WORKSPACE_KIEZATLAS);
 		}
 		//
 		return stylesheet;
 	}
 
+	public BaseTopic getSiteLogo() {
+		String workspaceID = as.getTopicmapOwner(getID()).getID();
+		BaseTopic siteLogo = getSiteLogo(workspaceID);
+		// if there is no custom site logo use the default one
+		if (siteLogo == null && !workspaceID.equals(WORKSPACE_KIEZATLAS)) {
+			// the default site logo is that assigned to the "Kiez-Atlas" workspace
+			siteLogo = getSiteLogo(WORKSPACE_KIEZATLAS);
+		}
+		//
+		return siteLogo;
+	}
+
 	public BaseTopic getStylesheet(String workspaceID) {
 		return as.getRelatedTopic(workspaceID, SEMANTIC_WORKSPACE_STYLESHEET, TOPICTYPE_STYLESHEET, 2, true);	// emptyAllowed=true
+	}
+
+	public BaseTopic getSiteLogo(String workspaceID) {
+		return as.getRelatedTopic(workspaceID, SEMANTIC_WORKSPACE_SITELOGO, TOPICTYPE_IMAGE, 2, true);	// emptyAllowed=true
 	}
 
 	// ---

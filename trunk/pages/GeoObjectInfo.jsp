@@ -7,7 +7,7 @@
 	String imagePath = (String) session.getAttribute("imagePath");	
 	String forumActivition = (String) session.getAttribute("forumActivition");
 	Integer commentCount = (Integer) session.getAttribute("commentCount");
-	// hide properties by removing
+	// hide properties
 	TopicBean topicBean = (TopicBean) session.getAttribute("topicBean");
 	topicBean.removeFieldsContaining("Password");
 	topicBean.removeFieldsContaining("YADE");
@@ -15,51 +15,50 @@
 	topicBean.removeFieldsContaining("Web Alias");
 	topicBean.removeFieldsContaining("Locked Geometry");
 	topicBean.removeFieldsContaining("Description");
-	out.println("<br>");
-	// image
+	out.println("<div class=\"content-area\">");
+	// --- image ---
 	String imageFile = topicBean.getValue("Image / File");
 	if (!imageFile.equals("")) {
 		out.println("<img src=" + imagePath + imageFile + "><br>");
 	}	
-	// name
+	// --- name ---
 	out.println("<b>" + topicBean.getValue("Name") + "</b><br>");
-	// print address if available on this topic including fahrinfo-link
-	try { 
-		// first comes the property and as second the possible related address topic 
-		String city = topicBean.getValue("Stadt");
-		if (city == null) {
-			Vector tmp = topicBean.getValues("Address / City");
-			if (tmp != null) {
-				if (tmp.size() > 0){
-					city = ((BaseTopic) tmp.elementAt(0)).getName();
-				} else {
-					city = "";
-				}						
+	// --- address ---
+	// a "Stadt" property precedes a "City" topic (assigned to an "Address" topic)
+	String city = topicBean.getValue("Stadt");
+	if (city == null) {
+		Vector tmp = topicBean.getValues("Address / City");
+		if (tmp != null) {
+			if (tmp.size() > 0){
+				city = ((BaseTopic) tmp.elementAt(0)).getName();
 			} else {
 				city = "";
-			}
-		}			
-		String street = topicBean.getValue("Address / Street");
-		String postalCode = topicBean.getValue("Address / Postal Code");
-		// fetch maplink block
-		out.println(mapLink(street, postalCode, city));
-	} catch (DeepaMehtaException ex) {
-		out.println("Es ist ein Fehler aufgetreten: " + ex);	
-	}
+			}						
+		} else {
+			city = "";
+		}
+	}			
+	String street = topicBean.getValue("Address / Street");
+	String postalCode = topicBean.getValue("Address / Postal Code");
+	// address, probably with fahr-info link
+	out.println(mapLink(street, postalCode, city));
+	// --- generic geo object info ---
 	// remove fields which are rendered manually
 	topicBean.removeFieldsContaining("Image");
 	topicBean.removeFieldsContaining("Address");
 	topicBean.removeFieldsContaining("Icon");
 	topicBean.removeField("Name");
 	topicBean.removeField("Stadt");
-	// generic topic info rendering 
+	// geo object info
 	out.println("<br><br>");
 	out.println(html.info(topicBean, DeepaMehtaConstants.LAYOUT_STYLE_FLOW));
-	// forum
+	// --- forum ---
 	if (forumActivition.equals(KiezAtlas.SWITCH_ON)) {
 		// link to forum page
 		out.println("<p>\r<hr>\rDas " + html.link("Forum", KiezAtlas.ACTION_SHOW_GEO_FORUM) +
 			" enth&auml;lt "+ commentCount + " Kommentare</p>");
 	}
+	//
+	out.println("</div>");
 %>
 <% end(out); %>

@@ -57,6 +57,7 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 				initSearchCriterias(session);	// relies on city map
 				initShapeTypes(session);		// relies on city map
 				initStylesheet(session);		// relies on city map
+				initSiteLogo(session);			// relies on city map
 				updateShapes(session);			// relies on shape types;
 				return PAGE_FRAMESET;
 			} catch (DeepaMehtaException e) {
@@ -124,19 +125,19 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 			return PAGE_GEO_LIST;
 		// info
 		} else if (action.equals(ACTION_SHOW_GEO_INFO)) {
-				String geoID = params.getValue("id");
-				setSelectedGeo(geoID, session);
-				TopicBean topicBean = as.createTopicBean(geoID, 1);
-				session.setAttribute("topicBean", topicBean);
-				String imagePath = as.getCorporateWebBaseURL() + FILESERVER_IMAGES_PATH;
-				session.setAttribute("imagePath", imagePath);
-				GeoObjectTopic geo = (GeoObjectTopic) as.getLiveTopic(geoID, 1);
-				boolean isForumActivated = geo.isForumActivated();
-				session.setAttribute("forumActivition", isForumActivated ? SWITCH_ON : SWITCH_OFF);
-				if (isForumActivated) {
-					session.setAttribute("commentCount", new Integer(geo.getComments().size()));
-				}
-				return PAGE_GEO_INFO;
+			String geoID = params.getValue("id");
+			setSelectedGeo(geoID, session);
+			TopicBean topicBean = as.createTopicBean(geoID, 1);
+			session.setAttribute("topicBean", topicBean);
+			String imagePath = as.getCorporateWebBaseURL() + FILESERVER_IMAGES_PATH;
+			session.setAttribute("imagePath", imagePath);
+			GeoObjectTopic geo = (GeoObjectTopic) as.getLiveTopic(geoID, 1);
+			boolean isForumActivated = geo.isForumActivated();
+			session.setAttribute("forumActivition", isForumActivated ? SWITCH_ON : SWITCH_OFF);
+			if (isForumActivated) {
+				session.setAttribute("commentCount", new Integer(geo.getComments().size()));
+			}
+			return PAGE_GEO_INFO;
 		// show forum if wanted
 		} else if (action.equals(ACTION_SHOW_GEO_FORUM)) {
 			return PAGE_GEO_FORUM;
@@ -350,8 +351,21 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 
 	private void initStylesheet(Session session) {
 		BaseTopic stylesheet = ((CityMapTopic) as.getLiveTopic(getCityMap(session))).getStylesheet();		// ### ugly
-		session.setAttribute("stylesheet", as.getTopicProperty(stylesheet, PROPERTY_CSS));
-		System.out.println(">>> \"stylesheet\" stored in session: \"" + stylesheet.getName() + "\"");
+		if (stylesheet != null) {
+			session.setAttribute("stylesheet", as.getTopicProperty(stylesheet, PROPERTY_CSS));
+			System.out.println(">>> \"stylesheet\" stored in session: \"" + stylesheet.getName() + "\"");
+		} else {
+			// there is no stylesheet assigned to the Kiez-Atlas workspace
+			session.setAttribute("stylesheet", "");
+			System.out.println("*** NO STYLESHEET FOUND -- website is displayed without style");
+		}
+	}
+
+	private void initSiteLogo(Session session) {
+		BaseTopic siteLogo = ((CityMapTopic) as.getLiveTopic(getCityMap(session))).getSiteLogo();		// ### ugly
+		String imagefile = as.getCorporateWebBaseURL() + FILESERVER_IMAGES_PATH + as.getTopicProperty(siteLogo, PROPERTY_FILE);
+		session.setAttribute("siteLogo", imagefile);
+		System.out.println(">>> \"siteLogo\" stored in session: \"" + imagefile + "\"");
 	}
 
 	private void setSelectedGeo(String geoID, Session session) {

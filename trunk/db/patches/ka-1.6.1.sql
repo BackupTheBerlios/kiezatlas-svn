@@ -70,84 +70,111 @@ INSERT INTO TopicProp VALUES ('t-ka-default-stylesheet', 1, 'Name', 'Kiezatlas S
 INSERT INTO Association VALUES ('at-association', 1, 1, 'a-ka-110', '', 't-ka-workspace', 1, 't-ka-default-stylesheet', 1);
 -- CSS
 INSERT INTO TopicProp VALUES ('t-ka-default-stylesheet', 1, 'CSS', '\n
-\n
 body, td {\n
-    font-family: Verdana, Arial, Lucida Sans;\n
-    font-size: 12px;\n
+\tfont-family: Verdana, Arial, Lucida Sans;\n
+\tfont-size: 12px;\n
 }\n
 \n
 body {\n
-    background-color: #FFFFFF;\n
+\tbackground-color: #FFFFFF;\n
+\tmargin: 0px;\n
 }\n
 \n
-.header-box {\n
-    background-color: #F3F3F3;\n
+/* Kiezatlas: header area of right frame */\n
+.header-area {\n
+\twidth: 100%;\n
+\tbackground-color: #F3F3F3;\n
+\tpadding: 8px;\n
 }\n
 \n
-.footer-box {\n
-    background-color: #F3F3F3;\n
+/* Kiezatlas: content area of right frame */\n
+.content-area {\n
+\twidth: 100%;\n
+\tmargin-top: 2em;\n
+\tpadding: 8px;\n
 }\n
 \n
-.big {\n
-    font-size: 14px;\n
-    font-weight: bold;\n
+/* Kiezatlas: footer area of right frame */\n
+.footer-area {\n
+\twidth: 100%;\n
+\tbackground-color: #F3F3F3;\n
+\tmargin-top: 4em;\n
+\tpadding: 8px;\n
+}\n
+\n
+/* Kiezatlas: the citymap name contained in the header */\n
+.citymap-name {\n
+\tfont-size: 14px;\n
+\tfont-weight: bold;\n
 }\n
 \n
 .small {\n
-    color: #666666;\n
-    font-size: 10px;\n
+\tfont-size: 10px;\n
+\tcolor: #666666;\n
 }\n
 \n
+.secondary-text {\n
+\tfont-size: 10px;\n
+\tcolor: #666666;\n
+}\n
+\n
+/* Kiezatlas (list interface): the heading citymap name */\n
 .heading {\n
-    font-size: 18px;\n
-    font-weight: bold;\n
+\tfont-size: 18px;\n
+\tfont-weight: bold;\n
 }\n
 \n
+/* DeepaMehta list generator: the highlighted row */\n
 .list-highlight {\n
-    background-color: #FFE0E0;\n
+\tbackground-color: #FFE0E0;\n
 }\n
 \n
+/* DeepaMehta list generator: an even row (use for zebra striping) */\n
 .list-evenrow {\n
-    background-color: #E0E0FF;\n
+\tbackground-color: #E0E0FF;\n
 }\n
 \n
+/* DeepaMehta list generator: an odd row (use for zebra striping) */\n
 .list-oddrow {\n
-    background-color: #FFFFFF;\n
+\tbackground-color: #FFFFFF;\n
 }\n
 \n
-/* container for entire geo object info (public website and owner interface) */\n
+/* DeepaMehta info generator: outmost container for label/content pairs */\n
 .info-container {\n
 }\n
 \n
-/* label of a single geo object info field (public website and owner interface) */\n
-.info-label {\n
-    font-size: 10px;\n
-    font-weight: bold;\n
-    color: #666666;\n
+/* DeepaMehta info generator: a label/content pair */\n
+.info {\n
 }\n
 \n
-/* content of a single geo object info field (public website and owner interface) */\n
+/* DeepaMehta info generator: the label part of a label/content pair */\n
+.info-label {\n
+\tfont-size: 10px;\n
+\tfont-weight: bold;\n
+\tcolor: #666666;\n
+}\n
+\n
+/* DeepaMehta info generator: the content part of a label/content pair */\n
 .info-content {\n
 }\n
 \n
-/* container for a geo object multi-field, e.g. "Telefon" (public website and owner interface) */\n
-.info-multibox {\n
-}\n
-\n
+/* Kiezatlas: outmost container for notifications */\n
 .notification {\n
-    color: red;\n
+\tcolor: red;\n
 }\n
 \n
+/* Kiezatlas: an "info" notifications */\n
 .notification-info:before {\n
-    content: url("../images/notification-info.gif")" ";\n
+\tcontent: url("../images/notification-info.gif")" ";\n
 }\n
 \n
+/* Kiezatlas: a "warning" notifications */\n
 .notification-warning:before {\n
-    content: url("../images/notification-warning.gif")" ";\n
+\tcontent: url("../images/notification-warning.gif")" ";\n
 }\n
 \n
+/* Kiezatlas: an "error" notifications */\n
 .notification-error:before {\n
-    content: url("../images/notification-error.gif")" ";\n
+\tcontent: url("../images/notification-error.gif")" ";\n
 }\n
-\n
 ');

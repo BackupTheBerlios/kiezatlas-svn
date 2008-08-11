@@ -26,6 +26,7 @@ searchValue			String
 						searchMode=byName: search string
 						searchMode=0,1,..: criteria name
 stylesheet			CSS (String)
+siteLogo			imagefile (String)
 
 
 CityMap

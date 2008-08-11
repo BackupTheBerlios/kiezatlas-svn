@@ -94,6 +94,9 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	// direction is from workspace to stylesheet
 	static final String SEMANTIC_WORKSPACE_STYLESHEET = ASSOCTYPE_ASSOCIATION;
 
+	// direction is from workspace to image
+	static final String SEMANTIC_WORKSPACE_SITELOGO = ASSOCTYPE_ASSOCIATION;
+
 	// direction is arbitrary
 	static final String SEMANTIC_SHAPE_OUTLINE = ASSOCTYPE_OUTLINE;
 

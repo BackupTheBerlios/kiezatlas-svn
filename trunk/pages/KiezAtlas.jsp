@@ -49,18 +49,17 @@
 		String searchMode = (String) session.getAttribute("searchMode");
 		String searchValue = (String) session.getAttribute("searchValue");
 		String stylesheet = (String) session.getAttribute("stylesheet");
+		String siteLogo = (String) session.getAttribute("siteLogo");
 		out.println("<html>\r<head>\r<title>Kiezatlas</title>\r" +
-			"<style type=\"text/css\">\r" +
-			stylesheet +
-			"</style>\r" +
+			"<style type=\"text/css\">\r" + stylesheet + "\r</style>\r" +
 			"</head>\r" +
 			"<body" + (refreshMap ? " onLoad=\"top.frames.left.location.href='controller?action=initFrame&frame=" +
-				KiezAtlas.FRAME_LEFT + "'\"" : "") + ">\r");
-		// --- header box ---
-		out.println("<table class=\"header-box\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\"><tr valign=\"top\">");
+				KiezAtlas.FRAME_LEFT + "'\"" : "") + ">\r\r");
+		// --- header area ---
+		out.println("<table class=\"header-area\" cellpadding=\"0\"><tr valign=\"top\">");
 		out.println("<td rowspan=\"" + (criterias.length + 1) + "\">");
-		out.println("<a href=\"http://www.kiezatlas.de/\" target=\"_top\"><img src=\"../images/kiezatlas-logo.png\" border=\"0\"></a>");
-		out.println("<div class=\"big\">" + map.getName() + "</div>");
+		out.println("<a href=\"http://www.kiezatlas.de/\" target=\"_top\"><img src=\"" + siteLogo + "\" border=\"0\"></a>");
+		out.println("<div class=\"citymap-name\">" + map.getName() + "</div>");
 		out.println("</td>");
 		//
 		boolean byName = searchMode.equals(KiezAtlas.SEARCHMODE_BY_NAME);
@@ -77,9 +76,11 @@
 	}
 
 	void end(JspWriter out) throws IOException {
-		out.println("<br><br>\r<hr>\r<table class=\"footer-box\" width=\"100%\" cellpadding=\"4\"><tr><td class=\"small\">Powered by<br><a href=\"http://www.deepamehta.de/\" target=\"_blank\"><b>DeepaMehta</b></a></td>\r" +
-			"<td class=\"small\" align=\"right\"><a href=\"http://www.kiezatlas.de/impressum.html\" target=\"_top\">Impressum +<br>Haftungshinweise</a></td>" +
-			"</tr></table>\r</body>\r</html>");
+		// --- footer area ---
+		out.println("<table class=\"footer-area\"><tr>\r" +
+			"<td class=\"secondary-text\">Powered by<br><a href=\"http://www.deepamehta.de/\" target=\"_blank\"><b>DeepaMehta</b></a></td>\r" +
+			"<td class=\"secondary-text\" align=\"right\"><a href=\"http://www.kiezatlas.de/impressum.html\" target=\"_top\">Impressum +<br>Haftungshinweise</a></td>\r" +
+			"</tr></table>\r\r</body>\r</html>");
 	}
 
 	// ---

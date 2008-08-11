@@ -6,7 +6,7 @@
 <head>
 	<title>Kiezatlas - <%= map.getName() %></title>
 </head>
-<frameset cols="*,320">
+<frameset cols="*,350">
 	<frame name="left" src="../pages/blank.html">
 	<frame name="right" src="controller?action=initFrame&frame=<%= KiezAtlas.FRAME_RIGHT %>">
 </frameset>
