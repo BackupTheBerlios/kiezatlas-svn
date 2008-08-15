@@ -9,7 +9,6 @@
 	String searchMode = (String) session.getAttribute("searchMode");
 	String searchValue = (String) session.getAttribute("searchValue");
 	// --- heading ---
-	out.println("<p>");
 	if (searchMode.equals(KiezAtlas.SEARCHMODE_BY_NAME)) {
 		out.println("Suchergebnis ");
 	}
@@ -40,4 +39,4 @@
 	out.println("</table>");
 	
 %>
-<% end(out); %>
+<% end(session, out); %>

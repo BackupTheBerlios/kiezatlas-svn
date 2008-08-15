@@ -15,7 +15,6 @@
 	topicBean.removeFieldsContaining("Web Alias");
 	topicBean.removeFieldsContaining("Locked Geometry");
 	topicBean.removeFieldsContaining("Description");
-	out.println("<div class=\"content-area\">");
 	// --- image ---
 	String imageFile = topicBean.getValue("Image / File");
 	if (!imageFile.equals("")) {
@@ -58,7 +57,5 @@
 		out.println("<p>\r<hr>\rDas " + html.link("Forum", KiezAtlas.ACTION_SHOW_GEO_FORUM) +
 			" enth&auml;lt "+ commentCount + " Kommentare</p>");
 	}
-	//
-	out.println("</div>");
 %>
-<% end(out); %>
+<% end(session, out); %>

@@ -8,7 +8,7 @@ import de.deepamehta.DeepaMehtaConstants;
  * Kiezatlas 1.6.1<br>
  * Requires DeepaMehta 2.0b8.
  * <p>
- * Last change: 10.8.2008<br>
+ * Last change: 11.8.2008<br>
  * J&ouml;rg Richter<br>
  * jri@deepamehta.de
  */
@@ -70,6 +70,8 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 
 
 	static final String ASSOCTYPE_OUTLINE = "at-ka-outline";
+	static final String ASSOCTYPE_HOMEPAGE_LINK = "at-ka-homepage-link";
+	static final String ASSOCTYPE_IMPRESSUM_LINK = "at-ka-impressum-link";
 
 
 
@@ -96,6 +98,12 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 
 	// direction is from workspace to image
 	static final String SEMANTIC_WORKSPACE_SITELOGO = ASSOCTYPE_ASSOCIATION;
+
+	// direction is from workspace to webpage
+	static final String SEMANTIC_WORKSPACE_HOMEPAGELINK = ASSOCTYPE_HOMEPAGE_LINK;
+
+	// direction is from workspace to webpage
+	static final String SEMANTIC_WORKSPACE_IMPRESSUMLINK = ASSOCTYPE_IMPRESSUM_LINK;
 
 	// direction is arbitrary
 	static final String SEMANTIC_SHAPE_OUTLINE = ASSOCTYPE_OUTLINE;

@@ -27,6 +27,8 @@ searchValue			String
 						searchMode=0,1,..: criteria name
 stylesheet			CSS (String)
 siteLogo			imagefile (String)
+homepageURL			String
+impressumURL		String
 
 
 CityMap

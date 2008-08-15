@@ -6,7 +6,6 @@
 	Vector cats = (Vector) session.getAttribute("categories");
 	Vector selCats = (Vector) session.getAttribute("selectedCats");
 	//
-	out.println("<p>" + html.topicSelector(cats, selCats,
-		KiezAtlas.ACTION_SEARCH_BY_CATEGORY, KiezAtlas.ACTION_SELECT_CATEGORY));
+	out.println(html.topicSelector(cats, selCats, KiezAtlas.ACTION_SEARCH_BY_CATEGORY, KiezAtlas.ACTION_SELECT_CATEGORY));
 %>
-<% end(out); %>
+<% end(session, out); %>

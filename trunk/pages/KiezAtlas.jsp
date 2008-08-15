@@ -24,6 +24,8 @@
 <%@ page import="java.awt.Point" %>
 
 <%!
+	// --- header area ---
+
 	// edit / list / upload
 	void begin(int servlet, HttpSession session, JspWriter out) throws IOException {
 		String title = "Kiezatlas";
@@ -36,10 +38,16 @@
 			title = title + " - Listenzugang";
 			break;
 		}
-		out.println("<html>\r<head>\r<title>" + title + "</title>\r" +
-			"<link href=\"../pages/kiezatlas.css\" rel=\"stylesheet\" type=\"text/css\">\r</head>\r<body>\r" +
-			"<a href=\"http://www.kiezatlas.de/\" target=\"_blank\"><img src=\"../images/kiezatlas-logo.png\" border=\"0\">" +
-			"</a>\r<br><br>");
+		out.println("<html>\r<head>\r<title>" + title + "</title>");
+		out.println("<link href=\"../pages/kiezatlas.css\" rel=\"stylesheet\" type=\"text/css\">");
+		out.println("</head>");
+		out.println("<body>");
+		out.println();
+		out.println("<div class=\"header-area\">"); 		// --- begin header area
+		out.println("<a href=\"http://www.kiezatlas.de/\" target=\"_blank\"><img src=\"../images/kiezatlas-logo.png\" border=\"0\"></a>");
+		out.println("</div>");								// --- end header area
+		out.println();
+		out.println("<div class=\"content-area\">");		// --- begin content area
 	}
 
 	// browse
@@ -50,15 +58,17 @@
 		String searchValue = (String) session.getAttribute("searchValue");
 		String stylesheet = (String) session.getAttribute("stylesheet");
 		String siteLogo = (String) session.getAttribute("siteLogo");
+		String homepageURL = (String) session.getAttribute("homepageURL");
 		out.println("<html>\r<head>\r<title>Kiezatlas</title>\r" +
 			"<style type=\"text/css\">\r" + stylesheet + "\r</style>\r" +
 			"</head>\r" +
 			"<body" + (refreshMap ? " onLoad=\"top.frames.left.location.href='controller?action=initFrame&frame=" +
 				KiezAtlas.FRAME_LEFT + "'\"" : "") + ">\r\r");
-		// --- header area ---
-		out.println("<table class=\"header-area\" cellpadding=\"0\"><tr valign=\"top\">");
+		//
+		out.println("<div class=\"header-area\">");			// --- begin header area
+		out.println("<table cellpadding=\"0\" width=\"100%\"><tr valign=\"top\">");
 		out.println("<td rowspan=\"" + (criterias.length + 1) + "\">");
-		out.println("<a href=\"http://www.kiezatlas.de/\" target=\"_top\"><img src=\"" + siteLogo + "\" border=\"0\"></a>");
+		out.println("<a href=\"" + homepageURL + "\" target=\"_blank\"><img src=\"" + siteLogo + "\" border=\"0\"></a>");
 		out.println("<div class=\"citymap-name\">" + map.getName() + "</div>");
 		out.println("</td>");
 		//
@@ -73,14 +83,35 @@
 				"<a href=\"controller?action=" + KiezAtlas.ACTION_SHOW_CATEGORIES + "&critNr=" + i + "\">" + critName + "</a></td></tr>");
 		}
 		out.println("</table>");
+		out.println("</div>");								// --- end header area
+		out.println();
+		out.println("<div class=\"content-area\">");		// --- begin content area
 	}
 
+	// --- footer area ---
+
+	// edit / list / upload
 	void end(JspWriter out) throws IOException {
-		// --- footer area ---
-		out.println("<table class=\"footer-area\"><tr>\r" +
+		String impressumURL = "http://www.kiezatlas.de/impressum.html";
+		out.println(footerArea(impressumURL));
+	}
+
+	// browse
+	void end(HttpSession session, JspWriter out) throws IOException {
+		String impressumURL = (String) session.getAttribute("impressumURL");
+		out.println(footerArea(impressumURL));
+	}
+
+	private String footerArea(String impressumURL) {
+		return "</div>\r" +									// --- end content area
+			"\r" +
+			"<div class=\"footer-area\">\r" +				// --- begin footer area
+			"<table width=\"100%\"><tr>\r" +
 			"<td class=\"secondary-text\">Powered by<br><a href=\"http://www.deepamehta.de/\" target=\"_blank\"><b>DeepaMehta</b></a></td>\r" +
-			"<td class=\"secondary-text\" align=\"right\"><a href=\"http://www.kiezatlas.de/impressum.html\" target=\"_top\">Impressum +<br>Haftungshinweise</a></td>\r" +
-			"</tr></table>\r\r</body>\r</html>");
+			"<td class=\"secondary-text\" align=\"right\"><a href=\"" + impressumURL + "\" target=\"_blank\">Impressum +<br>Haftungshinweise</a></td>\r" +
+			"</tr></table>\r" +
+			"</div>\r\r" +									// --- begin footer area
+			"</body>\r</html>\r";
 	}
 
 	// ---

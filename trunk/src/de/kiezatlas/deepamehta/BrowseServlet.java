@@ -35,7 +35,7 @@ import de.kiezatlas.deepamehta.topics.GeoObjectTopic;
  * Kiezatlas 1.6.1<br>
  * Requires DeepaMehta 2.0b8
  * <p>
- * Last change: 10.8.2008<br>
+ * Last change: 11.8.2008<br>
  * J&ouml;rg Richter<br>
  * jri@deepamehta.de
  */
@@ -53,11 +53,14 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 				//
 				String alias = pathInfo.substring(1);
 				setCityMap(CityMapTopic.lookupCityMap(alias, true, as), session);	// throwIfNotFound=true
+				//
 				initInstitutaionType(session);	// relies on city map
 				initSearchCriterias(session);	// relies on city map
 				initShapeTypes(session);		// relies on city map
 				initStylesheet(session);		// relies on city map
 				initSiteLogo(session);			// relies on city map
+				initSiteLinks(session);			// relies on city map
+				//
 				updateShapes(session);			// relies on shape types;
 				return PAGE_FRAMESET;
 			} catch (DeepaMehtaException e) {
@@ -355,17 +358,44 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 			session.setAttribute("stylesheet", as.getTopicProperty(stylesheet, PROPERTY_CSS));
 			System.out.println(">>> \"stylesheet\" stored in session: \"" + stylesheet.getName() + "\"");
 		} else {
-			// there is no stylesheet assigned to the Kiez-Atlas workspace
 			session.setAttribute("stylesheet", "");
-			System.out.println("*** NO STYLESHEET FOUND -- website is displayed without style");
+			System.out.println("*** NO STYLESHEET FOUND (there is no stylesheet topic assigned to the Kiez-Atlas workspace)");
 		}
 	}
 
 	private void initSiteLogo(Session session) {
 		BaseTopic siteLogo = ((CityMapTopic) as.getLiveTopic(getCityMap(session))).getSiteLogo();		// ### ugly
-		String imagefile = as.getCorporateWebBaseURL() + FILESERVER_IMAGES_PATH + as.getTopicProperty(siteLogo, PROPERTY_FILE);
-		session.setAttribute("siteLogo", imagefile);
-		System.out.println(">>> \"siteLogo\" stored in session: \"" + imagefile + "\"");
+		if (siteLogo != null) {
+			String imagefile = as.getCorporateWebBaseURL() + FILESERVER_IMAGES_PATH + as.getTopicProperty(siteLogo, PROPERTY_FILE);
+			session.setAttribute("siteLogo", imagefile);
+			System.out.println(">>> \"siteLogo\" stored in session: \"" + imagefile + "\"");
+		} else {
+			// ### session.setAttribute("siteLogo", "");
+			System.out.println("*** NO SITELOGO FOUND (there is no image topic assigned to the Kiez-Atlas workspace)");
+		}
+	}
+
+	private void initSiteLinks(Session session) {
+		// homepage link
+		BaseTopic homepageLink = ((CityMapTopic) as.getLiveTopic(getCityMap(session))).getHomapageLink();		// ### ugly
+		if (homepageLink != null) {
+			String homepageURL = as.getTopicProperty(homepageLink, PROPERTY_URL);
+			session.setAttribute("homepageURL", homepageURL);
+			System.out.println(">>> \"homepageURL\" stored in session: \"" + homepageURL + "\"");
+		} else {
+			// ### session.setAttribute("homepageURL", "");
+			System.out.println("*** NO HOMEPAGE LINK FOUND (there is no webpage topic assigned to the Kiez-Atlas workspace)");
+		}
+		// impressum link
+		BaseTopic impressumLink = ((CityMapTopic) as.getLiveTopic(getCityMap(session))).getImpressumLink();		// ### ugly
+		if (impressumLink != null) {
+			String impressumURL = as.getTopicProperty(impressumLink, PROPERTY_URL);
+			session.setAttribute("impressumURL", impressumURL);
+			System.out.println(">>> \"impressumURL\" stored in session: \"" + impressumURL + "\"");
+		} else {
+			// ### session.setAttribute("impressumLink", "");
+			System.out.println("*** NO IMPRESSUM LINK FOUND (there is no webpage topic assigned to the Kiez-Atlas workspace)");
+		}
 	}
 
 	private void setSelectedGeo(String geoID, Session session) {

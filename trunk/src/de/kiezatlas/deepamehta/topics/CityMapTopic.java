@@ -7,6 +7,7 @@ import de.deepamehta.BaseTopic;
 import de.deepamehta.PresentableTopic;
 import de.deepamehta.DeepaMehtaConstants;
 import de.deepamehta.DeepaMehtaException;
+import de.deepamehta.AmbiguousSemanticException;
 import de.deepamehta.service.ApplicationService;
 import de.deepamehta.service.CorporateDirectives;
 import de.deepamehta.service.CorporateCommands;
@@ -24,7 +25,7 @@ import java.util.*;
  * Kiezatlas 1.6.1<br>
  * Requires DeepaMehta 2.0b8
  * <p>
- * Last change: 10.8.2008<br>
+ * Last change: 11.8.2008<br>
  * J&ouml;rg Richter<br>
  * jri@deepamehta.de
  */
@@ -235,36 +236,43 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 		return shapeTypes;
 	}
 
+	// ---
+
 	public BaseTopic getStylesheet() {
-		String workspaceID = as.getTopicmapOwner(getID()).getID();
-		BaseTopic stylesheet = getStylesheet(workspaceID);
-		// if there is no custom stylesheet use the default one
-		if (stylesheet == null && !workspaceID.equals(WORKSPACE_KIEZATLAS)) {
-			// the default stylesheet is that assigned to the "Kiez-Atlas" workspace
-			stylesheet = getStylesheet(WORKSPACE_KIEZATLAS);
-		}
-		//
-		return stylesheet;
+		return getWorkspacePreference(TOPICTYPE_STYLESHEET, SEMANTIC_WORKSPACE_STYLESHEET);
 	}
 
 	public BaseTopic getSiteLogo() {
-		String workspaceID = as.getTopicmapOwner(getID()).getID();
-		BaseTopic siteLogo = getSiteLogo(workspaceID);
-		// if there is no custom site logo use the default one
-		if (siteLogo == null && !workspaceID.equals(WORKSPACE_KIEZATLAS)) {
-			// the default site logo is that assigned to the "Kiez-Atlas" workspace
-			siteLogo = getSiteLogo(WORKSPACE_KIEZATLAS);
+		return getWorkspacePreference(TOPICTYPE_IMAGE, SEMANTIC_WORKSPACE_SITELOGO);
+	}
+
+	public BaseTopic getHomapageLink() {
+		return getWorkspacePreference(TOPICTYPE_WEBPAGE, SEMANTIC_WORKSPACE_HOMEPAGELINK);
+	}
+
+	public BaseTopic getImpressumLink() {
+		return getWorkspacePreference(TOPICTYPE_WEBPAGE, SEMANTIC_WORKSPACE_IMPRESSUMLINK);
+	}
+
+	// ---
+
+	/**
+	 * Preference overriding mechanism.
+	 */
+	private BaseTopic getWorkspacePreference(String topicTypeID, String semantic) {
+		try {
+			String workspaceID = as.getTopicmapOwner(getID()).getID();
+			BaseTopic preference = as.getRelatedTopic(workspaceID, semantic, topicTypeID, 2, true);		// emptyAllowed=true
+			// if there is no custom preference use the default one
+			if (preference == null && !workspaceID.equals(WORKSPACE_KIEZATLAS)) {
+				// the default preference is that assigned to the "Kiez-Atlas" workspace
+				preference = as.getRelatedTopic(WORKSPACE_KIEZATLAS, semantic, topicTypeID, 2, true);		// emptyAllowed=true
+			}
+			return preference;
+		} catch (AmbiguousSemanticException e) {
+			System.out.println("*** CityMapTopic.getWorkspacePreference(): " +  e);
+			return e.getDefaultTopic();
 		}
-		//
-		return siteLogo;
-	}
-
-	public BaseTopic getStylesheet(String workspaceID) {
-		return as.getRelatedTopic(workspaceID, SEMANTIC_WORKSPACE_STYLESHEET, TOPICTYPE_STYLESHEET, 2, true);	// emptyAllowed=true
-	}
-
-	public BaseTopic getSiteLogo(String workspaceID) {
-		return as.getRelatedTopic(workspaceID, SEMANTIC_WORKSPACE_SITELOGO, TOPICTYPE_IMAGE, 2, true);	// emptyAllowed=true
 	}
 
 	// ---

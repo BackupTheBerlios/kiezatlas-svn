@@ -4,7 +4,7 @@
 
 
 
---- define topic type "Stylesheet" ---
+--- topic type "Stylesheet" ---
 INSERT INTO Topic VALUES ('tt-topictype', 1, 1, 'tt-ka-stylesheet', 'Stylesheet');
 INSERT INTO TopicProp VALUES ('tt-ka-stylesheet', 1, 'Name', 'Stylesheet');
 INSERT INTO TopicProp VALUES ('tt-ka-stylesheet', 1, 'Plural Name', 'Stylesheets');
@@ -25,16 +25,36 @@ INSERT INTO Association VALUES ('at-derivation', 1, 1, 'a-ka-106', '', 'tt-topic
 -- assign search type to type
 INSERT INTO Association VALUES ('at-aggregation', 1, 1, 'a-ka-107', '', 'tt-ka-stylesheet-search', 1, 'tt-ka-stylesheet', 1);
 
---- define property "CSS" ---
+--- property "CSS" ---
 INSERT INTO Topic VALUES ('tt-property', 1, 1, 'pp-ka-css', 'CSS');
 INSERT INTO TopicProp VALUES ('pp-ka-css', 1, 'Name', 'CSS');
 INSERT INTO TopicProp VALUES ('pp-ka-css', 1, 'Visualization', 'Multiline Input Field');
 -- assign property to "Stylesheet"
 INSERT INTO Association VALUES ('at-composition', 1, 1, 'a-ka-108', '', 'tt-ka-stylesheet', 1, 'pp-ka-css', 1);
 INSERT INTO AssociationProp VALUES ('a-ka-108', 1, 'Ordinal Number', '200');
--- assign "Name" property
+-- assign "Name" property to "Stylesheet"
 INSERT INTO Association VALUES ('at-composition', 1, 1, 'a-ka-109', '', 'tt-ka-stylesheet', 1, 'pp-name', 1);
 INSERT INTO AssociationProp VALUES ('a-ka-109', 1, 'Ordinal Number', '100');
+
+
+
+--- association type "Homepage Link" ---
+INSERT INTO Topic VALUES ('tt-assoctype', 1, 1, 'at-ka-homepage-link', 'Homepage Link');
+INSERT INTO TopicProp VALUES ('at-ka-homepage-link', 1, 'Name', 'Homepage Link');
+INSERT INTO TopicProp VALUES ('at-ka-homepage-link', 1, 'Plural Name', 'Homepage Links');
+INSERT INTO TopicProp VALUES ('at-ka-homepage-link', 1, 'Color', '#cc9933');
+-- INSERT INTO TopicProp VALUES ('at-ka-homepage-link', 1, 'Custom Implementation', '...');
+-- super type
+-- INSERT INTO Association VALUES ('at-derivation', 1, 1, 'a-757', '', 'at-generic', 1, 'at-ka-homepage-link', 1);
+
+--- association type "Impressum Link" ---
+INSERT INTO Topic VALUES ('tt-assoctype', 1, 1, 'at-ka-impressum-link', 'Impressum Link');
+INSERT INTO TopicProp VALUES ('at-ka-impressum-link', 1, 'Name', 'Impressum Link');
+INSERT INTO TopicProp VALUES ('at-ka-impressum-link', 1, 'Plural Name', 'Impressum Links');
+INSERT INTO TopicProp VALUES ('at-ka-impressum-link', 1, 'Color', '#9933cc');
+-- INSERT INTO TopicProp VALUES ('at-ka-impressum-link', 1, 'Custom Implementation', '...');
+-- super type
+-- INSERT INTO Association VALUES ('at-derivation', 1, 1, 'a-757', '', 'at-generic', 1, 'at-ka-impressum-link', 1);
 
 
 
@@ -45,6 +65,12 @@ INSERT INTO AssociationProp VALUES ('a-ka-111', 1, 'Access Permission', 'create'
 -- "Image"
 INSERT INTO Association VALUES ('at-uses', 1, 1, 'a-ka-112', '', 't-ka-workspace', 1, 'tt-image', 1);
 INSERT INTO AssociationProp VALUES ('a-ka-112', 1, 'Access Permission', 'create');
+-- "Homepage Link"
+INSERT INTO Association VALUES ('at-uses', 1, 1, 'a-ka-114', '', 't-ka-workspace', 1, 'at-ka-homepage-link', 1);
+INSERT INTO AssociationProp VALUES ('a-ka-114', 1, 'Access Permission', 'create');
+-- "Impressum Link"
+INSERT INTO Association VALUES ('at-uses', 1, 1, 'a-ka-115', '', 't-ka-workspace', 1, 'at-ka-impressum-link', 1);
+INSERT INTO AssociationProp VALUES ('a-ka-115', 1, 'Access Permission', 'create');
 
 
 
@@ -61,11 +87,25 @@ INSERT INTO TopicProp VALUES ('t-ka-logo', 1, 'File', 'kiezatlas-logo.png');
 -- assign to "Kiez-Atlas" workspace
 INSERT INTO Association VALUES ('at-association', 1, 1, 'a-ka-113', '', 't-ka-workspace', 1, 't-ka-logo', 1);
 
+--- default homepage link ---
+INSERT INTO Topic VALUES ('tt-webpage', 1, 1, 't-ka-website', 'Kiezatlas Website');
+INSERT INTO TopicProp VALUES ('t-ka-website', 1, 'Name', 'Kiezatlas Website');
+INSERT INTO TopicProp VALUES ('t-ka-website', 1, 'URL', 'http://www.kiezatlas.de/');
+-- assign to "Kiez-Atlas" workspace
+INSERT INTO Association VALUES ('at-ka-homepage-link', 1, 1, 'a-ka-116', '', 't-ka-workspace', 1, 't-ka-website', 1);
+
+--- default impressum link ---
+INSERT INTO Topic VALUES ('tt-webpage', 1, 1, 't-ka-impressum', 'Kiezatlas Impressum');
+INSERT INTO TopicProp VALUES ('t-ka-impressum', 1, 'Name', 'Kiezatlas Impressum');
+INSERT INTO TopicProp VALUES ('t-ka-impressum', 1, 'URL', 'http://www.kiezatlas.de/impressum.html');
+-- assign to "Kiez-Atlas" workspace
+INSERT INTO Association VALUES ('at-ka-impressum-link', 1, 1, 'a-ka-117', '', 't-ka-workspace', 1, 't-ka-impressum', 1);
+
 
 
 --- default stylesheet ---
-INSERT INTO Topic VALUES ('tt-ka-stylesheet', 1, 1, 't-ka-default-stylesheet', 'Kiezatlas Standard-Stylesheet');
-INSERT INTO TopicProp VALUES ('t-ka-default-stylesheet', 1, 'Name', 'Kiezatlas Standard-Stylesheet');
+INSERT INTO Topic VALUES ('tt-ka-stylesheet', 1, 1, 't-ka-default-stylesheet', 'Kiezatlas Stylesheet');
+INSERT INTO TopicProp VALUES ('t-ka-default-stylesheet', 1, 'Name', 'Kiezatlas Stylesheet');
 -- assign to "Kiez-Atlas" workspace
 INSERT INTO Association VALUES ('at-association', 1, 1, 'a-ka-110', '', 't-ka-workspace', 1, 't-ka-default-stylesheet', 1);
 -- CSS
@@ -82,23 +122,25 @@ body {\n
 \n
 /* Kiezatlas: header area of right frame */\n
 .header-area {\n
-\twidth: 100%;\n
+\twidth: 95%;\n
 \tbackground-color: #F3F3F3;\n
 \tpadding: 8px;\n
 }\n
 \n
 /* Kiezatlas: content area of right frame */\n
 .content-area {\n
-\twidth: 100%;\n
-\tmargin-top: 2em;\n
-\tpadding: 8px;\n
+\twidth: 95%;\n
+\tbackground-color: #FFFFFF;\n
+\tpadding-top: 30px;\n
+\tpadding-bottom: 40px;\n
+\tpadding-left: 8px;\n
+\tpadding-right: 8px;\n
 }\n
 \n
 /* Kiezatlas: footer area of right frame */\n
 .footer-area {\n
-\twidth: 100%;\n
+\twidth: 95%;\n
 \tbackground-color: #F3F3F3;\n
-\tmargin-top: 4em;\n
 \tpadding: 8px;\n
 }\n
 \n

@@ -39,4 +39,4 @@
 	%>
 	<br>
 	<p><%= html.link("Zur&uuml;ck zu " + inst.name, KiezAtlas.ACTION_SHOW_GEO_INFO, "id=" + inst.geoID) %></p>
-<% end(out); %>
+<% end(session, out); %>
