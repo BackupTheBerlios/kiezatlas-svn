@@ -15,6 +15,7 @@
 	topicBean.removeFieldsContaining("Web Alias");
 	topicBean.removeFieldsContaining("Locked Geometry");
 	topicBean.removeFieldsContaining("Description");
+	topicBean.removeField("Forum / Aktivierung");
 	// --- image ---
 	String imageFile = topicBean.getValue("Image / File");
 	if (!imageFile.equals("")) {
@@ -28,7 +29,7 @@
 	if (city == null) {
 		Vector tmp = topicBean.getValues("Address / City");
 		if (tmp != null) {
-			if (tmp.size() > 0){
+			if (tmp.size() > 0) {
 				city = ((BaseTopic) tmp.elementAt(0)).getName();
 			} else {
 				city = "";

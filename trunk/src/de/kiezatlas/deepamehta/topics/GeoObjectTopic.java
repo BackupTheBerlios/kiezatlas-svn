@@ -27,10 +27,10 @@ import java.util.Vector;
 
 
 /**
- * Kiezatlas 1.6<br>
+ * Kiezatlas 1.6.1<br>
  * Requires DeepaMehta 2.0b8
  * <p>
- * Last change: 8.7.2008<br>
+ * Last change: 19.8.2008<br>
  * J&ouml;rg Richter<br>
  * jri@deepamehta.de
  */
@@ -274,6 +274,10 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 		} else if (relTopicTypeID.equals(TOPICTYPE_EMAIL_ADDRESS)) {
 			if (propName.equals(PROPERTY_EMAIL_ADDRESS)) {
 				return "E-mail";
+			}
+		} else if (relTopicTypeID.equals(TOPICTYPE_FORUM)) {
+			if (propName.equals(PROPERTY_FORUM_ACTIVITION)) {
+				return "Forum Aktivierung";
 			}
 		}
 		return LiveTopic.propertyLabel(propDef, relTopicTypeID, as);

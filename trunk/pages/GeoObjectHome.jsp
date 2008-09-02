@@ -16,6 +16,7 @@
 	topicBean.removeField("Password");
 	topicBean.removeField("Address / Name");
 	topicBean.removeField("Address / Description");
+	topicBean.removeField("Forum / Aktivierung");
 	topicBean.removeFieldsContaining("Owner ID");
 	topicBean.removeFieldsContaining("Description");
 	topicBean.removeFieldsContaining("Locked Geometry");
@@ -26,7 +27,7 @@
 	out.println(html.info(topicBean, DeepaMehtaConstants.LAYOUT_STYLE_FLOW));
 	//
 	// links to form page and forum administration
-	out.println("<p>\r" + html.link("Zum &Auml;nderungsformular", KiezAtlas.ACTION_SHOW_GEO_FORM) + "</p>");
+	out.println("<p>\r<br>\r" + html.link("Zum &Auml;nderungsformular", KiezAtlas.ACTION_SHOW_GEO_FORM) + "</p>");
 	out.println("<p>\r<hr>\r" + html.link("Zur Forum Administration", KiezAtlas.ACTION_SHOW_FORUM_ADMINISTRATION) + "</p>");
 %>
 <% end(out); %>

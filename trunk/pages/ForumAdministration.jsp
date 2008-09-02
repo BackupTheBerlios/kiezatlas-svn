@@ -7,8 +7,9 @@
 	String activition = (String) session.getAttribute("activition");
 	Vector comments = (Vector) session.getAttribute("comments");
 %>
-	<h2><%= inst.getName() %> -- Forum Administration</h2>
-	Hier k&ouml;nnen Sie das Forum zu Ihrer Einrichtung aktivieren und deaktivieren. Nur wenn das Forum aktiviert ist, haben Websurfer die M&ouml;glichkeit, Kommentare zu Ihrer Einrichtung zu hinterlassen.
+	<h2><%= inst.getName() %> - Forum Administration</h2>
+	Hier k&ouml;nnen Sie das Forum zu Ihrer Einrichtung aktivieren und deaktivieren.<br>
+	Wenn das Forum aktiviert ist, haben Websurfer die M&ouml;glichkeit, Kommentare zu Ihrer Einrichtung zu hinterlassen.
 	<p>
 	Au&szlig;erdem haben Sie hier die M&ouml;glichkeit einzelne Kommentare zu l&ouml;schen.
 	<hr>

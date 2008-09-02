@@ -6,8 +6,7 @@
 	GeoObject geo = (GeoObject) session.getAttribute("selectedGeo");
 	Vector comments = (Vector) session.getAttribute("geoComments");
 %>
-	<br><br>
-	<p><b><%= geo.name %> -- Forum</b></p>
+	<p><b><%= geo.name %> - Forum</b></p>
 	<p class="small">Das Forum enth&auml;lt <%= comments.size() %> Kommentare</p>
 	<p><%= html.link("Kommentar schreiben", KiezAtlas.ACTION_SHOW_COMMENT_FORM) %></p>
 	<%

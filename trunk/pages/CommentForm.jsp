@@ -6,13 +6,12 @@
 	GeoObject inst = (GeoObject) session.getAttribute("selectedGeo");
 	Vector comments = (Vector) session.getAttribute("geoComments");
 %>
-	<br><br>
-	<p><b><%= inst.name %> -- Forum</b></p>
+	<p><b><%= inst.name %> - Forum</b></p>
 	<p>Kommentar schreiben</p>
 	<form>
 		<table>
 		<tr>
-			<td colspan="2"><textarea name="<%=KiezAtlas.PROPERTY_TEXT%>" rows="8" cols="36"></textarea></td>
+			<td colspan="2"><textarea name="<%=KiezAtlas.PROPERTY_TEXT%>" rows="12" cols="40"></textarea></td>
 		</tr>
 		<tr>
 			<td class="small">Autor</td>

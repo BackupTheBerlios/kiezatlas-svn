@@ -11,6 +11,8 @@
 		KiezAtlas.PROPERTY_YADE_X,
 		KiezAtlas.PROPERTY_YADE_Y,
 		KiezAtlas.PROPERTY_LAST_MODIFIED,
+		"Forum Aktivierung",	/* can't use PROPERTY_FORUM_ACTIVITION because       */
+								/* relabled by GeoObjectTopic's propertyLabel() hook */
 		"Title", "Content",
 		"Width", "Height"};
 %>

@@ -1,3 +1,19 @@
+
+-------------------------------------------
+--- Add "Forum Activation" to list view ---
+-------------------------------------------
+
+
+
+INSERT INTO Association VALUES ('at-relation', 1, 1, 'a-ka-118', '', 'tt-ka-geoobject', 1, 'tt-ka-forum', 1);
+INSERT INTO AssociationProp VALUES ('a-ka-118', 1, 'Cardinality', 'one');
+INSERT INTO AssociationProp VALUES ('a-ka-118', 1, 'Association Type ID', 'at-association');
+INSERT INTO AssociationProp VALUES ('a-ka-118', 1, 'Web Info', 'Related Info');
+INSERT INTO AssociationProp VALUES ('a-ka-118', 1, 'Web Form', 'Related Form');
+INSERT INTO AssociationProp VALUES ('a-ka-118', 1, 'Ordinal Number', '390');
+
+
+
 ----------------------------------------
 --- New Feature: Customizable Layout ---
 ----------------------------------------
@@ -65,6 +81,9 @@ INSERT INTO AssociationProp VALUES ('a-ka-111', 1, 'Access Permission', 'create'
 -- "Image"
 INSERT INTO Association VALUES ('at-uses', 1, 1, 'a-ka-112', '', 't-ka-workspace', 1, 'tt-image', 1);
 INSERT INTO AssociationProp VALUES ('a-ka-112', 1, 'Access Permission', 'create');
+-- "Webpage"
+INSERT INTO Association VALUES ('at-uses', 1, 1, 'a-ka-119', '', 't-ka-workspace', 1, 'tt-webpage', 1);
+INSERT INTO AssociationProp VALUES ('a-ka-119', 1, 'Access Permission', 'create');
 -- "Homepage Link"
 INSERT INTO Association VALUES ('at-uses', 1, 1, 'a-ka-114', '', 't-ka-workspace', 1, 'at-ka-homepage-link', 1);
 INSERT INTO AssociationProp VALUES ('a-ka-114', 1, 'Access Permission', 'create');
