@@ -156,7 +156,7 @@ public class EditServlet extends DeepaMehtaServlet implements KiezAtlas {
 				String fileext = getFileExtension(item.getName());	// ### explorer includes entire path
 				String filename = getFilename(item.getName());	// ### explorer includes entire path
 				System.out.println("  > filename=\"" + filename + "\" extension=\"" + fileext + "\"");
-				String path = "/home/jrichter/deepamehta/install/client/document/";	// ### hardcoded
+				String path = "/home/jrichter/deepamehta/install/client/documents/";	// ### hardcoded
 				// String path = "/home/monty/source/deepaMehta/install/client/documents/";
 				if (fileext.equals("png") || fileext.equals("jpg") || fileext.equals("gif")) {
 					path = "/home/jrichter/deepamehta/install/client/images/";	// ### hardcoded

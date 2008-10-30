@@ -137,7 +137,9 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			if(letter.equals("")) {
 				return PAGE_LIST;
 			}
-			session.setAttribute("formLetter", letter);
+			String link = as.getCorporateWebBaseURL() + FILESERVER_DOCUMENTS_PATH;
+			link += writeLetter(letter, "Adressen.tsv");
+			session.setAttribute("formLetter", link);
 			return "Print";
 		}
 		//
@@ -457,6 +459,37 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		return cityMaps;
 	}
 
+	/**
+	 * Writes tsv files with incremental number into the documents repository
+	 * 
+	 * @param letter
+	 * @param fileName
+	 */
+	private String writeLetter(String letter, String fileName) {
+		String path = "/home/jrichter/deepamehta/install/client/documents/"; // ### hardcoded ka
+		// String path = "/home/monty/source/deepaMehta/install/client/documents/"; // ### hardcoded mre's
+		File toFile = new File(path + fileName);
+		try {
+			int copyCount = 0;
+			String newFilename = null;
+			int pos = fileName.lastIndexOf('.');
+			while(toFile.exists()) {
+				copyCount++;
+				newFilename = fileName.substring(0, pos) + "-" + copyCount + fileName.substring(pos);
+				toFile = new File(path + newFilename);
+				System.out.println("  > file already exists, try \"" + newFilename + "\"");
+				//fileName = newFilename;
+			}
+			FileWriter fw = new FileWriter(toFile, true);
+			fw.write(letter);
+			fw.close();
+			System.out.println(">>> writeLetter(): written file successfully from: " + toFile.getAbsolutePath());
+		} catch (IOException ex){
+			System.out.println("***: Error with writing File:" + ex.getMessage());
+		}
+		return toFile.getName();
+	}
+
 	private void checkForWarnings(RequestParameter params, Session session, CorporateDirectives directives) {
 		CityMapTopic cityMap = getCityMap(session);
 		String geoName = params.getValue(PROPERTY_NAME);
@@ -567,7 +600,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			*/
 			return k; // ( 0 != i ) ? i : k;
 		}
-
+		
 		/**
 		 * Maybe not useful
 		 * 

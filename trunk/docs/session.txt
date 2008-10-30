@@ -152,3 +152,9 @@ GeoObjectAdminForm
 ------------------
 
 geo					BaseTopic (geo object to edit)
+
+
+Print
+-----
+
+formLetter			String used as a link to the file in the documents repository
