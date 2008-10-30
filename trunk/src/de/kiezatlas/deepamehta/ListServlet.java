@@ -138,7 +138,6 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 				return PAGE_LIST;
 			}
 			session.setAttribute("formLetter", letter);
-			writeLetter(letter, "testLetter.txt");
 			return "Print";
 		}
 		//
@@ -164,7 +163,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 					TopicBean topic = as.createTopicBean(insts.get(i).toString(), 1);
 					topicBeans.add(topic);
 				}
-				// recover sorting
+				// re sort
 				if (sortBy != null) {
 					sortBeans(topicBeans, sortBy);
 					// ### System.out.println(">>>> topics are fresh from server and sorted by: " + session.getAttribute("sortField") );
@@ -280,12 +279,12 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 	}
 	
 	private String createFormLetter(Vector topics) {
-		String letter = new String();
+		String letter = "Name" + createTab() + "Ansprechpartner/in" + createTab() + "Straße / Hnr." +
+			"" + createTab() + "PLZ" + createTab() + "Stadt\n";
 		String personName = "";
-		String test = "";
+		String entry = "";
 		//
 		if (topics == null) {
-			System.out.println("**** createFormLetter(): somebody gave me an empty topics list");
 			return "";
 		}
 		Enumeration e = topics.elements();
@@ -294,40 +293,37 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			// get related Address
 			String address = getAddress(bean);
 			if (address != null) {
-				test += bean.name;
-				test += createTab();
+				// Create an Entry, starting with Name Tab
+				entry += bean.name;
+				entry += createTab();
 				personName = getRelatedPersonName(bean);
-				if (personName != null && !personName.equals("")) {
-					test += ("z.Hd. ");
-					test += personName;
-					test += createTab(); 
-					test += address;
-					test += "\n";
-					letter += test;
-					System.out.println("Adresseintrag mit Person: " + test);
-					test = "";
+				if (!personName.equals("")) {
+					// filling the Ansprechpartner Tab
+					entry += ("z.Hd. ");
+					entry += personName;
+					entry += createTab();
+					// filling the Street, Code, and City Tabs
+					entry += address;
+					// prepare for a new entry
+					entry += "\n";
+					letter += entry;
+					// System.out.println("Adresseintrag mit Person: " + entry);
+					entry = "";
 				} else {
-					test += address;
-					test += "\n";
-					letter += test;
-					System.out.println("Adresseintrag: " + test);
-					test = "";
+					//filling the Ansprechpartner Tab
+					entry += personName;
+					entry += createTab();
+					// filling the Street, Code, and City Tabs
+					entry += address;
+					// prepare for a new entry
+					entry += "\n";
+					letter += entry;
+					// System.out.println("Adresseintrag: " + entry);
+					entry = "";
 				}
 			}
 		}
 		return letter;
-	}
-	
-	private void writeLetter(String letter, String fileName) {
-		File toFile = new File("/tmp/" + fileName);
-		try {
-			FileWriter fw = new FileWriter(toFile, true);
-			fw.write(letter);
-			fw.close(); 
-			System.out.println(">>> writeLetter(): written file successfully from: " + toFile.getAbsolutePath());
-		} catch (IOException ex){
-			System.out.println("***: Error with writing File:");
-		}
 	}
 	
 	private String createTab() {
@@ -336,9 +332,10 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 	
 	/**
 	 * First checks for Related Topic Name, if no relatedPerson looks for Related Info Person
+	 * If no Lastname is set an empty String is returned, normally Firstname Lastname without Gender
 	 * 
 	 * @param bean
-	 * @return
+	 * @return <Code>""<Code> if no lastname is assigned to the person
 	 */
 	private String getRelatedPersonName(TopicBean bean) {
 		String relatedPerson = new String();
@@ -349,13 +346,13 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		if (lastName != null && !lastName.equals("")) {
 			// Person: Related Info | Related Deeply Info has at least a name
 			// String gender = bean.getValue("Person / Gender");
-			//relatedPerson =	!gender.equals("Female") ? "Herr " : "Frau ";
+			// relatedPerson =	!gender.equals("Female") ? "Herr " : "Frau ";
 			if (firstName != null && !firstName.equals("")) {
 				relatedPerson += firstName + " " + lastName;
 			} else {
 				relatedPerson += lastName;
 			}
-			System.out.println("***getRelatedPerson(): There is a LastName, so: " + relatedPerson);
+			// System.out.println("***getRelatedPerson(): There is a LastName, so: " + relatedPerson);
 			return relatedPerson;
 		} else if (fullName != null && fullName.size() > 0) {
 			// Person: Related Topic Name has at least some attributes
@@ -371,7 +368,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 					relatedPerson += firstName;
 				}
 				relatedPerson += lastName;
-				System.out.println("***getRelatedPerson(): RelatedTopicName " + relatedPerson);
+				// System.out.println("***getRelatedPerson(): RelatedTopicName " + relatedPerson);
 				return relatedPerson;
 				/* Commented out since Gender Prefix is prefilled in a lot of data fields
 				String gender = as.getTopicProperty(person, PROPERTY_GENDER);
@@ -383,14 +380,24 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		return relatedPerson;
 	}
 	
+	/**
+	 * Creates an address string with street, code, city divided by tabulator
+	 * Addresses are not allowed to be empty, Cities are PostalCode is enough
+	 * 
+	 * @param bean
+	 * @return <Code>null<Code> if no street and zip code could be found
+	 */
 	public String getAddress(TopicBean bean) {
 		String address = "";
 		// get Street & Postal Code
 		String street = bean.getValue("Address / Street");
 		String postalCode = bean.getValue("Address / Postal Code");
 		if ( street != null && postalCode != null ) {
+			if (street.equals("") || postalCode.equals("")) {
+				return null;
+			} else {
 				address = street + createTab() + postalCode + createTab();
-				//System.out.println("**** found related address: " + address.toString());	
+			}
 		} else {
 			return null;
 		}
@@ -398,12 +405,12 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		String oldCityProp = bean.getValue("Stadt");
 		if (oldCityProp != null) {// != null && oldCityProp.type == TopicBeanField.TYPE_SINGLE) {
 			address += oldCityProp;
-			System.out.println("*** found old \"Stadt\" Property. so City is: " + address.toString());
+			// System.out.println("*** found old \"Stadt\" Property. so City is: " + address.toString());
 		} else {
 			String cityField = bean.getValue("Address / City");
 			if (cityField != null) { // != null && cityField.type == TopicBeanField.TYPE_MULTI){
 				address += cityField;
-				System.out.println("**** found related city: " + address.toString());	
+				// System.out.println("**** found related city: " + address.toString());	
 			}
 		}
 		return address;

@@ -174,19 +174,34 @@
 	// ---
 
 	String mapLink(String street, String postalCode, String city) throws IOException {
-		System.out.println(">>> mapLink(): street=\"" + street + "\" postalCode=\"" + postalCode + "\" city=\"" + city + "\"");
+		// ### System.out.println(">>> mapLink(): street=\"" + street + "\" postalCode=\"" + postalCode + "\" city=\"" + city + "\"");
 		StringBuffer html = new StringBuffer();
 		// render fahr-info link if address is in berlin
 		if (city.startsWith("Berlin") && isSet(street)) {
 			String mapURL = "http://www.fahrinfo-berlin.de/Stadtplan/index?query=" + street + "&search=Suchen&formquery=&address=true";
-			String imageLink = " <a href=\"" + mapURL + "\" target=\"_blank\"><img src=\"../images/fahrinfo.gif\" border=\"0\" hspace=\"20\"></a>";
-			html.append(street + imageLink + "<br>" + postalCode + " " + city);
+			String imageLink = " <a href=\"" + mapURL + "\" target=\"_blank\"><img src=\"../images/fahrinfo.gif\" border=\"0\" " +
+				"hspace=\"20\"></a>";
+			html.append(street + imageLink + "<br>" + postalCode + " " + city + googleLink(street, postalCode, city));
 			return html.toString();
 		} else {
 			html.append(isSet(street) ? street + "<br>" : "");
 			html.append(isSet(postalCode) ? postalCode + " " : "");
-			html.append(isSet(city) ? city : "");
+			html.append(isSet(city) ? city + googleLink(street, postalCode, city) : "");
 			return html.toString();
+		}
+	}
+	
+	String googleLink(String street, String postalCode, String city) throws IOException {
+		// ### System.out.println(">>> googleLink(): street=\"" + street + "\" postalCode=\"" + postalCode + "\" city=\"" + city + "\"");
+		StringBuffer html = new StringBuffer();
+		// render googlelink if address is complete
+		if (isSet(city) && isSet(street) && isSet(postalCode)) {
+			String mapURL = "http://maps.google.de/maps?q=" + street + ", " + postalCode + " " + city + "&mrt=loc&lci=lmc:panoramio,lmc:wikipedia_en&layer=tc&t=h";
+			String imageLink = " <a href=\"" + mapURL + "\" target=\"_blank\"><img src=\"../images/google14.ico\" alt=\"Ansicht in Google \" height=\"10\" width=\"10\" hspace=\"20\" border=\"0\"></a>";
+			html.append(imageLink);
+			return html.toString();
+		} else {
+		    return "";
 		}
 	}
 	
@@ -204,7 +219,7 @@
 			    html.append(",");
 			}
 		}
-		html.append("\" class=\"small\"> Rundmail erstellen</a>");
+		html.append("\" class=\"small\"> Rundmail verfassen</a>");
 		//
 		return html.toString();
 	}

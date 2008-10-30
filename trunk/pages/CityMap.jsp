@@ -12,6 +12,7 @@
 <html>
 <head>
 	<title>Kiezatlas</title>
+	<meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 	<style type="text/css">
 	<%= stylesheet %>
 	</style>
@@ -103,7 +104,7 @@
 				Point p = inst.getGeometry();
 				// marker and hotspot can't overlap exactly, cause of the new icons don't fit in the old convention of 20x20px chel
 				if (selectedInst != null && selectedInst.geoID.equals(inst.getID())) {
-					out.println("<img src=\"../images/marker.gif\" style=\"position:absolute; top:" +
+					out.println("<img src=\"../images/marker.png\" style=\"position:absolute; top:" +
 						(p.y - 20) + "px; left:" + (p.x - 20) + "px;\">");
 					break;
 				}

@@ -72,7 +72,7 @@
 	if (mailboxes != null && mailboxes.size() > 0) {
 	    out.println(mailListLink(mailboxes));
 	}
-	out.println("<a href=\"?action=createFormLetter\" class=\"small\">Erstelle Serienbrief</a>");
+	out.println("<a href=\"?action=createFormLetter\" class=\"small\">Steuerdatei für Serienbrief erstellen</a>");
 	out.println("</p>");
 %>
 <% end(out); %>
