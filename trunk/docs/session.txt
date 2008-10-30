@@ -138,9 +138,14 @@ List
 ----
 
 cityMap				selected city map (BaseTopic)
-topics				IDs of geo objects to list (Vector of String)
+topics				Vector of TopicBeans
 geo					geo object to highlight (BaseTopic)
 notifications		error notifications (Vector of Notification)
+sortField			Topic Bean Field Name, der zur Sortierung heanrgezogen wird (String) bzw. "null", wenn unsortiert
+filterField			Topic Bean Field Name, der zur Filterung heanrgezogen wird (String) bzw. "null", wenn ungefiltert
+filterText			query string (String). Nur verwendet, wenn filterField != null
+emailList			Liste von Email-Adressen (Vector of String)
+
 
 
 GeoObjectAdminForm

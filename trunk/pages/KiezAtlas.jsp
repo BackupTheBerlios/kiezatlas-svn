@@ -9,6 +9,8 @@
 <%@ page import="de.kiezatlas.deepamehta.Cluster" %>
 
 <%@ page import="de.deepamehta.BaseTopic" %>
+<%@ page import="de.deepamehta.service.TopicBean" %>
+<%@ page import="de.deepamehta.service.TopicBeanField" %>
 <%@ page import="de.deepamehta.BaseAssociation" %>
 <%@ page import="de.deepamehta.DeepaMehtaException" %>
 <%@ page import="de.deepamehta.PresentableTopic" %>
@@ -38,7 +40,9 @@
 			title = title + " - Listenzugang";
 			break;
 		}
-		out.println("<html>\r<head>\r<title>" + title + "</title>");
+		out.println("<html>" +
+			"<meta http-equiv=\"content-type\" content=\"text/html; charset=iso-8859-1\">" +
+			"\r<head>\r<title>" + title + "</title>");
 		out.println("<link href=\"../pages/kiezatlas.css\" rel=\"stylesheet\" type=\"text/css\">");
 		out.println("</head>");
 		out.println("<body>");
@@ -59,7 +63,9 @@
 		String stylesheet = (String) session.getAttribute("stylesheet");
 		String siteLogo = (String) session.getAttribute("siteLogo");
 		String homepageURL = (String) session.getAttribute("homepageURL");
-		out.println("<html>\r<head>\r<title>Kiezatlas</title>\r" +
+		out.println("<html>" +
+			"<meta http-equiv=\"content-type\" content=\"text/html; charset=iso-8859-1\">" +
+			"\r<head>\r<title>Kiezatlas</title>\r" +
 			"<style type=\"text/css\">\r" + stylesheet + "\r</style>\r" +
 			"</head>\r" +
 			"<body" + (refreshMap ? " onLoad=\"top.frames.left.location.href='controller?action=initFrame&frame=" +
@@ -183,7 +189,47 @@
 			return html.toString();
 		}
 	}
-
+	
+	String mailListLink(Vector mailboxes) {
+		Enumeration e = mailboxes.elements();
+		StringBuffer html = new StringBuffer();
+		html.append("<a href=\"mailto:");
+		//
+		while(e.hasMoreElements()) {
+			String mail = (String) e.nextElement();
+			if(mail != null && !mail.equals("")) {
+			    html.append(mail);
+			}
+			if (e.hasMoreElements()) {
+			    html.append(",");
+			}
+		}
+		html.append("\" class=\"small\"> Rundmail erstellen</a>");
+		//
+		return html.toString();
+	}
+	
+	// --
+	
+	String fieldOptions(TopicBean bean, String[] hiddenProps, String[] hiddenPropsContaining, String checked) {
+		StringBuffer html = new StringBuffer();
+		for (int j = 0; j < hiddenProps.length; j++) {
+		    bean.removeField(hiddenProps[j].toString());
+		}
+		for (int k = 0; k < hiddenPropsContaining.length; k++) {
+		    bean.removeFieldsContaining(hiddenPropsContaining[k].toString());
+		}
+		for (int i = 0; i < bean.fields.size(); i++) {
+		    TopicBeanField field = (TopicBeanField) bean.fields.get(i);
+		    html.append("<option value=\""+ field.name +"\"");
+		    if (field.name.equals(checked)) {
+			html.append(" selected=\"selected\"");
+		    }
+		    html.append(">" + field.label + "</option> \n ");
+		}
+		return html.toString();
+	}
+	
 	// ---
 
 	boolean isSet(String str) {

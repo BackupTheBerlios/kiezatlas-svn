@@ -15,6 +15,12 @@
 	topicBean.removeFieldsContaining("Web Alias");
 	topicBean.removeFieldsContaining("Locked Geometry");
 	topicBean.removeFieldsContaining("Description");
+	topicBean.removeFieldsContaining("Birthday");
+	topicBean.removeFieldsContaining("Gender");
+	topicBean.removeField("Person / Mobile Number");
+	topicBean.removeField("Person / Fax Number");
+	topicBean.removeField("Person / Phone Number");
+	topicBean.removeField("Person / Webpage");
 	topicBean.removeField("Forum / Aktivierung");
 	// --- image ---
 	String imageFile = topicBean.getValue("Image / File");

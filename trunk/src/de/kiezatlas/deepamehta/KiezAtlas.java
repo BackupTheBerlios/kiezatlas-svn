@@ -229,6 +229,12 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	public static final String ACTION_SHOW_INSTITUTIONS = "showInstitutions";
 	public static final String ACTION_SHOW_EMPTY_GEO_FORM = "showEmptyGeoObjectForm";
 	public static final String ACTION_CREATE_GEO = "createGeo";
+	public static final String ACTION_SORT_BY ="sort";
+	public static final String ACTION_FILTER ="filter";
+	public static final String ACTION_CLEAR_FILTER ="clearFilter";
+	public static final String ACTION_CREATE_FORM_LETTER ="createFormLetter";
+	
+	
 
 
 

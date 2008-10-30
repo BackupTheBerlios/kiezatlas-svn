@@ -92,6 +92,24 @@
 				out.println("</a>");
 			}
 		}
+		// --- marker first ---
+		e = hotspots.elements();
+		while (e.hasMoreElements()) {
+			Vector presentables = (Vector) e.nextElement();
+			Enumeration e2 = presentables.elements();
+			String icon = (String) e2.nextElement();
+			while (e2.hasMoreElements()) {
+				PresentableTopic inst = (PresentableTopic) e2.nextElement();
+				Point p = inst.getGeometry();
+				// marker and hotspot can't overlap exactly, cause of the new icons don't fit in the old convention of 20x20px chel
+				if (selectedInst != null && selectedInst.geoID.equals(inst.getID())) {
+					out.println("<img src=\"../images/marker.gif\" style=\"position:absolute; top:" +
+						(p.y - 20) + "px; left:" + (p.x - 20) + "px;\">");
+					break;
+				}
+			}
+		}
+		
 		// --- geoObjects ---
 		e = hotspots.elements();
 		while (e.hasMoreElements()) {
@@ -101,13 +119,6 @@
 			while (e2.hasMoreElements()) {
 				PresentableTopic inst = (PresentableTopic) e2.nextElement();
 				Point p = inst.getGeometry();
-				// marker
-				// marker and hotspot can't overlap exactly, cause of the new icons don't fit in the old convention of 20x20px chel
-				if (selectedInst != null && selectedInst.geoID.equals(inst.getID())) {
-					out.println("<img src=\"../images/marker.gif\" style=\"position:absolute; top:" +
-						(p.y - 18) + "px; left:" + (p.x - 18) + "px;\">");
-				}
-				// hotspot
 				out.println("<a href=\"javascript:top.frames.right.location.href='controller?action=" +
 					KiezAtlas.ACTION_SHOW_GEO_INFO + "&id=" + inst.getID() + "'\">" +
 					"<img src=\"" + icon + "\" style=\"position:absolute; top:" + (p.y - 7) + "px; left:" +

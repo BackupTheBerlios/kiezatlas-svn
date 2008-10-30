@@ -75,7 +75,7 @@ public class EditServlet extends DeepaMehtaServlet implements KiezAtlas {
 			// Note: the timestamp is updated through geo object's propertiesChanged() hook
 			updateTopic(geo.getType(), params, session, directives);
 			// --- store image ---
-			writeImage(params.getUploads(), geo.getImage(), PROPERTY_FILE, as);
+			writeFiles(params.getUploads(), geo.getImage(), as);
 			//
 			return PAGE_GEO_HOME;
 			//
@@ -146,15 +146,22 @@ public class EditServlet extends DeepaMehtaServlet implements KiezAtlas {
 	 * @see		#performAction
 	 * @see		ListServlet#performAction
 	 */
-	static String writeImage(Vector fileItems, BaseTopic topic, String propName, ApplicationService as) {
-		try {
-			System.out.println(">>> EditServlet.writeImage(): " + fileItems.size() + " files uploaded");
-			if (fileItems.size() > 0) {
-				String path = "/home/jrichter/deepamehta/install/client/images/";	// ### hardcoded
-				// ### String path = "/Users/jri/Projects/DeepaMehta/trunk/install/client/images/";
-				FileItem item = (FileItem) fileItems.firstElement();
+	static Vector writeFiles(Vector fileItems, BaseTopic topic, ApplicationService as) {
+		Vector fileNames = new Vector();
+		for (int i = 0; i < fileItems.size(); i++) {
+			try {
+				System.out.println(">>> EditServlet.writeImage(): " + fileItems.size() + " files uploaded, writing fileItem: " + i);
+				FileItem item = (FileItem) fileItems.get(i);
+				String propName = getFileChooserFieldName(item);
+				String fileext = getFileExtension(item.getName());	// ### explorer includes entire path
 				String filename = getFilename(item.getName());	// ### explorer includes entire path
-				System.out.println("  > filename=\"" + filename + "\"");
+				System.out.println("  > filename=\"" + filename + "\" extension=\"" + fileext + "\"");
+				// String path = "/home/jrichter/deepamehta/install/client/document/";	// ### hardcoded
+				String path = "/home/monty/source/deepaMehta/install/client/documents/";
+				if (fileext.equals("png") || fileext.equals("jpg") || fileext.equals("gif")) {
+					// String path = "/home/jrichter/deepamehta/install/client/images/";	// ### hardcoded
+					path = "/home/monty/source/deepaMehta/install/client/images/";
+				}
 				File fileToWrite = new File(path + filename);
 				// find new filename if already exists
 				int copyCount = 0;
@@ -174,19 +181,32 @@ public class EditServlet extends DeepaMehtaServlet implements KiezAtlas {
 					if (newFilename != null) {
 						as.setTopicProperty(topic, propName, newFilename);
 					}
-					return newFilename;
+					fileNames.add(newFilename);
+				} else {
+					fileNames.add(filename);
 				}
+			} catch (Exception e) {
+				System.out.println("*** EditServlet.writeImage(): " + e);
 			}
-		} catch (Exception e) {
-			System.out.println("*** EditServlet.writeImage(): " + e);
 		}
-		return null;
+		return fileNames;
+	}
+	
+	static String getFileChooserFieldName(FileItem item) {
+		String fieldName = item.getFieldName();
+		int pos = fieldName.lastIndexOf(":");
+		return pos != -1 ? fieldName.substring(pos + 1) : fieldName; 
 	}
 
 	// ###
 	static String getFilename(String path) {
 		int pos = path.lastIndexOf('\\');
 		return pos != -1 ? path.substring(pos + 1) : path;
+	}
+	
+	static String getFileExtension(String path) {
+		int pos = path.lastIndexOf('.');
+		return pos != -1 ? path.substring(pos + 1) : "";
 	}
 
 

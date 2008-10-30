@@ -6,16 +6,21 @@ import de.kiezatlas.deepamehta.topics.GeoObjectTopic;
 import de.deepamehta.BaseTopic;
 import de.deepamehta.service.CorporateDirectives;
 import de.deepamehta.service.Session;
+import de.deepamehta.service.TopicBean;
+import de.deepamehta.service.TopicBeanField;
 import de.deepamehta.service.web.DeepaMehtaServlet;
-import de.deepamehta.service.web.Notification;
 import de.deepamehta.service.web.RequestParameter;
-import de.deepamehta.util.DeepaMehtaUtils;
-//
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Comparator;
 import javax.servlet.ServletException;
 //
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
+import org.apache.commons.fileupload.FileItem;
 
 
 
@@ -28,7 +33,7 @@ import java.util.Vector;
  * jri@deepamehta.de
  */
 public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
-
+	
 	protected String performAction(String action, RequestParameter params, Session session, CorporateDirectives directives)
 																									throws ServletException {
 		if (action == null) {
@@ -47,6 +52,9 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			String instTypeID = ((CityMapTopic) as.getLiveTopic(cityMap)).getInstitutionType().getID();
 			setCityMap(cityMap, session);
 			setInstTypeID(instTypeID, session);
+			// -- initialize filter and search attributes with "null"
+			session.setAttribute("sortField", null);
+			session.setAttribute("filterField", null);
 			return PAGE_LIST;
 		} else if (action.equals(ACTION_SHOW_GEO_FORM)) {
 			String geoObjectID = params.getValue("id");
@@ -62,8 +70,12 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			// --- update geo object ---
 			// Note: the timestamp is updated through geo object's propertiesChanged() hook
 			updateTopic(geo.getType(), params, session, directives, cityMap.getID(), VIEWMODE_USE);
-			// --- store image ---
-			EditServlet.writeImage(params.getUploads(), geo.getImage(), PROPERTY_FILE, as);
+			// --- store image / files---
+			for (int a = 0; a < params.getUploads().size(); a++) {
+				FileItem f = (FileItem) params.getUploads().get(a);
+				System.out.println("***ListServlet. uploaded files are " + EditServlet.getFilename(f.getName()));
+			}
+			EditServlet.writeFiles(params.getUploads(), geo.getImage(), as);
 			//
 			return PAGE_LIST;
 		} else if (action.equals(ACTION_SHOW_EMPTY_GEO_FORM)) {
@@ -86,11 +98,48 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			setGeoObject(cm.getTopic(geoObjectID, 1), session);
 			GeoObjectTopic geo = getGeoObject(session);
 			// --- store image ---
-			EditServlet.writeImage(params.getUploads(), geo.getImage(), PROPERTY_FILE, as);
+			EditServlet.writeFiles(params.getUploads(), geo.getImage(), as);
 			//
 			return PAGE_LIST;
 		} else if (action.equals(ACTION_GO_HOME)) {
 			return PAGE_LIST_HOME;
+		} else if (action.equals(ACTION_SORT_BY)) {
+			Vector topicBeans = getListedTopics(session);
+			String sortBy = params.getParameter("sortField");
+			sortBeans(topicBeans, sortBy);
+			session.setAttribute("topics", topicBeans);
+			session.setAttribute("sortField", sortBy);
+			return PAGE_LIST;
+		} else if (action.equals(ACTION_FILTER)) {
+			Vector topicBeans = getListedTopics(session);
+			String filterField = params.getParameter("filterField");
+			if (filterField != null) {
+				String filterText = params.getValue("filterText");
+				Vector newBeans = filterBeansByField(topicBeans, filterField, filterText);
+				session.setAttribute("topics", newBeans);
+				session.setAttribute("filterField", filterField);
+				session.setAttribute("filterText", filterText);
+				// Maybe redundant
+				return PAGE_LIST;
+			}
+			// Maybe redundant
+			session.setAttribute("topics", topicBeans);
+			return PAGE_LIST;
+		} else if (action.equals(ACTION_CLEAR_FILTER)) {
+			// -- reset filter and search attributes to "null"
+			session.setAttribute("filterField", null);
+			session.setAttribute("filterText", null);
+			System.out.println(">>> cleared Sort and Filter");
+			return PAGE_LIST;
+		} else if (action.equals(ACTION_CREATE_FORM_LETTER)) {
+			System.out.println(">>> created Form Letter");
+			String letter = createFormLetter(getListedTopics(session));
+			if(letter.equals("")) {
+				return PAGE_LIST;
+			}
+			session.setAttribute("formLetter", letter);
+			writeLetter(letter, "testLetter.txt");
+			return "Print";
 		}
 		//
 		return super.performAction(action, params, session, directives);
@@ -102,25 +151,264 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			Hashtable cityMaps = getCityMaps(workspaces);
 			session.setAttribute("workspaces", workspaces);
 			session.setAttribute("cityMaps", cityMaps);
+			session.setAttribute("emailList", null);
 		} else if (page.equals(PAGE_LIST)) {
-			// geo objects
-			String cityMapID = getCityMap(session).getID();
-			String instTypeID = getInstTypeID(session);
-			Vector insts = cm.getTopicIDs(instTypeID, cityMapID, true);		// sortByTopicName=true
-			session.setAttribute("topics", insts);
-			// notifications
-			session.setAttribute("notifications", directives.getNotifications());
+			String sortBy = getSortByField(session);
+			// refresh geo objects in list from cm, if no filter active
+			if (session.getAttribute("filterField") == null) {
+				String cityMapID = getCityMap(session).getID();
+				String instTypeID = getInstTypeID(session);
+				Vector insts = cm.getTopicIDs(instTypeID, cityMapID, true);		// sortByTopicName=true
+				Vector topicBeans = new Vector();
+				for (int i = 0; i < insts.size(); i++) {
+					TopicBean topic = as.createTopicBean(insts.get(i).toString(), 1);
+					topicBeans.add(topic);
+				}
+				// recover sorting
+				if (sortBy != null) {
+					sortBeans(topicBeans, sortBy);
+					// ### System.out.println(">>>> topics are fresh from server and sorted by: " + session.getAttribute("sortField") );
+				} else {
+					// ### System.out.println(">>>> topics are fresh from server, by default sort");
+				}
+				session.setAttribute("topics", topicBeans);
+				// notifications
+				session.setAttribute("notifications", directives.getNotifications());
+			} else {
+				// ### System.out.println(">>>> sorting / filtering active: " + params.getParameter("sortField") );
+				session.setAttribute("notifications", directives.getNotifications());
+			}
+			Vector beans = getListedTopics(session);
+			Vector mailAdresses = getMailAdresses(beans);
+			session.setAttribute("emailList", mailAdresses);
+			// ### System.out.println(">>>> emailList created with : " + mailAdresses.size() + " Einträge");
+			
 		}
 	}
 
-
+	
 
 	// **********************
 	// *** Custom Methods ***
 	// **********************
-
-
-
+	
+	
+	
+	private void sortBeans(Vector topicBeans, String sortBy) {
+		// ### System.out.println(">>> sorting for german strings supported");
+		Collections.sort(topicBeans, new MyStringComparator( sortBy ));
+	}
+	
+	private Vector filterBeansByField(Vector topicBeans, String filterField, String filterText) {
+		Vector filteredBeans = new Vector();
+		//
+		String prop;
+		BaseTopic topicProp;
+		TopicBean topicBean;
+		TopicBeanField beanField;
+		for (int i = 0; i < topicBeans.size(); i++) {
+			topicBean = (TopicBean) topicBeans.get(i);
+			beanField = (TopicBeanField) topicBean.getField(filterField);
+			if (beanField.type == TopicBeanField.TYPE_MULTI) {
+				for (int j = 0; j < beanField.values.size(); j++) {
+					topicProp = (BaseTopic) beanField.values.get(j);
+					if (topicProp.getName().toLowerCase().indexOf(filterText.toLowerCase()) != -1) {
+						filteredBeans.add(topicBean);
+					}
+					break;
+				}
+			} else {
+				prop = (String) beanField.value;
+				if (prop.toLowerCase().indexOf(filterText.toLowerCase()) != -1) {
+					// ### System.out.println("single field: found " + filterText + ", in " + prop);
+					filteredBeans.add(topicBean);
+				}
+			}
+		}
+		//
+		return filteredBeans;
+	}
+	/**
+	 * Collects Email Addresses for all given beans by searching for TopicBeanFields {@link TopicBeanField} 
+	 * which are inherited by each bean as PROPERTY_EMAIL_ADDRESS as Email Topic (has to be named PROPERTY_EMAIL_ADDRESS) 
+	 * and a TopicBeanField with the name "Person / Email Address" (Email of Person which is assigned to an Institution)
+	 * @param topics
+	 * @return a list of Strings which are all email adresses
+	 */
+	private Vector getMailAdresses(Vector topics) {
+		Vector mailAdresses = new Vector();
+		//
+		Enumeration e = topics.elements();
+		while (e.hasMoreElements()) {
+			TopicBean bean = (TopicBean) e.nextElement();
+			TopicBeanField mailProp = bean.getField(PROPERTY_EMAIL_ADDRESS);
+			// direct related Email Topic
+			if (mailProp != null) {
+				// ### Value can be not null and just empty "" () have to verify this in the form processor
+				if (mailProp.value != null && !mailProp.value.equals("")) {
+					// Type Single
+					// ### System.out.println("type single mail property is: " + mailProp.value); 
+				} else if(mailProp.values != null && mailProp.values.size() > 0){
+					// Type Multi
+					BaseTopic mailTopic = (BaseTopic) mailProp.values.get(0);
+					if (!mailTopic.getName().equals("")) {
+						mailAdresses.add(mailTopic.getName());
+						// ### System.out.println("type multi direct mail topic is: " + mailTopic.getName());
+					}
+				}
+			}
+			// indirect related Email Topic via Person
+			if (mailProp != null) {
+				TopicBeanField mailField = bean.getField("Person / Email Address");
+				if (mailField != null && mailField.type == TopicBeanField.TYPE_MULTI){
+					// ### System.out.println("indirect mailProp Field is: " + mailField.name);
+					if (mailField.values.size() > 0 ){
+						BaseTopic propTopic = (BaseTopic) mailField.values.get(0);
+						String mail = as.getTopicProperty(propTopic, PROPERTY_EMAIL_ADDRESS);
+						if (mail != null && mail.indexOf("@") != -1) {
+							mailAdresses.add(mail);
+							// ### System.out.println("**** found indirect related email adress, added to \"recipient list\": " +
+							// mail + ", fieldName is: " + mailField.name);	
+						}
+						
+					}
+				}
+			}
+		}
+		//
+		return mailAdresses;
+	}
+	
+	private String createFormLetter(Vector topics) {
+		String letter = new String();
+		String personName = "";
+		String test = "";
+		//
+		if (topics == null) {
+			System.out.println("**** createFormLetter(): somebody gave me an empty topics list");
+			return "";
+		}
+		Enumeration e = topics.elements();
+		while (e.hasMoreElements()) {
+			TopicBean bean = (TopicBean) e.nextElement();
+			// get related Address
+			String address = getAddress(bean);
+			if (address != null) {
+				test += bean.name;
+				test += createTab();
+				personName = getRelatedPersonName(bean);
+				if (personName != null && !personName.equals("")) {
+					test += ("z.Hd. ");
+					test += personName;
+					test += createTab(); 
+					test += address;
+					test += "\n";
+					letter += test;
+					System.out.println("Adresseintrag mit Person: " + test);
+					test = "";
+				} else {
+					test += address;
+					test += "\n";
+					letter += test;
+					System.out.println("Adresseintrag: " + test);
+					test = "";
+				}
+			}
+		}
+		return letter;
+	}
+	
+	private void writeLetter(String letter, String fileName) {
+		File toFile = new File("/tmp/" + fileName);
+		try {
+			FileWriter fw = new FileWriter(toFile, true);
+			fw.write(letter);
+			fw.close(); 
+			System.out.println(">>> writeLetter(): written file successfully from: " + toFile.getAbsolutePath());
+		} catch (IOException ex){
+			System.out.println("***: Error with writing File:");
+		}
+	}
+	
+	private String createTab() {
+		return "\t";
+	}
+	
+	/**
+	 * First checks for Related Topic Name, if no relatedPerson looks for Related Info Person
+	 * 
+	 * @param bean
+	 * @return
+	 */
+	private String getRelatedPersonName(TopicBean bean) {
+		String relatedPerson = new String();
+		String firstName = bean.getValue("Person / First Name");
+		String lastName = bean.getValue("Person / Name");
+		Vector fullName = bean.getValues("Person");
+		// Check both types of related Person Topics
+		if (lastName != null && !lastName.equals("")) {
+			// Person: Related Info | Related Deeply Info has at least a name
+			// String gender = bean.getValue("Person / Gender");
+			//relatedPerson =	!gender.equals("Female") ? "Herr " : "Frau ";
+			if (firstName != null && !firstName.equals("")) {
+				relatedPerson += firstName + " " + lastName;
+			} else {
+				relatedPerson += lastName;
+			}
+			System.out.println("***getRelatedPerson(): There is a LastName, so: " + relatedPerson);
+			return relatedPerson;
+		} else if (fullName != null && fullName.size() > 0) {
+			// Person: Related Topic Name has at least some attributes
+			BaseTopic person = (BaseTopic) fullName.get(0);
+			lastName = as.getTopicProperty(person, PROPERTY_NAME);
+			if (lastName.equals("")) {
+				// Found no name, so no 'ansprechpartner'
+				return relatedPerson;
+			} else {
+				// found a name via Related Topic Name
+				firstName = as.getTopicProperty(person, PROPERTY_FIRST_NAME);
+				if (!firstName.equals("")) {
+					relatedPerson += firstName;
+				}
+				relatedPerson += lastName;
+				System.out.println("***getRelatedPerson(): RelatedTopicName " + relatedPerson);
+				return relatedPerson;
+				/* Commented out since Gender Prefix is prefilled in a lot of data fields
+				String gender = as.getTopicProperty(person, PROPERTY_GENDER);
+				if (!gender.equals("")) {
+					relatedPerson = !gender.equals("Female") ? "Herr " : "Frau ";
+				}*/
+			}
+		}		
+		return relatedPerson;
+	}
+	
+	public String getAddress(TopicBean bean) {
+		String address = "";
+		// get Street & Postal Code
+		String street = bean.getValue("Address / Street");
+		String postalCode = bean.getValue("Address / Postal Code");
+		if ( street != null && postalCode != null ) {
+				address = street + createTab() + postalCode + createTab();
+				//System.out.println("**** found related address: " + address.toString());	
+		} else {
+			return null;
+		}
+		// get City
+		String oldCityProp = bean.getValue("Stadt");
+		if (oldCityProp != null) {// != null && oldCityProp.type == TopicBeanField.TYPE_SINGLE) {
+			address += oldCityProp;
+			System.out.println("*** found old \"Stadt\" Property. so City is: " + address.toString());
+		} else {
+			String cityField = bean.getValue("Address / City");
+			if (cityField != null) { // != null && cityField.type == TopicBeanField.TYPE_MULTI){
+				address += cityField;
+				System.out.println("**** found related city: " + address.toString());	
+			}
+		}
+		return address;
+	}
+	
 	private Vector getWorkspaces(String userID) {
 		Vector workspaces = new Vector();
 		//
@@ -204,6 +492,16 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		session.setAttribute("geo", geo);
 		System.out.println("> \"geo\" stored in session: " + geo);
 	}
+	
+	private void setSortField(String field, Session session) {
+		session.setAttribute("sortField", field);
+		System.out.println("> \"sortField\" stored in session: " + field);
+	}
+
+	private void setListedTopics(Vector beans, Session session) {
+		session.setAttribute("topics", beans);
+		System.out.println("> \"topics\" stored in session: " + beans.size());
+	}
 
 	// ---
 
@@ -218,4 +516,64 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 	private GeoObjectTopic getGeoObject(Session session) {
 		return (GeoObjectTopic) as.getLiveTopic((BaseTopic) session.getAttribute("geo"));
 	}
+	
+	private String getSortByField(Session session) {
+		return (String) session.getAttribute("sortField");
+	}
+	
+	private Vector getListedTopics(Session session) {
+		return (Vector) session.getAttribute("topics");
+	}
+
+
+
+	// ********************************
+	// *** Inner Comparison Classes ***
+	// ********************************
+
+
+
+	private class MyStringComparator implements Comparator {
+		
+		private String sortBy;
+		
+		public MyStringComparator(String sortBy) {
+			this.sortBy = sortBy;
+		}
+		
+		public int compare( Object o1, Object o2 ) {
+			TopicBean beanOne = (TopicBean) o1;
+			TopicBean beanTwo = (TopicBean) o2;
+			//
+			String valOne = beanOne.getValue(sortBy);
+			String valTwo = beanTwo.getValue(sortBy);
+			//
+			// int i = prepairForCompare( valOne ).compareTo( prepairForCompare( valTwo ) );
+			int k = ((String)valOne).compareTo( (String)valTwo );
+			/*
+			if ( i != 0) {
+				System.out.println(">>>>i "+ i +" o1: " + o1.toString() +", o2: "+ o2.toString());
+			}
+			if ( i == 0 ) {
+				System.out.println(">>>>k "+ k +" o1: " + o1.toString() +", o2: "+ o2.toString());
+			}
+			*/
+			return k; // ( 0 != i ) ? i : k;
+		}
+
+		/**
+		 * Maybe not useful
+		 * 
+		 * @param o
+		 * @return
+		 */
+		private String prepairForCompare( Object o ) {
+			return ((String)o).toLowerCase().replace( 'ä', 'a' )
+										.replace( 'ö', 'o' )
+										.replace( 'ü', 'u' )
+										.replace( 'ß', 's' );
+		}
+
+	}
+	
 }

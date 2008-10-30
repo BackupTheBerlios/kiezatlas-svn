@@ -69,6 +69,13 @@ body {
 	background-color: #FFFFFF;
 }
 
+/* DeepaMehta list generator: higlight the table header (used for sortBy in listTopicBeans)*/
+.list-highlightcolumnheader {
+        background-color: #E0E0FF;
+        font-size: 10px;
+	color: #666666;
+}
+
 /* DeepaMehta info generator: outmost container for label/content pairs */
 .info-container {
 }
