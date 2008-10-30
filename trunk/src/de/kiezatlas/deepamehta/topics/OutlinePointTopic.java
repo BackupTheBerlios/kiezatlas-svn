@@ -27,9 +27,9 @@ import java.util.*;
 
 /**
  * Kiezatlas 1.4.1.<br>
- * Requires DeepaMehta 2.0b8-pre2.
+ * Requires DeepaMehta 2.0b8.
  * <p>
- * Last functional change: 11.9.2007<br>
+ * Last change: 14.9.2008<br>
  * J&ouml;rg Richter<br>
  * jri@freenet.de
  */
@@ -116,7 +116,7 @@ public class OutlinePointTopic extends LiveTopic implements KiezAtlas {
 
 
 
-	public String associationAllowed(String assocTypeID, String relTopicID, CorporateDirectives directives) {
+	public String associationAllowed(String assocTypeID, String relTopicID, int relTopicPos, CorporateDirectives directives) {
 		return SEMANTIC_SHAPE_OUTLINE;
 	}
 
