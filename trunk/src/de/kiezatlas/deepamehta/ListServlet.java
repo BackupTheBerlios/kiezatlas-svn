@@ -11,8 +11,11 @@ import de.deepamehta.service.TopicBeanField;
 import de.deepamehta.service.web.DeepaMehtaServlet;
 import de.deepamehta.service.web.RequestParameter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.Collections;
 import java.util.Comparator;
 import javax.servlet.ServletException;
@@ -55,6 +58,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			// -- initialize filter and search attributes with "null"
 			session.setAttribute("sortField", null);
 			session.setAttribute("filterField", null);
+			setUseCache(Boolean.FALSE, session);
 			return PAGE_LIST;
 		} else if (action.equals(ACTION_SHOW_GEO_FORM)) {
 			String geoObjectID = params.getValue("id");
@@ -77,6 +81,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			}
 			EditServlet.writeFiles(params.getUploads(), geo.getImage(), as);
 			//
+			setUseCache(Boolean.FALSE, session);
 			return PAGE_LIST;
 		} else if (action.equals(ACTION_SHOW_EMPTY_GEO_FORM)) {
 			return PAGE_GEO_EMPTY_FORM;
@@ -99,46 +104,53 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			GeoObjectTopic geo = getGeoObject(session);
 			// --- store image ---
 			EditServlet.writeFiles(params.getUploads(), geo.getImage(), as);
-			//
+			setUseCache(Boolean.FALSE, session);			//
 			return PAGE_LIST;
 		} else if (action.equals(ACTION_GO_HOME)) {
+			setFilterField(null, session);
+			setFilterText(null, session);
+			setSortByField(null, session);
 			return PAGE_LIST_HOME;
 		} else if (action.equals(ACTION_SORT_BY)) {
 			Vector topicBeans = getListedTopics(session);
 			String sortBy = params.getParameter("sortField");
 			sortBeans(topicBeans, sortBy);
-			session.setAttribute("topics", topicBeans);
-			session.setAttribute("sortField", sortBy);
+			setListedTopics(topicBeans, session);
+			setSortByField(sortBy, session);
+			setUseCache(Boolean.TRUE, session);
 			return PAGE_LIST;
 		} else if (action.equals(ACTION_FILTER)) {
 			Vector topicBeans = getListedTopics(session);
 			String filterField = params.getParameter("filterField");
 			if (filterField != null) {
-				String filterText = params.getValue("filterText");
+				String filterText = params.getParameter("filterText");
 				Vector newBeans = filterBeansByField(topicBeans, filterField, filterText);
-				session.setAttribute("topics", newBeans);
-				session.setAttribute("filterField", filterField);
-				session.setAttribute("filterText", filterText);
-				// Maybe redundant
+				setListedFilteredTopics(newBeans, session);
+				setFilterField(filterField, session);
+				setFilterText(filterText, session);
+				setUseCache(Boolean.TRUE, session);
 				return PAGE_LIST;
 			}
-			// Maybe redundant
-			session.setAttribute("topics", topicBeans);
+			// setListedTopics(topicBeans, session);
+			setUseCache(Boolean.TRUE, session);
 			return PAGE_LIST;
 		} else if (action.equals(ACTION_CLEAR_FILTER)) {
 			// -- reset filter and search attributes to "null"
-			session.setAttribute("filterField", null);
+			// session.setAttribute("filterField", null);
 			session.setAttribute("filterText", null);
-			System.out.println(">>> cleared Sort and Filter");
+			session.setAttribute("filterField", null);
+			setUseCache(Boolean.TRUE, session);
+			System.out.println(">>> cleared Filter");
 			return PAGE_LIST;
 		} else if (action.equals(ACTION_CREATE_FORM_LETTER)) {
 			System.out.println(">>> created Form Letter");
 			String letter = createFormLetter(getListedTopics(session));
 			if(letter.equals("")) {
+				setUseCache(Boolean.TRUE, session);
 				return PAGE_LIST;
 			}
 			String link = as.getCorporateWebBaseURL() + FILESERVER_DOCUMENTS_PATH;
-			link += writeLetter(letter, "Adressen.tsv");
+			link += writeLetter(letter, "Adressen.txt");
 			session.setAttribute("formLetter", link);
 			return "Print";
 		}
@@ -155,8 +167,8 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			session.setAttribute("emailList", null);
 		} else if (page.equals(PAGE_LIST)) {
 			String sortBy = getSortByField(session);
-			// refresh geo objects in list from cm, if no filter active
-			if (session.getAttribute("filterField") == null) {
+			// refresh geo objects in list from cm, if caching is not active
+			if(!isCacheUsed(session).booleanValue()) {
 				String cityMapID = getCityMap(session).getID();
 				String instTypeID = getInstTypeID(session);
 				Vector insts = cm.getTopicIDs(instTypeID, cityMapID, true);		// sortByTopicName=true
@@ -172,11 +184,10 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 				} else {
 					// ### System.out.println(">>>> topics are fresh from server, by default sort");
 				}
-				session.setAttribute("topics", topicBeans);
+				setListedTopics(topicBeans, session);
 				// notifications
 				session.setAttribute("notifications", directives.getNotifications());
 			} else {
-				// ### System.out.println(">>>> sorting / filtering active: " + params.getParameter("sortField") );
 				session.setAttribute("notifications", directives.getNotifications());
 			}
 			Vector beans = getListedTopics(session);
@@ -211,12 +222,14 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			topicBean = (TopicBean) topicBeans.get(i);
 			beanField = (TopicBeanField) topicBean.getField(filterField);
 			if (beanField.type == TopicBeanField.TYPE_MULTI) {
+				multiLoop:
 				for (int j = 0; j < beanField.values.size(); j++) {
 					topicProp = (BaseTopic) beanField.values.get(j);
-					if (topicProp.getName().toLowerCase().indexOf(filterText.toLowerCase()) != -1) {
+					prop = topicProp.getName();
+					if (prop.toLowerCase().indexOf(filterText.toLowerCase()) != -1) {
 						filteredBeans.add(topicBean);
+						break multiLoop;
 					}
-					break;
 				}
 			} else {
 				prop = (String) beanField.value;
@@ -229,6 +242,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		//
 		return filteredBeans;
 	}
+	
 	/**
 	 * Collects Email Addresses for all given beans by searching for TopicBeanFields {@link TopicBeanField} 
 	 * which are inherited by each bean as PROPERTY_EMAIL_ADDRESS as Email Topic (has to be named PROPERTY_EMAIL_ADDRESS) 
@@ -480,9 +494,11 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 				System.out.println("  > file already exists, try \"" + newFilename + "\"");
 				//fileName = newFilename;
 			}
+			FileOutputStream fout = new FileOutputStream(toFile, true);
+			OutputStreamWriter out = new OutputStreamWriter(fout ,"ISO-8859-1");
 			FileWriter fw = new FileWriter(toFile, true);
-			fw.write(letter);
-			fw.close();
+			out.write(letter);
+			out.close();
 			System.out.println(">>> writeLetter(): written file successfully from: " + toFile.getAbsolutePath());
 		} catch (IOException ex){
 			System.out.println("***: Error with writing File:" + ex.getMessage());
@@ -533,7 +549,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		System.out.println("> \"geo\" stored in session: " + geo);
 	}
 	
-	private void setSortField(String field, Session session) {
+	private void setSortByField(String field, Session session) {
 		session.setAttribute("sortField", field);
 		System.out.println("> \"sortField\" stored in session: " + field);
 	}
@@ -543,6 +559,26 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		System.out.println("> \"topics\" stored in session: " + beans.size());
 	}
 
+	private void setListedFilteredTopics(Vector beans, Session session) {
+		session.setAttribute("filteredTopics", beans);
+		System.out.println("> \"filteredTopics\" stored in session: " + beans.size());
+	}
+	
+	private void setFilterText(String value, Session session) {
+		session.setAttribute("filterText", value);
+		System.out.println("> \"filterText\" stored in session: " + value);
+	}
+	
+	private void setFilterField(String fieldName, Session session) {
+		session.setAttribute("filterField", fieldName);
+		System.out.println("> \"filterField\" stored in session: " + fieldName);
+	}
+	
+	private void setUseCache(Boolean flag, Session session) {
+		session.setAttribute("useCache", flag.toString());
+		System.out.println(">> \"useCache\" stored in session: " + flag.toString());
+	}
+	
 	// ---
 
 	private CityMapTopic getCityMap(Session session) {
@@ -557,6 +593,11 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		return (GeoObjectTopic) as.getLiveTopic((BaseTopic) session.getAttribute("geo"));
 	}
 	
+	/** Works just if sorting was once activated, uses session
+	 * 
+	 * @param session
+	 * @return
+	 */
 	private String getSortByField(Session session) {
 		return (String) session.getAttribute("sortField");
 	}
@@ -564,7 +605,26 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 	private Vector getListedTopics(Session session) {
 		return (Vector) session.getAttribute("topics");
 	}
-
+	
+	private Vector getListedFilteredTopics(Session session) {
+		return (Vector) session.getAttribute("filteredTopics");
+	}
+	
+	private String getFilterText(Session session) {
+		return (String) session.getAttribute("filterText");
+	}
+	
+	private Boolean isCacheUsed (Session session) {
+		if (session.getAttribute("useCache").equals("true")) {
+			return Boolean.TRUE;
+		} else {
+			return Boolean.FALSE;
+		}
+	}
+	
+	private String getFilterField(Session session) {
+		return (String) session.getAttribute("filterField");
+	}
 
 
 	// ********************************

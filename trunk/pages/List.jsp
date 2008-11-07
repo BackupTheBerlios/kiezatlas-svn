@@ -30,6 +30,7 @@
 	if(filterField != null) {
 	    disabledFormString = "";
 	    selectedFilterField = filterField;
+	    topics = (Vector) session.getAttribute("filteredTopics");
 	} else {
 	    disabledFormString = " disabled";
 	    selectedFilterField = "";

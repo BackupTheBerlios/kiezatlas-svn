@@ -18,8 +18,8 @@
 	</style>
 	<!--[if lt IE 7]>
 	<script defer type="text/javascript" src="../pages/pngfix.js"></script>
-	<script defer type="text/javascript" src="../pages/fixed.js"></script>
 	<![endif]-->
+	<script defer type="text/javascript" src="../pages/fixed.js"></script>
 	<script type="text/javascript">
 
 		var currentActiveMenu = "";

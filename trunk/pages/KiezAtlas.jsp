@@ -197,7 +197,7 @@
 		// render googlelink if address is complete
 		if (isSet(city) && isSet(street) && isSet(postalCode)) {
 			String mapURL = "http://maps.google.de/maps?q=" + street + ", " + postalCode + " " + city + "&mrt=loc&lci=lmc:panoramio,lmc:wikipedia_en&layer=tc&t=h";
-			String imageLink = " <a href=\"" + mapURL + "\" target=\"_blank\"><img src=\"../images/google14.ico\" alt=\"Ansicht in Google \" height=\"10\" width=\"10\" hspace=\"20\" border=\"0\"></a>";
+			String imageLink = " <a href=\"" + mapURL + "\" target=\"_blank\"><img src=\"../images/google_logo_small.png\" alt=\"Ansicht in Google \" hspace=\"20\" border=\"0\"></a>";
 			html.append(imageLink);
 			return html.toString();
 		} else {

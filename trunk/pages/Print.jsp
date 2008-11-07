@@ -5,5 +5,7 @@
    "http://www.w3.org/TR/html4/loose.dtd">
 
 <%  String link = (String) session.getAttribute("formLetter");
+    out.println("<h3>Download der Steuerdatei</h3>");
+    out.println("<p>Bitte klicken Sie mit der rechten Maustaste auf den untenstehenden Link und wählen Sie \"Ziel Speichern unter\"</p>");
     out.println("<a href=\"" + link + "\">Steuerdatei herunterladen</a>");
 %>

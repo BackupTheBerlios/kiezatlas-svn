@@ -76,6 +76,10 @@ body {
 	color: #666666;
 }
 
+.list-highlightcolumnheader:after { 
+        content: url("../images/arrow_up.gif")" ";
+}
+
 /* DeepaMehta info generator: outmost container for label/content pairs */
 .info-container {
 }
