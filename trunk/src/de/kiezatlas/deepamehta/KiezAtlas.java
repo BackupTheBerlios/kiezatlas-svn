@@ -5,7 +5,7 @@ import de.deepamehta.DeepaMehtaConstants;
 
 
 /**
- * Kiezatlas 1.6.1<br>
+ * Kiezatlas 1.6.2<br>
  * Requires DeepaMehta 2.0b8.
  * <p>
  * Last change: 11.8.2008<br>
@@ -285,6 +285,7 @@ public interface KiezAtlas extends DeepaMehtaConstants {
     static final String PAGE_LIST = "List";
     static final String PAGE_GEO_ADMIN_FORM = "GeoObjectAdminForm";
     static final String PAGE_GEO_EMPTY_FORM = "GeoObjectEmptyForm";
+	static final String PAGE_LINK_PAGE = "Print";
 	// error
     static final String PAGE_ERROR = "error";
 }

@@ -18,8 +18,9 @@
 	</style>
 	<!--[if lt IE 7]>
 	<script defer type="text/javascript" src="../pages/pngfix.js"></script>
-	<![endif]-->
 	<script defer type="text/javascript" src="../pages/fixed.js"></script>
+	<![endif]-->
+	<!-- For running this app in IE 7, css-strict mode has to be enabled via a doctype definition -->
 	<script type="text/javascript">
 
 		var currentActiveMenu = "";

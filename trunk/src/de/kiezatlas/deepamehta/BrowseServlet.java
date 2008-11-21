@@ -32,7 +32,7 @@ import de.kiezatlas.deepamehta.topics.GeoObjectTopic;
 
 
 /**
- * Kiezatlas 1.6.1<br>
+ * Kiezatlas 1.6.2<br>
  * Requires DeepaMehta 2.0b8
  * <p>
  * Last change: 11.8.2008<br>

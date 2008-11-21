@@ -28,10 +28,10 @@ import org.apache.commons.fileupload.FileItem;
 
 
 /**
- * Kiezatlas 1.6<br>
+ * Kiezatlas 1.6.2<br>
  * Requires DeepaMehta 2.0b8
  * <p>
- * Last change: 8.7.2008<br>
+ * Last change: 20.11.2008<br>
  * J&ouml;rg Richter<br>
  * jri@deepamehta.de
  */
@@ -143,16 +143,21 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			System.out.println(">>> cleared Filter");
 			return PAGE_LIST;
 		} else if (action.equals(ACTION_CREATE_FORM_LETTER)) {
-			System.out.println(">>> created Form Letter");
-			String letter = createFormLetter(getListedTopics(session));
+			String letter = "";
+			if(getFilterField(session) != null) {
+				letter = createFormLetter(getListedFilteredTopics(session));	
+			} else {
+				letter = createFormLetter(getListedTopics(session));
+			}
 			if(letter.equals("")) {
 				setUseCache(Boolean.TRUE, session);
 				return PAGE_LIST;
 			}
 			String link = as.getCorporateWebBaseURL() + FILESERVER_DOCUMENTS_PATH;
 			link += writeLetter(letter, "Adressen.txt");
+			System.out.println(">>> created Form Letter");
 			session.setAttribute("formLetter", link);
-			return "Print";
+			return PAGE_LINK_PAGE;
 		}
 		//
 		return super.performAction(action, params, session, directives);
@@ -190,11 +195,17 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			} else {
 				session.setAttribute("notifications", directives.getNotifications());
 			}
-			Vector beans = getListedTopics(session);
-			Vector mailAdresses = getMailAdresses(beans);
-			session.setAttribute("emailList", mailAdresses);
-			// ### System.out.println(">>>> emailList created with : " + mailAdresses.size() + " Einträge");
-			
+			if(getFilterField(session) != null) {
+				Vector beans = getListedFilteredTopics(session);
+				Vector mailAdresses = getMailAdresses(beans);
+				session.setAttribute("emailList", mailAdresses);
+				System.out.println(">>>> emailList created with : " + mailAdresses.size() + " Einträge");
+			} else {
+				Vector beans = getListedTopics(session);
+				Vector mailAdresses = getMailAdresses(beans);
+				session.setAttribute("emailList", mailAdresses);
+				System.out.println(">>>> emailList created with : " + mailAdresses.size() + " Einträge");
+			}			
 		}
 	}
 
@@ -294,6 +305,11 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		return mailAdresses;
 	}
 	
+	/**
+	 * 
+	 * @param topics
+	 * @return can be empty an empty stringif the given topics were null
+	 */
 	private String createFormLetter(Vector topics) {
 		String letter = "Name" + createTab() + "Ansprechpartner/in" + createTab() + "Straße / Hnr." +
 			"" + createTab() + "PLZ" + createTab() + "Stadt\n";
@@ -480,7 +496,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 	 * @param fileName
 	 */
 	private String writeLetter(String letter, String fileName) {
-		String path = "/home/jrichter/deepamehta/install/client/documents/"; // ### hardcoded ka
+		String path = "/home/jrichter/deepamehta/install/client/documents/"; // ### hardcoded ka-server
 		// String path = "/home/monty/source/deepaMehta/install/client/documents/"; // ### hardcoded mre's
 		File toFile = new File(path + fileName);
 		try {
