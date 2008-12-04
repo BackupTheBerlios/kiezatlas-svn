@@ -16,6 +16,7 @@ Global
 map					BaseTopic
 mapImage			String
 criterias			array of SearchCriteria
+defaultCriteria		number of selected Criteria. Just set if an additional param e.g. '&1' was appended to the citymap alias
 instType			TypeTopic
 shapeTypes			Vector of ShapeType
 shapes				Vector of Shape
@@ -138,8 +139,8 @@ List
 ----
 
 cityMap				selected city map (BaseTopic)
-topics				Vector of TopicBeans
-filteredTopics		Vector of filteredTopics
+topics				Vector of current Beans
+cachedTopics		Vector of cached TopicBeans
 useCache			Boolean to use listed topics, not populated listedTopics 
 geo					geo object to highlight (BaseTopic)
 notifications		error notifications (Vector of Notification)

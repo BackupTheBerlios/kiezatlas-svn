@@ -46,6 +46,17 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 		if (action == null) {
 			try {
 				String pathInfo = params.getPathInfo();
+				int additionParam = pathInfo.indexOf("&");
+				if (additionParam != -1) {
+					String selectCriteria = pathInfo.substring(additionParam+1);
+					System.out.println("Info: the default action comes along with a criteria: " + selectCriteria);
+					session.setAttribute("defaultCriteria", selectCriteria);
+					// clear citymap alias from additional params
+					pathInfo = pathInfo.substring(0, additionParam);
+				} else {
+					// no external criteria link in
+					session.setAttribute("defaultCriteria", null);
+				}
 				// error check
 				if (pathInfo == null || pathInfo.length() == 1) {
 					throw new DeepaMehtaException("Fehler in URL");
@@ -85,7 +96,12 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 			} else if (frame.equals(FRAME_RIGHT)) {
 				// list categories of 1st search criteria, if there is a criteria at all
 				if (getCriterias(session).length > 0) {
-					setSearchMode("0", session);	// ### was SEARCHMODE_BY_CATEGORY
+					String criteria = (String) session.getAttribute("defaultCriteria");
+					if (criteria != null) {
+						setSearchMode(criteria, session);
+					} else {
+						setSearchMode("0", session);	// ### was SEARCHMODE_BY_CATEGORY
+					}
 					return PAGE_CATEGORY_LIST; 
 				} else {
 					// otherwise list all institutions

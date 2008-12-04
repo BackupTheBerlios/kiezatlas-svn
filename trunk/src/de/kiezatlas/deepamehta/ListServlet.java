@@ -10,6 +10,7 @@ import de.deepamehta.service.TopicBean;
 import de.deepamehta.service.TopicBeanField;
 import de.deepamehta.service.web.DeepaMehtaServlet;
 import de.deepamehta.service.web.RequestParameter;
+import de.deepamehta.topics.PersonSearchTopic;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -81,7 +82,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			}
 			EditServlet.writeFiles(params.getUploads(), geo.getImage(), as);
 			//
-			setUseCache(Boolean.FALSE, session);
+			setUseCache(Boolean.FALSE, session);	// re-filtering and -sorting is handled in preparePage with fresh topics now
 			return PAGE_LIST;
 		} else if (action.equals(ACTION_SHOW_EMPTY_GEO_FORM)) {
 			return PAGE_GEO_EMPTY_FORM;
@@ -104,7 +105,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			GeoObjectTopic geo = getGeoObject(session);
 			// --- store image ---
 			EditServlet.writeFiles(params.getUploads(), geo.getImage(), as);
-			setUseCache(Boolean.FALSE, session);			//
+			setUseCache(Boolean.FALSE, session);	// re-filtering and -sorting is handled in preparePage with fresh topics now
 			return PAGE_LIST;
 		} else if (action.equals(ACTION_GO_HOME)) {
 			setFilterField(null, session);
@@ -120,23 +121,24 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			setUseCache(Boolean.TRUE, session);
 			return PAGE_LIST;
 		} else if (action.equals(ACTION_FILTER)) {
-			Vector topicBeans = getListedTopics(session);
+			Vector topicBeans = getCachedTopicList(session);
 			String filterField = params.getParameter("filterField");
 			if (filterField != null) {
 				String filterText = params.getParameter("filterText");
 				Vector newBeans = filterBeansByField(topicBeans, filterField, filterText);
-				setListedFilteredTopics(newBeans, session);
+				setListedTopics(newBeans, session);
 				setFilterField(filterField, session);
 				setFilterText(filterText, session);
 				setUseCache(Boolean.TRUE, session);
 				return PAGE_LIST;
 			}
-			// setListedTopics(topicBeans, session);
 			setUseCache(Boolean.TRUE, session);
 			return PAGE_LIST;
 		} else if (action.equals(ACTION_CLEAR_FILTER)) {
 			// -- reset filter and search attributes to "null"
 			// session.setAttribute("filterField", null);
+			Vector topics = getCachedTopicList(session);
+			setListedTopics(topics, session);
 			session.setAttribute("filterText", null);
 			session.setAttribute("filterField", null);
 			setUseCache(Boolean.TRUE, session);
@@ -145,11 +147,13 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		} else if (action.equals(ACTION_CREATE_FORM_LETTER)) {
 			String letter = "";
 			if(getFilterField(session) != null) {
-				letter = createFormLetter(getListedFilteredTopics(session));	
-			} else {
 				letter = createFormLetter(getListedTopics(session));
+				// System.out.println("Take Filtered Topic List: " + letter);
+			} else {
+				letter = createFormLetter(getCachedTopicList(session));
+				// System.out.println("Take Cached Topic List: " + letter);
 			}
-			if(letter.equals("")) {
+			if(letter != null && letter.equals("")) {
 				setUseCache(Boolean.TRUE, session);
 				return PAGE_LIST;
 			}
@@ -182,30 +186,41 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 					TopicBean topic = as.createTopicBean(insts.get(i).toString(), 1);
 					topicBeans.add(topic);
 				}
-				// re sort
+				setCachedTopicList(topicBeans, session);
+				// System.out.println(">>> refreshed beans in cache with serverside data");
+				// fresh topic data & re sorted
 				if (sortBy != null) {
 					sortBeans(topicBeans, sortBy);
-					// ### System.out.println(">>>> topics are fresh from server and sorted by: " + session.getAttribute("sortField") );
+					System.out.println(">>>> topics are fresh from server and sorted by: " 
+						+ session.getAttribute("sortField") );
 				} else {
-					// ### System.out.println(">>>> topics are fresh from server, by default sort");
+					System.out.println(">>>> topics are fresh from server with sortByTopicName");
+				}
+				// fresh topic data & re filtered (just used after create geo)
+				if(getFilterField(session) != null) {
+					String filterText = (String) session.getAttribute("filterText");
+					topicBeans = filterBeansByField(topicBeans, getFilterField(session), filterText);
+					// System.out.println(">>>> re-filtered fresh data in topicList");
 				}
 				setListedTopics(topicBeans, session);
 				// notifications
 				session.setAttribute("notifications", directives.getNotifications());
 			} else {
+				// System.out.println(">>> used cached or filtered topic list");
 				session.setAttribute("notifications", directives.getNotifications());
 			}
+			// prepare the correct mailto link
 			if(getFilterField(session) != null) {
-				Vector beans = getListedFilteredTopics(session);
-				Vector mailAdresses = getMailAdresses(beans);
-				session.setAttribute("emailList", mailAdresses);
-				System.out.println(">>>> emailList created with : " + mailAdresses.size() + " Einträge");
-			} else {
 				Vector beans = getListedTopics(session);
-				Vector mailAdresses = getMailAdresses(beans);
+				Vector mailAdresses = getMailAddresses(beans);
 				session.setAttribute("emailList", mailAdresses);
-				System.out.println(">>>> emailList created with : " + mailAdresses.size() + " Einträge");
-			}			
+				// System.out.println(">>>> filtered emailList created with : " + mailAdresses.size() + " Einträge");
+			} else {
+				Vector beans = getCachedTopicList(session);
+				Vector mailAdresses = getMailAddresses(beans);
+				session.setAttribute("emailList", mailAdresses);
+				// System.out.println(">>>> emailList created with : " + mailAdresses.size() + " Einträge");
+			}
 		}
 	}
 
@@ -214,9 +229,9 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 	// **********************
 	// *** Custom Methods ***
 	// **********************
+
 	
-	
-	
+
 	private void sortBeans(Vector topicBeans, String sortBy) {
 		// ### System.out.println(">>> sorting for german strings supported");
 		Collections.sort(topicBeans, new MyStringComparator( sortBy ));
@@ -232,6 +247,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		for (int i = 0; i < topicBeans.size(); i++) {
 			topicBean = (TopicBean) topicBeans.get(i);
 			beanField = (TopicBeanField) topicBean.getField(filterField);
+			// TopicBeanFields of TYPE_MULTI 
 			if (beanField.type == TopicBeanField.TYPE_MULTI) {
 				multiLoop:
 				for (int j = 0; j < beanField.values.size(); j++) {
@@ -242,10 +258,10 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 						break multiLoop;
 					}
 				}
+			// TopicBeanFields of TYPE_SINGLE
 			} else {
 				prop = (String) beanField.value;
 				if (prop.toLowerCase().indexOf(filterText.toLowerCase()) != -1) {
-					// ### System.out.println("single field: found " + filterText + ", in " + prop);
 					filteredBeans.add(topicBean);
 				}
 			}
@@ -261,57 +277,70 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 	 * @param topics
 	 * @return a list of Strings which are all email adresses
 	 */
-	private Vector getMailAdresses(Vector topics) {
+	private Vector getMailAddresses(Vector topics) {
 		Vector mailAdresses = new Vector();
 		//
 		Enumeration e = topics.elements();
 		while (e.hasMoreElements()) {
 			TopicBean bean = (TopicBean) e.nextElement();
-			TopicBeanField mailProp = bean.getField(PROPERTY_EMAIL_ADDRESS);
-			// direct related Email Topic
-			if (mailProp != null) {
-				// ### Value can be not null and just empty "" () have to verify this in the form processor
-				if (mailProp.value != null && !mailProp.value.equals("")) {
-					// Type Single
-					// ### System.out.println("type single mail property is: " + mailProp.value); 
-				} else if(mailProp.values != null && mailProp.values.size() > 0){
-					// Type Multi
-					BaseTopic mailTopic = (BaseTopic) mailProp.values.get(0);
-					if (!mailTopic.getName().equals("")) {
-						mailAdresses.add(mailTopic.getName());
-						// ### System.out.println("type multi direct mail topic is: " + mailTopic.getName());
-					}
-				}
-			}
-			// indirect related Email Topic via Person
-			if (mailProp != null) {
-				TopicBeanField mailField = bean.getField("Person / Email Address");
-				if (mailField != null && mailField.type == TopicBeanField.TYPE_MULTI){
-					// ### System.out.println("indirect mailProp Field is: " + mailField.name);
-					if (mailField.values.size() > 0 ){
-						BaseTopic propTopic = (BaseTopic) mailField.values.get(0);
-						String mail = as.getTopicProperty(propTopic, PROPERTY_EMAIL_ADDRESS);
-						if (mail != null && mail.indexOf("@") != -1) {
-							mailAdresses.add(mail);
-							// ### System.out.println("**** found indirect related email adress, added to \"recipient list\": " +
-							// mail + ", fieldName is: " + mailField.name);	
-						}
-						
-					}
-				}
+			String mailbox = getMailbox(bean);
+			if (!mailbox.equals("")) {
+				mailAdresses.add(mailbox);
 			}
 		}
 		//
 		return mailAdresses;
 	}
 	
+	/** See getMailAddresses
+	 * 
+	 * @param bean
+	 * @return
+	 */
+	private String getMailbox(TopicBean bean) {
+		TopicBeanField mailProp = bean.getField(PROPERTY_EMAIL_ADDRESS);
+		if (mailProp != null) {
+		// direct related Email Topic
+			// ### Value can be not null and just empty "" () have to verify this in the form processor
+			if (mailProp.value != null && !mailProp.value.equals("")) {
+				// Type Single
+				// System.out.println("type single mail property is: " + mailProp.value); 
+				return mailProp.value;
+			} else if(mailProp.values != null && mailProp.values.size() > 0){
+				// Type Multi
+				BaseTopic mailTopic = (BaseTopic) mailProp.values.get(0);
+				if (!mailTopic.getName().equals("")) {
+					// System.out.println("type multi direct mail topic is: " + mailTopic.getName());
+					return mailTopic.getName();
+				}
+			}
+		} else {
+		// indirect related Email Topic via Person
+			TopicBeanField mailField = bean.getField("Person / Email Address");
+			if (mailField != null && mailField.type == TopicBeanField.TYPE_MULTI){
+				// ### System.out.println("indirect mailProp Field is: " + mailField.name);
+				if (mailField.values.size() > 0 ){
+					BaseTopic propTopic = (BaseTopic) mailField.values.get(0);
+					String mail = as.getTopicProperty(propTopic, PROPERTY_EMAIL_ADDRESS);
+					if (mail != null && mail.indexOf("@") != -1) {
+						//System.out.println("**** found indirect related email adress, added to \"mailUrl\": " +
+							//mail + ", fieldName is: " + mailField.name);
+						return mail;
+					}
+
+				}
+			}
+		}
+		return "";
+	}
+	
 	/**
 	 * 
 	 * @param topics
-	 * @return can be empty an empty stringif the given topics were null
+	 * @return can be empty an empty string if the given topics were null
 	 */
 	private String createFormLetter(Vector topics) {
-		String letter = "Name" + createTab() + "Ansprechpartner/in" + createTab() + "Straße / Hnr." +
+		String letter = "Name" + createTab() + "Email" + createTab() + "Ansprechpartner/in" + createTab() + "Straße / Hnr." +
 			"" + createTab() + "PLZ" + createTab() + "Stadt\n";
 		String personName = "";
 		String entry = "";
@@ -324,35 +353,30 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			TopicBean bean = (TopicBean) e.nextElement();
 			// get related Address
 			String address = getAddress(bean);
-			if (address != null) {
-				// Create an Entry, starting with Name Tab
+			String mailbox = getMailbox(bean);
+			if (mailbox.equals("") && address == null) {
+				entry = "";
+				System.out.println("[Info]: Neither mailbox nor address provided, skip the entry: " + bean.name);
+			} else {
+				// at least one is available, make an entry
 				entry += bean.name;
 				entry += createTab();
-				personName = getRelatedPersonName(bean);
-				if (!personName.equals("")) {
-					// filling the Ansprechpartner Tab
-					entry += ("z.Hd. ");
-					entry += personName;
-					entry += createTab();
-					// filling the Street, Code, and City Tabs
-					entry += address;
-					// prepare for a new entry
-					entry += "\n";
-					letter += entry;
-					// System.out.println("Adresseintrag mit Person: " + entry);
-					entry = "";
-				} else {
+				entry += getMailbox(bean);
+				entry += createTab();
+				if (address != null) {
+					// Create an Entry, starting with Name Tab
+					personName = getRelatedPersonName(bean);
 					//filling the Ansprechpartner Tab
 					entry += personName;
 					entry += createTab();
-					// filling the Street, Code, and City Tabs
+					// filling the Street, Code, and City, method insert Tabs for you
 					entry += address;
-					// prepare for a new entry
-					entry += "\n";
-					letter += entry;
-					// System.out.println("Adresseintrag: " + entry);
-					entry = "";
 				}
+				// prepare for a new entry
+				entry += "\n";
+				// append it to the letter and clear
+				letter += entry;
+				entry = "";
 			}
 		}
 		return letter;
@@ -363,7 +387,8 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 	}
 	
 	/**
-	 * First checks for Related Topic Name, if no relatedPerson looks for Related Info Person
+	 * 
+	 * Related Topic Name, if no relatedPerson looks for Related Info Properties on Person
 	 * If no Lastname is set an empty String is returned, normally Firstname Lastname without Gender
 	 * 
 	 * @param bean
@@ -373,48 +398,34 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		String relatedPerson = new String();
 		String firstName = bean.getValue("Person / First Name");
 		String lastName = bean.getValue("Person / Name");
-		Vector fullName = bean.getValues("Person");
-		// Check both types of related Person Topics
-		if (lastName != null && !lastName.equals("")) {
-			// Person: Related Info | Related Deeply Info has at least a name
-			// String gender = bean.getValue("Person / Gender");
-			// relatedPerson =	!gender.equals("Female") ? "Herr " : "Frau ";
+		TopicBeanField personField = (TopicBeanField) bean.getField("Person");
+		if (personField != null && personField.type == TopicBeanField.TYPE_MULTI) {
+			Vector persons = (Vector) personField.values;
+			if (persons.size() > 0) {
+				BaseTopic person = (BaseTopic) persons.get(0);
+				// System.out.println(">>> createFormLetter:getRelatedPerson(): Related Topic Name is: " + person.getName());
+				relatedPerson = person.getName();
+				return relatedPerson;
+			} else {
+				// System.out.println(">>> createFormLetter:getRelatedPerson(): Related Topic Name is empty, found props: " 
+					// + lastName + ", "  +firstName);
+			}
+		} else if (lastName != null && !lastName.equals("")) {
 			if (firstName != null && !firstName.equals("")) {
 				relatedPerson += firstName + " " + lastName;
 			} else {
 				relatedPerson += lastName;
 			}
-			// System.out.println("***getRelatedPerson(): There is a LastName, so: " + relatedPerson);
+			// System.out.println(">>> createFormLetter:getRelatedPerson(): There is no related Person but at least a " +
+				// "lastName, so: take " + relatedPerson);
 			return relatedPerson;
-		} else if (fullName != null && fullName.size() > 0) {
-			// Person: Related Topic Name has at least some attributes
-			BaseTopic person = (BaseTopic) fullName.get(0);
-			lastName = as.getTopicProperty(person, PROPERTY_NAME);
-			if (lastName.equals("")) {
-				// Found no name, so no 'ansprechpartner'
-				return relatedPerson;
-			} else {
-				// found a name via Related Topic Name
-				firstName = as.getTopicProperty(person, PROPERTY_FIRST_NAME);
-				if (!firstName.equals("")) {
-					relatedPerson += firstName;
-				}
-				relatedPerson += lastName;
-				// System.out.println("***getRelatedPerson(): RelatedTopicName " + relatedPerson);
-				return relatedPerson;
-				/* Commented out since Gender Prefix is prefilled in a lot of data fields
-				String gender = as.getTopicProperty(person, PROPERTY_GENDER);
-				if (!gender.equals("")) {
-					relatedPerson = !gender.equals("Female") ? "Herr " : "Frau ";
-				}*/
-			}
-		}		
+		}
 		return relatedPerson;
 	}
 	
 	/**
 	 * Creates an address string with street, code, city divided by tabulator
-	 * Addresses are not allowed to be empty, Cities are PostalCode is enough
+	 * Addresses are not allowed to be empty, Cities are. PostalCode is enough for us to send a letter.
 	 * 
 	 * @param bean
 	 * @return <Code>null<Code> if no street and zip code could be found
@@ -424,25 +435,47 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		// get Street & Postal Code
 		String street = bean.getValue("Address / Street");
 		String postalCode = bean.getValue("Address / Postal Code");
-		if ( street != null && postalCode != null ) {
+		// check for web_info deeply related or related info address topic data
+		if (street != null && postalCode != null) {
+			// if WEB_INFO_ is not deeply, beans do not have "Address / Street" as TopicBeanField. Street is named "Address" then
 			if (street.equals("") || postalCode.equals("")) {
+				// System.out.println("*** createFormLetter:skipAddr, neither street or postalCode was a 
+					// provided as deep topicdata");
 				return null;
 			} else {
 				address = street + createTab() + postalCode + createTab();
 			}
+		// check for web_info related topic name 
 		} else {
-			return null;
+			 Vector addresses= bean.getValues("Address");
+			 BaseTopic addressTopic = (BaseTopic) addresses.get(0);
+			 postalCode = as.getTopicProperty(addressTopic, PROPERTY_POSTAL_CODE);
+ 			 address = addressTopic.getName() + createTab() + postalCode + createTab();
+			 //System.out.println("*** createFormLetter: not deeply or info related address topic, " +
+				// "topic name delivers: " + address);
 		}
 		// get City
 		String oldCityProp = bean.getValue("Stadt");
+		Vector citys = bean.getValues("Address / City");
+		// - via "Stadt" Property
 		if (oldCityProp != null) {// != null && oldCityProp.type == TopicBeanField.TYPE_SINGLE) {
 			address += oldCityProp;
 			// System.out.println("*** found old \"Stadt\" Property. so City is: " + address.toString());
-		} else {
-			String cityField = bean.getValue("Address / City");
-			if (cityField != null) { // != null && cityField.type == TopicBeanField.TYPE_MULTI){
-				address += cityField;
+		// - via deeply related MultiType City
+		} else if (citys != null && citys.size() > 0) { // != null && cityField.type == TopicBeanField.TYPE_MULTI){
+				BaseTopic city = (BaseTopic) citys.get(0);
+				address += city.getName();
 				// System.out.println("**** found related city: " + address.toString());	
+		// - no city data, but give berlin a plz try
+		} else {
+			if (postalCode != null) {
+				int value = Integer.valueOf(postalCode).intValue();
+				if (value > 10001 && value <= 14199) {
+					// is within 10001 and 14199
+					System.out.println("*** createFormLetter: no city assigned to Address: " + address + ", but internal postal " +
+						"code check delivered \"Berlin\" as the city");	
+					address += "Berlin";
+				}
 			}
 		}
 		return address;
@@ -490,7 +523,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 	}
 
 	/**
-	 * Writes tsv files with incremental number into the documents repository
+	 * Writes txt files with incremental number into the documents repository
 	 * 
 	 * @param letter
 	 * @param fileName
@@ -521,6 +554,10 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		}
 		return toFile.getName();
 	}
+	
+	private void performSortAndFilter(Vector topics, Session session) {
+		
+	}
 
 	private void checkForWarnings(RequestParameter params, Session session, CorporateDirectives directives) {
 		CityMapTopic cityMap = getCityMap(session);
@@ -544,6 +581,15 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 
 
 	// --- Methods to maintain data in the session
+	
+	private void setCachedTopicList(Vector beans, Session session) {
+		System.out.println(">>> stored " + beans.size() + " \"cachedTopics\" in session");
+		session.setAttribute("cachedTopics", beans);
+	}
+	
+	private Vector getCachedTopicList(Session session) {
+		return (Vector) session.getAttribute("cachedTopics");
+	}
 
 	private void setUser(BaseTopic user, Session session) {
 		session.setAttribute("user", user);
@@ -573,11 +619,6 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 	private void setListedTopics(Vector beans, Session session) {
 		session.setAttribute("topics", beans);
 		System.out.println("> \"topics\" stored in session: " + beans.size());
-	}
-
-	private void setListedFilteredTopics(Vector beans, Session session) {
-		session.setAttribute("filteredTopics", beans);
-		System.out.println("> \"filteredTopics\" stored in session: " + beans.size());
 	}
 	
 	private void setFilterText(String value, Session session) {
@@ -620,14 +661,6 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 	
 	private Vector getListedTopics(Session session) {
 		return (Vector) session.getAttribute("topics");
-	}
-	
-	private Vector getListedFilteredTopics(Session session) {
-		return (Vector) session.getAttribute("filteredTopics");
-	}
-	
-	private String getFilterText(Session session) {
-		return (String) session.getAttribute("filterText");
 	}
 	
 	private Boolean isCacheUsed (Session session) {

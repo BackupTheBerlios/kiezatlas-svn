@@ -5,7 +5,7 @@
 	static String[] hiddenProps = {
 		"Image", "Image / Height", "Image / Width", 
 		"Image / File",  "Image / Name", "Width", "Height",
-		"Address / Name", "Address / City", "Person / Birthday"};
+		"Address / Name", "Person / Birthday"}; // "Address / City" can not be removed for the listtopicBean generator, due to round letter feature
 	static String[] hiddenPropsContaining= {"YADE", "Owner", "Locked Geometry", KiezAtlas.PROPERTY_DESCRIPTION, KiezAtlas.PROPERTY_ICON, "Person / Address" };
 %>
 <%
@@ -30,7 +30,7 @@
 	if(filterField != null) {
 	    disabledFormString = "";
 	    selectedFilterField = filterField;
-	    topics = (Vector) session.getAttribute("filteredTopics");
+	    // topics = (Vector) session.getAttribute("filteredTopics");
 	} else {
 	    disabledFormString = " disabled";
 	    selectedFilterField = "";
@@ -43,7 +43,7 @@
 	if (bean != null) {
 	    out.println("<form id=\"filterForm\" method=\"GET\" action=\"controller\" >\n<select name=\"filterField\">" + 
 			fieldOptions(bean, hiddenProps, hiddenPropsContaining, filterField) + "</select>\n");
-	    // -- had to encode the action into form data cause of '?'
+	    // -- had to encode the action into a hidden form element. cause of '?'
 	    out.println("<input type=\"hidden\" name=\"action\" value=\""+KiezAtlas.ACTION_FILTER+"\">\n");
 	    if (filterText != null) {
 		out.println("<input type=\"text\" name=\"filterText\" value=\""+filterText+"\">\n");
@@ -69,11 +69,13 @@
 	}
 	//
 	out.println("<p>");
-	// check mailboxes
+	// check for displaying mailbox feature
 	if (mailboxes != null && mailboxes.size() > 0) {
-	    out.println(mailListLink(mailboxes));
+	    out.println("<b><a href=\""+mailtoUrl(mailboxes)+"\">Rundmail verfassen</a></b>");
+	    String adressLabel = mailboxes.size() == 1 ? " Adresse" : " Adressen";
+	    out.println(" (an " + mailboxes.size()  + adressLabel + ")");
 	}
-	out.println("<a href=\"?action=createFormLetter\" class=\"small\">Steuerdatei für Serienbrief erstellen</a>");
+	out.println(html.link("Steuerdatei für Serienbrief erstellen", KiezAtlas.ACTION_CREATE_FORM_LETTER));
 	out.println("</p>");
 %>
 <% end(out); %>

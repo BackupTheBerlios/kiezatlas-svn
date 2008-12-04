@@ -40,9 +40,11 @@
 			title = title + " - Listenzugang";
 			break;
 		}
-		out.println("<html>" +
+		out.println("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">\r" +
+			"<html>" +
+			"\r<head>" +
 			"<meta http-equiv=\"content-type\" content=\"text/html; charset=iso-8859-1\">" +
-			"\r<head>\r<title>" + title + "</title>");
+			"\r<title>" + title + "</title>");
 		out.println("<link href=\"../pages/kiezatlas.css\" rel=\"stylesheet\" type=\"text/css\">");
 		out.println("</head>");
 		out.println("<body>");
@@ -63,10 +65,12 @@
 		String stylesheet = (String) session.getAttribute("stylesheet");
 		String siteLogo = (String) session.getAttribute("siteLogo");
 		String homepageURL = (String) session.getAttribute("homepageURL");
-		out.println("<html>" +
+		out.println("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">\r" +
+			"<html>" +
+			"\r<head>\n" +
 			"<meta http-equiv=\"content-type\" content=\"text/html; charset=iso-8859-1\">" +
-			"\r<head>\r<title>Kiezatlas</title>\r" +
-			"<style type=\"text/css\">\r" + stylesheet + "\r</style>\r" +
+			"\r<title>Kiezatlas</title>" +
+			"\r<style type=\"text/css\">\r" + stylesheet + "\r</style>\r" +
 			"</head>\r" +
 			"<body" + (refreshMap ? " onLoad=\"top.frames.left.location.href='controller?action=initFrame&frame=" +
 				KiezAtlas.FRAME_LEFT + "'\"" : "") + ">\r\r");
@@ -205,23 +209,22 @@
 		}
 	}
 	
-	String mailListLink(Vector mailboxes) {
+	String mailtoUrl(Vector mailboxes) {
 		Enumeration e = mailboxes.elements();
-		StringBuffer html = new StringBuffer();
-		html.append("<a href=\"mailto:");
+		StringBuffer url = new StringBuffer();
+		url.append("mailto:");
 		//
 		while(e.hasMoreElements()) {
 			String mail = (String) e.nextElement();
 			if(mail != null && !mail.equals("")) {
-			    html.append(mail);
+			    url.append(mail);
 			}
 			if (e.hasMoreElements()) {
-			    html.append(",");
+			    url.append(",");
 			}
 		}
-		html.append("\" class=\"small\"> Rundmail verfassen</a>");
 		//
-		return html.toString();
+		return url.toString();
 	}
 	
 	// --

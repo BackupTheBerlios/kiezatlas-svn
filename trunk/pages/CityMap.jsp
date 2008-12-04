@@ -8,7 +8,7 @@
 	GeoObject selectedInst = (GeoObject) session.getAttribute("selectedGeo");
 	String stylesheet = (String) session.getAttribute("stylesheet");
 %>
-
+<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">
 <html>
 <head>
 	<title>Kiezatlas</title>
@@ -36,14 +36,15 @@
 				originalPosition = id.split(".");
 				var xPosition = parseInt(originalPosition[0]);
 				var yPosition = parseInt(originalPosition[1]);
-				if (navigator.appName != "Microsoft Internet Explorer") {
-					// not ie, recalculate position after scrolling
-					document.getElementById(currentMenu).style.top = yPosition - independentY();
-					document.getElementById(currentMenu).style.left = xPosition - independentX();
-				} else {
-					// ie, no recalculation, handled by included 'fixed.js' script
+				var myregex = /MSIE 6\.0/i;
+				if (navigator.appName == "Microsoft Internet Explorer" && navigator.appVersion.indexOf("6.0") != -1) {
+					// ie 6, no recalculation, handled by included 'fixed.js' script
 					document.getElementById(currentMenu).style.top = yPosition;
 					document.getElementById(currentMenu).style.left = xPosition;
+				} else {
+					// everything but ie 6, recalculate position after scrolling
+					document.getElementById(currentMenu).style.top = yPosition - independentY();
+					document.getElementById(currentMenu).style.left = xPosition - independentX();
 				}
 				document.getElementById(currentMenu).style.visibility = 'visible';
 					currentActiveMenu = id;
@@ -61,7 +62,8 @@
 		// helper called for browser independency
 		function independentY() {
 			if (navigator.appName == "Microsoft Internet Explorer") {
-				return document.body.scrollTop;
+			    if(navigator.appVersion.indexOf("7.0") != -1) return document.documentElement.scrollTop;
+			    else return document.body.scrollTop;
 			} else {
 				return window.pageYOffset;
 			}
@@ -69,9 +71,10 @@
 		
 		function independentX() {
 			if (navigator.appName == "Microsoft Internet Explorer") {
-				return document.body.scrollLeft;
+			    if(navigator.appVersion.indexOf("7.0") != -1) return document.documentElement.scrollLeft;
+			    else return document.body.scrollLeft;
 			} else {
-				return window.pageXOffset;
+			    return window.pageXOffset;
 			}
 		}		
 
@@ -105,8 +108,8 @@
 				Point p = inst.getGeometry();
 				// marker and hotspot can't overlap exactly, cause of the new icons don't fit in the old convention of 20x20px chel
 				if (selectedInst != null && selectedInst.geoID.equals(inst.getID())) {
-					out.println("<img src=\"../images/marker.png\" style=\"position:absolute; top:" +
-						(p.y - 20) + "px; left:" + (p.x - 20) + "px;\">");
+					out.println("<img src=\"../images/marker.png\" class=\"fixpng\" style=\"position:absolute; top:" +
+						(p.y - 20) + "px; left:" + (p.x - 20) + "px; width:40px; height:40px;\">");
 					break;
 				}
 			}

@@ -4,7 +4,7 @@
 
 <%
 	HTMLGenerator html = (HTMLGenerator) session.getAttribute("html");
-	String imagePath = (String) session.getAttribute("imagePath");	
+	String imagePath = (String) session.getAttribute("imagePath");
 	String forumActivition = (String) session.getAttribute("forumActivition");
 	Integer commentCount = (Integer) session.getAttribute("commentCount");
 	// hide properties
@@ -51,8 +51,10 @@
 	// --- generic geo object info ---
 	// remove fields which are rendered manually
 	topicBean.removeFieldsContaining("Image");
-	topicBean.removeFieldsContaining("Address");
 	topicBean.removeFieldsContaining("Icon");
+	topicBean.removeField("Address / Street");
+	topicBean.removeField("Address / Postal Code");
+	topicBean.removeField("Address / Name");
 	topicBean.removeField("Name");
 	topicBean.removeField("Stadt");
 	// geo object info
