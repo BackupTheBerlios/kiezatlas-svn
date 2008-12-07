@@ -554,10 +554,6 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		}
 		return toFile.getName();
 	}
-	
-	private void performSortAndFilter(Vector topics, Session session) {
-		
-	}
 
 	private void checkForWarnings(RequestParameter params, Session session, CorporateDirectives directives) {
 		CityMapTopic cityMap = getCityMap(session);
