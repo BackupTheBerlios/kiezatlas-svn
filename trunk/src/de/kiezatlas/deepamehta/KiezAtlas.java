@@ -233,6 +233,7 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	public static final String ACTION_FILTER ="filter";
 	public static final String ACTION_CLEAR_FILTER ="clearFilter";
 	public static final String ACTION_CREATE_FORM_LETTER ="createFormLetter";
+	public static final String ACTION_DELETE_ENTRY ="deleteEntry";
 	
 	
 

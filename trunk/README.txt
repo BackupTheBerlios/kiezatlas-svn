@@ -1,18 +1,18 @@
 
-Kiezatlas 1.4.1                                                               Jörg Richter
-===============                                                                  11.9.2007
+Kiezatlas 1.6.2                                                  Malte Reißig & Jörg Richter
+===============                                                                   21.11.2008
 
 
 Kiezatlas is an application for the DeepaMehta platform.
-Kiezatlas relies on a DeepaMehta installation.
+Kiezatlas relies on a DeepaMehta installation, at the moment it depends on the revision 357
 
 
 Install Kiezatlas:
 
-1) unzip kiezatlas-1.4.1.zip
-2) apply 11 database patches from db/, begin with kiezatlas.sql
+1) unzip kiezatlas-1.6.2.zip
+2) apply all database patches from db/, begin with kiezatlas.sql
 3) copy 2 .war files to tomcat/webapps
-4) copy kiezatlas.jar file to tomcat/shared/libs
+4) copy kiezatlas.jar file to tomcat/shared/libs or to a resp. local web-inf/lib
 5) copy content of icons/ to deepamehta/install/client/icons
 6) copy content of backgrounds/ to deepamehta/install/client/backgrounds
 

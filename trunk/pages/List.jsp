@@ -6,7 +6,7 @@
 		"Image", "Image / Height", "Image / Width", 
 		"Image / File",  "Image / Name", "Width", "Height",
 		"Address / Name", "Person / Birthday"}; // "Address / City" can not be removed for the listtopicBean generator, due to round letter feature
-	static String[] hiddenPropsContaining= {"YADE", "Owner", "Locked Geometry", KiezAtlas.PROPERTY_DESCRIPTION, KiezAtlas.PROPERTY_ICON, "Person / Address" };
+	static String[] hiddenPropsContaining= { "Owner", "Locked Geometry", KiezAtlas.PROPERTY_DESCRIPTION, KiezAtlas.PROPERTY_ICON, "Person / Address" };
 %>
 <%
 
@@ -61,10 +61,10 @@
 	// --- list of institutions ---
 	String selectedID = geo != null ? geo.getID() : null;
 	if (sortField == null) {
-	    out.println(html.listTopicBeans(topics, selectedID, hiddenProps, hiddenPropsContaining, true, KiezAtlas.ACTION_SHOW_GEO_FORM, KiezAtlas.ACTION_SORT_BY, true, null));
+	    out.println(html.listTopicBeans(topics, selectedID, hiddenProps, hiddenPropsContaining, true, KiezAtlas.ACTION_SHOW_GEO_FORM, KiezAtlas.ACTION_SORT_BY, "deleteEntry", true, null));
 	} else {
 	    System.out.println(">>> highlight Column: " + sortField);
-	    out.println(html.listTopicBeans(topics, selectedID, hiddenProps, hiddenPropsContaining, true, KiezAtlas.ACTION_SHOW_GEO_FORM, KiezAtlas.ACTION_SORT_BY, true, sortField));
+	    out.println(html.listTopicBeans(topics, selectedID, hiddenProps, hiddenPropsContaining, true, KiezAtlas.ACTION_SHOW_GEO_FORM, KiezAtlas.ACTION_SORT_BY, "deleteEntry", true, sortField));
 	}
 	//
 	out.println("<p>");

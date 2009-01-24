@@ -321,20 +321,20 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 				Point p = inst.getPoint(getID());	// throws DME
 				// Note: if YADE is "off" p is null
 				if (p == null) {
-					String txt = "Die Einrichtungen konnten nicht neupositioniert werden. " +
+					String txt = "Die Einrichtung konnten nicht neupositioniert werden. " +
 						"Es müssen erst 2 YADE-Referenzpunkte gesetzt werden.";
 					directives.add(DIRECTIVE_SHOW_MESSAGE, txt, new Integer(NOTIFICATION_WARNING));
 					System.out.println(">>> CityMapTopic.repositionAllInstitutions(): " + txt);
-					return;
+					// do not return; go on
 				}
 				// reposition
 				directives.add(DIRECTIVE_SET_TOPIC_GEOMETRY, inst.getID(), p, getID());
 				System.out.println(">>> CityMapTopic.repositionAllInstitutions(): " + inst + " -> moved to " + p.x + " " + p.y);
 			} catch (DeepaMehtaException dme) {
-				String txt = "Die Neupositionierung der Einrichtungen wurde abgebrochen (" + dme.getMessage() + ")";
+				String txt = "Hinweis: " + dme.getMessage();
 				directives.add(DIRECTIVE_SHOW_MESSAGE, txt, new Integer(NOTIFICATION_WARNING));
 				System.out.println(">>> CityMapTopic.repositionAllInstitutions(): " + txt);
-				return;
+				// do not return; go on
 			}
 		}
 	}

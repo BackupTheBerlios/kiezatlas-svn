@@ -162,6 +162,13 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			System.out.println(">>> created Form Letter");
 			session.setAttribute("formLetter", link);
 			return PAGE_LINK_PAGE;
+		} else if (action.equals(ACTION_DELETE_ENTRY)){
+			String topicId = params.getParameter("id");
+			System.out.println("	deleteAction from listServlet, deleting entry with id: " + topicId);
+			deleteTopic(topicId);
+            System.out.println("    " + topicId + " deleted successful from corporate memory");
+			setUseCache(Boolean.FALSE, session);
+			return PAGE_LIST;
 		}
 		//
 		return super.performAction(action, params, session, directives);

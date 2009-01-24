@@ -46,6 +46,7 @@
 			"<meta http-equiv=\"content-type\" content=\"text/html; charset=iso-8859-1\">" +
 			"\r<title>" + title + "</title>");
 		out.println("<link href=\"../pages/kiezatlas.css\" rel=\"stylesheet\" type=\"text/css\">");
+		out.println("<script src=\"../pages/util.js\" type=\"text/javascript\"></script>");
 		out.println("</head>");
 		out.println("<body>");
 		out.println();
