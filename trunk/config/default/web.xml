@@ -18,7 +18,7 @@
 		<param-name>service</param-name>
 		<!-- <param-value>kiezbox</param-value> --> <!-- mre's local kiezatlas instance -->
 		<!-- <param-value>mysql5</param-value> --> <!-- jri's default instance -->
-		<param-value>kiezbox</param-value> <!-- www.kiezatlas.de production instance-->
+		<param-value>kiezatlas</param-value> <!-- www.kiezatlas.de production instance-->
 		<description>Selects a DeepaMehta service.
 			If this parameter is not set the "default" service will be used.
 			To configure DeepaMehta services see the file install/client/dms.rc</description>
@@ -66,7 +66,7 @@
 		 particular servlet.
 	-->
 
-
+    
 
     <servlet-mapping>
 		<servlet-name>Browse Servlet</servlet-name>
@@ -92,7 +92,7 @@
 		 in minutes.
 	-->
 
-
+    
 
     <session-config>
 		<session-timeout>120</session-timeout>

@@ -39,9 +39,6 @@
 		case KiezAtlas.SERVLET_LIST:
 			title = title + " - Listenzugang";
 			break;
-        case KiezAtlas.SERVLET_SERVE:
-			title = title + " - Einfacher Listenzugang";
-			break;
 		}
 		out.println("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">\r" +
 			"<html>" +

@@ -190,7 +190,6 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	public static final int SERVLET_EDIT = 2;
 	public static final int SERVLET_LIST = 3;
 	public static final int SERVLET_UPLOAD = 4;
-    public static final int SERVLET_SERVE = 5;
 
 
 
