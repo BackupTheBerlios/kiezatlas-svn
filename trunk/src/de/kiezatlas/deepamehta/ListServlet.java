@@ -46,8 +46,9 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			String username = params.getValue("username");
 			String password = params.getValue("password");
 			if (as.loginCheck(username, password)) {
-				setUser(cm.getTopic(TOPICTYPE_USER, username, 1), session);
-				return PAGE_LIST_HOME;
+				BaseTopic user = cm.getTopic(TOPICTYPE_USER, username, 1);
+                setUser(user, session);
+                return PAGE_LIST_HOME;
 			} else {
 				return PAGE_LIST_LOGIN;
 			}
@@ -176,7 +177,8 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 
 	protected void preparePage(String page, RequestParameter params, Session session, CorporateDirectives directives) {
 		if (page.equals(PAGE_LIST_HOME)) {
-			Vector workspaces = getWorkspaces(getUserID(session));
+            // next line: membership preferences are set according to workspaces
+			Vector workspaces = getWorkspaces(getUserID(session), session);
 			Hashtable cityMaps = getCityMaps(workspaces);
 			session.setAttribute("workspaces", workspaces);
 			session.setAttribute("cityMaps", cityMaps);
@@ -488,11 +490,17 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		return address;
 	}
 	
-	private Vector getWorkspaces(String userID) {
+	private Vector getWorkspaces(String userID, Session session) {
 		Vector workspaces = new Vector();
 		//
-		Vector ws = as.getRelatedTopics(userID, SEMANTIC_MEMBERSHIP, TOPICTYPE_WORKSPACE, 2);
-		Enumeration e = ws.elements();
+        session.setAttribute("membership", "");
+        Vector ws = as.getRelatedTopics(userID, SEMANTIC_MEMBERSHIP, TOPICTYPE_WORKSPACE, 2);
+        Enumeration e = ws.elements();
+        if (!e.hasMoreElements()) {
+            Vector aws = as.getRelatedTopics(userID, SEMANTIC_AFFILIATED_MEMBERSHIP, TOPICTYPE_WORKSPACE, 2);
+            session.setAttribute("membership", "Affiliated");
+            e = aws.elements();
+        }
 		while (e.hasMoreElements()) {
 			BaseTopic w = (BaseTopic) e.nextElement();
 			if (isKiezatlasWorkspace(w.getID())) {

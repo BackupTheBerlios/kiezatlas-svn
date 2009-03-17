@@ -6,7 +6,8 @@
 		"Image", "Image / Height", "Image / Width", 
 		"Image / File",  "Image / Name", "Width", "Height",
 		"Address / Name", "Person / Birthday"}; // "Address / City" can not be removed for the listtopicBean generator, due to round letter feature
-	static String[] hiddenPropsContaining= { "Owner", "Locked Geometry", KiezAtlas.PROPERTY_DESCRIPTION, KiezAtlas.PROPERTY_ICON, "Person / Address" };
+	static String[] hiddenPropsContaining = { "Owner", "Locked Geometry", KiezAtlas.PROPERTY_DESCRIPTION, KiezAtlas.PROPERTY_ICON, "Person / Address" };
+	static String[] hiddenPropsContainingAffiliated = { "Owner", "Locked Geometry", KiezAtlas.PROPERTY_DESCRIPTION, KiezAtlas.PROPERTY_ICON, "Person / Address","YADE", "Alias", "Password"};
 %>
 <%
 
@@ -19,6 +20,7 @@
 	String filterText = (String) session.getAttribute("filterText");
 	String sortField = (String) session.getAttribute("sortField");
 	Vector mailboxes = (Vector) session.getAttribute("emailList");
+    String membership = (String) session.getAttribute("membership");
 	TopicBean bean = null;
 	if (topics.size() > 0) {
 	    // get table headers, just if topics are provided
@@ -37,8 +39,8 @@
 	out.println("<p><span class=\"heading\">" + cityMap.getName() + "</span>" +
 		"&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;" +
 		html.link("Alle Stadtpl&auml;ne anzeigen", KiezAtlas.ACTION_GO_HOME) + "</p>");
-	out.println("<p>" + topics.size() + " Objekte&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;" +
-		html.link("Neues Objekt eingeben", KiezAtlas.ACTION_SHOW_EMPTY_GEO_FORM));
+	out.println("<p>" + topics.size() + " Objekte");
+    if (membership.equals("")) out.println("&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;" + html.link("Neues Objekt eingeben", KiezAtlas.ACTION_SHOW_EMPTY_GEO_FORM));
 	if (bean != null) {
 	    out.println("<form id=\"filterForm\" method=\"GET\" action=\"controller\" >\n<select name=\"filterField\">" + 
 			fieldOptions(bean, hiddenProps, hiddenPropsContaining, filterField) + "</select>\n");
@@ -61,10 +63,18 @@
 	// --- list of institutions ---
 	String selectedID = geo != null ? geo.getID() : null;
 	if (sortField == null) {
-	    out.println(html.listTopicBeans(topics, selectedID, hiddenProps, hiddenPropsContaining, true, KiezAtlas.ACTION_SHOW_GEO_FORM, KiezAtlas.ACTION_SORT_BY, "deleteEntry", true, null));
+	    if (membership.equals("")) {
+            out.println(html.listTopicBeans(topics, selectedID, hiddenProps, hiddenPropsContaining, true, KiezAtlas.ACTION_SHOW_GEO_FORM, KiezAtlas.ACTION_SORT_BY, "deleteEntry", true, null));
+        } else {
+            out.println(html.listTopicBeans(topics, selectedID, hiddenProps, hiddenPropsContainingAffiliated, true, "", KiezAtlas.ACTION_SORT_BY, "", true, null));
+        }
 	} else {
-	    System.out.println(">>> highlight Column: " + sortField);
-	    out.println(html.listTopicBeans(topics, selectedID, hiddenProps, hiddenPropsContaining, true, KiezAtlas.ACTION_SHOW_GEO_FORM, KiezAtlas.ACTION_SORT_BY, "deleteEntry", true, sortField));
+        if (membership.equals("")) {
+            System.out.println(">>> highlight Column: " + sortField);
+            out.println(html.listTopicBeans(topics, selectedID, hiddenProps, hiddenPropsContaining, true, KiezAtlas.ACTION_SHOW_GEO_FORM, KiezAtlas.ACTION_SORT_BY, "deleteEntry", true, sortField));
+        } else {
+            out.println(html.listTopicBeans(topics, selectedID, hiddenProps, hiddenPropsContainingAffiliated, true, "", KiezAtlas.ACTION_SORT_BY, "", true, sortField));
+        }
 	}
 	//
 	out.println("<p>");

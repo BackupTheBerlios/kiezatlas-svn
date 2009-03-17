@@ -70,6 +70,7 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 
 
 	static final String ASSOCTYPE_OUTLINE = "at-ka-outline";
+    static final String ASSOCTYPE_AFFILIATED = "at-ka-affiliated";
 	static final String ASSOCTYPE_HOMEPAGE_LINK = "at-ka-homepage-link";
 	static final String ASSOCTYPE_IMPRESSUM_LINK = "at-ka-impressum-link";
 
@@ -105,8 +106,13 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	// direction is from workspace to webpage
 	static final String SEMANTIC_WORKSPACE_IMPRESSUMLINK = ASSOCTYPE_IMPRESSUM_LINK;
 
+    // direction is from user to workspac
+	static final String SEMANTIC_AFFILIATED_MEMBERSHIP = ASSOCTYPE_AFFILIATED;
+
 	// direction is arbitrary
 	static final String SEMANTIC_SHAPE_OUTLINE = ASSOCTYPE_OUTLINE;
+
+
 
 
 
@@ -184,6 +190,7 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	public static final int SERVLET_EDIT = 2;
 	public static final int SERVLET_LIST = 3;
 	public static final int SERVLET_UPLOAD = 4;
+    public static final int SERVLET_SERVE = 5;
 
 
 
@@ -284,6 +291,7 @@ public interface KiezAtlas extends DeepaMehtaConstants {
     static final String PAGE_LIST_LOGIN = "ListLogin";
     static final String PAGE_LIST_HOME = "ListHome";
     static final String PAGE_LIST = "List";
+    static final String PAGE_SERVE = "Serve";
     static final String PAGE_GEO_ADMIN_FORM = "GeoObjectAdminForm";
     static final String PAGE_GEO_EMPTY_FORM = "GeoObjectEmptyForm";
 	static final String PAGE_LINK_PAGE = "Print";

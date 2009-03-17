@@ -125,6 +125,7 @@ Global
 ------
 
 user				BaseTopic (logged in user)
+membership          String with either an empty String "" for full rights or "Affiliated" String of just read access
 
 
 ListHome
