@@ -17,7 +17,6 @@
 	BaseTopic geo = (BaseTopic) session.getAttribute("geo");
 	Vector notifications = (Vector) session.getAttribute("notifications");
 	String filterField = (String) session.getAttribute("filterField");
-	String filterText = (String) session.getAttribute("filterText");
 	String sortField = (String) session.getAttribute("sortField");
 	Vector mailboxes = (Vector) session.getAttribute("emailList");
     String membership = (String) session.getAttribute("membership");
@@ -46,11 +45,7 @@
 			fieldOptions(bean, hiddenProps, hiddenPropsContaining, filterField) + "</select>\n");
 	    // -- had to encode the action into a hidden form element. cause of '?'
 	    out.println("<input type=\"hidden\" name=\"action\" value=\""+KiezAtlas.ACTION_FILTER+"\">\n");
-	    if (filterText != null) {
-		out.println("<input type=\"text\" name=\"filterText\" value=\""+filterText+"\">\n");
-	    } else {
-		out.println("<input type=\"text\" name=\"filterText\">\n");
-	    }
+        out.println("<input type=\"text\" name=\"filterText\">\n");
 	    out.println("<input type=\"submit\" value=\"Filtern\">\n");
 	    out.println("</form>\n");
 	}

@@ -53,7 +53,10 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 				return PAGE_LIST_LOGIN;
 			}
 		} else if (action.equals(ACTION_SHOW_INSTITUTIONS)) {
-			BaseTopic cityMap = cm.getTopic(params.getValue("cityMapID"), 1);
+			if (session.getAttribute("membership") == null) {
+                session.setAttribute("membership", "Affiliated");
+            }
+            BaseTopic cityMap = cm.getTopic(params.getValue("cityMapID"), 1);
 			String instTypeID = ((CityMapTopic) as.getLiveTopic(cityMap)).getInstitutionType().getID();
 			setCityMap(cityMap, session);
 			setInstTypeID(instTypeID, session);
