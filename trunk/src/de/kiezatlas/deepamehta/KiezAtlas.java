@@ -55,6 +55,7 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	static final String TOPICTYPE_AGENCY = "tt-ka-traeger";
 	static final String TOPICTYPE_CRITERIA = "tt-ka-kriterium";
 	static final String TOPICTYPE_YADE_POINT = "tt-ka-yadepoint";
+	static final String TOPICTYPE_GPS_CONVERTER = "tt-ka-gpsconverter";
 	static final String TOPICTYPE_FORUM = "tt-ka-forum";
 	static final String TOPICTYPE_COMMENT = "tt-ka-kommentar";
 	static final String TOPICTYPE_OUTLINE_POINT = "tt-ka-outlinepoint";
@@ -129,6 +130,8 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	static final String PROPERTY_AGENCY_KIND = "Art";
 	static final String PROPERTY_YADE_X = "YADE x";
 	static final String PROPERTY_YADE_Y = "YADE y";
+    static final String PROPERTY_GPS_LONG = "LONG";
+    static final String PROPERTY_GPS_LAT = "LAT";
 	static final String PROPERTY_LAST_MODIFIED = "Zuletzt geändert";
 	//
 	static final String PROPERTY_FORUM_ACTIVITION = "Aktivierung";
@@ -158,6 +161,8 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	// ----------------
 
 
+    static final String ITEM_LOAD_COORDINATES = "Load GPS Coordinates";
+    static final String  CMD_START_GEOCODING = "loadGeoCodes";
 
     static final String ITEM_LOCK_GEOMETRY = "Lock";
     static final String  CMD_LOCK_GEOMETRY = "lockGeometry";

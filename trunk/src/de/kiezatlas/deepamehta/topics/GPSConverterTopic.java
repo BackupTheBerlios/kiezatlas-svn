@@ -1,0 +1,340 @@
+package de.kiezatlas.deepamehta.topics;
+
+import de.deepamehta.AmbiguousSemanticException;
+import de.kiezatlas.deepamehta.KiezAtlas;
+//
+import de.deepamehta.BaseTopic;
+import de.deepamehta.Directive;
+import de.deepamehta.service.ApplicationService;
+import de.deepamehta.service.CorporateDirectives;
+import de.deepamehta.service.CorporateCommands;
+import de.deepamehta.service.Session;
+import de.deepamehta.topics.LiveTopic;
+//
+import de.deepamehta.topics.TypeTopic;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.*;
+
+
+
+/**
+ * Kiezatlas 1.6.3<br>
+ * Requires DeepaMehta 2.0b8
+ * <p>
+ * Last functional change: 25.4.2008<br>
+ * J&ouml;rg Richter<br>
+ * jri@freenet.de
+ */
+public class GPSConverterTopic extends LiveTopic implements KiezAtlas {
+
+
+
+	// *******************
+	// *** Constructor ***
+	// *******************
+
+
+
+	public GPSConverterTopic(BaseTopic topic, ApplicationService as) {
+		super(topic, as);
+	}
+
+
+
+	// **********************
+	// *** Defining Hooks ***
+	// **********************
+
+
+
+	// ------------------
+	// --- Life Cycle ---
+	// ------------------
+
+
+
+	public CorporateDirectives evoke(Session session, String topicmapID, String viewmode) {
+		return super.evoke(session, topicmapID, viewmode);
+	}
+
+
+
+	// --------------------------
+	// --- Providing Commands ---
+	// --------------------------
+
+
+
+	public CorporateCommands contextCommands(String topicmapID, String viewmode,
+								Session session, CorporateDirectives directives) {
+		CorporateCommands commands = new CorporateCommands(as);
+		int editorContext = as.editorContext(topicmapID);
+		//
+		commands.addNavigationCommands(this, editorContext, session);
+		commands.addSeparator();
+		// --- "Load GPS Coordinates" ---
+        commands.addCommand(ITEM_LOAD_COORDINATES, CMD_START_GEOCODING);
+		// --- standard topic commands ---
+		commands.addStandardCommands(this, editorContext, viewmode, session, directives);
+		//
+		return commands;
+	}
+
+
+
+	// --------------------------
+	// --- Executing Commands ---
+	// --------------------------
+
+
+
+	public CorporateDirectives executeCommand(String command, Session session, String topicmapID, String viewmode) {
+		CorporateDirectives directives = new CorporateDirectives();
+		StringTokenizer st = new StringTokenizer(command, COMMAND_SEPARATOR);
+		String cmd = st.nextToken();
+		if (cmd.equals(CMD_START_GEOCODING)) {
+            Vector workspaces = getAssignedWorkspaces();
+            StringBuffer htmlReport = new StringBuffer("<html><head><title>GPS Transform Report</title></head><body>");
+                htmlReport.append("<h4>GPS Transform Report for "+workspaces.size()+" workspace/s<h4/>");
+            for (int i = 0; i<workspaces.size(); i++) {
+                // for each workspace assigned to the GPSConverterTopic
+                BaseTopic workspace = (BaseTopic) workspaces.get(i);
+                htmlReport.append("<hr>");
+                htmlReport.append("Im Workspace: <b>" + workspace.getName() + "<b/><br/>");
+                System.out.println("    searching on workspace ("+i+"/"+workspaces.size()+"): " + workspace.getName() + ":" + workspace.getID());
+                BaseTopic geotype = getWorkspaceGeoType(workspace.getID());
+                if (geotype == null) {
+                    directives.add(DIRECTIVE_SHOW_MESSAGE, "Please assign the GPSConverter Topic to a 'KiezAtlas' Workspace. No 'GeoObject' was found.", new Integer(NOTIFICATION_ERROR));
+                    return directives;
+                } else {
+                    Vector geos  = getAllGeoObjects(geotype.getID());
+                    htmlReport.append("sind insgesamt " + geos.size() + " "+geotype.getName()+" zu verarbeiten.<br/><p/>");
+                    htmlReport.append("");
+                    // set report
+                    as.setTopicProperty(this, PROPERTY_DESCRIPTION, htmlReport.toString());
+                    int runs = 0;
+                    geos = updateAllGeoCoordinates(geos);
+                    scenarioloop:
+                    while (!geos.isEmpty()) {
+                        if (runs == 10) {
+                            // 10 retries to contact the geocoder again
+                            htmlReport.append("<br>Adressfehler sind bei insgesamt <b>"+geos.size()+"</b> Objekten aufgetreten:");
+                            htmlReport.append("<ul>");
+                            for(int a = 0; a < geos.size(); a++) {
+                                BaseTopic geo = (BaseTopic) geos.get(a);
+                                htmlReport.append("<li>Adressangabe: " + getAddress(geo.getID()) +", "+ geo.getName() + "("+geo.getID()+")<li/>");
+                                //directives.add(DIRECTIVE_SHOW_MESSAGE,
+                                //        "Die globalen Koordinaten zu folgendem Objekt konnten nicht aufgelöst werden: "
+                                //        + geo.getName() + ":"+ getAddress(geo.getID()) + ". " +
+                                //        "Damit auch dieses Objekt Koordinaten enthält, korrigieren Sie bitte die Anschrift und starten Sie den Konverter erneut.", new Integer(NOTIFICATION_WARNING));
+                                System.out.println("*** Fail with: " + geo.getName() + "("+geo.getID()+"), Adressangabe: "+ getAddress(geo.getID()));
+                            }
+                            htmlReport.append("</ul>");
+                            htmlReport.append("<br/>Auch nach mehrmaligen Anfragen sind folgende Adressen nicht automatisch in GPS Koordinaten aufzulösen. Bitte überprüfen Sie die Schreibweise bzw. Korrektheit der Adressangaben im einzelnen.");
+                            break scenarioloop;
+                        } else {
+                            geos = updateAllGeoCoordinates(geos);
+                            System.out.println("\n*** updateAllCoordinates: " + geos.size() + " faulty objects / trying again");
+                        }
+                        runs++;
+                    }
+                    htmlReport.append("<br> Insgesamt " + geos.size() + " konvertiert.");
+                }
+
+            }
+            htmlReport.append("</body></html>");
+            as.setTopicProperty(this, PROPERTY_DESCRIPTION, htmlReport.toString());
+		} else {
+			return super.executeCommand(command, session, topicmapID, viewmode);
+		}
+		return directives;
+	}
+
+
+
+	// --------------------------
+	// --- Utility Methods ---
+	// --------------------------
+
+
+
+    private Vector getAssignedWorkspaces() {
+        Vector workspaces = as.getRelatedTopics(this.getID(), ASSOCTYPE_ASSOCIATION, TOPICTYPE_WORKSPACE, 2);
+        // System.out.println("    workspaces found count: " + workspaces.size());
+        return workspaces;
+    }
+
+
+    /**
+     * returns null if no topictype whihc is assigned to the given workspace, is a subtype of "GeoObjectTopic"
+     * @param workspaceId
+     * @return
+     */
+    private BaseTopic getWorkspaceGeoType(String workspaceId) {
+        //
+        TypeTopic geotype = as.type(TOPICTYPE_KIEZ_GEO, 1);
+        Vector subtypes = geotype.getSubtypeIDs();
+        Vector workspacetypes = as.getRelatedTopics(workspaceId, ASSOCTYPE_USES, 2);
+        int i;
+        // ### matching the id with object in vector
+        for (i = 0; i < workspacetypes.size(); i++) {
+            BaseTopic topic = (BaseTopic) workspacetypes.get(i);
+            int a;
+            for (a = 0; a < subtypes.size(); a++) {
+                // System.out.println(" counter: " + a);
+                String derivedOne = (String) subtypes.get(a);
+                // System.out.println("    " + derivedOne.getID() + ":" + derivedOne.getName());
+                if (derivedOne.equals(topic.getID())) {
+                    System.out.println(" GPSConverterTopic runs now on all instances of type " + topic.getID() + ":" + topic.getName());
+                    return topic;
+                }
+                // Vector derivedTopics = cm.getRelatedTopics(TOPICTYPE_KIEZ_GEO, ASSOCTYPE_DERIVATION, 2) ;
+            }
+            // System.out.println("It's just a related TopicType named " + topic.getID() + ":" + topic.getName());
+        }
+        return null;
+    }
+
+    private Vector getAllGeoObjects(String typeID) {
+        // Hashtable props;
+        Vector geoObjects = cm.getTopics(typeID);
+        System.out.println("    found " + geoObjects.size() + " topics of type (" + typeID + "): " );
+        return geoObjects;
+    }
+
+    // ---
+
+	private String getAddress(String topicID) {
+		StringBuffer address = new StringBuffer();
+        try {
+            // Related Address Topic
+            BaseTopic add = as.getRelatedTopic(topicID, ASSOCTYPE_ASSOCIATION, TOPICTYPE_ADDRESS, 2, true);     // emptyAllowed=true
+            if (add != null) {
+                // Streetname and Housenumber
+                address.append(add.getName());
+            } else {
+                return "";
+            }
+            // Postal Code of Address
+            address.append(", " + as.getTopicProperty(add, PROPERTY_POSTAL_CODE));
+            // Get Old City Property
+            String cityProp = as.getTopicProperty(topicID, 1, PROPERTY_CITY);
+            // Related City
+            BaseTopic city = as.getRelatedTopic(add.getID(), ASSOCTYPE_ASSOCIATION, TOPICTYPE_CITY, 2, true);
+            if (city != null) {
+                address.append(" " + city.getName());
+            } else if (cityProp != null && !cityProp.equals("")) {
+                address.append(" " + cityProp);
+                //System.out.println("    # FallBack to Old City Prop: " + address );
+            }
+            return address.toString();
+			// as.getRelatedTopic(id, ASSOCTYPE_ASSOCIATION, TOPICTYPE_ADDRESS, 2, true);		// emptyAllowed=true
+		} catch (AmbiguousSemanticException e) {
+			// Related Address Topic
+            BaseTopic add = e.getDefaultTopic();
+            if (add != null) {
+                // Streetname and Housenumber
+                address.append(add.getName());
+            } else {
+                return "";
+            }
+            // Postal Code of Address
+            address.append(", " + as.getTopicProperty(add, PROPERTY_POSTAL_CODE));
+            // Get Old City Property
+            String cityProp = as.getTopicProperty(topicID, 1, PROPERTY_CITY);
+            // Related City
+            BaseTopic city = as.getRelatedTopic(add.getID(), ASSOCTYPE_ASSOCIATION, TOPICTYPE_CITY, 2, true);
+            if (city != null) {
+                address.append(" " + city.getName());
+            } else if (cityProp != null && !cityProp.equals("")) {
+                address.append(" " + cityProp);
+                //System.out.println("    # FallBack to Old City Prop: " + address );
+            }
+            System.out.println("*** GPSConverterTopic.getAddress(): AmbigiousSemanticExc. took " + address.toString());
+            return address.toString();
+		}
+	}
+
+
+    private Vector updateAllGeoCoordinates(Vector geoObjects) {
+        Vector faultyObjects = new Vector();
+        // ### CorporateWebSettings
+        // String key = as.getGoogleKey();
+        Hashtable requested = new Hashtable(geoObjects.size());
+        int i;
+        for (i = 0; i < geoObjects.size(); i++) {
+            StringBuffer requestUrl = new StringBuffer("http://maps.google.com/maps/geo?");
+            BaseTopic geoObject = (BaseTopic) geoObjects.get(i);
+            String address =  getAddress(geoObject.getID());
+            // System.out.println("    took " + cityProp + " as city for address");
+            
+            if (address.equals("")) {
+                System.out.println("*** missing address for GeoObject: " + geoObject.getName());
+                if (!faultyObjects.contains(geoObject)) {
+                    faultyObjects.add(geoObject);
+                }
+            }
+            requestUrl.append("q=");
+            // requested. put and remove address
+            requestUrl.append(convertAddressForRequest(address));
+            requestUrl.append("&output=csv" +
+                    "&oe=utf8&" +
+                    "sensor=false" +
+                    "&key=ABQIAAAAyg-5-YjVJ1InfpWX9gsTuxRa7xhKv6UmZ1sBua05bF3F2fwOehRUiEzUjBmCh76NaeOoCu841j1qnQ" +
+                    "&gl=de");
+            try {
+                String cachedCoords = (String) requested.get(address.toString());
+                // System.out.println("cachedCoords: " + cachedCoords);
+                if(cachedCoords != null && !cachedCoords.equals("")) {
+                    // skipping requests to already known address
+                    // System.out.println("*** " +cachedCoords +" known for: " + address +", skipping");
+                } else {
+                    URL url = new URL(requestUrl.toString());
+                    URLConnection con = url.openConnection();
+                    BufferedReader in = new BufferedReader(
+                                        new InputStreamReader(
+                                        con.getInputStream()));
+                    String inputLine;
+                    while ((inputLine = in.readLine()) != null) {
+                        //System.out.println(inputLine);
+                        String[] points = inputLine.split(",");
+                        if (points[2].equals("0") && points[3].equals("0")) {
+                            if (!faultyObjects.contains(geoObject)) {
+                                faultyObjects.add(geoObject);
+                            }
+                            // System.out.println("*** Fail with loading: "+address.toString()+" ("+geoObject.getID()+"): ");
+                        } else {
+                            requested.put(address.toString(), points[2] + ":" + points[3]);
+                            as.setTopicProperty(geoObject, PROPERTY_GPS_LAT, points[2]);
+                            as.setTopicProperty(geoObject, PROPERTY_GPS_LONG, points[3]);
+                            System.out.println("    saving: " + requested.get(address.toString()) + " for: "+ address);
+
+                        }
+                    }
+                    in.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                if (!faultyObjects.contains(geoObject)) {
+                    faultyObjects.add(geoObject);
+                }
+            }
+        }
+        return faultyObjects;
+    }
+
+//    private getAddress(BaseTopic topic) {
+//
+//    }
+
+    private String convertAddressForRequest(String address) {
+        char blank = " ".charAt(0);
+        char plus = "+".charAt(0);
+        return address.replace(blank, plus);
+    }
+
+}

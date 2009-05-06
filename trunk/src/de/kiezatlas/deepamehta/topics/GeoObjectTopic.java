@@ -19,6 +19,11 @@ import de.deepamehta.util.DeepaMehtaUtils;
 
 import java.awt.Point;
 import java.awt.geom.Point2D;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
@@ -73,6 +78,7 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 
 
 	public CorporateDirectives evoke(Session session, String topicmapID, String viewmode) {
+        setGPSCoordinates();
 		setProperty(PROPERTY_LOCKED_GEOMETRY, SWITCH_ON);
 		setProperty(PROPERTY_PASSWORD, DEFAULT_PASSWORD);
 		setProperty(PROPERTY_LAST_MODIFIED, DeepaMehtaUtils.getDate());
@@ -327,6 +333,50 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 
 	// ---
 
+    	private String getStringAddress(String topicID) {
+		StringBuffer address = new StringBuffer();
+        try {
+            // Related Address Topic
+            BaseTopic add = as.getRelatedTopic(topicID, ASSOCTYPE_ASSOCIATION, TOPICTYPE_ADDRESS, 2, true);     // emptyAllowed=true
+            if (add != null) {
+                // Streetname and Housenumber
+                address.append(add.getName());
+            } else {
+                return "";
+            }
+            // Postal Code of Address
+            address.append(", " + as.getTopicProperty(add, PROPERTY_POSTAL_CODE));
+            // Get Old City Property
+            String cityProp = as.getTopicProperty(topicID, 1, PROPERTY_CITY);
+            // Related City
+            BaseTopic city = as.getRelatedTopic(add.getID(), ASSOCTYPE_ASSOCIATION, TOPICTYPE_CITY, 2, true);
+            if (city != null) {
+                address.append(" " + city.getName());
+            } else if (cityProp != null && !cityProp.equals("")) {
+                address.append(" " + cityProp);
+                System.out.println("    # FallBack to Old City Prop: " + address );
+            }
+            return address.toString();
+			// as.getRelatedTopic(id, ASSOCTYPE_ASSOCIATION, TOPICTYPE_ADDRESS, 2, true);		// emptyAllowed=true
+		} catch (AmbiguousSemanticException e) {
+			// Related Address Topic
+            BaseTopic add = e.getDefaultTopic();
+            if (add != null) {
+                // Streetname and Housenumber
+                address.append(add.getName());
+            } else {
+                return "";
+            }
+            // Postal Code of Address
+            address.append(", " + as.getTopicProperty(add, PROPERTY_POSTAL_CODE));
+            // and City
+            address.append(" " + getCity());
+            System.out.println("*** GPSConverterTopic.getAddress(): AmbigiousSemanticExc. took " + address.toString());
+            return address.toString();
+
+		}
+	}
+
 	public BaseTopic getAddress() {
 		try {
 			return as.getRelatedTopic(getID(), ASSOCTYPE_ASSOCIATION, TOPICTYPE_ADDRESS, 2, true);		// emptyAllowed=true
@@ -346,7 +396,7 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 			if (!city.equals("")) {
 				return city;
 			} else if (address != null) {
-				BaseTopic town = as.getRelatedTopic(address.getID(), ASSOCTYPE_ASSOCIATION, "tt-city", 2, true);
+				BaseTopic town = as.getRelatedTopic(address.getID(), ASSOCTYPE_ASSOCIATION, TOPICTYPE_CITY, 2, true);
 				if (town != null) {
 					city = town.getName();
 					return city;
@@ -515,4 +565,64 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 		//
 		return commentBeans;
 	}
+
+    private String[] getGPSCoordinates(String givenAdress) {
+        //
+        StringBuffer requestUrl = new StringBuffer("http://maps.google.com/maps/geo?");
+        requestUrl.append("q=");
+        requestUrl.append(convertAddressForRequest(givenAdress));
+        // requested. put and remove address
+        requestUrl.append("&output=csv&oe=utf8&sensor=false&key=ABQIAAAAyg-5-YjVJ1InfpWX9gsTuxRa7xhKv6UmZ1sBua05bF3F2fwOehRUiEzUjBmCh76NaeOoCu841j1qnQ&gl=de");
+        try {
+            URL url = new URL(requestUrl.toString());
+            URLConnection con = url.openConnection();
+            BufferedReader in = new BufferedReader(
+                                new InputStreamReader(
+                                con.getInputStream()));
+            String inputLine;
+            while ((inputLine = in.readLine()) != null) {
+                //System.out.println(inputLine);
+                String[] points = inputLine.split(",");
+                if (points[2].equals("0") && points[3].equals("0")) {
+                    //faultyObjects.add(geoObject);
+                    // ### exception thrown
+                    System.out.println("    geoCoder is lazy, could not evoke GeoObject ("+this.getID()+") with coordinates: ");
+                } else {
+                    // requested.put(address, points[2] +":"+points[3]);
+                    //System.out.println("    caching coordinates: " + requested.get(address) + " for: "+ address);
+                    return points;
+                }
+            }
+            in.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new String[2];
+        }
+        // never returned
+        return null;
+    }
+
+    public String toJSONString() {
+        StringBuffer object = new StringBuffer();
+        object.append("{x: 1, y: 2, name: MyName, [{critID: <myCritId>}, {critID: <myCritId2>}]}");
+        return object.toString();
+    }
+
+    private void setGPSCoordinates() {
+        String address = getStringAddress(this.getID());
+        // ### alternatively fetch city property
+        String[] point = getGPSCoordinates(address);
+        // if addres already known, take the cache
+        // if points are empty, geocoder was lazy
+        as.setTopicProperty(this, PROPERTY_GPS_LAT, point[0]);
+        as.setTopicProperty(this, PROPERTY_GPS_LONG, point[1]);
+        System.out.println("GeoObjectTopic.setGPSCoordinates(): successfull to " + point[0].toString() +"," + point[1].toString() +" for address:" + address);
+    }
+
+    private String convertAddressForRequest(String address) {
+        char blank = " ".charAt(0);
+        char plus = "+".charAt(0);
+        return address.replace(blank, plus);
+    }
+
 }
