@@ -1,15 +1,9 @@
 package de.kiezatlas.deepamehta;
 
-import de.deepamehta.AmbiguousSemanticException;
 import de.deepamehta.BaseTopic;
-import de.deepamehta.DeepaMehtaException;
 import de.deepamehta.service.*;
 import de.deepamehta.service.web.JSONRPCServlet;
-import de.deepamehta.topics.TopicTypeTopic;
 import de.deepamehta.topics.TypeTopic;
-import java.text.CharacterIterator;
-import java.text.StringCharacterIterator;
-import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -35,28 +29,6 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
 
     protected String performAction(String topicId, String params, Session session, CorporateDirectives directives)
     {
-//        TopicBean bean = as.createTopicBean(topicId, 1);
-//        TypeTopic geoType = as.type(bean.typeID, 1);
-//        BaseTopic workspace;
-//        try
-//        {
-//            workspace = as.getRelatedTopic(geoType.getID(), ASSOCTYPE_USES, 1);
-//        }
-//        catch(AmbiguousSemanticException ex)
-//        {
-//            workspace = ex.getDefaultTopic();
-//        }
-//        Vector criterias = getKiezCriteriaTypes(workspace.getID());
-//        String crits[] = new String[criterias.size()];
-//        for(int i = 0; i < crits.length; i++)
-//            crits[i] = ((BaseTopic)criterias.get(i)).getID();
-//
-//        session.setAttribute("topicBean", bean);
-//        session.setAttribute("imagePath", "");
-//        session.setAttribute("criterias", crits);
-//        session.setAttribute("instType", geoType);
-//        System.out.println(">>>> created TopicBean for " + topicId);
-//        return KiezAtlas.PAGE_GEO_INFO;
         return topicId;
     }
 
@@ -72,16 +44,10 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
         System.out.println(">>> getGeoObjectInfo(" + params + ")");
         String parameters[] = params.split(":");
         String topicId = parameters[0];
-        StringBuffer messages = new StringBuffer("\"My GeoObject Notification\"");
+        StringBuffer messages = null;
         StringBuffer result = new StringBuffer("{\"result\": ");
         String geoObjectString = createGeoObjectBean(cm.getTopic(topicId, 1), messages);
-        if (geoObjectString.equals("")) {
-            System.out.println("TopicBean for GeoObject is empty " + cm.getTopic(topicId, 1).getName());
-            geoObjectString = "\"\"";
-        } else {
-            // System.out.println("TopicBean for GeoObjectEmpty " + geoObjectString);
-            result.append(geoObjectString);
-        }
+        result.append(geoObjectString);
         result.append(", \"error\": " + messages + "}");
         // System.out.println("result: "+ result.toString());
         return result.toString();
@@ -99,16 +65,10 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
         System.out.println(">>> getWorkspaceCriterias(" + params + ")");
         String parameters[] = params.split(":");
         String workspaceId = parameters[0];
-        StringBuffer messages = new StringBuffer("\"My Workspace Criteria Notification\"");
+        StringBuffer messages = null;
         StringBuffer result = new StringBuffer("{\"result\": ");
         String criteriaList = createListOfCategorizations(workspaceId);
-        if (criteriaList.equals("")) {
-            //System.out.println("*** listOfCategorizations is Empty: " + criteriaList);
-            result.append("\"\"");
-        } else {
-            //System.out.println("*** listOfCategorizations is : " + criteriaList);
-            result.append(criteriaList);
-        }
+        result.append(criteriaList);
         result.append(", \"error\": " + messages + "}");
         return result.toString();
     }
@@ -164,7 +124,7 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
         String parameters[] = params.split(":");
         String mapId = parameters[0];
         String workspaceId = parameters[1];
-        StringBuffer messages = new StringBuffer("\"My GeoMapTopic Notification\"");
+        StringBuffer messages = null;
         StringBuffer result = new StringBuffer("{\"result\": ");
         StringBuffer mapTopics = new StringBuffer("{ \"map\": \"" + mapId + "\", \"topics\": [");
         // 
@@ -178,9 +138,9 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
             BaseTopic topic = (BaseTopic) allTopics.get(i);
             // System.out.println("    e: " + topic.getName());
             String geo  = createSlimGeoObject(topic, criterias, messages);
-            System.out.println("geo: " + geo);
+            // System.out.println("geo: " + geo);
             mapTopics.append(geo);
-            mapTopics.append("}");
+            // mapTopics.append("}");
             if(allTopics.indexOf(topic) != allTopics.size() - 1) {
                 mapTopics.append(",");
             }
@@ -247,7 +207,7 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
                 if(hasQuotationMarks(value))
                     // preparing java string for json
                     value = convertHTMLForJSON(value);
-                    value = removeControlChars(value, field.name);
+                    value = removeControlChars(value);
                 bean.append("\"value\":  \"" + value + "\"");
             } else {
                 Vector relatedFields = field.values;
@@ -347,7 +307,7 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
                 objectList.append("{");
                 objectList.append("\"catId\":");
                 BaseTopic cat = (BaseTopic)categories.get(c);
-                System.out.println(">>>> category(" + cat.getName() +" icon: "+ as.getLiveTopic(cat).getIconfile());
+                // System.out.println(">>>> category(" + cat.getName() +" icon: "+ as.getLiveTopic(cat).getIconfile());
                 objectList.append("\"" + cat.getID() + "\", ");
                 objectList.append("\"catName\":");
                 objectList.append("\"" + cat.getName() + "\", ");
@@ -438,24 +398,14 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
         return value.indexOf("\"") != -1;
     }
 
-    private String removeControlChars(String value, String name) {
-        StringCharacterIterator iterator = new StringCharacterIterator(value);
-        StringBuffer result = new StringBuffer();
-        char character = iterator.current();
-        while( character != CharacterIterator.DONE) // character = iterator.next())
-        {
-            if (Character.isISOControl(character)) {
-                //System.out.println("*** skipping control character in " + name + "" +
-                 //       ": " + Character.getNumericValue(character));
-            } else {
-                result.append(character);
-            }
-            character = iterator.next();
-        }
-        //value.replaceAll("\r", "\\\\r");
-        //value.replaceAll("\n", "\\\\n");
-        //value.replaceAll("\");
-        return result.toString();
+    private String removeControlChars(String value) {
+        // html uses carriage-return, line-feed and horizontal tab
+        value = value.replaceAll("\r", "\\\\r");
+        value = value.replaceAll("\n", "\\\\n");
+        value = value.replaceAll("\t", "\\\\t");
+        //value = value.replaceAll("\"", "\\\\\"");
+        //System.out.println("replaced value is : " + value);
+        return value;
     }
 
     private String convertHTMLForJSON(String html)

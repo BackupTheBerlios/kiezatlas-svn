@@ -78,7 +78,6 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 
 
 	public CorporateDirectives evoke(Session session, String topicmapID, String viewmode) {
-        setGPSCoordinates();
 		setProperty(PROPERTY_LOCKED_GEOMETRY, SWITCH_ON);
 		setProperty(PROPERTY_PASSWORD, DEFAULT_PASSWORD);
 		setProperty(PROPERTY_LAST_MODIFIED, DeepaMehtaUtils.getDate());
@@ -333,51 +332,24 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 
 	// ---
 
-    	private String getStringAddress(String topicID) {
-		StringBuffer address = new StringBuffer();
-        try {
-            // Related Address Topic
-            BaseTopic add = as.getRelatedTopic(topicID, ASSOCTYPE_ASSOCIATION, TOPICTYPE_ADDRESS, 2, true);     // emptyAllowed=true
-            if (add != null) {
-                // Streetname and Housenumber
-                address.append(add.getName());
-            } else {
-                return "";
-            }
-            // Postal Code of Address
-            address.append(", " + as.getTopicProperty(add, PROPERTY_POSTAL_CODE));
-            // Get Old City Property
-            String cityProp = as.getTopicProperty(topicID, 1, PROPERTY_CITY);
-            // Related City
-            BaseTopic city = as.getRelatedTopic(add.getID(), ASSOCTYPE_ASSOCIATION, TOPICTYPE_CITY, 2, true);
-            if (city != null) {
-                address.append(" " + city.getName());
-            } else if (cityProp != null && !cityProp.equals("")) {
-                address.append(" " + cityProp);
-                System.out.println("    # FallBack to Old City Prop: " + address );
-            }
-            return address.toString();
-			// as.getRelatedTopic(id, ASSOCTYPE_ASSOCIATION, TOPICTYPE_ADDRESS, 2, true);		// emptyAllowed=true
-		} catch (AmbiguousSemanticException e) {
-			// Related Address Topic
-            BaseTopic add = e.getDefaultTopic();
-            if (add != null) {
-                // Streetname and Housenumber
-                address.append(add.getName());
-            } else {
-                return "";
-            }
-            // Postal Code of Address
-            address.append(", " + as.getTopicProperty(add, PROPERTY_POSTAL_CODE));
-            // and City
-            address.append(" " + getCity());
-            System.out.println("*** GPSConverterTopic.getAddress(): AmbigiousSemanticExc. took " + address.toString());
-            return address.toString();
-
-		}
+    private String getAddressString() {
+        StringBuffer address = new StringBuffer();
+        // Related Address Topic
+        BaseTopic add = getAddress();
+        if (add != null) {
+            // Streetname and Housenumber
+            address.append(add.getName());
+        } else {
+            return "";
+        }
+        // Postal Code of Address
+        address.append(", " + as.getTopicProperty(add, PROPERTY_POSTAL_CODE));
+        // City
+        address.append(" " + getCity());
+        return address.toString();
 	}
 
-	public BaseTopic getAddress() {
+    public BaseTopic getAddress() {
 		try {
 			return as.getRelatedTopic(getID(), ASSOCTYPE_ASSOCIATION, TOPICTYPE_ADDRESS, 2, true);		// emptyAllowed=true
 		} catch (AmbiguousSemanticException e) {
@@ -386,6 +358,12 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 		}
 	}
 
+    /**
+     * Encapsulates the logic for backward compatibility after GeoObject's
+     * new Address / City Relation
+     *
+     * @return
+     */
 	public String getCity() {
 		// if a geoobject has a stadt property, take it and return it
 		// else if a geoobject has an addressTopic assigned, check if there is a city, if so return this city
@@ -566,40 +544,40 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 		return commentBeans;
 	}
 
-    private String[] getGPSCoordinates(String givenAdress) {
+    public String[] loadGPSCoordinates(CorporateDirectives directives) {
         //
+        String givenAddress = getAddressString();
         StringBuffer requestUrl = new StringBuffer("http://maps.google.com/maps/geo?");
         requestUrl.append("q=");
-        requestUrl.append(convertAddressForRequest(givenAdress));
+        requestUrl.append(convertAddressForRequest(givenAddress));
         // requested. put and remove address
         requestUrl.append("&output=csv&oe=utf8&sensor=false&key=ABQIAAAAyg-5-YjVJ1InfpWX9gsTuxRa7xhKv6UmZ1sBua05bF3F2fwOehRUiEzUjBmCh76NaeOoCu841j1qnQ&gl=de");
-        try {
-            URL url = new URL(requestUrl.toString());
-            URLConnection con = url.openConnection();
-            BufferedReader in = new BufferedReader(
-                                new InputStreamReader(
-                                con.getInputStream()));
-            String inputLine;
-            while ((inputLine = in.readLine()) != null) {
-                //System.out.println(inputLine);
-                String[] points = inputLine.split(",");
-                if (points[2].equals("0") && points[3].equals("0")) {
-                    //faultyObjects.add(geoObject);
-                    // ### exception thrown
-                    System.out.println("    geoCoder is lazy, could not evoke GeoObject ("+this.getID()+") with coordinates: ");
-                } else {
-                    // requested.put(address, points[2] +":"+points[3]);
-                    //System.out.println("    caching coordinates: " + requested.get(address) + " for: "+ address);
-                    return points;
+        for (int i = 0; i < 3; i++) {
+            try {
+                URL url = new URL(requestUrl.toString());
+                URLConnection con = url.openConnection();
+                BufferedReader in = new BufferedReader(
+                                    new InputStreamReader(
+                                    con.getInputStream()));
+                String inputLine;
+                while ((inputLine = in.readLine()) != null) {
+                    //System.out.println(inputLine);
+                    String[] points = inputLine.split(",");
+                    if (points[2].equals("0") && points[3].equals("0")) {
+                        System.out.println("    geoCoder is lazy, could not locate GeoObjects ("+this.getAddressString()+") G coordinates, trying again " + i);
+                    } else {
+                        return points;
+                    }
                 }
+                in.close();
+            } catch (IOException e) {
+                directives.add(DIRECTIVE_SHOW_MESSAGE, "The Google GeoCoder could not be connected. This GeoObject has no GPS Coordinates.", new Integer(NOTIFICATION_ERROR));
+                e.printStackTrace();
+                return new String[4];
             }
-            in.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return new String[2];
         }
-        // never returned
-        return null;
+        System.out.println("    GeoObjectTopic ("+this.getID()+") was not able to load coordinates for "+convertAddressForRequest(givenAddress)+" !");
+        return new String[4];
     }
 
     public String toJSONString() {
@@ -608,15 +586,21 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
         return object.toString();
     }
 
-    private void setGPSCoordinates() {
-        String address = getStringAddress(this.getID());
+    public void setGPSCoordinates(CorporateDirectives directives) {
         // ### alternatively fetch city property
-        String[] point = getGPSCoordinates(address);
-        // if addres already known, take the cache
-        // if points are empty, geocoder was lazy
-        as.setTopicProperty(this, PROPERTY_GPS_LAT, point[0]);
-        as.setTopicProperty(this, PROPERTY_GPS_LONG, point[1]);
-        System.out.println("GeoObjectTopic.setGPSCoordinates(): successfull to " + point[0].toString() +"," + point[1].toString() +" for address:" + address);
+        String[] point = loadGPSCoordinates(directives);
+        if(point[2] != null && point[3] != null) {
+            if (!point[2].equals("") && !point[3].equals("")) {
+                as.setTopicProperty(this, PROPERTY_GPS_LAT, point[2]);
+                as.setTopicProperty(this, PROPERTY_GPS_LONG, point[3]);
+                directives.add(DIRECTIVE_SHOW_MESSAGE, "Die Adresse hat "+point[2]+","+point[3]+" als GPS Koordinaten zugewiesen bekommen.", new Integer(NOTIFICATION_DEFAULT));
+                System.out.println("GeoObjectTopic.setGPSCoordinates(): successful to " + point[2] +"," + point[3] +" for address:" + getAddressString());
+            } else {
+                directives.add(DIRECTIVE_SHOW_MESSAGE, "Address could not be resolved to GPS coordinates.", new Integer(NOTIFICATION_ERROR));
+            }
+        } else {
+            directives.add(DIRECTIVE_SHOW_MESSAGE, "Address could not be resolved to GPS coordinates.", new Integer(NOTIFICATION_ERROR));
+        }
     }
 
     private String convertAddressForRequest(String address) {

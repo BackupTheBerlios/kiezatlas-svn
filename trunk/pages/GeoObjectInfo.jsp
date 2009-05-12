@@ -18,6 +18,8 @@
 	topicBean.removeFieldsContaining("Birthday");
 	topicBean.removeFieldsContaining("Gender");
 	topicBean.removeField("Person / Mobile Number");
+    topicBean.removeField("LONG");
+    topicBean.removeField("LAT");
 	topicBean.removeField("Person / Fax Number");
 	topicBean.removeField("Person / Phone Number");
 	topicBean.removeField("Person / Webpage");
@@ -30,7 +32,7 @@
 	// --- name ---
 	out.println("<b>" + topicBean.getValue("Name") + "</b><br>");
 	// --- address ---
-	// a "Stadt" property precedes a "City" topic (assigned to an "Address" topic)
+	// a "Stadt" property is preferred compared to a "City" topic (assigned to an "Address" topic)
 	String city = topicBean.getValue("Stadt");
 	if (city == null) {
 		Vector tmp = topicBean.getValues("Address / City");

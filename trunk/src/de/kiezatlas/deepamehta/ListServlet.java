@@ -1,5 +1,6 @@
 package de.kiezatlas.deepamehta;
 
+import de.deepamehta.AmbiguousSemanticException;
 import de.kiezatlas.deepamehta.topics.CityMapTopic;
 import de.kiezatlas.deepamehta.topics.GeoObjectTopic;
 //
@@ -10,13 +11,15 @@ import de.deepamehta.service.TopicBean;
 import de.deepamehta.service.TopicBeanField;
 import de.deepamehta.service.web.DeepaMehtaServlet;
 import de.deepamehta.service.web.RequestParameter;
-import de.deepamehta.topics.PersonSearchTopic;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Collections;
 import java.util.Comparator;
 import javax.servlet.ServletException;
@@ -79,6 +82,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			// --- update geo object ---
 			// Note: the timestamp is updated through geo object's propertiesChanged() hook
 			updateTopic(geo.getType(), params, session, directives, cityMap.getID(), VIEWMODE_USE);
+            // setGPSCoordinates(geo, directives); ### should load coordinates if address was changed
 			// --- store image / files---
 			for (int a = 0; a < params.getUploads().size(); a++) {
 				FileItem f = (FileItem) params.getUploads().get(a);
@@ -107,7 +111,8 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			// --- get geo object ---
 			setGeoObject(cm.getTopic(geoObjectID, 1), session);
 			GeoObjectTopic geo = getGeoObject(session);
-			// --- store image ---
+			setGPSCoordinates(geo, directives);
+            // --- store image ---
 			EditServlet.writeFiles(params.getUploads(), geo.getImage(), as);
 			setUseCache(Boolean.FALSE, session);	// re-filtering and -sorting is handled in preparePage with fresh topics now
 			return PAGE_LIST;
@@ -236,8 +241,18 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		}
 	}
 
-	
+    /**
+     * Connects to Google's GeoCoder and gets for the Ojbects resp. Address
+     * the GPS Coordinates and saves them into the Corporate Memory
+     *
+     * @param geo
+     * @param directives
+     */
+    private void setGPSCoordinates(GeoObjectTopic geo, CorporateDirectives directives) {
+        geo.setGPSCoordinates(directives);
+    }
 
+	
 	// **********************
 	// *** Custom Methods ***
 	// **********************
@@ -364,7 +379,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		while (e.hasMoreElements()) {
 			TopicBean bean = (TopicBean) e.nextElement();
 			// get related Address
-			String address = getAddress(bean);
+			String address = getTabbedAddress(bean);
 			String mailbox = getMailbox(bean);
 			if (mailbox.equals("") && address == null) {
 				entry = "";
@@ -442,7 +457,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 	 * @param bean
 	 * @return <Code>null<Code> if no street and zip code could be found
 	 */
-	public String getAddress(TopicBean bean) {
+	private String getTabbedAddress(TopicBean bean) {
 		String address = "";
 		// get Street & Postal Code
 		String street = bean.getValue("Address / Street");
@@ -587,7 +602,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 	}
 
 
-
+    
 	// *************************
 	// *** Session Utilities ***
 	// *************************

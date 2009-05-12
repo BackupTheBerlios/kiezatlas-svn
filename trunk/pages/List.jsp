@@ -7,7 +7,7 @@
 		"Image / File",  "Image / Name", "Width", "Height",
 		"Address / Name", "Person / Birthday"}; // "Address / City" can not be removed for the listtopicBean generator, due to round letter feature
 	static String[] hiddenPropsContaining = { "Owner", "Locked Geometry", KiezAtlas.PROPERTY_DESCRIPTION, KiezAtlas.PROPERTY_ICON, "Person / Address" };
-	static String[] hiddenPropsContainingAffiliated = { "Owner", "Locked Geometry", KiezAtlas.PROPERTY_DESCRIPTION, KiezAtlas.PROPERTY_ICON, "Person / Address","YADE", "Alias", "Password"};
+	static String[] hiddenPropsContainingAffiliated = { "Owner", "Locked Geometry", KiezAtlas.PROPERTY_DESCRIPTION, KiezAtlas.PROPERTY_ICON, "Person / Address","YADE", "Alias", "Password", "LAT", "LONG"};
 %>
 <%
 
