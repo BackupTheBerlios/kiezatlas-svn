@@ -1,6 +1,5 @@
 package de.kiezatlas.deepamehta;
 
-import de.deepamehta.AmbiguousSemanticException;
 import de.kiezatlas.deepamehta.topics.CityMapTopic;
 import de.kiezatlas.deepamehta.topics.GeoObjectTopic;
 //
@@ -11,15 +10,11 @@ import de.deepamehta.service.TopicBean;
 import de.deepamehta.service.TopicBeanField;
 import de.deepamehta.service.web.DeepaMehtaServlet;
 import de.deepamehta.service.web.RequestParameter;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.Collections;
 import java.util.Comparator;
 import javax.servlet.ServletException;
@@ -82,7 +77,6 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			// --- update geo object ---
 			// Note: the timestamp is updated through geo object's propertiesChanged() hook
 			updateTopic(geo.getType(), params, session, directives, cityMap.getID(), VIEWMODE_USE);
-            // setGPSCoordinates(geo, directives); ### should load coordinates if address was changed
 			// --- store image / files---
 			for (int a = 0; a < params.getUploads().size(); a++) {
 				FileItem f = (FileItem) params.getUploads().get(a);
@@ -90,6 +84,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			}
 			EditServlet.writeFiles(params.getUploads(), geo.getImage(), as);
 			//
+            setGPSCoordinates(geo, directives); // ### should load coordinates if address was changed
 			setUseCache(Boolean.FALSE, session);	// re-filtering and -sorting is handled in preparePage with fresh topics now
 			return PAGE_LIST;
 		} else if (action.equals(ACTION_SHOW_EMPTY_GEO_FORM)) {

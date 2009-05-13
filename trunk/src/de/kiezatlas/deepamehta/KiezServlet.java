@@ -41,12 +41,12 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
 
     private String getGeoObjectInfo(String params)
     {
-        System.out.println(">>> getGeoObjectInfo(" + params + ")");
-        String parameters[] = params.split(":");
+        System.out.println(">>>> getGeoObjectInfo(" + params + ")");
+        String parameters[] = params.split(",");
         String topicId = parameters[0];
         StringBuffer messages = null;
         StringBuffer result = new StringBuffer("{\"result\": ");
-        String geoObjectString = createGeoObjectBean(cm.getTopic(topicId, 1), messages);
+        String geoObjectString = createGeoObjectBean(cm.getTopic(topicId.substring(2,topicId.length()-2), 1), messages);
         result.append(geoObjectString);
         result.append(", \"error\": " + messages + "}");
         // System.out.println("result: "+ result.toString());
@@ -62,12 +62,12 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
      */
     private String getWorkspaceCriterias(String params)
     {
-        System.out.println(">>> getWorkspaceCriterias(" + params + ")");
+        System.out.println(">>>> getWorkspaceCriterias(" + params + ")");
         String parameters[] = params.split(":");
         String workspaceId = parameters[0];
         StringBuffer messages = null;
         StringBuffer result = new StringBuffer("{\"result\": ");
-        String criteriaList = createListOfCategorizations(workspaceId);
+        String criteriaList = createListOfCategorizations(workspaceId.substring(2, workspaceId.length()-2));
         result.append(criteriaList);
         result.append(", \"error\": " + messages + "}");
         return result.toString();
@@ -82,23 +82,25 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
      * @return
      */
     private String searchTopics(String params, CorporateDirectives directives) {
-        System.out.println(">>> searchGeoObjects(" + params +")");
+        System.out.println(">>>> searchGeoObjects(" + params +")");
         StringBuffer result = new StringBuffer("{\"result\": ");
         StringBuffer messages = null;
-        String parameters[] = params.split(":");
+        String parameters[] = params.split(",");
         String query = parameters[0];
+        query = query.substring(2, query.length()-1);
         String workspaceId = parameters[1];
         // String topicmapId = parameters[2];
+        workspaceId = workspaceId.substring(2, workspaceId.length()-2);
+        // LOG System.out.println("INFO: query: " + query + ", " + "workspaceId: " + workspaceId);
         Vector criterias = getKiezCriteriaTypes(workspaceId);
         BaseTopic geoType = getWorkspaceGeoType(workspaceId);
         Hashtable props = new Hashtable();
         props.put(PROPERTY_NAME, query);
         Vector results = cm.getTopics(geoType.getID(), props); // getTopic(query, props, topicmapId, directives);
-        System.out.println(">>> found " + results.size() + " geoObjects with name " + query);
+        System.out.println(">>>> found " + results.size() + " geoObjects with name " + query);
         result.append("[");
         for (int i=0; i < results.size(); i++) {
             BaseTopic topic = (BaseTopic) results.get(i);
-            
             result.append(createSlimGeoObject(topic, criterias, new StringBuffer()));
             if (results.indexOf(topic) == results.size()-1) {
                 result.append("]");
@@ -120,10 +122,13 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
      */
     private String getGeoMapTopics(String params, Session session, CorporateDirectives directives)
     {
-        System.out.println(">>> getGeoMapTopics(" + params + ")");
-        String parameters[] = params.split(":");
+        System.out.println(">>>> getGeoMapTopics(" + params + ")");
+        String parameters[] = params.split(",");
         String mapId = parameters[0];
         String workspaceId = parameters[1];
+        mapId = mapId.substring(2,mapId.length()-2);
+        workspaceId = workspaceId.substring(2, workspaceId.length()-2);
+        // LOG System.out.println("INFO: mapId is " + mapId + ", " + " and workspaceId is " + workspaceId);
         StringBuffer messages = null;
         StringBuffer result = new StringBuffer("{\"result\": ");
         StringBuffer mapTopics = new StringBuffer("{ \"map\": \"" + mapId + "\", \"topics\": [");

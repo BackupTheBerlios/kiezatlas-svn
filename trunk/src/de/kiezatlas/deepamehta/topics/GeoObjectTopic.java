@@ -596,10 +596,10 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
                 directives.add(DIRECTIVE_SHOW_MESSAGE, "Die Adresse hat "+point[2]+","+point[3]+" als GPS Koordinaten zugewiesen bekommen.", new Integer(NOTIFICATION_DEFAULT));
                 System.out.println("GeoObjectTopic.setGPSCoordinates(): successful to " + point[2] +"," + point[3] +" for address:" + getAddressString());
             } else {
-                directives.add(DIRECTIVE_SHOW_MESSAGE, "Address could not be resolved to GPS coordinates.", new Integer(NOTIFICATION_ERROR));
+                directives.add(DIRECTIVE_SHOW_MESSAGE, "Address could not be resolved to GPS coordinates. Leaving the topic like it is. ", new Integer(NOTIFICATION_ERROR));
             }
         } else {
-            directives.add(DIRECTIVE_SHOW_MESSAGE, "Address could not be resolved to GPS coordinates.", new Integer(NOTIFICATION_ERROR));
+            directives.add(DIRECTIVE_SHOW_MESSAGE, "Address could not be resolved to GPS coordinates. Leaving the topic like it is. ", new Integer(NOTIFICATION_ERROR));
         }
     }
 
