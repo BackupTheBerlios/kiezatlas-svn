@@ -49,6 +49,7 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 
 
 
+    static final String TOPICTYPE_CITY = "tt-city";
 	static final String TOPICTYPE_CITYMAP = "tt-ka-stadtplan";
 	static final String TOPICTYPE_KIEZ_GEO = "tt-ka-geoobject";
 	static final String TOPICTYPE_KIEZ_GEO_SEARCH = "tt-ka-geoobject-search";

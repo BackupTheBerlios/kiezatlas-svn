@@ -14,9 +14,12 @@ import de.deepamehta.topics.TypeTopic;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 
@@ -123,6 +126,7 @@ public class GPSConverterTopic extends LiveTopic implements KiezAtlas {
                         if (runs == 10) {
                             // 10 retries to contact the geocoder again
                             htmlReport.append("<br>Adressfehler sind bei insgesamt <b>"+geos.size()+"</b> Objekten aufgetreten:");
+                            // checkout the corresponding cityMap
                             htmlReport.append("<ul>");
                             for(int a = 0; a < geos.size(); a++) {
                                 BaseTopic geo = (BaseTopic) geos.get(a);
@@ -167,6 +171,14 @@ public class GPSConverterTopic extends LiveTopic implements KiezAtlas {
         return workspaces;
     }
 
+
+    private String getCityMapId(String geoTypeId, String topicId, String workspaceId) {
+        // get all published topicmaps  from this workspace
+            // go through all topics in in this map and search for the topicId
+            // if topic is part of the Map, return it's cityMapID
+            // ? speed ? maybe, do that first
+        return "";
+    }
 
     /**
      * returns null if no topictype whihc is assigned to the given workspace, is a subtype of "GeoObjectTopic"
@@ -218,6 +230,7 @@ public class GPSConverterTopic extends LiveTopic implements KiezAtlas {
 
 
 	private String getAddressURL(String topicID) {
+        String result;
 		StringBuffer address = new StringBuffer();
         try {
             // Related Address Topic
@@ -258,7 +271,13 @@ public class GPSConverterTopic extends LiveTopic implements KiezAtlas {
             city = removeSpaces(city);
             address.append(" " + city);
             System.out.println("*** GPSConverterTopic.getAddress(): AmbigiousSemanticExc. took " + address.toString());
-            return address.toString();
+            try {
+                result = new String(address.toString().getBytes(), "UTF-8");
+            } catch (UnsupportedEncodingException ex) {
+                Logger.getLogger(GPSConverterTopic.class.getName()).log(Level.SEVERE, null, ex);
+                result = address.toString();
+            }
+            return result;
 		}
 	}
 
