@@ -173,19 +173,29 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 		if (propName.equals(PROPERTY_WEB_ALIAS)) {
 			String webAlias = propValue;
 			// ### compare to lookupInstitution()
-			Vector typeIDs = as.type(TOPICTYPE_KIEZ_GEO, 1).getSubtypeIDs();
-			Hashtable props = new Hashtable();
-			props.put(PROPERTY_WEB_ALIAS, webAlias);
-			Vector insts = cm.getTopics(typeIDs, props, true);	// caseSensitive=true
-			//
-			if (insts.size() > 0) {
-				BaseTopic inst = (BaseTopic) insts.firstElement();
-				String errText = "Web Alias \"" + webAlias + "\" ist bereits an \"" + inst.getName() +
-					"\" vergeben -- Für \"" + getName() + "\" bitte anderen Web Alias verwenden";
-				directives.add(DIRECTIVE_SHOW_MESSAGE, errText, new Integer(NOTIFICATION_WARNING));
-				System.out.println("*** GeoObjectTopic.propertyChangeAllowed(): " + errText);
-				return false;
-			}
+            try {
+                TypeTopic typeTopic = as.type(TOPICTYPE_KIEZ_GEO, 1);
+                Vector typeIDs = typeTopic.getSubtypeIDs();
+                Hashtable props = new Hashtable();
+                props.put(PROPERTY_WEB_ALIAS, webAlias);
+                Vector insts = cm.getTopics(typeIDs, props, true);	// caseSensitive=true
+                //
+                if (insts.size() > 0) {
+                    BaseTopic inst = (BaseTopic) insts.firstElement();
+                    String errText = "Web Alias \"" + webAlias + "\" ist bereits an \"" + inst.getName() +
+                        "\" vergeben -- Für \"" + getName() + "\" bitte anderen Web Alias verwenden";
+                    directives.add(DIRECTIVE_SHOW_MESSAGE, errText, new Integer(NOTIFICATION_WARNING));
+                    System.out.println("*** GeoObjectTopic.propertyChangeAllowed(): " + errText);
+                    return false;
+                }
+            } catch(DeepaMehtaException ex) {
+                // catches nullpointer in as.type() call, should never happen.
+                // but i got a error report for this. i assume that it's session timer issue
+                directives.add(DIRECTIVE_SHOW_MESSAGE, "Beim aktualisieren des Webalias einer Einrichtung " +
+                        "ist folgender Fehler aufgetreten: "+ex, new Integer(NOTIFICATION_ERROR));
+            }
+
+			
 		}
 		return super.propertyChangeAllowed(propName, propValue, session, directives);
 	}
@@ -551,7 +561,7 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
         requestUrl.append("q=");
         requestUrl.append(convertAddressForRequest(givenAddress));
         // requested. put and remove address
-        requestUrl.append("&output=csv&oe=utf8&sensor=false&key=ABQIAAAAyg-5-YjVJ1InfpWX9gsTuxRa7xhKv6UmZ1sBua05bF3F2fwOehRUiEzUjBmCh76NaeOoCu841j1qnQ&gl=de");
+        requestUrl.append("&output=csv&oe=utf8&sensotr=false&key=ABQIAAAAyg-5-YjVJ1InfpWX9gsTuxRa7xhKv6UmZ1sBua05bF3F2fwOehRUiEzUjBmCh76NaeOoCu841j1qnQ&gl=de");
         for (int i = 0; i < 3; i++) {
             try {
                 URL url = new URL(requestUrl.toString());

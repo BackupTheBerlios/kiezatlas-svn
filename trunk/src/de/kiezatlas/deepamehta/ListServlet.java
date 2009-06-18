@@ -85,7 +85,9 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			EditServlet.writeFiles(params.getUploads(), geo.getImage(), as);
 			//
             setGPSCoordinates(geo, directives); // ### should load coordinates if address was changed
-			setUseCache(Boolean.FALSE, session);	// re-filtering and -sorting is handled in preparePage with fresh topics now
+			// make sure that element in cache is updated
+            updateTopicInCache(geo, session);
+            setUseCache(Boolean.TRUE, session);	// re-filtering and -sorting is handled in preparePage with cached topics now
 			return PAGE_LIST;
 		} else if (action.equals(ACTION_SHOW_EMPTY_GEO_FORM)) {
 			return PAGE_GEO_EMPTY_FORM;
@@ -109,7 +111,8 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			setGPSCoordinates(geo, directives);
             // --- store image ---
 			EditServlet.writeFiles(params.getUploads(), geo.getImage(), as);
-			setUseCache(Boolean.FALSE, session);	// re-filtering and -sorting is handled in preparePage with fresh topics now
+            inserTopicIntoCache(geo, session);
+			setUseCache(Boolean.TRUE, session);	// re-filtering and -sorting is handled in preparePage with fresh topics now
 			return PAGE_LIST;
 		} else if (action.equals(ACTION_GO_HOME)) {
 			setFilterField(null, session);
@@ -117,6 +120,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			setSortByField(null, session);
 			return PAGE_LIST_HOME;
 		} else if (action.equals(ACTION_SORT_BY)) {
+            // just sort currently rendered list of topics
 			Vector topicBeans = getListedTopics(session);
 			String sortBy = params.getParameter("sortField");
 			sortBeans(topicBeans, sortBy);
@@ -125,6 +129,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			setUseCache(Boolean.TRUE, session);
 			return PAGE_LIST;
 		} else if (action.equals(ACTION_FILTER)) {
+            // always filter on the full list of cached topics
 			Vector topicBeans = getCachedTopicList(session);
 			String filterField = params.getParameter("filterField");
 			if (filterField != null) {
@@ -168,10 +173,9 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			return PAGE_LINK_PAGE;
 		} else if (action.equals(ACTION_DELETE_ENTRY)){
 			String topicId = params.getParameter("id");
-			System.out.println("	deleteAction from listServlet, deleting entry with id: " + topicId);
 			deleteTopic(topicId);
-            System.out.println("    " + topicId + " deleted successful from corporate memory");
-			setUseCache(Boolean.FALSE, session);
+            removeTopicFromCache(topicId, session);
+			setUseCache(Boolean.TRUE, session);
 			return PAGE_LIST;
 		}
 		//
@@ -188,7 +192,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			session.setAttribute("emailList", null);
 		} else if (page.equals(PAGE_LIST)) {
 			String sortBy = getSortByField(session);
-			// refresh geo objects in list from cm, if caching is not active
+			// refresh geo objects in list from cm, if caching is not used
 			if(!isCacheUsed(session).booleanValue()) {
 				String cityMapID = getCityMap(session).getID();
 				String instTypeID = getInstTypeID(session);
@@ -198,6 +202,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 					TopicBean topic = as.createTopicBean(insts.get(i).toString(), 1);
 					topicBeans.add(topic);
 				}
+                //
 				setCachedTopicList(topicBeans, session);
 				// System.out.println(">>> refreshed beans in cache with serverside data");
 				// fresh topic data & re sorted
@@ -214,6 +219,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 					topicBeans = filterBeansByField(topicBeans, getFilterField(session), filterText);
 					// System.out.println(">>>> re-filtered fresh data in topicList");
 				}
+                // set topics to render in list, differ from cached if sorted or filtered
 				setListedTopics(topicBeans, session);
 				// notifications
 				session.setAttribute("notifications", directives.getNotifications());
@@ -233,6 +239,9 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 				session.setAttribute("emailList", mailAdresses);
 				// System.out.println(">>>> emailList created with : " + mailAdresses.size() + " Einträge");
 			}
+            // total memory of a jvm is flexible 
+            System.out.println("CHECK: jvm has " + Runtime.getRuntime().freeMemory() + " free memory, " +
+                    "it's max memory is "+Runtime.getRuntime().maxMemory());
 		}
 	}
 
@@ -549,6 +558,38 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		//
 		return cityMaps;
 	}
+
+    private void updateTopicInCache(GeoObjectTopic geo, Session session) {
+        Vector topics = getCachedTopicList(session);
+        for (int i=0; i < topics.size(); i++) {
+            TopicBean t = (TopicBean) topics.get(i);
+            if (t.id.equals(geo.getID())) {
+                topics.set(i, as.createTopicBean(geo.getID(), 1));
+                System.out.println(">>>> replaced topic ("+geo.getID()+") in cache, inserted a fresh bean");
+            }
+        }
+        setCachedTopicList(topics, session);
+    }
+
+    private void inserTopicIntoCache(GeoObjectTopic geo, Session session) {
+        Vector topics = getCachedTopicList(session);
+        TopicBean geoBean = as.createTopicBean(geo.getID(), 1);
+        topics.add(1, geoBean);
+        System.out.println(">>>> updated cache, inserted a fresh bean ("+geo.getID()+") ");
+        setCachedTopicList(topics, session);
+    }
+
+    private void removeTopicFromCache(String topicId, Session session) {
+        Vector topics = getCachedTopicList(session);
+         for (int i=0; i < topics.size(); i++) {
+            TopicBean t = (TopicBean) topics.get(i);
+            if (t.id.equals(topicId)) {
+                topics.remove(i);
+                System.out.println(">>>> removed topic ("+topicId+") from cache");
+            }
+        }
+    }
+
 
 	/**
 	 * Writes txt files with incremental number into the documents repository

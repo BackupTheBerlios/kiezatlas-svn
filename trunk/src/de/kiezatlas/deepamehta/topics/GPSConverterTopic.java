@@ -150,6 +150,9 @@ public class GPSConverterTopic extends LiveTopic implements KiezAtlas {
 
             }
             htmlReport.append("</body></html>");
+            Hashtable props = new Hashtable();
+            props.put(PROPERTY_DESCRIPTION, htmlReport.toString());
+            directives.add(DIRECTIVE_SHOW_TOPIC_PROPERTIES, this.getID(), props, new Integer(1));
             as.setTopicProperty(this, PROPERTY_DESCRIPTION, htmlReport.toString());
 		} else {
 			return super.executeCommand(command, session, topicmapID, viewmode);
