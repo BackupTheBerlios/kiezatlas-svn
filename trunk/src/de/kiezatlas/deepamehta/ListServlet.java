@@ -84,7 +84,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			}
 			EditServlet.writeFiles(params.getUploads(), geo.getImage(), as);
 			//
-            setGPSCoordinates(geo, directives); // ### should load coordinates if address was changed
+            setGPSCoordinates(geo, directives); //{ // ### should load coordinates if address was changed
 			// make sure that element in cache is updated
             updateTopicInCache(geo, session);
             setUseCache(Boolean.TRUE, session);	// re-filtering and -sorting is handled in preparePage with cached topics now
@@ -108,7 +108,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			// --- get geo object ---
 			setGeoObject(cm.getTopic(geoObjectID, 1), session);
 			GeoObjectTopic geo = getGeoObject(session);
-			setGPSCoordinates(geo, directives);
+			setGPSCoordinates(geo, directives); //{ // ### should load coordinates if address was changed
             // --- store image ---
 			EditServlet.writeFiles(params.getUploads(), geo.getImage(), as);
             inserTopicIntoCache(geo, session);

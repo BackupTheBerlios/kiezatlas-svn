@@ -17,9 +17,8 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 
 
@@ -123,19 +122,21 @@ public class GPSConverterTopic extends LiveTopic implements KiezAtlas {
                     // re-try as long as geoObjects are returned, max. 10 times
                     scenarioloop:
                     while (!geos.isEmpty()) {
-                        if (runs == 10) {
+                        if (runs == 3) {
                             // 10 retries to contact the geocoder again
                             htmlReport.append("<br>Adressfehler sind bei insgesamt <b>"+geos.size()+"</b> Objekten aufgetreten:");
                             // checkout the corresponding cityMap
                             htmlReport.append("<ul>");
                             for(int a = 0; a < geos.size(); a++) {
                                 BaseTopic geo = (BaseTopic) geos.get(a);
-                                htmlReport.append("<li>" + getAddressURL(geo.getID()) +", "+ geo.getName() + "("+geo.getID()+")</li>");
-                                //directives.add(DIRECTIVE_SHOW_MESSAGE,
-                                //        "Die globalen Koordinaten zu folgendem Objekt konnten nicht aufgelöst werden: "
-                                //        + geo.getName() + ":"+ getAddress(geo.getID()) + ". " +
-                                //        "Damit auch dieses Objekt Koordinaten enthält, korrigieren Sie bitte die Anschrift und starten Sie den Konverter erneut.", new Integer(NOTIFICATION_WARNING));
-                                System.out.println("*** Fail with: " + geo.getName() + "("+geo.getID()+"), Adressangabe: "+ getAddressURL(geo.getID()));
+                                GeoObjectTopic geoTopic = (GeoObjectTopic) as.getLiveTopic(geo);
+                                if (geoTopic.getAddress() != null) {
+                                    htmlReport.append("<li>"+geoTopic.getAddress().getName()+", "+ as.getTopicProperty(geoTopic.getAddress(), PROPERTY_POSTAL_CODE)+", " +
+                                            ""+ geoTopic.getName() + "("+geoTopic.getID()+")</li>");
+                                } else {
+                                    htmlReport.append("<li>"+ geoTopic.getName() + "("+geoTopic.getID()+")</li>");
+                                }
+                                System.out.println("*** Fail with: " + geo.getName() + "("+geo.getID()+"), Adressangabe: "+ geoTopic.getAddress());
                             }
                             htmlReport.append("</ul>");
                             htmlReport.append("<br/>Auch nach mehrmaligen Anfragen sind folgende Adressen nicht automatisch in GPS Koordinaten aufzulösen. Bitte überprüfen Sie die Schreibweise bzw. Korrektheit der Adressangaben im einzelnen.");
@@ -173,15 +174,7 @@ public class GPSConverterTopic extends LiveTopic implements KiezAtlas {
         // System.out.println("    workspaces found count: " + workspaces.size());
         return workspaces;
     }
-
-
-    private String getCityMapId(String geoTypeId, String topicId, String workspaceId) {
-        // get all published topicmaps  from this workspace
-            // go through all topics in in this map and search for the topicId
-            // if topic is part of the Map, return it's cityMapID
-            // ? speed ? maybe, do that first
-        return "";
-    }
+    
 
     /**
      * returns null if no topictype whihc is assigned to the given workspace, is a subtype of "GeoObjectTopic"
@@ -253,8 +246,13 @@ public class GPSConverterTopic extends LiveTopic implements KiezAtlas {
             String city = geo.getCity();
             city = removeSpaces(city);
             address.append(" " + city);
-            return address.toString();
-			// as.getRelatedTopic(id, ASSOCTYPE_ASSOCIATION, TOPICTYPE_ADDRESS, 2, true);		// emptyAllowed=true
+            try {
+                result = URLEncoder.encode(address.toString(), "UTF-8");
+            } catch (UnsupportedEncodingException ex) {
+                System.out.println(GPSConverterTopic.class.getName()+": "+ex);
+                result = address.toString();
+            }
+            return result;
 		} catch (AmbiguousSemanticException e) {
 			// Related Address Topic
             BaseTopic add = e.getDefaultTopic();
@@ -275,9 +273,9 @@ public class GPSConverterTopic extends LiveTopic implements KiezAtlas {
             address.append(" " + city);
             System.out.println("*** GPSConverterTopic.getAddress(): AmbigiousSemanticExc. took " + address.toString());
             try {
-                result = new String(address.toString().getBytes(), "UTF-8");
+                result = URLEncoder.encode(address.toString(), "UTF-8");
             } catch (UnsupportedEncodingException ex) {
-                Logger.getLogger(GPSConverterTopic.class.getName()).log(Level.SEVERE, null, ex);
+                System.out.println(GPSConverterTopic.class.getName()+": "+ex);
                 result = address.toString();
             }
             return result;
@@ -338,7 +336,6 @@ public class GPSConverterTopic extends LiveTopic implements KiezAtlas {
                             as.setTopicProperty(geoObject, PROPERTY_GPS_LAT, points[2]);
                             as.setTopicProperty(geoObject, PROPERTY_GPS_LONG, points[3]);
                             System.out.println("    saving: " + requested.get(address.toString()) + " for: "+ address);
-
                         }
                     }
                     in.close();

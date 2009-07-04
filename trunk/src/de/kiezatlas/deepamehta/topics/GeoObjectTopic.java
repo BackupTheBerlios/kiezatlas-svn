@@ -22,12 +22,16 @@ import java.awt.geom.Point2D;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
 import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 
@@ -343,6 +347,7 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 	// ---
 
     private String getAddressString() {
+        String result;
         StringBuffer address = new StringBuffer();
         // Related Address Topic
         BaseTopic add = getAddress();
@@ -356,7 +361,8 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
         address.append(", " + as.getTopicProperty(add, PROPERTY_POSTAL_CODE));
         // City
         address.append(" " + getCity());
-        return address.toString();
+        result = address.toString();
+        return result;
 	}
 
     public BaseTopic getAddress() {
@@ -564,6 +570,7 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
         requestUrl.append("&output=csv&oe=utf8&sensotr=false&key=ABQIAAAAyg-5-YjVJ1InfpWX9gsTuxRa7xhKv6UmZ1sBua05bF3F2fwOehRUiEzUjBmCh76NaeOoCu841j1qnQ&gl=de");
         for (int i = 0; i < 3; i++) {
             try {
+                //String http = URLEncoder.encode(requestUrl.toString(), "UTF-8");
                 URL url = new URL(requestUrl.toString());
                 URLConnection con = url.openConnection();
                 BufferedReader in = new BufferedReader(
@@ -614,9 +621,12 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
     }
 
     private String convertAddressForRequest(String address) {
-        char blank = " ".charAt(0);
-        char plus = "+".charAt(0);
-        return address.replace(blank, plus);
+        try {
+            address = URLEncoder.encode(address.toString(), "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(GeoObjectTopic.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return address;
     }
 
 }
