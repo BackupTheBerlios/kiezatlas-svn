@@ -106,10 +106,12 @@ public class GPSConverterTopic extends LiveTopic implements KiezAtlas {
                 BaseTopic workspace = (BaseTopic) workspaces.get(i);
                 htmlReport.append("<hr>");
                 htmlReport.append("Im Workspace: <b>" + workspace.getName() + "</b><br/>");
-                System.out.println("    searching on workspace ("+i+"/"+workspaces.size()+"): " + workspace.getName() + ":" + workspace.getID());
+                System.out.println("    searching on workspace ("+i+"/"+workspaces.size()+"): " +
+                        "" + workspace.getName() + ":" + workspace.getID());
                 BaseTopic geotype = getWorkspaceGeoType(workspace.getID());
                 if (geotype == null) {
-                    directives.add(DIRECTIVE_SHOW_MESSAGE, "Please assign the GPSConverter Topic to a 'KiezAtlas' Workspace. No 'GeoObject' was found.", new Integer(NOTIFICATION_ERROR));
+                    directives.add(DIRECTIVE_SHOW_MESSAGE, "Please assign the GPSConverter Topic to a " +
+                            "'KiezAtlas' Workspace. No 'GeoObject' was found.", new Integer(NOTIFICATION_ERROR));
                     return directives;
                 } else {
                     Vector geos  = getAllGeoObjects(geotype.getID());
@@ -131,15 +133,21 @@ public class GPSConverterTopic extends LiveTopic implements KiezAtlas {
                                 BaseTopic geo = (BaseTopic) geos.get(a);
                                 GeoObjectTopic geoTopic = (GeoObjectTopic) as.getLiveTopic(geo);
                                 if (geoTopic.getAddress() != null) {
-                                    htmlReport.append("<li>"+geoTopic.getAddress().getName()+", "+ as.getTopicProperty(geoTopic.getAddress(), PROPERTY_POSTAL_CODE)+", " +
-                                            ""+ geoTopic.getName() + "("+geoTopic.getID()+")</li>");
+                                    htmlReport.append("<li><a href=\"http://"+ACTION_REVEAL_TOPIC+"/"+geoTopic.getAddress().getID()+"\">" +
+                                            ""+geoTopic.getAddress().getName()+", " +
+                                            ""+ geoTopic.getName() + "</li>");
                                 } else {
-                                    htmlReport.append("<li>"+ geoTopic.getName() + "("+geoTopic.getID()+")</li>");
+                                    htmlReport.append("<li><a href=\"http://"+ACTION_REVEAL_TOPIC+"/"+geoTopic.getID()+"\">" +
+                                            ""+ geoTopic.getName() +"</a></li>");
                                 }
+                                //http://revealTopic|t-195554"
+                                //http://revealTopic/t-256022
                                 System.out.println("*** Fail with: " + geo.getName() + "("+geo.getID()+"), Adressangabe: "+ geoTopic.getAddress());
                             }
                             htmlReport.append("</ul>");
-                            htmlReport.append("<br/>Auch nach mehrmaligen Anfragen sind folgende Adressen nicht automatisch in GPS Koordinaten aufzulösen. Bitte überprüfen Sie die Schreibweise bzw. Korrektheit der Adressangaben im einzelnen.");
+                            htmlReport.append("<br/>Auch nach mehrmaligen Anfragen sind folgende Adressen " +
+                                    "nicht automatisch in GPS Koordinaten aufzulösen. " +
+                                    "Bitte überprüfen Sie die Schreibweise bzw. Korrektheit der Adressangaben im einzelnen.");
                             break scenarioloop;
                         } else {
                             geos = updateAllGeoCoordinates(geos);
@@ -155,9 +163,13 @@ public class GPSConverterTopic extends LiveTopic implements KiezAtlas {
             props.put(PROPERTY_DESCRIPTION, htmlReport.toString());
             directives.add(DIRECTIVE_SHOW_TOPIC_PROPERTIES, this.getID(), props, new Integer(1));
             as.setTopicProperty(this, PROPERTY_DESCRIPTION, htmlReport.toString());
+		} else if (cmd.equals(CMD_FOLLOW_HYPERLINK)){
+            //directives.add(DIRECTIVE_, this.getID(), props, new Integer(1));
+			// delegate to super class to handle ACTION_REVEAL_TOPIC
+            return super.executeCommand(command, session, topicmapID, viewmode);
 		} else {
-			return super.executeCommand(command, session, topicmapID, viewmode);
-		}
+            return super.executeCommand(command, session, topicmapID, viewmode);
+        }
 		return directives;
 	}
 
@@ -174,7 +186,14 @@ public class GPSConverterTopic extends LiveTopic implements KiezAtlas {
         // System.out.println("    workspaces found count: " + workspaces.size());
         return workspaces;
     }
-    
+
+    public Vector disabledProperties(Session session) {
+		Vector disabledProps = new Vector();
+		//
+        disabledProps.addElement(PROPERTY_DESCRIPTION);
+		//
+		return disabledProps;
+	}
 
     /**
      * returns null if no topictype whihc is assigned to the given workspace, is a subtype of "GeoObjectTopic"
