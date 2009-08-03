@@ -604,19 +604,27 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
     }
 
     public void setGPSCoordinates(CorporateDirectives directives) {
-        // ### alternatively fetch city property
-        String[] point = loadGPSCoordinates(directives);
-        if(point[2] != null && point[3] != null) {
-            if (!point[2].equals("") && !point[3].equals("")) {
-                as.setTopicProperty(this, PROPERTY_GPS_LAT, point[2]);
-                as.setTopicProperty(this, PROPERTY_GPS_LONG, point[3]);
-                directives.add(DIRECTIVE_SHOW_MESSAGE, "Die Adresse hat "+point[2]+","+point[3]+" als GPS Koordinaten zugewiesen bekommen.", new Integer(NOTIFICATION_DEFAULT));
-                System.out.println("GeoObjectTopic.setGPSCoordinates(): successful to " + point[2] +"," + point[3] +" for address:" + getAddressString());
-            } else {
-                directives.add(DIRECTIVE_SHOW_MESSAGE, "Address could not be resolved to GPS coordinates. Leaving the topic like it is. ", new Integer(NOTIFICATION_ERROR));
-            }
+        boolean emptyLat = (!as.getTopicProperty(this, PROPERTY_GPS_LAT).equals("")) ? true : false;
+        boolean emptyLong = (!as.getTopicProperty(this, PROPERTY_GPS_LONG).equals("")) ? true : false;
+        if (emptyLat && emptyLong) {
+            directives.add(DIRECTIVE_SHOW_MESSAGE, "WGS 84 coordinates are already known to the system, " +
+                    "skipping repositioning. (Means: Changes to the <i>Address</i> do not <i>automatically</i> update " +
+                    "the position of this GeoObject in a \"Citymap\".", new Integer(NOTIFICATION_DEFAULT));
         } else {
-            directives.add(DIRECTIVE_SHOW_MESSAGE, "Address could not be resolved to GPS coordinates. Leaving the topic like it is. ", new Integer(NOTIFICATION_ERROR));
+            // ### alternatively fetch city property
+            String[] point = loadGPSCoordinates(directives);
+            if(point[2] != null && point[3] != null) {
+                if (!point[2].equals("") && !point[3].equals("")) {
+                    as.setTopicProperty(this, PROPERTY_GPS_LAT, point[2]);
+                    as.setTopicProperty(this, PROPERTY_GPS_LONG, point[3]);
+                    directives.add(DIRECTIVE_SHOW_MESSAGE, "Die Adresse hat "+point[2]+","+point[3]+" als GPS Koordinaten zugewiesen bekommen.", new Integer(NOTIFICATION_DEFAULT));
+                    System.out.println("GeoObjectTopic.setGPSCoordinates(): successful to " + point[2] +"," + point[3] +" for address:" + getAddressString());
+                } else {
+                    directives.add(DIRECTIVE_SHOW_MESSAGE, "Address could not be resolved to WGS 84 coordinates. Leaving the topic like it is. ", new Integer(NOTIFICATION_ERROR));
+                }
+            } else {
+                directives.add(DIRECTIVE_SHOW_MESSAGE, "Address could not be resolved to WGS 84 coordinates. Leaving the topic like it is. ", new Integer(NOTIFICATION_ERROR));
+            }
         }
     }
 

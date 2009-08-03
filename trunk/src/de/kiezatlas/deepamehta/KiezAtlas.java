@@ -239,6 +239,7 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	public static final String ACTION_DELETE_COMMENT = "deleteComment";
 	// list servlet
 	public static final String ACTION_SHOW_INSTITUTIONS = "showInstitutions";
+	public static final String ACTION_SHOW_INSTITUTIONS_SLIM = "showSlimInstitution";
 	public static final String ACTION_SHOW_EMPTY_GEO_FORM = "showEmptyGeoObjectForm";
 	public static final String ACTION_CREATE_GEO = "createGeo";
 	public static final String ACTION_SORT_BY ="sort";
@@ -296,6 +297,7 @@ public interface KiezAtlas extends DeepaMehtaConstants {
     static final String PAGE_LIST_LOGIN = "ListLogin";
     static final String PAGE_LIST_HOME = "ListHome";
     static final String PAGE_LIST = "List";
+    static final String PAGE_SLIM_LIST = "SlimList";
     static final String PAGE_SERVE = "Serve";
     static final String PAGE_GEO_ADMIN_FORM = "GeoObjectAdminForm";
     static final String PAGE_GEO_EMPTY_FORM = "GeoObjectEmptyForm";
