@@ -150,7 +150,7 @@ public class EditServlet extends DeepaMehtaServlet implements KiezAtlas {
 		Vector fileNames = new Vector();
 		for (int i = 0; i < fileItems.size(); i++) {
 			try {
-				System.out.println(">>> EditServlet.writeImage(): " + fileItems.size() + " files uploaded, writing fileItem: " + i);
+				System.out.println(">>> EditServlet.writeFiles(): " + fileItems.size() + " files uploaded, writing fileItem: " + i);
 				FileItem item = (FileItem) fileItems.get(i);
 				String propName = getFileChooserFieldName(item);
 				String fileext = getFileExtension(item.getName());	// ### explorer includes entire path
@@ -184,7 +184,7 @@ public class EditServlet extends DeepaMehtaServlet implements KiezAtlas {
 					fileNames.add(filename);
 				}
 			} catch (Exception e) {
-				System.out.println("*** EditServlet.writeImage(): " + e);
+				System.out.println("*** EditServlet.writeFiles(): " + e);
 			}
 		}
 		return fileNames;
@@ -233,7 +233,14 @@ public class EditServlet extends DeepaMehtaServlet implements KiezAtlas {
 		if (image != null) {
 			String imagefile = as.getTopicProperty(image, PROPERTY_FILE);
 			if (imagefile.length() > 0) {
-				imageURL = as.getCorporateWebBaseURL() + FILESERVER_IMAGES_PATH + imagefile;
+                // yes, users store pdf or docs as object's logo image into the system, 
+                // we have to adjust the path so that they can see what they're doing
+                if (imagefile.indexOf("png") != -1 || imagefile.indexOf("jpg") != -1 || imagefile.indexOf("gif") != -1 ||
+                        imagefile.indexOf("PNG") != -1 || imagefile.indexOf("JPG") != -1 || imagefile.indexOf("GIF") != -1) {
+                    imageURL = as.getCorporateWebBaseURL() + FILESERVER_IMAGES_PATH + imagefile;
+                } else {
+                    imageURL = as.getCorporateWebBaseURL() + FILESERVER_DOCUMENTS_PATH + imagefile;
+                }
 			}
 		}
 		session.setAttribute("imagefile", imageURL);

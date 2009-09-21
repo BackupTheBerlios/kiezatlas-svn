@@ -30,14 +30,26 @@ import org.apache.commons.fileupload.FileItem;
 
 /**
  * Kiezatlas 1.6.2<br>
- * Requires DeepaMehta 2.0b8
+ * Requires DeepaMehta rev. 369
  * <p>
- * Last change: 20.11.2008<br>
- * J&ouml;rg Richter<br>
- * jri@deepamehta.de
+ * Last change: 05.08.2009<br>
+ * J&ouml;rg Richter / Malte Rei&szlig;ig<br>
+ * jri@deepamehta.de / mre@deepamehta.de
  */
 public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
-	
+
+    /**
+     * With introducing a SlimList this controller gained a state which is maintain in the session
+     * and that hurts to even look at. This is gonig to be nice in the near future, where no
+     * tight time contstraints are a matter of fact.
+     *
+     * @param action
+     * @param params
+     * @param session
+     * @param directives
+     * @return
+     * @throws javax.servlet.ServletException
+     */
 	protected String performAction(String action, RequestParameter params, Session session, CorporateDirectives directives)
 																									throws ServletException {
 		if (action == null) {
@@ -262,7 +274,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 					System.out.println(">>>> topics are fresh from server and sorted by: " 
 						+ session.getAttribute("sortField") );
 				} else {
-					System.out.println(">>>> topics are fresh from server with sortByTopicName");
+					System.out.println(">>>> topics are fresh from server with sort ByTopic Name");
 				}
 				// fresh topic data & re filtered (just used after create geo)
 				if(getFilterField(session) != null) {
@@ -278,6 +290,9 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 				// System.out.println(">>> used cached or filtered topic list");
 				session.setAttribute("notifications", directives.getNotifications());
 			}
+            System.out.println(">>>> Runtime has: " + Runtime.getRuntime().maxMemory()/1024/1024 + "mb " +
+                    " of max, " + Runtime.getRuntime().totalMemory()/1024/1024 + " of total, " +
+                    ""+Runtime.getRuntime().freeMemory()/1024/1024 +" in memory");
 			// prepare the correct mailto link
 			if(getFilterField(session) != null) {
 				Vector beans = getListedTopics(session);
@@ -297,18 +312,18 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 				String cityMapID = getCityMap(session).getID();
 				String instTypeID = getInstTypeID(session);
 				Vector insts = cm.getTopicIDs(instTypeID, cityMapID, true);		// sortByTopicName=true
-				Vector topicBeans = new Vector();
+				Vector topics = new Vector();
 				for (int i = 0; i < insts.size(); i++) {
                     // Loads BaseTopic
 					BaseTopic topic = as.getLiveTopic(insts.get(i).toString(), 1);
-					topicBeans.add(topic);
+					topics.add(topic);
 				}
                 //
-				setCachedTopicList(topicBeans, session);
-				System.out.println(">>> slim refresh "+topicBeans.size()+" topics in cache with serverside data");
+				setCachedTopicList(topics, session);
+				System.out.println(">>> slim refresh "+topics.size()+" topics in cache with serverside data");
 				// fresh topic data & re sorted
 				if (sortBy != null) {
-					sortBeans(topicBeans, sortBy);
+					sortBeans(topics, sortBy);
 					System.out.println(">>>> topics are fresh from server and sorted by: "
 						+ session.getAttribute("sortField") );
 				} else {
@@ -317,11 +332,11 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 				// fresh topic data & re filtered (just used after create geo)
 				if(getFilterField(session) != null) {
 					String filterText = (String) session.getAttribute("filterText");
-					topicBeans = filterTopicsByName(topicBeans, getFilterField(session), filterText);
+					topics = filterTopicsByName(topics, getFilterField(session), filterText);
 					// System.out.println(">>>> re-filtered fresh data in topicList");
 				}
                 // set topics to render in list, differ from cached if sorted or filtered
-				setListedTopics(topicBeans, session);
+				setListedTopics(topics, session);
 				// notifications
 				session.setAttribute("notifications", directives.getNotifications());
 			} else {
@@ -800,7 +815,14 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 
 
 	// --- Methods to maintain data in the session
-	
+
+    /**
+     * Stores the full List of Topics into the Session, independent of a filter. A filter always works on
+     * all elements in this list, so the user filter through all topics wether or not he has filtered before
+     * 
+     * @param beans
+     * @param session
+     */
 	private void setCachedTopicList(Vector beans, Session session) {
 		System.out.println(">>> stored " + beans.size() + " \"cachedTopics\" in session");
 		session.setAttribute("cachedTopics", beans);
@@ -835,6 +857,12 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		System.out.println("> \"sortField\" stored in session: " + field);
 	}
 
+    /**
+     * Stores the List of Topics which is to be rendered of the List or SlimList Page
+     *
+     * @param beans
+     * @param session
+     */
 	private void setListedTopics(Vector beans, Session session) {
 		session.setAttribute("topics", beans);
 		System.out.println("> \"topics\" stored in session: " + beans.size());
