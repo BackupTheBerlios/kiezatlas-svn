@@ -14,15 +14,18 @@ import de.deepamehta.topics.TypeTopic;
 import de.deepamehta.util.DeepaMehtaUtils;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import javax.servlet.ServletException;
 //
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.TimeZone;
 import java.util.Vector;
 import org.apache.commons.fileupload.FileItem;
 
@@ -32,11 +35,13 @@ import org.apache.commons.fileupload.FileItem;
  * Kiezatlas 1.6.2<br>
  * Requires DeepaMehta rev. 369
  * <p>
- * Last change: 05.08.2009<br>
+ * Last change: 10.09.2009<br>
  * J&ouml;rg Richter / Malte Rei&szlig;ig<br>
  * jri@deepamehta.de / mre@deepamehta.de
  */
 public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
+
+    private Thread worker = null;
 
     /**
      * With introducing a SlimList this controller gained a state which is maintain in the session
@@ -237,7 +242,87 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
                 setUseCache(Boolean.TRUE, session);
             }
 			return PAGE_LIST;
-		}
+		} else if (action.equals(ACTION_EXPORT_CITYMAP)) {
+            String cityMap = (String) params.getValue("cityMapID");
+            CityMapTopic map = (CityMapTopic) as.getLiveTopic(cityMap, 1); // live/base
+            String mapAlias = map.getProperty(PROPERTY_WEB_ALIAS);
+            BaseTopic instType = as.getLiveTopic(map.getInstitutionType());
+            Vector allTopics = cm.getViewTopics(map.getID(), 1);
+            System.out.println(">>> ListServlet got request to export \"" + mapAlias + "\" with " + instType.getName() + " ("+ allTopics.size() +")");
+            // ToDo render approximate waiting time into the displayed result webpage
+            // String absoluteFileNamePath = "/home/jrichter/deepamehta/install/client/documents/"+map.getProperty(PROPERTY_WEB_ALIAS)+".csv"; // ### hardcoded
+            String absoluteFileNamePath = "/home/monty/source/deepaMehta/install/client/documents/"+mapAlias+".csv"; // ### hardcoded
+            File fileToWrite = new File(absoluteFileNamePath);
+            // Time
+            Calendar cal = Calendar.getInstance();
+            long now = cal.getTimeInMillis();
+            // Date
+            SimpleDateFormat sfc = new SimpleDateFormat("E HH:mm dd MMM yy");
+            Date date = new Date();
+            String timestamp = sfc.format(date);
+            try {
+                if (fileToWrite.exists()) {
+                    long touched = fileToWrite.lastModified();
+                    // timestamp = touched;
+                    // check wether the file is pretty fresh or not
+                    System.out.println("  > file already exists and\"" + absoluteFileNamePath + "\"");
+                    System.out.println("  > and system knows that now it's " + now + " and the file was touched " + fileToWrite.lastModified());
+                    if (now-150000000 < touched) { // timestamp is smaller than now minus 10 000 seconds
+                        System.out.println(">> File is not going to be written, data is fresher than some hours");
+                        session.setAttribute("title", "Die Daten sind aktueller als 6 Stunden und werden daher nicht aktualisiert.");
+                    } else {
+                        // go ahead and write the file
+                        worker = new Thread(new DownloadWorker(as, cm, map, absoluteFileNamePath));
+                        // start the worker to export the map to the document-repository
+                        worker.start();
+                        // DownloadWorker dw = new DownloadWorker(as, cm, map, absoluteFileNamePath);
+                        System.out.println(">> File is going to be written, data is older than 6hrs and the user requested so");
+                        session.setAttribute("title", "In wenigen Minuten stehen die aktuellsten Daten des Stadtplans zum Download bereit");
+                        // start the worker to export the map to the document-repository
+                        //dw.run();
+                        // timestamp = now;
+                    }
+                } else {
+                    // go ahead and write the file
+                    worker = new Thread(new DownloadWorker(as, cm, map, absoluteFileNamePath));
+                    // start the worker to export the map to the document-repository
+                    worker.start();
+                    session.setAttribute("title", "In wenigen Minuten stehen die aktuellsten Daten des Stadtplans zum Download bereit");
+                    // timestamp = now;
+                }
+            } catch (Exception ex) {
+                System.out.println("*** ListServlet.exportCityMapError " + ex.getLocalizedMessage());
+            }
+            // display the link with webAlias and DownloadCityMap ??
+            session.setAttribute("link", as.getCorporateWebBaseURL()+FILESERVER_DOCUMENTS_PATH+mapAlias+".csv");
+            // session.setAttribute("date", ""+timestamp); // testTime
+            return PAGE_DOWNLOAD_PAGE;
+        } else if (action.equals(ACTION_DOWNLOAD_CITYMAP)) {
+            // get webAlias
+            String cityMap = (String) params.getValue("cityMapID");
+            String mapName = "";
+            if (cityMap != null) {
+                CityMapTopic map = (CityMapTopic) as.getLiveTopic(cityMap, 1); // live/base
+                mapName = map.getName();
+                String mapAlias = map.getProperty(PROPERTY_WEB_ALIAS);
+                if (!mapAlias.equals("")) {
+                    session.setAttribute("link", as.getCorporateWebBaseURL()+FILESERVER_DOCUMENTS_PATH+mapAlias+".csv");
+                    // get lastModified
+                    String absoluteFileNamePath = "/home/monty/source/deepamehta/install/client/documents/"+mapAlias+".csv"; // ### hardcoded
+                    // Date
+                    SimpleDateFormat sfc = new SimpleDateFormat("E hh:mm dd MMM yy");
+                    Date date = new Date();
+                    String timestamp = sfc.format(date);
+                    // session.setAttribute("date", timestamp); // cal.getTime()
+                } else {
+                    session.setAttribute("link", "MapHasNoAttribute:MapAlias");
+                }
+            } else {
+                session.setAttribute("link", "GetHome");
+            }
+            session.setAttribute("title", "Download der &ouml;ffentlichen Daten des Stadtplans " + mapName);
+            return PAGE_DOWNLOAD_PAGE;
+        }
 		//
 		return super.performAction(action, params, session, directives);
 	}
@@ -248,6 +333,8 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			Vector workspaces = getWorkspaces(getUserID(session), session);
 			Hashtable cityMaps = getCityMaps(workspaces);
             Hashtable mapCounts = getMapCounts(cityMaps);
+            Hashtable mapTimes = getMapTimes(cityMaps);
+            session.setAttribute("mapTimes", mapTimes);
             session.setAttribute("mapCounts", mapCounts);
 			session.setAttribute("workspaces", workspaces);
 			session.setAttribute("cityMaps", cityMaps);
@@ -700,6 +787,48 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
     }
 
     /**
+     * If returned result vector contains a mapId as key where the value is equals("") - export was never done before
+     *
+     * @param cityMaps
+     * @return
+     */
+    private Hashtable getMapTimes(Hashtable cityMaps) {
+        Hashtable counts = new Hashtable();
+        // System.out.println(">> TIMER: mapCount was started at : " + DeepaMehtaUtils.getTime(true));
+        Enumeration wsIds = cityMaps.keys();
+        // System.out.println(">> TIME INFO: Starting Fetchint the MapTimes : " + DeepaMehtaUtils.getTime(true));
+        while (wsIds.hasMoreElements()) {
+            String workspaceId = (String) wsIds.nextElement();
+            Vector maps = (Vector) cityMaps.get(workspaceId);
+            BaseTopic typeTopic = getWorkspaceSubType(workspaceId, KiezAtlas.TOPICTYPE_KIEZ_GEO);
+            for (int i = 0; i < maps.size(); i++) {
+                BaseTopic map = (BaseTopic) maps.get(i);
+                String mapAlias = as.getTopicProperty(map, PROPERTY_WEB_ALIAS);
+                // Vector allTopics = cm.getViewTopics(map.getID(), 1, typeTopic.getID());
+                // String absoluteFileNamePath = "/home/jrichter/deepamehta/install/client/documents/"+mapAlias+".csv"; // ### hardcoded
+                String absoluteFileNamePath = "/home/monty/source/deepaMehta/install/client/documents/"+mapAlias+".csv"; //
+                File fileToWrite = new File(absoluteFileNamePath);
+                if (fileToWrite.exists()) {
+                    Date d = new Date(fileToWrite.lastModified());
+                    Calendar cal = Calendar.getInstance(TimeZone.getDefault());
+                    long now = cal.getTimeInMillis();
+                    if (now-150000000 > fileToWrite.lastModified()) { // timestamp is smaller than now minus 10 000 seconds
+                        SimpleDateFormat sdf = new SimpleDateFormat("dd MMM, E HH:mm");
+                        counts.put(map.getID(), sdf.format(d));
+                    } else {
+                        counts.put(map.getID(), "isUpToDate");
+                    }
+                } else {
+                    counts.put(map.getID(), "");
+                }
+                //
+            }
+        }
+        // System.out.println(">> TIME INFO: mapCount has finished at : " + DeepaMehtaUtils.getTime(true));
+        return counts;
+    }
+
+    /**
      * returns null if no topictype whihc is assigned to the given workspace,
      * is a subtype of "GeoObjectTopic"
      *
@@ -783,7 +912,6 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			}
 			FileOutputStream fout = new FileOutputStream(toFile, true);
 			OutputStreamWriter out = new OutputStreamWriter(fout ,"ISO-8859-1");
-			FileWriter fw = new FileWriter(toFile, true);
 			out.write(letter);
 			out.close();
 			System.out.println(">>> writeLetter(): written file successfully from: " + toFile.getAbsolutePath());
@@ -922,7 +1050,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		return (String) session.getAttribute("filterField");
 	}
 
-
+    
 	// ********************************
 	// *** Inner Comparison Classes ***
 	// ********************************

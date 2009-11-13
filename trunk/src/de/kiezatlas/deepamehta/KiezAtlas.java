@@ -247,6 +247,8 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	public static final String ACTION_CLEAR_FILTER ="clearFilter";
 	public static final String ACTION_CREATE_FORM_LETTER ="createFormLetter";
 	public static final String ACTION_DELETE_ENTRY ="deleteEntry";
+	public static final String ACTION_EXPORT_CITYMAP ="exportCityMap";
+	public static final String ACTION_DOWNLOAD_CITYMAP ="downloadCityMap";
 	
 	
 
@@ -302,6 +304,7 @@ public interface KiezAtlas extends DeepaMehtaConstants {
     static final String PAGE_GEO_ADMIN_FORM = "GeoObjectAdminForm";
     static final String PAGE_GEO_EMPTY_FORM = "GeoObjectEmptyForm";
 	static final String PAGE_LINK_PAGE = "Print";
+	static final String PAGE_DOWNLOAD_PAGE = "Download";
 	// error
     static final String PAGE_ERROR = "error";
 }
