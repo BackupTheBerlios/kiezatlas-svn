@@ -16,7 +16,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -43,20 +45,34 @@ public class DownloadWorker extends Thread implements Runnable {
         String content = getFileContent(map);
         exportFile(filePath, content);
         // now copy tmp file and replace the original file
+        // worst case is; former file deleted and .tmp file could not be copied
         try {
-            FileReader fis = new FileReader(filePath+".tmp");
-            // File fileToWrite = new File(filePath);
+            FileReader fis = new FileReader(filePath+".tmp"); // read input
+            File fileToWrite = new File(filePath);
+            fileToWrite.delete(); // delete the former file and start to write the new one
             FileOutputStream fout = new FileOutputStream(filePath, true);
-            OutputStreamWriter out = new OutputStreamWriter(fout ,"ISO-8859-1");
+            // OutputStreamWriter out = new OutputStreamWriter(fout ,"ISO-8859-1");
+            OutputStreamWriter out = new OutputStreamWriter(fout ,"UTF-8");
             while(fis.ready()) {
                 out.write(fis.read());
             }
             out.close();
+            System.out.println("    >> DownloadWorker sucessfully replaced CityMapData in " + mapAlias);
+        } catch (SecurityException sex) {
+            // Former File could not be deleted
+            System.out.println("*** ListServlet.DownloadWorker.run() : " + sex.getMessage());
+        } catch (FileNotFoundException p) {
+            // tmp file could not be opened
+            System.out.println("*** ListServlet.DownloadWorker.run() :" + p.getMessage());
+        } catch (UnsupportedEncodingException uio) {
+            // outputStreamWriter does not support encoding
+            System.out.println("*** ListServlet.DownloadWorker.run() :" + uio.getMessage());
+        } catch (IOException iox) {
+            // copying failed
+            System.out.println("*** ListServlet.DownloadWorker.run() :" + iox.getMessage());
+        } finally {
             File f = new File(filePath+".tmp");
             f.delete(); // cleanup tmp file
-            System.out.println("    >> DownloadWorker sucessfully replaced CityMapData in " + mapAlias + " and cleaned up afterwards");
-        } catch (Exception p) {
-            System.out.println("*** ListServlet.DownloadWorker.run() :" + p.getMessage());
         }
         // throw new UnsupportedOperationException("Not supported yet.");
     }
@@ -72,32 +88,29 @@ public class DownloadWorker extends Thread implements Runnable {
         Vector allElements = cm.getViewTopics(map.getID(), 1, mapTopic.getInstitutionType().getID());
         System.out.println(">>>> collectMapTopics counted "+allElements.size()+" objects of type " + mapTopic.getInstitutionType().getID());
         // create header of csv file
-        TopicBean headBean = as.createTopicBean(((BaseTopic)allElements.get(0)).getID(), 1);
+        TopicBean tmp = as.createTopicBean(((BaseTopic)allElements.get(0)).getID(), 1);
         StringBuffer headline = new StringBuffer();
         // Removing 15 Fields
-        headBean.removeField(DeepaMehtaConstants.PROPERTY_PASSWORD);
-        headBean.removeField(DeepaMehtaConstants.PROPERTY_WEB_ALIAS);
-        headBean.removeFieldsContaining(DeepaMehtaConstants.PROPERTY_OWNER_ID);
-        headBean.removeFieldsContaining(DeepaMehtaConstants.PROPERTY_LOCKED_GEOMETRY);
-        headBean.removeFieldsContaining("Image");
-        headBean.removeFieldsContaining("Forum");
-        headBean.removeField(KiezAtlas.PROPERTY_YADE_X);
-        headBean.removeField(KiezAtlas.PROPERTY_YADE_Y);
-        headBean.removeField(KiezAtlas.PROPERTY_GPS_LAT);
-        headBean.removeField(KiezAtlas.PROPERTY_GPS_LONG);
-        for (int i = 0; i < headBean.fields.size(); i++) {
-            TopicBeanField field = (TopicBeanField) headBean.fields.get(i);
+        tmp.removeField(DeepaMehtaConstants.PROPERTY_PASSWORD);
+        tmp.removeField(DeepaMehtaConstants.PROPERTY_WEB_ALIAS);
+        tmp.removeFieldsContaining(DeepaMehtaConstants.PROPERTY_OWNER_ID);
+        tmp.removeFieldsContaining(DeepaMehtaConstants.PROPERTY_LOCKED_GEOMETRY);
+        tmp.removeFieldsContaining("Image");
+        tmp.removeFieldsContaining("Forum");
+        tmp.removeFieldsContaining("Description");
+        tmp.removeField(KiezAtlas.PROPERTY_YADE_X);
+        tmp.removeField(KiezAtlas.PROPERTY_YADE_Y);
+        tmp.removeField(KiezAtlas.PROPERTY_GPS_LAT);
+        tmp.removeField(KiezAtlas.PROPERTY_GPS_LONG);
+        for (int i = 0; i < tmp.fields.size(); i++) {
+            TopicBeanField field = (TopicBeanField) tmp.fields.get(i);
             headline.append(field.label);
             headline.append(createTab());
             // System.out.println("    > Field: " + field.label + " (" + field.type + ") ");
         }
-        System.out.println("> Headline is " + headline.toString());
+        // System.out.println("> Headline is " + headline.toString());
         result.append(headline);
-        // String header = "Name" + createTab() + "Email" + createTab() + "Ansprechpartner/in" + createTab() + "Straße / Hnr." +
-//			"" + createTab() + "PLZ" + createTab() + "Stadt\n";
-//		String personName = "";
-//		String entry = "";
-//		//
+		//
 		Enumeration e = allElements.elements();
 		while (e.hasMoreElements()) {
             result.append("\n");
@@ -110,24 +123,25 @@ public class DownloadWorker extends Thread implements Runnable {
             bean.removeFieldsContaining(DeepaMehtaConstants.PROPERTY_LOCKED_GEOMETRY);
             bean.removeFieldsContaining("Image");
             bean.removeFieldsContaining("Forum");
+            bean.removeFieldsContaining("Description");
             bean.removeField(KiezAtlas.PROPERTY_YADE_X);
             bean.removeField(KiezAtlas.PROPERTY_YADE_Y);
             bean.removeField(KiezAtlas.PROPERTY_GPS_LAT);
             bean.removeField(KiezAtlas.PROPERTY_GPS_LONG);
-            System.out.println("> > exporting " + bean.fields.size() + " fields of " + bean.name);
-            for (int i = 0; i < headBean.fields.size(); i++) {
-                TopicBeanField field = (TopicBeanField) headBean.fields.get(i);
+            for (int i = 0; i < bean.fields.size(); i++) {
+                TopicBeanField field = (TopicBeanField) bean.fields.get(i);
                 if (field.type == TopicBeanField.TYPE_SINGLE) {
-                    result.append(field.value);
+                    String toAppend = cleanFieldForExport(field.value);
+                    result.append(toAppend);
                 } else {
                     for (int a = 0; a < field.values.size(); a++) {
                         BaseTopic fieldTopic = (BaseTopic) field.values.get(a);
-                        result.append(fieldTopic.getName());
+                        String toAppend = cleanFieldForExport(fieldTopic.getName());
+                        result.append(toAppend);
                         result.append(" ");
                     }
                 }
                 result.append(createTab());
-                // System.out.println("    > Field: " + field.label + " (" + field.type + ") ");
             }
         }
         return result.toString();
@@ -137,15 +151,25 @@ public class DownloadWorker extends Thread implements Runnable {
 		return "\t";
 	}
 
+    private String cleanFieldForExport(String content) {
+        //
+        content = content.replaceAll("\t", " "); // tab
+        content = content.replaceAll("\n", " "); // newline
+        content = content.replaceAll("\r", " "); // carriage return
+        //
+        return content;
+    }
+
     void exportFile(String filePath, String content) {
             try {
-                System.out.println(">>>> DownloadWorker.exportFile(): " + filePath);
+                // System.out.println(">>>> DownloadWorker.exportFile(): " + filePath);
                 File fileToWrite = new File(filePath+".tmp");
                 FileOutputStream fout = new FileOutputStream(fileToWrite, true);
-                OutputStreamWriter out = new OutputStreamWriter(fout ,"ISO-8859-1");
+                // OutputStreamWriter out = new OutputStreamWriter(fout ,"ISO-8859-1");
+                OutputStreamWriter out = new OutputStreamWriter(fout ,"UTF-8");
                 out.write(content);
                 out.close();
-                System.out.println("  > new file \"" + fileToWrite + "\" written successfully");
+                System.out.println("  > temporary file \"" + fileToWrite + "\" successfully written");
             } catch (FileNotFoundException e) {
                 System.out.println("*** ListServlet.DownloadWorker.exportFile(): Trying Again " + e.toString());
                 // FileWriter fw = new FileWriter();

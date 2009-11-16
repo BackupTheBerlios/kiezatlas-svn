@@ -7,7 +7,8 @@
 	Hashtable mapCounts = (Hashtable) session.getAttribute("mapCounts");
 	Hashtable mapTimes = (Hashtable) session.getAttribute("mapTimes");
 	String membership = (String) session.getAttribute("membership");
-	//
+    out.println("<div class=\"small\" style=\"position: absolute; right: 75px;\"><a href=\"?action="+KiezAtlas.ACTION_SHOW_LIST_LEGEND+"\">zur Legende</a></div>");
+    //
 	out.println("<dl style=\"width: 700px;\">");
 	//
 	Enumeration e = workspaces.elements();

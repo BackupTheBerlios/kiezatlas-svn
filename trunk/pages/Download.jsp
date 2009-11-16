@@ -7,6 +7,11 @@
 <%  String link = (String) session.getAttribute("link");
     String title = (String) session.getAttribute("title");
     out.println("<h3>"+title+"</h3>");
-    out.println("<p>Bitte klicken Sie mit der rechten Maustaste auf den untenstehenden Link und wählen Sie \"Ziel Speichern unter\"</p>");
+    out.println("<p>Bitte klicken Sie mit der rechten Maustaste auf den untenstehenden Link und wählen Sie \"Ziel Speichern unter\".</p>");
     out.println("<a href=\"" + link + "\">Stadtplandaten herunterladen</a>");
+    //
+    out.println("<p><i>Hinweis: Die aktuellen Daten sind als sog \".csv\"-Datei unter der Adresse st&auml;ndig abrufbar. " +
+            "F&uuml;r den Import in ein g&auml;ngiges Tabellenkalkulationsprogramm ist folgendes zu beachten: " +
+            "Die Daten liegen in der sog. <b>UTF-8</b> Kodierung vor und die Spalten sind mittels <b>Tab</b> voneinander getrennt. " +
+            "Kommatas werden zur Trennung nicht eingesetzt. Beim Importvorgang kann es sein dass diese Eigenschaften vom Benutzer anzugeben sind.</i></p>");
 %>

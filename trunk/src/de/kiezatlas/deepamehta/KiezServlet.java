@@ -219,13 +219,19 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
                 for(int r = 0; r < relatedFields.size(); r++)
                 {
                     BaseTopic relatedTopic = (BaseTopic)relatedFields.get(r);
-                    bean.append("\"values\": {");
-                    bean.append("\"name\": \"" + relatedTopic.getName() + "\",");
+                    bean.append("\"values\": [");
+                    bean.append("{\"name\": \"" + relatedTopic.getName() + "\",");
                     // ### geoObject has it's own icon ?
                     bean.append("\"icon\": \"" + as.getTopicProperty(relatedTopic.getID(), 1, PROPERTY_ICON) + "\"}");
+                    if (r == relatedFields.size()-1)  {
+                        bean.append("]");
+                    } else {
+                        bean.append(", ");
+                    }
                 }
-                if(relatedFields.size() == 0)
+                if (relatedFields.size() == 0) {
                     bean.append("\"values\": {}");
+                }
             }
             if(properties.indexOf(field) == properties.size() - 1)
                 bean.append("}");
