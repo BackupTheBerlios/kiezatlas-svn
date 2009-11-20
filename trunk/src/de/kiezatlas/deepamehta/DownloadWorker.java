@@ -51,8 +51,8 @@ public class DownloadWorker extends Thread implements Runnable {
             File fileToWrite = new File(filePath);
             fileToWrite.delete(); // delete the former file and start to write the new one
             FileOutputStream fout = new FileOutputStream(filePath, true);
-            // OutputStreamWriter out = new OutputStreamWriter(fout ,"ISO-8859-1");
-            OutputStreamWriter out = new OutputStreamWriter(fout ,"UTF-8");
+            OutputStreamWriter out = new OutputStreamWriter(fout ,"ISO-8859-1");
+            // OutputStreamWriter out = new OutputStreamWriter(fout ,"UTF-8");
             while(fis.ready()) {
                 out.write(fis.read());
             }
@@ -98,10 +98,6 @@ public class DownloadWorker extends Thread implements Runnable {
         tmp.removeFieldsContaining("Image");
         tmp.removeFieldsContaining("Forum");
         tmp.removeFieldsContaining("Description");
-        tmp.removeField(KiezAtlas.PROPERTY_YADE_X);
-        tmp.removeField(KiezAtlas.PROPERTY_YADE_Y);
-        tmp.removeField(KiezAtlas.PROPERTY_GPS_LAT);
-        tmp.removeField(KiezAtlas.PROPERTY_GPS_LONG);
         for (int i = 0; i < tmp.fields.size(); i++) {
             TopicBeanField field = (TopicBeanField) tmp.fields.get(i);
             headline.append(field.label);
@@ -124,10 +120,6 @@ public class DownloadWorker extends Thread implements Runnable {
             bean.removeFieldsContaining("Image");
             bean.removeFieldsContaining("Forum");
             bean.removeFieldsContaining("Description");
-            bean.removeField(KiezAtlas.PROPERTY_YADE_X);
-            bean.removeField(KiezAtlas.PROPERTY_YADE_Y);
-            bean.removeField(KiezAtlas.PROPERTY_GPS_LAT);
-            bean.removeField(KiezAtlas.PROPERTY_GPS_LONG);
             for (int i = 0; i < bean.fields.size(); i++) {
                 TopicBeanField field = (TopicBeanField) bean.fields.get(i);
                 if (field.type == TopicBeanField.TYPE_SINGLE) {
@@ -165,8 +157,8 @@ public class DownloadWorker extends Thread implements Runnable {
                 // System.out.println(">>>> DownloadWorker.exportFile(): " + filePath);
                 File fileToWrite = new File(filePath+".tmp");
                 FileOutputStream fout = new FileOutputStream(fileToWrite, true);
-                // OutputStreamWriter out = new OutputStreamWriter(fout ,"ISO-8859-1");
-                OutputStreamWriter out = new OutputStreamWriter(fout ,"UTF-8");
+                OutputStreamWriter out = new OutputStreamWriter(fout ,"ISO-8859-1");
+                // OutputStreamWriter out = new OutputStreamWriter(fout ,"UTF-8");
                 out.write(content);
                 out.close();
                 System.out.println("  > temporary file \"" + fileToWrite + "\" successfully written");

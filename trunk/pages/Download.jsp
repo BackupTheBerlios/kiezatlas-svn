@@ -12,6 +12,6 @@
     //
     out.println("<p><i>Hinweis: Die aktuellen Daten sind als sog \".csv\"-Datei unter der Adresse st&auml;ndig abrufbar. " +
             "F&uuml;r den Import in ein g&auml;ngiges Tabellenkalkulationsprogramm ist folgendes zu beachten: " +
-            "Die Daten liegen in der sog. <b>UTF-8</b> Kodierung vor und die Spalten sind mittels <b>Tab</b> voneinander getrennt. " +
+            "Die Daten liegen in jetzt in der Westeurop&auml;ischen Kodierung vor  (ISO-8859-1) und die Spalten sind mittels <b>Tab</b> voneinander getrennt. " +
             "Kommatas werden zur Trennung nicht eingesetzt. Beim Importvorgang kann es sein dass diese Eigenschaften vom Benutzer anzugeben sind.</i></p>");
 %>

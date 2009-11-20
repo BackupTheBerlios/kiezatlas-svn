@@ -764,7 +764,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
             for (int i = 0; i < maps.size(); i++) {
                 BaseTopic map = (BaseTopic) maps.get(i);
                 Vector allTopics = cm.getViewTopics(map.getID(), 1, typeTopic.getID());
-                counts.put(map.getID(), allTopics.size());
+                counts.put(map.getID(), allTopics.size()); // hashtable does like int's, ### unsafe
             }
         }
         // System.out.println(">> TIMER: mapCount has finished at : " + DeepaMehtaUtils.getTime(true));
