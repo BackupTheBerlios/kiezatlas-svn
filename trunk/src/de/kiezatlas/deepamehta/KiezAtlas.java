@@ -301,7 +301,6 @@ public interface KiezAtlas extends DeepaMehtaConstants {
     static final String PAGE_LIST_HOME = "ListHome";
     static final String PAGE_LIST = "List";
     static final String PAGE_SLIM_LIST = "SlimList";
-    static final String PAGE_SERVE = "Serve";
     static final String PAGE_GEO_ADMIN_FORM = "GeoObjectAdminForm";
     static final String PAGE_GEO_EMPTY_FORM = "GeoObjectEmptyForm";
 	static final String PAGE_LINK_PAGE = "Print";
@@ -309,4 +308,6 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	static final String PAGE_LIST_INFO = "ListHelp";
 	// error
     static final String PAGE_ERROR = "error";
+    // service
+    static final String PAGE_SERVE = "Serve";
 }

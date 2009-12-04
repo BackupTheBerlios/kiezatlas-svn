@@ -29,7 +29,9 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
 
     protected String performAction(String topicId, String params, Session session, CorporateDirectives directives)
     {
-        return topicId;
+        session.setAttribute("html", "<h3>Willkommen zu ihrem Kiezatlas Dienst</h3>" +
+                "<br>Hier geht's zur <a href=\"http://www.deepamehta.de/wiki/en/Application:_Web_Service\">Software Dokumentation</a>");
+        return PAGE_SERVE;
     }
 
     protected void preparePage(String page, String params, Session session, CorporateDirectives directives)
@@ -41,12 +43,12 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
 
     private String getGeoObjectInfo(String params)
     {
-        System.out.println(">>>> getGeoObjectInfo(" + params + ")");
-        String parameters[] = params.split(",");
-        String topicId = parameters[0];
+        String topicId = params.substring(2,params.length()-2);
+        System.out.println(">>>> getGeoObjectInfo(" + topicId + ")");
+        // String parameters[] = params.split(",");
         StringBuffer messages = null;
         StringBuffer result = new StringBuffer("{\"result\": ");
-        String geoObjectString = createGeoObjectBean(cm.getTopic(topicId.substring(2,topicId.length()-2), 1), messages);
+        String geoObjectString = createGeoObjectBean(cm.getTopic(topicId, 1), messages);
         result.append(geoObjectString);
         result.append(", \"error\": " + messages + "}");
         // System.out.println("result: "+ result.toString());
@@ -216,21 +218,21 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
                 bean.append("\"value\":  \"" + value + "\"");
             } else {
                 Vector relatedFields = field.values;
-                for(int r = 0; r < relatedFields.size(); r++)
-                {
-                    BaseTopic relatedTopic = (BaseTopic)relatedFields.get(r);
-                    bean.append("\"values\": [");
-                    bean.append("{\"name\": \"" + relatedTopic.getName() + "\",");
-                    // ### geoObject has it's own icon ?
-                    bean.append("\"icon\": \"" + as.getTopicProperty(relatedTopic.getID(), 1, PROPERTY_ICON) + "\"}");
-                    if (r == relatedFields.size()-1)  {
-                        bean.append("]");
-                    } else {
-                        bean.append(", ");
-                    }
-                }
                 if (relatedFields.size() == 0) {
-                    bean.append("\"values\": {}");
+                    bean.append("\"values\": []");
+                } else {
+                    bean.append("\"values\": [");
+                    for (int r = 0; r < relatedFields.size(); r++) {
+                        BaseTopic relatedTopic = (BaseTopic) relatedFields.get(r);
+                        bean.append("{\"name\": \"" + relatedTopic.getName() + "\",");
+                        // ### geoObject has it's own icon ?
+                        bean.append("\"icon\": \"" + as.getTopicProperty(relatedTopic.getID(), 1, PROPERTY_ICON) + "\"}");
+                        if (r == relatedFields.size()-1)  {
+                            bean.append("]");
+                        } else {
+                            bean.append(", ");
+                        }
+                    }
                 }
             }
             if(properties.indexOf(field) == properties.size() - 1)

@@ -110,7 +110,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			// --- store image / files---
 			for (int a = 0; a < params.getUploads().size(); a++) {
 				FileItem f = (FileItem) params.getUploads().get(a);
-				System.out.println("***ListServlet. uploaded files are " + EditServlet.getFilename(f.getName()));
+				System.out.println("*** ListServlet. uploaded files are " + EditServlet.getFilename(f.getName()));
 			}
 			EditServlet.writeFiles(params.getUploads(), geo.getImage(), as);
 			//
@@ -227,7 +227,6 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			}
 			String link = as.getCorporateWebBaseURL() + FILESERVER_DOCUMENTS_PATH;
 			link += writeLetter(letter, "Adressen.txt");
-			System.out.println(">>> created Form Letter");
 			session.setAttribute("formLetter", link);
 			return PAGE_LINK_PAGE;
 		} else if (action.equals(ACTION_DELETE_ENTRY)){
@@ -396,8 +395,8 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 				// fresh topic data & re sorted
 				if (sortBy != null) {
 					sortBeans(topics, sortBy);
-					System.out.println(">>>> topics are fresh from server and sorted by: "
-						+ session.getAttribute("sortField") );
+					// System.out.println(">>>> topics are fresh from server and sorted by: "
+						//+ session.getAttribute("sortField") );
 				} else {
 					System.out.println(">>>> topics are fresh from server with sortByTopicName");
 				}
@@ -694,6 +693,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		// - no city data, but give berlin a plz try
 		} else {
 			if (postalCode != null) {
+                postalCode.replaceAll(" ", ""); // clean up for an evtl. valueOf NumberFormatException
 				int value = Integer.valueOf(postalCode).intValue();
 				if (value > 10001 && value <= 14199) {
 					// is within 10001 and 14199

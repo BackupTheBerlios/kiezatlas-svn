@@ -13,10 +13,11 @@ import de.deepamehta.service.TopicBean;
 import de.deepamehta.service.TopicBeanField;
 import de.kiezatlas.deepamehta.topics.CityMapTopic;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Enumeration;
@@ -42,19 +43,21 @@ public class DownloadWorker extends Thread implements Runnable {
     public void run() {
         System.out.println("    >> DownloadWorker was initalized to run for "+map.getName());
         String filePath = mapAlias; // DeepaMehtaConstants.FILESERVER_DOCUMENTS_PATH + 
+        // string wille be an UTF-8 Java String filled from within through a Latin 1 MYSQL Connector
         String content = getFileContent(map);
+        // write tmp file
         exportFile(filePath, content);
         // now copy tmp file and replace the original file
         // worst case is; former file deleted and .tmp file could not be copied
         try {
-            FileReader fis = new FileReader(filePath+".tmp"); // read input
+            FileInputStream fis = new FileInputStream(filePath+".tmp"); // read input
+            InputStreamReader isr = new InputStreamReader(fis, "ISO-8859-1");
             File fileToWrite = new File(filePath);
             fileToWrite.delete(); // delete the former file and start to write the new one
             FileOutputStream fout = new FileOutputStream(filePath, true);
-            OutputStreamWriter out = new OutputStreamWriter(fout ,"ISO-8859-1");
-            // OutputStreamWriter out = new OutputStreamWriter(fout ,"UTF-8");
-            while(fis.ready()) {
-                out.write(fis.read());
+            OutputStreamWriter out = new OutputStreamWriter(fout, "ISO-8859-1");
+            while(isr.ready()) {
+                out.write(isr.read());
             }
             out.close();
             System.out.println("    >> DownloadWorker sucessfully replaced CityMapData in " + mapAlias);
@@ -71,10 +74,10 @@ public class DownloadWorker extends Thread implements Runnable {
             // copying failed
             System.out.println("*** ListServlet.DownloadWorker.run() :" + iox.getMessage());
         } finally {
+            // delete the tmp file, too
             File f = new File(filePath+".tmp");
             f.delete(); // cleanup tmp file
         }
-        // throw new UnsupportedOperationException("Not supported yet.");
     }
 
     /**
@@ -157,7 +160,7 @@ public class DownloadWorker extends Thread implements Runnable {
                 // System.out.println(">>>> DownloadWorker.exportFile(): " + filePath);
                 File fileToWrite = new File(filePath+".tmp");
                 FileOutputStream fout = new FileOutputStream(fileToWrite, true);
-                OutputStreamWriter out = new OutputStreamWriter(fout ,"ISO-8859-1");
+                OutputStreamWriter out = new OutputStreamWriter(fout, "ISO-8859-1");
                 // OutputStreamWriter out = new OutputStreamWriter(fout ,"UTF-8");
                 out.write(content);
                 out.close();
