@@ -1,9 +1,11 @@
 package de.kiezatlas.deepamehta;
 
+import de.deepamehta.AmbiguousSemanticException;
 import de.kiezatlas.deepamehta.topics.CityMapTopic;
 import de.kiezatlas.deepamehta.topics.GeoObjectTopic;
 //
 import de.deepamehta.BaseTopic;
+import de.deepamehta.DeepaMehtaException;
 import de.deepamehta.service.CorporateDirectives;
 import de.deepamehta.service.Session;
 import de.deepamehta.service.TopicBean;
@@ -34,7 +36,7 @@ import org.apache.commons.fileupload.FileItem;
  * Kiezatlas 1.6.2<br>
  * Requires DeepaMehta rev. 369
  * <p>
- * Last change: 10.09.2009<br>
+ * Last change: 06.12.2009<br>
  * J&ouml;rg Richter / Malte Rei&szlig;ig<br>
  * jri@deepamehta.de / mre@deepamehta.de
  */
@@ -229,6 +231,72 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			link += writeLetter(letter, "Adressen.txt");
 			session.setAttribute("formLetter", link);
 			return PAGE_LINK_PAGE;
+		} else if (action.equals(ACTION_FILTER_ROUNDMAILING)) {
+            String cityMap = (String) params.getValue("cityMapID");
+            // re-set the map
+            session.setAttribute("cityMapID", cityMap);
+            CityMapTopic map = (CityMapTopic) as.getLiveTopic(cityMap, 1); // live/base
+            SearchCriteria[] criterias = map.getSearchCriterias();
+            Vector categories = new Vector();
+            for (int i = 0; i < criterias.length; i++) {
+                String critId = criterias[i].criteria.getID();
+                Vector cats = cm.getTopics(critId); // ics(crit.getID(), new Hashtable(), map.getID(), directives);
+                categories.addAll(cats);
+            }
+            sortBaseTopics(categories);
+            // Vector allTopics = cm.getViewTopics(map.getID(), 1);
+            session.setAttribute("availableCategories", categories);
+            session.setAttribute("filterField", "");
+            session.setAttribute("filterFieldNames", new Vector());
+            session.setAttribute("cityMapName", map.getName());
+            session.setAttribute("recipients", "");
+			return PAGE_LIST_MAILING;
+		} else if (action.equals(ACTION_CREATE_ROUNDMAILING)) {
+            String cityMap = (String) session.getAttribute("cityMapID");
+            String formerRecipients = (String) session.getAttribute("recipients");
+            Vector filterFieldNames = (Vector) session.getAttribute("filterFieldNames");
+            // String filterText = (String) session.getAttribute("filterText");
+            String filterField = (String) params.getValue("filterField");
+            filterFieldNames.add(as.getLiveTopic(filterField, 1).getName());
+            session.setAttribute("filterFieldNames", filterFieldNames);
+            //
+            CityMapTopic map = (CityMapTopic) as.getLiveTopic(cityMap, 1); // live/base
+            Vector mapTopics = cm.getViewTopics(map.getID(), 1);
+            Vector filteredTopics = new Vector();
+            for (int i = 0; i < mapTopics.size(); i++) {
+                BaseTopic topic = (BaseTopic) mapTopics.get(i);
+                try {
+                   // checking if a topic has the relation to the filterField assuming it's a subtype of criteria
+                   Vector cats = (Vector) as.getRelatedTopics(topic.getID(), ASSOCTYPE_ASSOCIATION, 2);
+                   fcats:
+                   for (int j = 0; j < cats.size(); j++) {
+                        BaseTopic kaTopic = (BaseTopic) cats.get(j);
+                        if (kaTopic.getID().equals(filterField)) {
+                            filteredTopics.add(topic);
+                            break fcats;
+                        }
+                   }
+                } catch (DeepaMehtaException ex) {
+                    // System.out.println("*** ListServlet.Exc is: " + ex.getMessage() + " remvoing topic from results.. " + topic.getName());
+                }
+            }
+            // Vector allTopics = cm.getViewTopics(map.getID(), 1);
+            StringBuffer mailBoxes = new StringBuffer("");
+            if (filteredTopics.size() > 0) {
+                // ToDo check the Email property properly (Engagement Workspace?)
+                Vector mailTo = lookUpMailAdresses(filteredTopics);
+                for (int j=0; j < mailTo.size(); j++) {
+                    String mailBox = (String) mailTo.get(j);
+                    if (formerRecipients.indexOf(mailBox) == -1) {
+                        // checked for double
+                        mailBoxes.append(mailTo.get(j) + ", ");
+                    }
+                }
+                System.out.println(""+ mailTo.size() + ". mailBoxes:" + mailBoxes.toString() + " formerRecipients: " + formerRecipients);
+            }
+            mailBoxes.append(formerRecipients);
+            session.setAttribute("recipients", mailBoxes.toString()); // --. update the linkedcontent
+			return PAGE_LIST_MAILING;
 		} else if (action.equals(ACTION_DELETE_ENTRY)){
 			String topicId = params.getParameter("id");
 			deleteTopic(topicId);
@@ -435,6 +503,11 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 
 	
 
+	private void sortBaseTopics(Vector baseTopics) {
+		// ### System.out.println(">>> sorting for german strings supported");
+		Collections.sort(baseTopics, new MyTopicSort());
+	}
+
 	private void sortBeans(Vector topicBeans, String sortBy) {
 		// ### System.out.println(">>> sorting for german strings supported");
 		Collections.sort(topicBeans, new MyStringComparator( sortBy ));
@@ -515,7 +588,99 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		//
 		return mailAdresses;
 	}
-	
+
+
+	/**
+	 * Collects Email Addresses for all given basetopics by searching for PROPERTY_EMAIL_ADDRESS as
+     * Email Topic (has to be named PROPERTY_EMAIL_ADDRESS)
+     *
+	 * @param topics
+	 * @return a list of Strings which are all email adresses
+	 */
+	private Vector lookUpMailAdresses(Vector topics) {
+		Vector mailAdresses = new Vector();
+		//
+		Enumeration e = topics.elements();
+		while (e.hasMoreElements()) {
+			BaseTopic geoObject = (BaseTopic) e.nextElement();
+			String mailbox = as.getTopicProperty(geoObject.getID(), 1, PROPERTY_EMAIL_ADDRESS);
+			// direct property
+            if (!mailbox.equals("") && checkForMailBox(mailbox)) {
+                mailbox = splitMailBoxes(mailbox);
+                mailbox = encodeMailAmpersandTo(mailbox);
+                mailAdresses.add(mailbox);
+                // System.out.println("> >>  added EmailProperty of " + geoObject.getName() + " to recipients");
+			} else {
+                try {
+                    mailbox = as.getRelatedTopic(geoObject.getID(), ASSOCTYPE_ASSOCIATION, TOPICTYPE_EMAIL_ADDRESS, 2, false).getName();
+                    if (checkForMailBox(mailbox)) {
+                        mailbox = splitMailBoxes(mailbox);
+                        mailbox = encodeMailAmpersandTo(mailbox);
+                        mailAdresses.add(mailbox);
+                    }
+                } catch (DeepaMehtaException ex) {
+                    // --- to ignore .. System.out.println("*** ListServlet.MailBoxExc. : " +  ex.getMessage());
+                } catch (AmbiguousSemanticException aex) {
+                    mailbox = aex.getDefaultTopic().getName();
+                    if (checkForMailBox(mailbox)) {
+                        mailbox = splitMailBoxes(mailbox);
+                        mailAdresses.add(mailbox);
+                        // System.out.println("> >> added related EmailAddress of " + geoObject.getName() + " to recipients");
+                    }
+                }
+            }
+		}
+		//
+		return mailAdresses;
+	}
+
+    /** mailAddress is handled as a correct mailbox if it contains an at-sign and no whitespace */
+    private boolean checkForMailBox (String mailBox) {
+        if ( mailBox.indexOf("@") == -1 || mailBox.indexOf(" ") != -1 ) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    /** some people do have an ampersand in their mailadress, it's allowed and there are other cases ### ToDo*/
+    private String encodeMailAmpersandTo (String mailBox) {
+        return mailBox.replaceAll("&", "%26").toString();
+    }
+
+    /** this method assumes that people divide different mailboxes through using _either_ / or : */
+    private String splitMailBoxes (String mailBox) {
+        int splitIndex = mailBox.indexOf("/");
+        StringBuffer result = new StringBuffer();
+        if (splitIndex != -1) {
+            String[] addresses = mailBox.split("/");
+            for (int i = 0; i < addresses.length; i++) {
+                String box = addresses[i];
+                result.append(box);
+                if (i < addresses.length) {
+                    result.append(", ");
+                }
+            }
+            System.out.println("> >>> modified MailBoxSplit /  " + mailBox.toString() + " to : " + result.toString());
+            return result.toString();
+        }
+        splitIndex = mailBox.indexOf(":");
+        if (splitIndex != -1) {
+            String[] addresses = mailBox.split(":");
+            for (int i = 0; i <= addresses.length; i++) {
+                String box = addresses[i];
+                result.append(box);
+                if (i < addresses.length) {
+                    result.append(", ");
+                }
+            }
+            System.out.println("> >>> modified MailBoxSplit : " + mailBox.toString() + " to : " + result.toString());
+            return result.toString();
+        }
+        // do nothing
+        return mailBox;
+    }
+
 	/** See getMailAddresses
 	 * 
 	 * @param bean
@@ -918,7 +1083,6 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 	}
 
 
-    
 	// *************************
 	// *** Session Utilities ***
 	// *************************
@@ -1071,6 +1235,45 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		/**
 		 * Maybe not useful
 		 * 
+		 * @param o
+		 * @return
+		 */
+		private String prepairForCompare( Object o ) {
+			return ((String)o).toLowerCase().replace( 'ä', 'a' )
+										.replace( 'ö', 'o' )
+										.replace( 'ü', 'u' )
+										.replace( 'ß', 's' );
+		}
+
+	}
+
+
+	private class MyTopicSort implements Comparator {
+
+
+		public int compare( Object o1, Object o2 ) {
+			BaseTopic beanOne = (BaseTopic) o1;
+			BaseTopic beanTwo = (BaseTopic) o2;
+			//
+			String valOne = beanOne.getName();
+			String valTwo = beanTwo.getName();
+			//
+			// int i = prepairForCompare( valOne ).compareTo( prepairForCompare( valTwo ) );
+			int k = ((String)valOne).compareTo( (String)valTwo );
+			/*
+			if ( i != 0) {
+				System.out.println(">>>>i "+ i +" o1: " + o1.toString() +", o2: "+ o2.toString());
+			}
+			if ( i == 0 ) {
+				System.out.println(">>>>k "+ k +" o1: " + o1.toString() +", o2: "+ o2.toString());
+			}
+			*/
+			return k; // ( 0 != i ) ? i : k;
+		}
+
+		/**
+		 * Maybe not useful
+		 *
 		 * @param o
 		 * @return
 		 */

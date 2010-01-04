@@ -170,7 +170,7 @@
 
 	private String commentEmail(boolean includeEmailAddress, String email) {
 		if (includeEmailAddress) {
-			return isSet(email) ? " (<a href=\"mailto:" + email + "\">" + email + "</a>)" : " (Emailadresse unbekannt)";
+			return isSet(email) ? " (<a href=\"mailto:?bcc=" + email + "\">" + email + "</a>)" : " (Emailadresse unbekannt)";
 		} else {
 			return "";
 		}
@@ -213,7 +213,7 @@
 	String mailtoUrl(Vector mailboxes) {
 		Enumeration e = mailboxes.elements();
 		StringBuffer url = new StringBuffer();
-		url.append("mailto:");
+		url.append("mailto:?bcc=");
 		//
 		while(e.hasMoreElements()) {
 			String mail = (String) e.nextElement();
@@ -242,9 +242,31 @@
 		    TopicBeanField field = (TopicBeanField) bean.fields.get(i);
 		    html.append("<option value=\""+ field.name +"\"");
 		    if (field.name.equals(checked)) {
-			html.append(" selected=\"selected\"");
+                html.append(" selected=\"selected\"");
 		    }
 		    html.append(">" + field.label + "</option> \n ");
+		}
+		return html.toString();
+	}
+
+	/** basetopics given for names and id*/
+
+	String fieldOptionalIds(Vector names, String checked) {
+		StringBuffer html = new StringBuffer();
+		/** for (int j = 0; j < hiddenProps.length; j++) {
+		    bean.removeField(hiddenProps[j].toString());
+		}
+		for (int k = 0; k < hiddenPropsContaining.length; k++) {
+		    bean.removeFieldsContaining(hiddenPropsContaining[k].toString());
+		}  */
+		for (int i = 0; i < names.size(); i++) {
+		    //TopicBeanField field = (TopicBeanField) names.get(i);
+            BaseTopic name = (BaseTopic) names.get(i);
+		    html.append("<option value=\""+ name.getID() +"\"");
+		    if (name.getName().equals(checked)) {
+                html.append(" selected=\"selected\"");
+		    }
+		    html.append(">" + name.getName() + "</option> \n ");
 		}
 		return html.toString();
 	}

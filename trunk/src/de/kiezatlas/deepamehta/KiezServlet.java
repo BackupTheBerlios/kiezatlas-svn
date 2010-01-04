@@ -29,8 +29,10 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
 
     protected String performAction(String topicId, String params, Session session, CorporateDirectives directives)
     {
-        session.setAttribute("html", "<h3>Willkommen zu ihrem Kiezatlas Dienst</h3>" +
-                "<br>Hier geht's zur <a href=\"http://www.deepamehta.de/wiki/en/Application:_Web_Service\">Software Dokumentation</a>");
+        session.setAttribute("html", "<h3>Willkommen zu dem Kiezatlas Dienst unter "+as.getCorporateWebBaseURL()+"</h3>" +
+                "<br>F&uuml;r die Nutzung des Dienstes steht Entwicklern " +
+                "<a href=\"http://www.deepamehta.de/wiki/en/Application:_Web_Service\">hier</a> die Software Dokumentation zur Verfügung. " +
+                "Ein Beispiel zur Nutzung eines Kiezatlas Dienstes ist <a href=\"http://www.kiezatlas.de/maps/interface.php?topicId=t-ka-schoeneberg&workspaceId=t-ka-workspace\">hier</a> bereits abrufbar.");
         return PAGE_SERVE;
     }
 
@@ -48,7 +50,14 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
         // String parameters[] = params.split(",");
         StringBuffer messages = null;
         StringBuffer result = new StringBuffer("{\"result\": ");
-        String geoObjectString = createGeoObjectBean(cm.getTopic(topicId, 1), messages);
+        BaseTopic t = cm.getTopic(topicId, 1);
+        String geoObjectString;
+        if (t.getType().equals("tt-user")) {
+            System.out.println("*** KiezServlet.SecurityAccessDenied: not allowed to access user information");
+            geoObjectString= "\"\"";
+        } else {
+            geoObjectString = createGeoObjectBean(t, messages);
+        }
         result.append(geoObjectString);
         result.append(", \"error\": " + messages + "}");
         // System.out.println("result: "+ result.toString());
