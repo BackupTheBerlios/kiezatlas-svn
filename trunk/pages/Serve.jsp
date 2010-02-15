@@ -5,6 +5,6 @@
    "http://www.w3.org/TR/html4/loose.dtd">
 
 <%
-    String link = (String) session.getAttribute("html");
+    String link = (String) session.getAttribute("info");
     out.println(link);
 %>

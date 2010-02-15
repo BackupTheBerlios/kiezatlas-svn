@@ -14,10 +14,14 @@
             "Durch das positionieren des Mauszeigers &uuml;ber dem Symbol sollte in jedem Browser ein Zeitstempel sichtbar werden.</dd>");
     out.println("<dt><img src=\"../images/reload.png\"></dt><dd>Dieses Icon erm&ouml;glicht das <i>erneuern der Stadtplandaten die in der Downloaddatei zur Verf&uuml;gung stehen</i>. " +
             "Diese Funktion wird momentan je Stadtplan einmal alle 6 Stunden erm&ouml;glicht. Nach dem ansto&szlig;en dieser Aktion kann es bis zu zehn Minuten dauern bis eine neue Downloaddatei die bis dahin aktuellste Version tats&auml;lich ersetzt.</dd>");
+    out.println("<dt><img src=\"../images/email.gif\">Dieses Icon bietet den Zugang zu der Funktion zum Erstellen einer Rundmail-Empfängerliste.</dt>");
     //
     out.println("</dl>");
     //
+    out.println("<h3>Erweiterte Anleitung zum Umgang mit Listen in Microsoft Exel</h3>");
+    out.println("<a href=\"http://www.kiezatlas.de/client/documents/AnleitungExceltabellen.pdf\">Download der Anleitung (0.5 MB .pdf)</a> <br/>Der Autor steht Anregungen und Erg&auml;nzungen prinzipiell eher freundlich gegen&uuml;ber (<a href=\"mailto:Ralph.Baumann@libg.verwalt-berlin.de\">Kontakt</a>)");
+    //
     if (loggedIn != null) { // session authenticated
-        out.println("<span class=\"small\"><a href=\"?action="+KiezAtlas.ACTION_GO_HOME+"\" class=\"small\">zur&uuml;ck zur Listenansicht</a></span>");
+        out.println("<p/><span class=\"small\"><a href=\"?action="+KiezAtlas.ACTION_GO_HOME+"\" class=\"small\">zur&uuml;ck zur Listenansicht</a></span>");
     }
 %>

@@ -7,6 +7,7 @@
 	Hashtable mapCounts = (Hashtable) session.getAttribute("mapCounts");
 	Hashtable mapTimes = (Hashtable) session.getAttribute("mapTimes");
 	String membership = (String) session.getAttribute("membership");
+    BaseTopic user = (BaseTopic) session.getAttribute("user");
     out.println("<div class=\"small\" style=\"position: absolute; right: 75px;\"><a href=\"?action="+KiezAtlas.ACTION_SHOW_LIST_LEGEND+"\">zur Legende</a></div>");
     //
 	out.println("<dl style=\"width: 700px;\">");
@@ -49,6 +50,11 @@
                 out.println("<a href=\"?action=" + KiezAtlas.ACTION_FILTER_ROUNDMAILING +
                     "&cityMapID=" + cityMap.getID() + "\" class=\"small\"><img src=\"http://www.kiezatlas.de/client/icons/mail.gif\" " +
                     "border=\"0\" height=\"15px\" width=\"15px\" title=\"zum verfassen einer Rundmail\" alt=\"zum verfassen einer Rundmail\"></a>");
+                if (user.getName().equals("root")) {
+                    out.println("<a href=\"http://www.kiezatlas.de/maps/map.php?&topicId=" + cityMap.getID() + "&workspaceId="+workspace.getID()+"\" " +
+                            "class=\"small\"><img src=\"http://www.kiezatlas.de/client/icons/layer-switcher-maximize.png\" border=\"0\" height=\"15px\" " +
+                            "width=\"15px\" alt=\"Link zum alternativen Interface\"></a>");
+                }
             out.println("</dd>");
 		}
 	}

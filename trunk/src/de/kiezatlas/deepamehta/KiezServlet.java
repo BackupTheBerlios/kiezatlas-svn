@@ -29,7 +29,7 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
 
     protected String performAction(String topicId, String params, Session session, CorporateDirectives directives)
     {
-        session.setAttribute("html", "<h3>Willkommen zu dem Kiezatlas Dienst unter "+as.getCorporateWebBaseURL()+"</h3>" +
+        session.setAttribute("info", "<h3>Willkommen zu dem Kiezatlas Dienst unter "+as.getCorporateWebBaseURL()+"</h3>" +
                 "<br>F&uuml;r die Nutzung des Dienstes steht Entwicklern " +
                 "<a href=\"http://www.deepamehta.de/wiki/en/Application:_Web_Service\">hier</a> die Software Dokumentation zur Verfügung. " +
                 "Ein Beispiel zur Nutzung eines Kiezatlas Dienstes ist <a href=\"http://www.kiezatlas.de/maps/interface.php?topicId=t-ka-schoeneberg&workspaceId=t-ka-workspace\">hier</a> bereits abrufbar.");
@@ -54,6 +54,7 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
         String geoObjectString;
         if (t.getType().equals("tt-user")) {
             System.out.println("*** KiezServlet.SecurityAccessDenied: not allowed to access user information");
+            messages = new StringBuffer("Access Denied");
             geoObjectString= "\"\"";
         } else {
             geoObjectString = createGeoObjectBean(t, messages);
@@ -98,17 +99,38 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
         StringBuffer messages = null;
         String parameters[] = params.split(",");
         String query = parameters[0];
-        query = query.substring(2, query.length()-1);
-        String workspaceId = parameters[1];
+        String topicmapId = parameters[1];
+        String workspaceId = parameters[2];
         // String topicmapId = parameters[2];
+        query = query.substring(2, query.length()-1);
+        topicmapId = topicmapId.substring(2, topicmapId.length()-1);
         workspaceId = workspaceId.substring(2, workspaceId.length()-2);
         // LOG System.out.println("INFO: query: " + query + ", " + "workspaceId: " + workspaceId);
         Vector criterias = getKiezCriteriaTypes(workspaceId);
         BaseTopic geoType = getWorkspaceGeoType(workspaceId);
         Hashtable props = new Hashtable();
-        props.put(PROPERTY_NAME, query);
-        Vector results = cm.getTopics(geoType.getID(), props); // getTopic(query, props, topicmapId, directives);
-        System.out.println(">>>> found " + results.size() + " geoObjects with name " + query);
+        props.put(PROPERTY_NAME, query);       
+        // String typeID, Hashtable propertyFilter, String topicmapID
+        Vector results = cm.getTopics(geoType.getID(), props, topicmapId, false); // getTopic(query, props, topicmapId, directives);
+        // getTopics: String typeID, String nameFilter, Hashtable propertyFilter, String relatedTopicID
+        // getRelated: String topicID, String assocType, String relTopicType, int relTopicPos
+        Vector topicsToQuery = cm.getViewTopics(topicmapId, 1);
+        Vector streetResults = new Vector();
+        for (int i = 0; i < topicsToQuery.size(); i++) {
+            BaseTopic topic = (BaseTopic) topicsToQuery.get(i);
+            Vector addresses = cm.getRelatedTopics(topic.getID(), ASSOCTYPE_ASSOCIATION, TOPICTYPE_ADDRESS, 2);
+            for (int j = 0; j < addresses.size(); j++) {
+                BaseTopic addressTopic = (BaseTopic) addresses.get(j);
+                String streetName = as.getTopicProperty(addressTopic, PROPERTY_STREET);
+                if (streetName.indexOf(query) != -1) {
+                    streetResults.add(topic);
+                    // System.out.println(">>>> streetFound + " + streetName+ " for " + topic.getName());
+                }
+            }
+        }
+        results.addAll(streetResults);
+        System.out.println(">>>> found " + results.size() + " named and "+streetResults.size()+ " streetnames like " + query);
+        //
         result.append("[");
         for (int i=0; i < results.size(); i++) {
             BaseTopic topic = (BaseTopic) results.get(i);
@@ -207,6 +229,7 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
         StringBuffer bean = new StringBuffer();
         //
         TopicBean topicBean = as.createTopicBean(topic.getID(), 1);
+        removeCredentialInformation(topicBean);
         bean.append("{\"id\": \"" + topicBean.id + "\",");
         bean.append("\"name\": \"" + topicBean.name + "\",");
         bean.append("\"icon\": \"" + topicBean.icon + "\",");
@@ -220,10 +243,11 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
             bean.append("\"label\": \"" + field.label + "\", ");
             if(field.type == 0) {
                 String value = field.value;
-                if(hasQuotationMarks(value))
+                if(hasQuotationMarks(value)) {
                     // preparing java string for json
                     value = convertHTMLForJSON(value);
                     value = removeControlChars(value);
+                }
                 bean.append("\"value\":  \"" + value + "\"");
             } else {
                 Vector relatedFields = field.values;
@@ -235,7 +259,7 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
                         BaseTopic relatedTopic = (BaseTopic) relatedFields.get(r);
                         bean.append("{\"name\": \"" + relatedTopic.getName() + "\",");
                         // ### geoObject has it's own icon ?
-                        bean.append("\"icon\": \"" + as.getTopicProperty(relatedTopic.getID(), 1, PROPERTY_ICON) + "\"}");
+                        bean.append("\"icon\": \"" + as.getLiveTopic(relatedTopic).getIconfile() + "\"}");
                         if (r == relatedFields.size()-1)  {
                             bean.append("]");
                         } else {
@@ -252,6 +276,15 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
         bean.append("]");
         bean.append("}");
         return bean.toString();
+    }
+
+    private TopicBean removeCredentialInformation(TopicBean topicBean) {
+        topicBean.removeFieldsContaining(PROPERTY_PASSWORD);
+        topicBean.removeFieldsContaining(PROPERTY_OWNER_ID);
+        topicBean.removeFieldsContaining(PROPERTY_WEB_ALIAS);
+        topicBean.removeFieldsContaining(PROPERTY_LAST_MODIFIED);
+        //
+        return topicBean;
     }
 
     /**
