@@ -196,6 +196,7 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	public static final int SERVLET_EDIT = 2;
 	public static final int SERVLET_LIST = 3;
 	public static final int SERVLET_UPLOAD = 4;
+	public static final int SERVLET_IMPORT = 5;
 
 
 
@@ -252,7 +253,11 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	public static final String ACTION_EXPORT_CITYMAP ="exportCityMap";
 	public static final String ACTION_DOWNLOAD_CITYMAP ="downloadCityMap";
 	public static final String ACTION_SHOW_LIST_LEGEND ="showListLegend";
-	
+	// import servlet
+    public static final String ACTION_SHOW_IMPORTS = "showImports";
+    public static final String ACTION_SHOW_REPORT = "showImportReport";
+    public static final String ACTION_DO_IMPORT = "doImport";
+    public static final String ACTION_RESET_CRITERIAS = "resetCritCats";
 	
 
 
@@ -309,7 +314,11 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	static final String PAGE_DOWNLOAD_PAGE = "Download"; // Link Page
 	static final String PAGE_LIST_INFO = "ListHelp";
 	static final String PAGE_LIST_MAILING = "ListMailing";
-	// error
+	// import
+    static final String PAGE_IMPORTS_LOGIN = "ImportsLogin";
+    static final String PAGE_IMPORTS_HOME = "ImportsHome";
+    static final String PAGE_REPORT_HOME = "ReportInfo";
+    // error
     static final String PAGE_ERROR = "error";
     // service
     static final String PAGE_SERVE = "Serve";

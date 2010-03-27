@@ -24,6 +24,7 @@
 	topicBean.removeField("Person / Phone Number");
 	topicBean.removeField("Person / Webpage");
 	topicBean.removeField("Forum / Aktivierung");
+    topicBean.removeField("Timestamp");
 	// --- image ---
 	String imageFile = topicBean.getValue("Image / File");
 	if (!imageFile.equals("")) {

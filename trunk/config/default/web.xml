@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN" "http://java.sun.com/dtd/web-app_2_3.dtd">
+
 <web-app>
+
+    <Listener className="de.kiezatlas.deepamehta.LifeCycleWatcher"></Listener>
 
 	<!-- General description of the web application -->
 
@@ -13,12 +16,12 @@
 		 can be customized by the system administrator who is
 		 installing your application.
 	-->
-
+    
 	<context-param>
 		<param-name>service</param-name>
 		<!-- <param-value>kiezbox</param-value> --> <!-- mre's local kiezatlas instance -->
 		<!-- <param-value>mysql5</param-value> --> <!-- jri's default instance -->
-		<param-value>kiezatlas</param-value> <!-- www.kiezatlas.de production instance-->
+		<param-value>kieztest</param-value> <!-- www.kiezatlas.de production instance-->
 		<description>Selects a DeepaMehta service.
 			If this parameter is not set the "default" service will be used.
 			To configure DeepaMehta services see the file install/client/dms.rc</description>
@@ -56,9 +59,21 @@
 	</servlet>
 
 	<servlet>
-		<servlet-name>Import Servlet</servlet-name>
+		<servlet-name>Neukoelln Import Servlet</servlet-name>
 		<description>For Stadtinfo Neukölln data only</description>
 		<servlet-class>de.swers.kiezatlas.tools.UploadDataServlet</servlet-class>
+	</servlet>
+
+	<servlet>
+		<servlet-name>Import Servlet</servlet-name>
+		<description>for berlin.de/buergeraktiv/kiezatlas</description>
+		<servlet-class>de.kiezatlas.deepamehta.ImportServlet</servlet-class>
+	</servlet>
+
+	<servlet>
+		<servlet-name>Service Servlet</servlet-name>
+		<description>JSON RPC Service</description>
+		<servlet-class>de.kiezatlas.deepamehta.KiezServlet</servlet-class>
 	</servlet>
 
 	<!-- Define mappings that are used by the servlet container to
@@ -84,8 +99,18 @@
 	</servlet-mapping>
 
 	<servlet-mapping>
-		<servlet-name>Import Servlet</servlet-name>
+		<servlet-name>Neukoelln Import Servlet</servlet-name>
 		<url-pattern>/upload/*</url-pattern>
+	</servlet-mapping>
+
+    <servlet-mapping>
+		<servlet-name>Import Servlet</servlet-name>
+		<url-pattern>/imports/*</url-pattern>
+	</servlet-mapping>
+
+    <servlet-mapping>
+		<servlet-name>Service Servlet</servlet-name>
+		<url-pattern>/rpc/*</url-pattern>
 	</servlet-mapping>
 
 	<!-- Define the default session timeout for your application,

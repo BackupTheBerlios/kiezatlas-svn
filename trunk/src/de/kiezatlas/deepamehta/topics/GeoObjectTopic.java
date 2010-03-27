@@ -597,12 +597,6 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
         return new String[4];
     }
 
-    public String toJSONString() {
-        StringBuffer object = new StringBuffer();
-        object.append("{x: 1, y: 2, name: MyName, [{critID: <myCritId>}, {critID: <myCritId2>}]}");
-        return object.toString();
-    }
-
     public void setGPSCoordinates(CorporateDirectives directives) {
         boolean emptyLat = (!as.getTopicProperty(this, PROPERTY_GPS_LAT).equals("")) ? true : false;
         boolean emptyLong = (!as.getTopicProperty(this, PROPERTY_GPS_LONG).equals("")) ? true : false;
@@ -613,12 +607,12 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
         } else {
             // ### alternatively fetch city property
             String[] point = loadGPSCoordinates(directives);
-            if(point[2] != null && point[3] != null) {
+            if(point.length > 3 && point[2] != null && point[3] != null) {
                 if (!point[2].equals("") && !point[3].equals("")) {
                     as.setTopicProperty(this, PROPERTY_GPS_LAT, point[2]);
                     as.setTopicProperty(this, PROPERTY_GPS_LONG, point[3]);
                     directives.add(DIRECTIVE_SHOW_MESSAGE, "Die Adresse hat "+point[2]+","+point[3]+" als GPS Koordinaten zugewiesen bekommen.", new Integer(NOTIFICATION_DEFAULT));
-                    System.out.println("GeoObjectTopic.setGPSCoordinates(): successful to " + point[2] +"," + point[3] +" for address:" + getAddressString());
+                    // System.out.println("GeoObjectTopic.setGPSCoordinates(): successful to " + point[2] +"," + point[3] +" for address:" + getAddressString());
                 } else {
                     directives.add(DIRECTIVE_SHOW_MESSAGE, "Address could not be resolved to WGS 84 coordinates. Leaving the topic like it is. ", new Integer(NOTIFICATION_ERROR));
                 }

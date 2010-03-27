@@ -61,9 +61,15 @@
 	</servlet>
 
 	<servlet>
-		<servlet-name>Import Servlet</servlet-name>
+		<servlet-name>Neukoelln Import Servlet</servlet-name>
 		<description>For Stadtinfo Neukölln data only</description>
 		<servlet-class>de.swers.kiezatlas.tools.UploadDataServlet</servlet-class>
+	</servlet>
+
+	<servlet>
+		<servlet-name>Import Servlet</servlet-name>
+		<description>for berlin.de/buergeraktiv/kiezatlas</description>
+		<servlet-class>de.kiezatlas.deepamehta.ImportServlet</servlet-class>
 	</servlet>
 
 	<!-- Define mappings that are used by the servlet container to
@@ -87,8 +93,13 @@
 	</servlet-mapping>
 
 	<servlet-mapping>
-		<servlet-name>Import Servlet</servlet-name>
+		<servlet-name>Neukoelln Import Servlet</servlet-name>
 		<url-pattern>/upload/*</url-pattern>
+	</servlet-mapping>
+
+        <servlet-mapping>
+		<servlet-name>Import Servlet</servlet-name>
+		<url-pattern>/imports/*</url-pattern>
 	</servlet-mapping>
 
 	<!-- Define the default session timeout for your application,

@@ -24,6 +24,7 @@
 <%@ page import="java.util.Hashtable" %>
 <%@ page import="java.util.Enumeration" %>
 <%@ page import="java.awt.Point" %>
+<%@ page import="java.lang.Thread.State" %>
 
 <%!
 	// --- header area ---
@@ -38,6 +39,9 @@
 			break;
 		case KiezAtlas.SERVLET_LIST:
 			title = title + " - Listenzugang";
+			break;
+        case KiezAtlas.SERVLET_IMPORT:
+			title = title + " - Importzugang";
 			break;
 		}
 		out.println("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">\r" +
