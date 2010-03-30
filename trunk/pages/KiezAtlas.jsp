@@ -1,7 +1,6 @@
-<%@ page import="de.deepamehta.DeepaMehtaConstants" %>
-<%@ page import="de.deepamehta.service.TopicBean" %>
 <%@ page import="de.kiezatlas.deepamehta.KiezAtlas" %>
 <%@ page import="de.kiezatlas.deepamehta.GeoObject" %>
+<%@ page import="de.kiezatlas.deepamehta.topics.GeoObjectTopic" %>
 <%@ page import="de.kiezatlas.deepamehta.SearchCriteria" %>
 <%@ page import="de.kiezatlas.deepamehta.ShapeType" %>
 <%@ page import="de.kiezatlas.deepamehta.Shape" %>
@@ -9,6 +8,8 @@
 <%@ page import="de.kiezatlas.deepamehta.Cluster" %>
 
 <%@ page import="de.deepamehta.BaseTopic" %>
+<%@ page import="de.deepamehta.DeepaMehtaConstants" %>
+<%@ page import="de.deepamehta.service.TopicBean" %>
 <%@ page import="de.deepamehta.service.TopicBean" %>
 <%@ page import="de.deepamehta.service.TopicBeanField" %>
 <%@ page import="de.deepamehta.BaseAssociation" %>

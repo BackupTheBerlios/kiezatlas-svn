@@ -29,17 +29,17 @@ public class ImportServlet extends DeepaMehtaServlet implements KiezAtlas {
     private ImportWorker worker = null;
 
     // private final long UPDATE_INTERVAL = 86000000;
-    public static final long UPDATE_INTERVAL = 900000;
+    public static final long UPDATE_INTERVAL = 600000;
     // 
-    public static final String ENGAGEMENT_WORKSPACE = "t-328325";
-    public static final String CITYMAP_TO_PUBLISH = "t-328349";
+    public static final String ENGAGEMENT_WORKSPACE = "t-331306";
+    public static final String CITYMAP_TO_PUBLISH = "t-331302";
     //
-    public static final String TOPICTYPE_ENG_PROJECT = "t-328337";
-    public static final String TOPICTYPE_ENG_ZIELGRUPPE = "t-328345";
-    public static final String TOPICTYPE_ENG_TAETIGKEIT = "t-328343";
-    public static final String TOPICTYPE_ENG_EINSATZBEREICH = "t-328339";
-    public static final String TOPICTYPE_ENG_MERKMAL = "t-328341";
-    public static final String TOPICTYPE_ENG_BEZIRK = "t-328347";
+    public static final String TOPICTYPE_ENG_PROJECT = "t-331314";
+    public static final String TOPICTYPE_ENG_ZIELGRUPPE = "t-331319";
+    public static final String TOPICTYPE_ENG_TAETIGKEIT = "t-331323";
+    public static final String TOPICTYPE_ENG_EINSATZBEREICH = "t-331321";
+    public static final String TOPICTYPE_ENG_MERKMAL = "t-331325";
+    public static final String TOPICTYPE_ENG_BEZIRK = "t-331327";
 
 	protected String performAction(String action, RequestParameter params, Session session, CorporateDirectives directives)
 																									throws ServletException {
@@ -50,6 +50,9 @@ public class ImportServlet extends DeepaMehtaServlet implements KiezAtlas {
             String password = params.getValue("password");
             if (as.loginCheck(username, password)) {
                 BaseTopic user = cm.getTopic(TOPICTYPE_USER, username, 1);
+                if (!user.getName().equals("root")) {
+                    return PAGE_IMPORTS_LOGIN;
+                }
                 setUser(user, session);
                 session.setAttribute("timingInterval", ""+UPDATE_INTERVAL/1000/60);
                 if (worker != null) {
@@ -58,6 +61,9 @@ public class ImportServlet extends DeepaMehtaServlet implements KiezAtlas {
                 } else {
                     session.setAttribute("workerThread", "inactive");
                 }
+                Vector unusables = getUnlocatableGeoObjects();
+                //
+                session.setAttribute("unusableGeoObjects", unusables);
                 return PAGE_IMPORTS_HOME;
             } else {
                 return PAGE_IMPORTS_LOGIN;
@@ -83,10 +89,9 @@ public class ImportServlet extends DeepaMehtaServlet implements KiezAtlas {
             //
             for (int i = 0; i < bezirke.size(); i++) {
                 BaseTopic category = (BaseTopic) bezirke.get(i);
-                directives.add(as.deleteTopic(category.getID(), 1));
+                CorporateDirectives newDirectives = as.deleteTopic(category.getID(), 1);
+                newDirectives.updateCorporateMemory(as, session, null, null);
             }
-            directives.updateCorporateMemory(as, session, null, null);
-            // ### ToDo: Reset CritCats
             return PAGE_IMPORTS_HOME;
         } else if (action.equals(ACTION_SHOW_REPORT)) {
             //
@@ -96,11 +101,6 @@ public class ImportServlet extends DeepaMehtaServlet implements KiezAtlas {
             if (session == null || workspace == null) {
                 return PAGE_IMPORTS_LOGIN;
             }
-            // String workspaceId = (String) params.getParameter("workspaceId");
-            //
-            // System.out.println(">> import started for workspace \"" + workspace.getName() + "\"");
-            // String ehrenamtXml = sendGetRequest("http://ehrenamt.index.de/xml/index.cfm", "");
-            // parseData(ehrenamtXml);
             if (worker == null) {
                 worker = new ImportWorker(as, cm, ENGAGEMENT_WORKSPACE, UPDATE_INTERVAL, directives);
                 worker.setDaemon(true);
@@ -128,7 +128,7 @@ public class ImportServlet extends DeepaMehtaServlet implements KiezAtlas {
             }
             Vector geoObjects = getGeoObjectInformation(ENGAGEMENT_WORKSPACE);
 			session.setAttribute("workspaces", workspace);
-            session.setAttribute("criterias", critWithNumbers);
+            session.setAttribute("importCriterias", critWithNumbers);
             session.setAttribute("geoObjects", geoObjects);
 		} else if (page.equals(PAGE_REPORT_HOME)) {
             session.setAttribute("report", null);
@@ -153,6 +153,32 @@ public class ImportServlet extends DeepaMehtaServlet implements KiezAtlas {
 	// *** Custom Methods ***
 	// **********************
 
+
+    private Vector getUnlocatableGeoObjects() {
+        Vector allTopics = cm.getTopics(TOPICTYPE_ENG_PROJECT);
+        Vector unusableTopics = new Vector();
+        for (int i = 0; i < allTopics.size(); i++) {
+            BaseTopic geoTopic = (BaseTopic) allTopics.get(i);
+            GeoObjectTopic geoObject = (GeoObjectTopic) as.getLiveTopic(geoTopic);
+            // validate stored topic
+            String lat = as.getTopicProperty(geoObject, PROPERTY_GPS_LAT);
+            String lon = as.getTopicProperty(geoObject, PROPERTY_GPS_LONG);
+            if (lat.equals("") || lon.equals("")) {
+                unusableTopics.add(geoObject);
+            }
+            BaseTopic addressTopic = geoObject.getAddress();
+            if (addressTopic == null) {
+                unusableTopics.add(geoObject);
+            } else {
+                String street = as.getTopicProperty(addressTopic, PROPERTY_STREET);
+                if (street.equals("über Gute-Tat.de")) {
+                    // unlogically google`s geocoder provides wgs84 coordinates for this !webaddress
+                    unusableTopics.add(geoObject);
+                }
+            }
+        }
+        return unusableTopics;
+    }
     
     private Vector getGeoObjectInformation(String workspaceId) {
         BaseTopic geoType = getWorkspaceGeoType(workspaceId);

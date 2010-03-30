@@ -2,6 +2,7 @@ package de.kiezatlas.deepamehta;
 
 import de.deepamehta.BaseTopic;
 import de.deepamehta.DeepaMehtaConstants;
+import de.deepamehta.DeepaMehtaException;
 import de.deepamehta.assocs.LiveAssociation;
 import de.deepamehta.service.ApplicationService;
 import de.deepamehta.service.CorporateDirectives;
@@ -12,6 +13,7 @@ import de.deepamehta.topics.TypeTopic;
 import de.deepamehta.util.DeepaMehtaUtils;
 import de.kiezatlas.deepamehta.topics.GeoObjectTopic;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.URL;
@@ -72,7 +74,7 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
         if (!threadDead) {
             threadDone = true;
             System.out.println("");
-            System.out.println("[ImportWorker] Thread \""+getName()+"\" is going to sleep for " + updateInterval/1000/60 + "min. at "+DeepaMehtaUtils.getTime()+" -- ");
+            System.out.println("[ImportWorker] done \""+getName()+"\" is going to sleep for " + updateInterval/1000/60 + "min. at "+DeepaMehtaUtils.getTime()+" -- ");
             workerStarted = DeepaMehtaUtils.getTime(true);
             System.out.println("");
             try {
@@ -82,7 +84,7 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
                 threadDone = false;
                 run();
             } catch (InterruptedException intex) {
-                System.out.println("*** ImportWorker was interrupted while sleeping: " + intex.getMessage());
+                System.out.println("*** ImportWorker was interrupted cause of " + intex.getMessage());
             }
         } else {
             System.out.println("[ImportWorker] Thread named \""+getName()+"\" is dead ----");
@@ -93,14 +95,17 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
     public void run() {
         if (!threadDead) {
             while (!threadDone) {
-                System.out.println("[ImportWorker] Thread \""+this.getName()+"\" was kicked of for workspace \"" + workspaceId + "\" at " + DeepaMehtaUtils.getTime().toString());
+                System.out.println("[ImportWorker] Thread \""+this.getName()+"\" was kicked off for workspace \"" + workspaceId + "\" at " + DeepaMehtaUtils.getTime().toString());
                 workerStarted = DeepaMehtaUtils.getTime(true);
-                // delete former import
-                clearImport(); // clears workspace if topics are available
                 // work here
                 String ehrenamtXml = sendGetRequest("http://ehrenamt.index.de/xml/index.cfm", "");
-                Vector topicIds = parseAndStoreData(ehrenamtXml);
-                publishData(topicIds);
+                if (ehrenamtXml != null) {
+                    // delete former import
+                    clearImport(); // clears workspace if new topics are available
+                    // store and publish new topics
+                    Vector topicIds = parseAndStoreData(ehrenamtXml);
+                    publishData(topicIds);
+                }
                 done();
             }
         } else {
@@ -112,32 +117,30 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
     }
 
     private void publishData(Vector topicIds) {
-        System.out.println("[ImportWorker] prePublishing \""+topicIds.size()+"\" topics data info: " + cm.getTopic(ImportServlet.CITYMAP_TO_PUBLISH, 1).getName() + " " +
-                "/ " + cm.getTopic(ImportServlet.CITYMAP_TO_PUBLISH, 1).getID() + " ofType: " +cm.getTopic(ImportServlet.CITYMAP_TO_PUBLISH, 1).getType());
+        //System.out.println("[ImportWorker] prePublishing \""+topicIds.size()+"\" topics data info: " + cm.getTopic(ImportServlet.CITYMAP_TO_PUBLISH, 1).getName() + " " +
+          //      "/ " + cm.getTopic(ImportServlet.CITYMAP_TO_PUBLISH, 1).getID() + " ofType: " +cm.getTopic(ImportServlet.CITYMAP_TO_PUBLISH, 1).getType());
         // BaseTopic cityMap = as.getLiveTopic(ImportServlet.CITYMAP_TO_PUBLISH, 1);
-        // CorporateDirectives directives = new CorporateDirectives();
-        // cityMap.get
-        // as.addTopic(topic); // to which map ?
-        //
         // System.out.println(">>> before corrupting everything, we publish into topic: " + cityMap.getName() + " of type " + cityMap.getType());
         Vector unusable = new Vector(); // collection of GeoObjects with GPS Data
         for (int i = 0; i < topicIds.size(); i++) {
-            BaseTopic baseTopic = as.getLiveTopic(((String)topicIds.get(i)), 1);
+            GeoObjectTopic baseTopic = (GeoObjectTopic) as.getLiveTopic(((String)topicIds.get(i)), 1);
             // System.out.println("[GPSINFO] is LAT: " + as.getTopicProperty(baseTopic, PROPERTY_GPS_LAT) + " LON: " + as.getTopicProperty(baseTopic, PROPERTY_GPS_LONG));
-            if (as.getTopicProperty(baseTopic, PROPERTY_GPS_LAT).equals("")) {
-                // System.out.println("*** ImportError: skipping the placement of in Map.. " + baseTopic.getID());
-                // return geoObject.getID();
-                System.out.println("[ImportWorker] WARNING ***  \""+baseTopic.getName()+"\" is without GPS Data... dropping placement in CityMap");
+            BaseTopic addressTopic = baseTopic.getAddress();
+            if (as.getTopicProperty(baseTopic.getID(), 1, PROPERTY_GPS_LAT).equals("")) {
+                // System.out.println("[ImportWorker] WARNING ***  \""+baseTopic.getName()+"\" is without GPS Data... dropping placement in CityMap");
                 unusable.add(baseTopic); //
+            } else if (as.getTopicProperty(addressTopic, PROPERTY_STREET).equals("über Gute-Tat.de")) {
+                unusable.add(baseTopic);
             } else {
                 // System.out.println(">>>> creating ViewTopic for " + baseTopic.getName() + " (" + baseTopic.getID() + ")" );
-                //Topic(getWorkspaceGeoType(workspaceId), null, cityMap.getID(), null);
                 as.createViewTopic(ImportServlet.CITYMAP_TO_PUBLISH, 1, null, baseTopic.getID(), 1, 0, 0, false);
             }
             // System.out.println(">>> ready to publish geoObject " +baseTopic.getName()+" ("+baseTopic.getID()+")");
         }
-        System.out.println("[ImportWorker] published "+topicIds.size() +" into cityMap \"" +as.getTopicProperty(ImportServlet.CITYMAP_TO_PUBLISH, 1, PROPERTY_WEB_ALIAS)+ "\"");
-        System.out.println("[ImportWorker] didn`t published " + unusable.size() + " unlocatable \""+getWorkspaceGeoType(workspaceId).getName()+"\"");
+        int validEntries = topicIds.size() - unusable.size();
+        //
+        System.out.println("[ImportWorker] stored " + validEntries + " in public cityMap \"" +as.getTopicProperty(ImportServlet.CITYMAP_TO_PUBLISH, 1, PROPERTY_WEB_ALIAS)+ "\"");
+        System.out.println("[ImportWorker] didn`t published " + unusable.size() + " unlocatable \""+getWorkspaceGeoType(workspaceId).getName()+"e\" ");
         /**for (int i = 0; i < unusable.size(); i++) {
          * ### ToDo: report unusuable bojects in import interfaces
             BaseTopic geoObject = (BaseTopic) unusable.get(i);
@@ -168,17 +171,15 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
         return workerStarted;
     }
 
-    /** completely remove all topics created by the last import */
+    /** completely remove all topics created by the last import 
+     *  e.g. delete from topicmap, delete related address topic, delete email topic, 
+     *  delete person topic, delete webpage topic, delete webpage topic if not used by any other topic ...
+     */
     private void clearImport() {
         /** import data is, date of last import, complete or not complete, error objects */
         Vector allGeoObjects = cm.getTopics(getWorkspaceGeoType(workspaceId).getID());
-        System.out.println("[INFO] ImportWorker starts to clean up " + allGeoObjects.size() + // " " +
-                //" cityMap: " + ImportServlet.CITYMAP_TO_PUBLISH + "" +
-                " AT " + DeepaMehtaUtils.getTime(true));
         Vector allRelatedTopics = new Vector();
-        System.out.println("");
-        System.out.println(" --- starting to delete all ("+getWorkspaceGeoType(workspaceId).getName()+") NOW --- (" +allGeoObjects.size()+ ")");
-        System.out.println("");
+        System.out.println("[ImportWorker] cleaning up ("+getWorkspaceGeoType(workspaceId).getName()+"). In number--- (" +allGeoObjects.size()+ ")");
         for (int i = 0; i < allGeoObjects.size(); i++) {
             BaseTopic baseTopic = (BaseTopic) allGeoObjects.get(i);
             Vector relatedTopics = as.getRelatedTopics(baseTopic.getID(), ASSOCTYPE_ASSOCIATION, 2);
@@ -189,41 +190,41 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
                         relatedTopic.getType().equals(ImportServlet.TOPICTYPE_ENG_EINSATZBEREICH) ||
                         relatedTopic.getType().equals(ImportServlet.TOPICTYPE_ENG_TAETIGKEIT) ||
                         relatedTopic.getType().equals(ImportServlet.TOPICTYPE_ENG_MERKMAL)) {
+                    //
                 } else {
                     // store topicID in Vector for later removal
                     allRelatedTopics.add(relatedTopic);
                 }
             }
-            addToDirectoveToDelete(baseTopic.getID());
+            directiveDeletion(baseTopic.getID());
             //
         }
-        // 
-        System.out.println(" --- starting to delete relatedTopics now ---");
-        System.out.println("");
+        //
+        System.out.println("[ImportWorker] is starting to delete "+allRelatedTopics.size()+" relatedTopics (just if one entry has no associations)---");
         for (int k = 0; k < allRelatedTopics.size(); k++) {
             BaseTopic relTopic = (BaseTopic) allRelatedTopics.get(k);
             //
             if (cm.getAssociationIDs(relTopic.getID(), 1).size() > 1) {
-               //
                System.out.println(">>> relTopic ("+relTopic.getID()+") \""+relTopic.getName()+"\" not to delete, has "+cm.getAssociationIDs(relTopic.getID(), 1).size()+" other associations");
             } else {
-                addToDirectoveToDelete(relTopic.getID());
+               directiveDeletion(relTopic.getID());
             }
-            //
         }
-        //
-        // delete all topics at once and their associations at once
-        directives.updateCorporateMemory(as, null, null, null);
-        // delete from topicmap, delete related address topic, delete email topic, delete person topic, delete webpage topic, delete webpage topic
     }
 
-    private void addToDirectoveToDelete(String topicID) {
+    /** performs a clear deletion of a topic with all it`s associations and it`s removal from all maps*/
+    private void directiveDeletion(String topicID) {
 		// CorporateDirectives myDirective = as.deleteTopic(topicID, 1);	// ### version=1
-        LiveTopic topic = as.getLiveTopic(topicID, 1);
-        // System.out.println(" -- topicToDelete is " + topic.getName() + " of type " + topic.getType());
-        directives.add(as.deleteTopic(topic.getID(), 1));
-		// return directives;
-        // System.out.println(">>> directive Deleteion of " + topicID);
+        try {
+            LiveTopic topic = as.getLiveTopic(topicID, 1);
+            if (topic != null) {
+                // topic.del
+                CorporateDirectives newDirectives = as.deleteTopic(topic.getID(), 1);	// ### version=1
+                newDirectives.updateCorporateMemory(as, null, null, null);
+            }
+        } catch (DeepaMehtaException dex) {
+            // yeah, it`s not known to CM..
+        }
 	}
 
     /**
@@ -339,7 +340,6 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
                                     }
                                     //System.out.println("data is: " + contentNode.getNodeValue());
                                 }
-
                             }
                         }
                     }
@@ -350,18 +350,17 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
             String topicID = saveProjectData(projectName, contactPerson, projectUrl, postcode, streetNr, bezirk,
                         orgaName, orgaWebsite, orgaContact, timeStamp,
                     merkmale, taetigkeiten, zielgruppen, einsatzbereiche);
-            if (topicID == null) {
+            //if (topicID == null) {
                 //ignore topic, failed to safe data
-                misspelledObjects.add(projectName);
-            } else {
+              //  System.out.println("Missspelled Address Item: " + projectName);
+                //misspelledObjects.add(projectName);
+            //} else {
                 // add topicID
                 topicIds.add(topicID);
-            }
+            //}
             // ???
         }//end of for loop with p for projects
-        System.out.println(" --");
-        System.out.println(" --- Import finished at "+DeepaMehtaUtils.getTime() +" for a total no of " + amountOfProjects + " " + getWorkspaceGeoType(workspaceId).getName());
-        System.out.println(" ---- skipped " +misspelledObjects.size()+ " unlocatable datasets");
+        System.out.println("[ImportWorker] stored data at "+DeepaMehtaUtils.getTime() +" for a total no of " + amountOfProjects + " " + getWorkspaceGeoType(workspaceId).getName());
     } catch (SAXParseException err) {
            System.out.println ("** Parsing error" + ", line "
              + err.getLineNumber () + ", uri " + err.getSystemId ());
@@ -378,145 +377,156 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
     return topicIds;
     }
 
+    /**
+     *  save one item "Project" from ehrenamt.de into the corporate memory with
+     *  reusing existing addresses, webpages and persons
+     *  building up the categorySystem by each item which is in some categories
+     */
     private String saveProjectData(String projectName, String contactPerson, String projectUrl, String postcode, String streetNr, String bezirk, String orgaName,
             String orgaWebsite, String orgaContact, String timeStamp, Vector merkmale, Vector taetigkeiten, Vector zielgruppen, Vector einsatzbereiche) {
         String topicId = "";
-        // System.out.println("- \""+projectName+"\" (last modified at: " + timeStamp + ")");
         String address = streetNr + ", " + postcode + " " + bezirk;
-        /**if (streetNr.indexOf("über Gute-Tat.de") != -1) {
-            //
-            // System.out.println("*** ImportError: skipping special Ehrenamt Project cause of misspelled streetname \"" + streetNr + "\"");
-            return null;
-        }*/
         // storing data in corporate memory
         String geoTypeId = getWorkspaceGeoType(workspaceId).getID();
-        if (projectName.length() <= 255) {
-            LiveTopic geoObjectTopic = as.createLiveTopic(as.getNewTopicID(), geoTypeId, projectName, null);
+        LiveTopic geoObjectTopic = as.createLiveTopic(as.getNewTopicID(), geoTypeId, projectName, null);
+        //
+        as.setTopicProperty(geoObjectTopic, PROPERTY_NAME, projectName);
+        // as.setTopicProperty(geoObjectTopic, PROPERTY_CITY, "Berlin");
+        as.setTopicProperty(geoObjectTopic, "Organisation", orgaName);
+        // as.setTopicProperty(geoObjectTopic, "Kontakt", orgaContact);
+        as.setTopicProperty(geoObjectTopic, "Timestamp", timeStamp); // instead of Zuletzt geändert
+        as.setTopicProperty(geoObjectTopic, PROPERTY_LOCKED_GEOMETRY, "off");
+        //
+        LiveTopic webpageTopic;
+        LiveTopic contactPersonTopic;
+        LiveTopic addressTopic;
+        LiveTopic cityTopic;
+        // LiveTopic mailTopic;
+        // check for webpage in cm
+        Hashtable webProps = new Hashtable();
+        webProps.put(PROPERTY_URL, projectUrl);
+        Vector webpages = cm.getTopics(TOPICTYPE_WEBPAGE, webProps);
+        // check for URL !!!
+        if (webpages.size() > 0) {
+            webpageTopic = as.getLiveTopic((BaseTopic)webpages.get(0));
             //
-            as.setTopicProperty(geoObjectTopic, PROPERTY_NAME, projectName);
-            as.setTopicProperty(geoObjectTopic, PROPERTY_CITY, "Berlin");
-            as.setTopicProperty(geoObjectTopic, "Organisation", orgaName);
-            as.setTopicProperty(geoObjectTopic, "Timestamp", timeStamp); // instead of Zuletzt geändert
-            as.setTopicProperty(geoObjectTopic, PROPERTY_LOCKED_GEOMETRY, "off");
-            //
-            LiveTopic webpageTopic;
-            LiveTopic contactPersonTopic;
-            LiveTopic addressTopic;
-            // check for webpage in cm
-            Hashtable webProps = new Hashtable();
-            webProps.put(PROPERTY_URL, projectUrl);
-            Vector webpages = cm.getTopics(TOPICTYPE_WEBPAGE, webProps);
-            // check for URL !!!
-            if (webpages.size() > 0) {
-                webpageTopic = as.getLiveTopic((BaseTopic)webpages.get(0));
-                //
-            } else {
-                webpageTopic = as.createLiveTopic(as.getNewTopicID(), TOPICTYPE_WEBPAGE, projectUrl, null);
-                // store url in topicname ###
-            }
-            // check for person in cm
-            BaseTopic knownPerson = cm.getTopic(TOPICTYPE_PERSON, contactPerson, 1);
-            if (knownPerson != null) {
-                contactPersonTopic = as.getLiveTopic(knownPerson);
-            } else {
-                contactPersonTopic = as.createLiveTopic(as.getNewTopicID(), TOPICTYPE_PERSON, contactPerson, null);
-            }
-            // check for address in cm
-            BaseTopic knownAddress = cm.getTopic(TOPICTYPE_ADDRESS, streetNr, 1);
-            // check for street in Adress !!
-            if (knownAddress != null) {
-                addressTopic = as.getLiveTopic(knownAddress);
-            } else {
-                addressTopic = as.createLiveTopic(as.getNewTopicID(), TOPICTYPE_ADDRESS, streetNr, null);
-            }
-            // add postalcode to address topic
-            as.setTopicProperty(addressTopic, PROPERTY_POSTAL_CODE, postcode);
-            as.setTopicProperty(addressTopic, PROPERTY_STREET, streetNr);
-            //
-            LiveAssociation toWebpage = as.createLiveAssociation(as.getNewAssociationID(), ASSOCTYPE_ASSOCIATION, geoObjectTopic.getID(), webpageTopic.getID(), null, null);
-            LiveAssociation toPerson = as.createLiveAssociation(as.getNewAssociationID(), ASSOCTYPE_ASSOCIATION, geoObjectTopic.getID(), contactPersonTopic.getID(), null, null);
-            LiveAssociation toAddress = as.createLiveAssociation(as.getNewAssociationID(), ASSOCTYPE_ASSOCIATION, geoObjectTopic.getID(), addressTopic.getID(), null, null);
-            // fetch GPS Data from GeoCoder
-            GeoObjectTopic geoObject = (GeoObjectTopic) geoObjectTopic;
-            geoObject.setGPSCoordinates(directives);
-            // bezirk label special move
-            if (bezirk.startsWith("Berlin-") || bezirk.startsWith("berlin-")) {
-                // slice a bit redundancy
-                bezirk = bezirk.substring(7);
-            }
-            // one to one
-            BaseTopic bezirkAlreadyKnown = cm.getTopic(ImportServlet.TOPICTYPE_ENG_BEZIRK, bezirk, 1);
-            if (bezirkAlreadyKnown != null) {
-                // connect to known Bezirk
-                // System.out.println(">> reusing BezirkTopic \""+bezirkAlreadyKnown.getName()+"\"");
-                as.createLiveAssociation(as.getNewAssociationID(), ASSOCTYPE_ASSOCIATION, geoObjectTopic.getID(), bezirkAlreadyKnown.getID(), null, null);
-            } else {
-                // new Bezirk and connect to
-                System.out.println(">> creating BezirkTopic \""+bezirk+"\"");
-                LiveTopic bezirkTopic = as.createLiveTopic(as.getNewTopicID(), ImportServlet.TOPICTYPE_ENG_BEZIRK, bezirk, null);
-                as.createLiveAssociation(as.getNewAssociationID(), ASSOCTYPE_ASSOCIATION, geoObjectTopic.getID(), bezirkTopic.getID(), null, null);
-            }
-            // one to many
-            for (int i = 0; i < zielgruppen.size(); i++) {
-                String zielgruppenName = (String) zielgruppen.get(i);
-                BaseTopic knownZielgruppe = cm.getTopic(ImportServlet.TOPICTYPE_ENG_ZIELGRUPPE, zielgruppenName, 1);
-                if (knownZielgruppe != null) {
-                    // connect to known cat
-                    // System.out.println(">> reusing ZielgruppenTopic \""+catAlreadyKnown.getName()+"\"");
-                    as.createLiveAssociation(as.getNewAssociationID(), ASSOCTYPE_ASSOCIATION, geoObjectTopic.getID(), knownZielgruppe.getID(), null, null);
-                } else {
-                    System.out.println(">> creating ZielgruppenTopic \""+zielgruppenName+"\"");
-                    LiveTopic newZielgruppe = as.createLiveTopic(as.getNewTopicID(), ImportServlet.TOPICTYPE_ENG_ZIELGRUPPE, zielgruppenName, null);
-                    as.createLiveAssociation(as.getNewAssociationID(), ASSOCTYPE_ASSOCIATION, geoObjectTopic.getID(), newZielgruppe.getID(), null, null);
-                }
-            }
-            // one to many
-            for (int i = 0; i < taetigkeiten.size(); i++) {
-                String taetigkeitName = (String) taetigkeiten.get(i);
-                BaseTopic knownTaetigkeit = cm.getTopic(ImportServlet.TOPICTYPE_ENG_TAETIGKEIT, taetigkeitName, 1);
-                if (knownTaetigkeit != null) {
-                    // connect to known cat
-                    // System.out.println(">> reusing ZielgruppenTopic \""+catAlreadyKnown.getName()+"\"");
-                    as.createLiveAssociation(as.getNewAssociationID(), ASSOCTYPE_ASSOCIATION, geoObjectTopic.getID(), knownTaetigkeit.getID(), null, null);
-                } else {
-                    System.out.println(">> creating TaetigkeitenTopic \""+taetigkeitName+"\"");
-                    LiveTopic newTaetigkeiten = as.createLiveTopic(as.getNewTopicID(), ImportServlet.TOPICTYPE_ENG_TAETIGKEIT, taetigkeitName, null);
-                    as.createLiveAssociation(as.getNewAssociationID(), ASSOCTYPE_ASSOCIATION, geoObjectTopic.getID(), newTaetigkeiten.getID(), null, null);
-                }
-            }
-            // one to many
-            for (int i = 0; i < merkmale.size(); i++) {
-                String merkmalsName = (String) merkmale.get(i);
-                BaseTopic merkmalKnown = cm.getTopic(ImportServlet.TOPICTYPE_ENG_MERKMAL, merkmalsName, 1);
-                if (merkmalKnown != null) {
-                    // connect to known cat
-                    // System.out.println(">> reusing ZielgruppenTopic \""+catAlreadyKnown.getName()+"\"");
-                    as.createLiveAssociation(as.getNewAssociationID(), ASSOCTYPE_ASSOCIATION, geoObjectTopic.getID(), merkmalKnown.getID(), null, null);
-                } else {
-                    System.out.println(">> creating MerkmalTopic \""+merkmalsName+"\"");
-                    LiveTopic newMerkmal = as.createLiveTopic(as.getNewTopicID(), ImportServlet.TOPICTYPE_ENG_MERKMAL, merkmalsName, null);
-                    as.createLiveAssociation(as.getNewAssociationID(), ASSOCTYPE_ASSOCIATION, geoObjectTopic.getID(), newMerkmal.getID(), null, null);
-                }
-            }
-            // one to many
-            for (int i = 0; i < einsatzbereiche.size(); i++) {
-                String einsatzbereichsName = (String) einsatzbereiche.get(i);
-                BaseTopic knownEinsatzbereich = cm.getTopic(ImportServlet.TOPICTYPE_ENG_EINSATZBEREICH, einsatzbereichsName, 1);
-                if (knownEinsatzbereich != null) {
-                    // connect to known cat
-                    // System.out.println(">> reusing ZielgruppenTopic \""+catAlreadyKnown.getName()+"\"");
-                    as.createLiveAssociation(as.getNewAssociationID(), ASSOCTYPE_ASSOCIATION, geoObjectTopic.getID(), knownEinsatzbereich.getID(), null, null);
-                } else {
-                    System.out.println(">> creating EinsatzbereichTopic \""+einsatzbereichsName+"\"");
-                    LiveTopic newEinsatzbereich = as.createLiveTopic(as.getNewTopicID(), ImportServlet.TOPICTYPE_ENG_EINSATZBEREICH, einsatzbereichsName, null);
-                    as.createLiveAssociation(as.getNewAssociationID(), ASSOCTYPE_ASSOCIATION, geoObjectTopic.getID(), newEinsatzbereich.getID(), null, null);
-                }
-            }
-            return geoObjectTopic.getID();
         } else {
-            System.out.println("*** ImportError: Projectname TOO LONG: " + projectName + " skip saving project");
-            return null;
+            webpageTopic = as.createLiveTopic(as.getNewTopicID(), TOPICTYPE_WEBPAGE, projectUrl, null);
+            as.setTopicProperty(webpageTopic.getID(), 1, PROPERTY_URL, projectUrl);
+            // as.setTopicProperty(webpageTopic.getID(), 1, PROPERTY_NAME, "weitere Ehrenamt Projektinfos");
         }
+        // check for person in cm
+        BaseTopic knownPerson = cm.getTopic(TOPICTYPE_PERSON, contactPerson, 1);
+        if (knownPerson != null) {
+            contactPersonTopic = as.getLiveTopic(knownPerson);
+        } else {
+            contactPersonTopic = as.createLiveTopic(as.getNewTopicID(), TOPICTYPE_PERSON, contactPerson, null);
+        }
+        // check for City Topic Berlin in cm
+        BaseTopic berlinTopic = cm.getTopic(TOPICTYPE_CITY, "Berlin", 1);
+        if (berlinTopic != null) {
+            cityTopic = as.getLiveTopic(berlinTopic);
+        } else {
+            cityTopic = null;
+            System.out.println("[WARNING] ImportWorker is using Property \"Stadt\" at GeoObjectTopic instead of City Topic");
+            as.setTopicProperty(geoObjectTopic, PROPERTY_CITY, "Berlin");
+        }
+        // BaseTopic knownMailbox = cm.getTopic(TOPICTYPE_EMAIL_ADDRESS, orgaContact, 1);
+        // check for address in cm
+        BaseTopic knownAddress = cm.getTopic(TOPICTYPE_ADDRESS, streetNr, 1);
+        // check for street in Adress !!
+        if (knownAddress != null) {
+            addressTopic = as.getLiveTopic(knownAddress);
+        } else {
+            addressTopic = as.createLiveTopic(as.getNewTopicID(), TOPICTYPE_ADDRESS, streetNr, null);
+        }
+        // add postalcode to address topic
+        as.setTopicProperty(addressTopic, PROPERTY_POSTAL_CODE, postcode);
+        as.setTopicProperty(addressTopic, PROPERTY_STREET, streetNr);
+        //
+        LiveAssociation toWebpage = as.createLiveAssociation(as.getNewAssociationID(), ASSOCTYPE_ASSOCIATION, geoObjectTopic.getID(), webpageTopic.getID(), null, null);
+        LiveAssociation toPerson = as.createLiveAssociation(as.getNewAssociationID(), ASSOCTYPE_ASSOCIATION, geoObjectTopic.getID(), contactPersonTopic.getID(), null, null);
+        LiveAssociation toAddress = as.createLiveAssociation(as.getNewAssociationID(), ASSOCTYPE_ASSOCIATION, geoObjectTopic.getID(), addressTopic.getID(), null, null);
+        if (as.getAssociation(addressTopic.getID(), ASSOCTYPE_ASSOCIATION, 2, TOPICTYPE_CITY, true, directives) == null) {
+            LiveAssociation toCity = as.createLiveAssociation(as.getNewAssociationID(), ASSOCTYPE_ASSOCIATION, addressTopic.getID(), cityTopic.getID(), null, null);
+        }
+        // fetch GPS Data from GeoCoder
+        GeoObjectTopic geoObject = (GeoObjectTopic) geoObjectTopic;
+        geoObject.setGPSCoordinates(directives);
+        // bezirk label special move
+        if (bezirk.startsWith("Berlin-") || bezirk.startsWith("berlin-")) {
+            // slice a bit redundancy
+            bezirk = bezirk.substring(7);
+        }
+        // one to one
+        BaseTopic bezirkAlreadyKnown = cm.getTopic(ImportServlet.TOPICTYPE_ENG_BEZIRK, bezirk, 1);
+        if (bezirkAlreadyKnown != null) {
+            // connect to known Bezirk
+            // System.out.println(">> reusing BezirkTopic \""+bezirkAlreadyKnown.getName()+"\"");
+            as.createLiveAssociation(as.getNewAssociationID(), ASSOCTYPE_ASSOCIATION, geoObjectTopic.getID(), bezirkAlreadyKnown.getID(), null, null);
+        } else {
+            // new Bezirk and connect to
+            System.out.println(">> creating "+as.getLiveTopic(ImportServlet.TOPICTYPE_ENG_BEZIRK, 1).getName()+"Topic \""+bezirk+"\"");
+            LiveTopic bezirkTopic = as.createLiveTopic(as.getNewTopicID(), ImportServlet.TOPICTYPE_ENG_BEZIRK, bezirk, null);
+            as.createLiveAssociation(as.getNewAssociationID(), ASSOCTYPE_ASSOCIATION, geoObjectTopic.getID(), bezirkTopic.getID(), null, null);
+        }
+        // one to many
+        for (int i = 0; i < zielgruppen.size(); i++) {
+            String zielgruppenName = (String) zielgruppen.get(i);
+            BaseTopic knownZielgruppe = cm.getTopic(ImportServlet.TOPICTYPE_ENG_ZIELGRUPPE, zielgruppenName, 1);
+            if (knownZielgruppe != null) {
+                // connect to known cat
+                // System.out.println(">> reusing ZielgruppenTopic \""+catAlreadyKnown.getName()+"\"");
+                as.createLiveAssociation(as.getNewAssociationID(), ASSOCTYPE_ASSOCIATION, geoObjectTopic.getID(), knownZielgruppe.getID(), null, null);
+            } else {
+                System.out.println(">> creating "+as.getLiveTopic(ImportServlet.TOPICTYPE_ENG_ZIELGRUPPE, 1).getName()+"Topic \""+zielgruppenName+"\"");
+                LiveTopic newZielgruppe = as.createLiveTopic(as.getNewTopicID(), ImportServlet.TOPICTYPE_ENG_ZIELGRUPPE, zielgruppenName, null);
+                as.createLiveAssociation(as.getNewAssociationID(), ASSOCTYPE_ASSOCIATION, geoObjectTopic.getID(), newZielgruppe.getID(), null, null);
+            }
+        }
+        // one to many
+        for (int i = 0; i < taetigkeiten.size(); i++) {
+            String taetigkeitName = (String) taetigkeiten.get(i);
+            BaseTopic knownTaetigkeit = cm.getTopic(ImportServlet.TOPICTYPE_ENG_TAETIGKEIT, taetigkeitName, 1);
+            if (knownTaetigkeit != null) {
+                // connect to known cat
+                // System.out.println(">> reusing ZielgruppenTopic \""+catAlreadyKnown.getName()+"\"");
+                as.createLiveAssociation(as.getNewAssociationID(), ASSOCTYPE_ASSOCIATION, geoObjectTopic.getID(), knownTaetigkeit.getID(), null, null);
+            } else {
+                System.out.println(">> creating "+as.getLiveTopic(ImportServlet.TOPICTYPE_ENG_TAETIGKEIT, 1).getName()+"Topic \""+taetigkeitName+"\"");
+                LiveTopic newTaetigkeiten = as.createLiveTopic(as.getNewTopicID(), ImportServlet.TOPICTYPE_ENG_TAETIGKEIT, taetigkeitName, null);
+                as.createLiveAssociation(as.getNewAssociationID(), ASSOCTYPE_ASSOCIATION, geoObjectTopic.getID(), newTaetigkeiten.getID(), null, null);
+            }
+        }
+        // one to many
+        for (int i = 0; i < merkmale.size(); i++) {
+            String merkmalsName = (String) merkmale.get(i);
+            BaseTopic merkmalKnown = cm.getTopic(ImportServlet.TOPICTYPE_ENG_MERKMAL, merkmalsName, 1);
+            if (merkmalKnown != null) {
+                // connect to known cat
+                // System.out.println(">> reusing ZielgruppenTopic \""+catAlreadyKnown.getName()+"\"");
+                as.createLiveAssociation(as.getNewAssociationID(), ASSOCTYPE_ASSOCIATION, geoObjectTopic.getID(), merkmalKnown.getID(), null, null);
+            } else {
+                System.out.println(">> creating "+as.getLiveTopic(ImportServlet.TOPICTYPE_ENG_MERKMAL, 1).getName()+"Topic \""+merkmalsName+"\"");
+                LiveTopic newMerkmal = as.createLiveTopic(as.getNewTopicID(), ImportServlet.TOPICTYPE_ENG_MERKMAL, merkmalsName, null);
+                as.createLiveAssociation(as.getNewAssociationID(), ASSOCTYPE_ASSOCIATION, geoObjectTopic.getID(), newMerkmal.getID(), null, null);
+            }
+        }
+        // one to many
+        for (int i = 0; i < einsatzbereiche.size(); i++) {
+            String einsatzbereichsName = (String) einsatzbereiche.get(i);
+            BaseTopic knownEinsatzbereich = cm.getTopic(ImportServlet.TOPICTYPE_ENG_EINSATZBEREICH, einsatzbereichsName, 1);
+            if (knownEinsatzbereich != null) {
+                // connect to known cat
+                // System.out.println(">> reusing ZielgruppenTopic \""+catAlreadyKnown.getName()+"\"");
+                as.createLiveAssociation(as.getNewAssociationID(), ASSOCTYPE_ASSOCIATION, geoObjectTopic.getID(), knownEinsatzbereich.getID(), null, null);
+            } else {
+                System.out.println(">> creating "+as.getLiveTopic(ImportServlet.TOPICTYPE_ENG_EINSATZBEREICH, 1).getName()+"Topic \""+einsatzbereichsName+"\"");
+                LiveTopic newEinsatzbereich = as.createLiveTopic(as.getNewTopicID(), ImportServlet.TOPICTYPE_ENG_EINSATZBEREICH, einsatzbereichsName, null);
+                as.createLiveAssociation(as.getNewAssociationID(), ASSOCTYPE_ASSOCIATION, geoObjectTopic.getID(), newEinsatzbereich.getID(), null, null);
+            }
+        }
+        return geoObjectTopic.getID();
     }
 
     private Vector readInCategories(String catSeperatedValue) {
@@ -548,10 +558,9 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
                     urlStr += "?" + requestParameters;
                 }
                 URL url = new URL(urlStr);
+                System.out.println("[ImportWorker] sending request to: " + url.toURI().toURL().toString());
                 URLConnection conn = url.openConnection();
                 // Get the response
-                // choose the right encoding !!
-                // conn.setE
                 BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream(), "ISO-8859-1"));
                 StringBuffer sb = new StringBuffer();
                 String line;
@@ -560,12 +569,14 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
                 }
                 rd.close();
                 result = sb.toString();
-                System.out.println(">>> loaded xml data to import from " + url);
+                System.out.println("[ImportWorker] finished loading data from " + url);
             } catch(UnknownHostException uke) {
                 System.out.println("*** ImportWorker Thread could not load the xml data to import from " + endpoint + " message is: " + uke.getMessage());
-                done();
+                return null;
+                // done();
             } catch (Exception ex) {
-                System.out.println("*** ImportWorker Thread encountered the problem: " + ex.getMessage());
+                System.out.println("*** ImportWorker Thread encountered problem: " + ex.getMessage());
+                return null;
             }
         }
         return result;

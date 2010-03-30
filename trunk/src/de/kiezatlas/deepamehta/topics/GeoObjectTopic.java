@@ -612,12 +612,14 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
                     as.setTopicProperty(this, PROPERTY_GPS_LAT, point[2]);
                     as.setTopicProperty(this, PROPERTY_GPS_LONG, point[3]);
                     directives.add(DIRECTIVE_SHOW_MESSAGE, "Die Adresse hat "+point[2]+","+point[3]+" als GPS Koordinaten zugewiesen bekommen.", new Integer(NOTIFICATION_DEFAULT));
-                    // System.out.println("GeoObjectTopic.setGPSCoordinates(): successful to " + point[2] +"," + point[3] +" for address:" + getAddressString());
+                    // System.out.println("[INFO] GeoObjectTopic.setGPSCoordinates(): successful to " + point[2] +"," + point[3] +" for address:" + getAddressString());
                 } else {
                     directives.add(DIRECTIVE_SHOW_MESSAGE, "Address could not be resolved to WGS 84 coordinates. Leaving the topic like it is. ", new Integer(NOTIFICATION_ERROR));
+                    System.out.println("[WARNING] GeoObjectTopic.setGPSCoordinates(): was not successful for " + getAddressString());
                 }
             } else {
                 directives.add(DIRECTIVE_SHOW_MESSAGE, "Address could not be resolved to WGS 84 coordinates. Leaving the topic like it is. ", new Integer(NOTIFICATION_ERROR));
+                System.out.println("[WARNING] GeoObjectTopic.setGPSCoordinates(): was not successful for " + getAddressString());
             }
         }
     }
