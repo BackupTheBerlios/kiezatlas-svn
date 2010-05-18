@@ -2,12 +2,12 @@
 
 <% begin(KiezAtlas.SERVLET_IMPORT, session, out); %>
 <%
-	String membership = (String) session.getAttribute("membership");
-	String timingInterval = (String) session.getAttribute("timingInterval");
-	String workerThreadState = (String) session.getAttribute("workerThread");
-	String workerThreadTime = (String) session.getAttribute("workerThreadTime");
+    String membership = (String) session.getAttribute("membership");
+    String timingInterval = (String) session.getAttribute("timingInterval");
+    String workerThreadState = (String) session.getAttribute("workerThread");
+    String workerThreadTime = (String) session.getAttribute("workerThreadTime");
     BaseTopic user = (BaseTopic) session.getAttribute("user");
-    BaseTopic workspace = (BaseTopic) session.getAttribute("workspaces");
+    BaseTopic workspace = (BaseTopic) session.getAttribute("importWorkspaces");
     Hashtable criterias = (Hashtable) session.getAttribute("importCriterias");
     Vector geoObjects = (Vector) session.getAttribute("geoObjects");
     Vector unusableGeoObjects = (Vector) session.getAttribute("unusableGeoObjects");
@@ -26,14 +26,14 @@
                 out.println(key.toString() + " (" +critInNumbers.toString()+ ")");
             out.println("</dd>");
 		}
+            // out.println("<dd><a href=\"?action="+KiezAtlas.ACTION_RESET_CRITERIAS+"&workspaceId="+workspace.getID()+"\"> resetCategories</a></dd>");
         out.println("</dl>");
-        out.println("&nbsp; <a href=\"?action="+KiezAtlas.ACTION_RESET_CRITERIAS+"&workspaceId="+workspace.getID()+"\"> resetCategories</a><br/>");
-        out.println("<a href=\"?action="+KiezAtlas.ACTION_DO_IMPORT+"&workspaceId="+workspace.getID()+"\">> kickoffImport</a>");
         if (workerThreadState.equals("NEW")) {
             out.println("<p><i>");
             out.println("The Import Worker for this workspace was kicked off at " + workerThreadTime + " and is currently working / sleeping. ");
             out.println("<br/> Import Intervall is set to " +timingInterval+ " min.</i><p/>");
         } else {
+            out.println("<a href=\"?action="+KiezAtlas.ACTION_DO_IMPORT+"&workspaceId="+workspace.getID()+"\">> kickoff Import</a>");
             out.println("<p><i>");
             out.println("The Import Worker for this Workspace was NOT kicked off yet.");
             out.println("</i><p/>");

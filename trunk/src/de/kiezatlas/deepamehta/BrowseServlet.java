@@ -55,7 +55,7 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 					pathInfo = pathInfo.substring(0, additionParam);
 				} else {
 					// no external criteria link in
-					session.setAttribute("defaultCriteria", null);
+					session.setAttribute("defaultCriteria", "0");
 				}
 				// error check
 				if (pathInfo == null || pathInfo.length() == 1) {
@@ -100,6 +100,7 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 					if (criteria != null) {
 						setSearchMode(criteria, session);
 					} else {
+						session.setAttribute("defaultCriteria", "0");
 						setSearchMode("0", session);	// ### was SEARCHMODE_BY_CATEGORY
 					}
 					return PAGE_CATEGORY_LIST; 
@@ -121,6 +122,7 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 		} else if (action.equals(ACTION_SHOW_CATEGORIES)) {
 			String critNr = params.getValue("critNr");
 			setSearchMode(critNr, session);
+			session.setAttribute("defaultCriteria", critNr);
 			return PAGE_CATEGORY_LIST;
 		// select
 		} else if (action.equals(ACTION_SELECT_CATEGORY)) {

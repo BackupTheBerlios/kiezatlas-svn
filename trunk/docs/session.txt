@@ -16,7 +16,7 @@ Global
 map					BaseTopic
 mapImage			String
 criterias			array of SearchCriteria
-defaultCriteria		number of selected Criteria. Just set if an additional param e.g. '&1' was appended to the citymap alias
+defaultCriteria			number of the currently selected Criteriaset, e.g. if an additional param e.g. '&1' was appended to the citymap alias
 instType			TypeTopic
 shapeTypes			Vector of ShapeType
 shapes				Vector of Shape
@@ -150,6 +150,16 @@ filterField		    Topic Bean Field Name, der zur Filterung heanrgezogen wird (Str
 emailList			Liste von Email-Adressen (Vector of String)
 
 
+Import
+------
+workerThread		String carrying the Threads curent state
+workerThreadTime	String carrying the Threads starting time
+timingInterval		String varrying the Timing Interval in Milliseconds
+importCriterias		Vector of BaseTopics which represent the criterias of the configured workspace
+unusableGeoObjects	Vector of GeoObjectTopics which are from the workspaces "institutionType" which have no WGS 84 coordinates
+geoObjects		Vector of BaseTopics containing all imported GeoObjects
+importWorksapces        currently BaseTopic of one Importer Workspace
+importCriteraias        Vector of Criterias related to the improter Workspace
 
 GeoObjectAdminForm
 ------------------

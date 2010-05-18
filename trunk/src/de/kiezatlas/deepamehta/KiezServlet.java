@@ -1,11 +1,14 @@
 package de.kiezatlas.deepamehta;
 
 import de.deepamehta.BaseTopic;
+import de.deepamehta.DeepaMehtaException;
 import de.deepamehta.service.*;
 import de.deepamehta.service.web.JSONRPCServlet;
 import de.deepamehta.topics.TypeTopic;
 import java.util.Hashtable;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
@@ -21,6 +24,8 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
             result = getGeoObjectInfo(params);
         } else if(remoteMethod.equals("getWorkspaceCriterias")) {
             result = getWorkspaceCriterias(params);
+        } else if(remoteMethod.equals("getWorkspaceInfos")) {
+            result = getWorkspaceInfos(params);
         } else if(remoteMethod.equals("searchGeoObjects")) {
             result = searchTopics(params, directives);
         }
@@ -32,7 +37,7 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
         session.setAttribute("info", "<h3>Willkommen zu dem Kiezatlas Dienst unter "+as.getCorporateWebBaseURL()+"</h3>" +
                 "<br>F&uuml;r die Nutzung des Dienstes steht Entwicklern " +
                 "<a href=\"http://www.deepamehta.de/wiki/en/Application:_Web_Service\">hier</a> die Software Dokumentation zur Verfügung. " +
-                "Ein Beispiel zur Nutzung eines Kiezatlas Dienstes ist <a href=\"http://www.kiezatlas.de/maps/interface.php?topicId=t-ka-schoeneberg&workspaceId=t-ka-workspace\">hier</a> bereits abrufbar.");
+                "Ein Beispiel zur Nutzung eines Kiezatlas Dienstes ist <a href=\"http://www.kiezatlas.de/maps/map.php?topicId=t-ka-schoeneberg&workspaceId=t-ka-workspace\">hier</a> abrufbar.");
         return PAGE_SERVE;
     }
 
@@ -48,18 +53,27 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
         String topicId = params.substring(2,params.length()-2);
         System.out.println(">>>> getGeoObjectInfo(" + topicId + ")");
         // String parameters[] = params.split(",");
-        StringBuffer messages = null;
+        StringBuffer messages = new StringBuffer("\"");
         StringBuffer result = new StringBuffer("{\"result\": ");
-        BaseTopic t = cm.getTopic(topicId, 1);
         String geoObjectString;
-        if (t.getType().equals("tt-user")) {
-            System.out.println("*** KiezServlet.SecurityAccessDenied: not allowed to access user information");
-            messages = new StringBuffer("Access Denied");
-            geoObjectString= "\"\"";
-        } else {
-            geoObjectString = createGeoObjectBean(t, messages);
+        try {
+            BaseTopic t = cm.getTopic(topicId, 1);
+            if (t != null && t.getType().equals("tt-user")) {
+                System.out.println("*** KiezServlet.SecurityAccessDenied: not allowed to access user information");
+                messages = new StringBuffer("Access Denied");
+                geoObjectString= "\"\"";
+            } else if (t != null) {
+                geoObjectString = createGeoObjectBean(t, messages);
+            } else {
+                geoObjectString = "{}";
+                messages.append("404 - Topic not found");
+            }
+        } catch (Exception tex) {
+            geoObjectString = "{}";
+            messages.append(""+toJSON(tex.toString())+" - 404 - Topic not found");
         }
         result.append(geoObjectString);
+        messages.append("\"");
         result.append(", \"error\": " + messages + "}");
         // System.out.println("result: "+ result.toString());
         return result.toString();
@@ -81,6 +95,25 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
         StringBuffer result = new StringBuffer("{\"result\": ");
         String criteriaList = createListOfCategorizations(workspaceId.substring(2, workspaceId.length()-2));
         result.append(criteriaList);
+        result.append(", \"error\": " + messages + "}");
+        return result.toString();
+    }
+
+    /**
+     * Serializes Workspace Infos into JSON
+     *
+     * @param params
+     * @return
+     */
+    private String getWorkspaceInfos(String params)
+    {
+        System.out.println(">>>> getWorkspaceInfos(" + params + ")");
+        String parameters[] = params.split(":");
+        String workspaceId = parameters[0];
+        StringBuffer messages = null;
+        StringBuffer result = new StringBuffer("{\"result\": ");
+        String infos = createWorkspaceInfos(workspaceId.substring(2, workspaceId.length()-2));
+        result.append(infos);
         result.append(", \"error\": " + messages + "}");
         return result.toString();
     }
@@ -193,23 +226,49 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
     // --- Utility Methods
     // -------------------
 
+    private String createWorkspaceInfos(String workspaceId)
+    {
+        // System.out.println(">>> createWorkspaceInfos(" + workspaceId+") ...");
+        StringBuffer object = new StringBuffer();
+        String workspaceName = as.getTopicProperty(workspaceId, 1, PROPERTY_NAME);
+        String logoURL = "";
+        String impressumURL = "";
+        String homepageURL = "";
+        //
+        BaseTopic logo = as.getRelatedTopic(workspaceId, ASSOCTYPE_ASSOCIATION, TOPICTYPE_IMAGE, 2, true);
+        if (logo != null) logoURL = as.getTopicProperty(logo, PROPERTY_FILE);
+        BaseTopic homepage = as.getRelatedTopic(workspaceId, KiezAtlas.ASSOCTYPE_HOMEPAGE_LINK, TOPICTYPE_WEBPAGE, 2, true);
+        if (homepage != null) homepageURL = as.getTopicProperty(homepage, PROPERTY_URL);
+        BaseTopic impressum = as.getRelatedTopic(workspaceId, KiezAtlas.ASSOCTYPE_IMPRESSUM_LINK, TOPICTYPE_WEBPAGE, 2, true);
+        if (impressum != null) impressumURL = as.getTopicProperty(impressum, PROPERTY_URL);
+        //
+        object.append("{\"name\": \"" + workspaceName + "\",");
+        object.append("\"logo\": \"" + logoURL + "\",");
+        object.append("\"imprint\": \"" + impressumURL + "\",");
+        object.append("\"homepage\": \"" + homepageURL + "\"");
+        object.append("}");
+        // System.out.println("workspaceInfos are imp:" + impressumURL + " home:" + homepageURL + " logo:" + logoURL);
+        return object.toString();
+    }
+
     private String createSlimGeoObject(BaseTopic topic, Vector criterias, StringBuffer messages)
     {
         StringBuffer object = new StringBuffer();
         //
-        String latitude = as.getTopicProperty(topic, "LAT");
-        String longnitude = as.getTopicProperty(topic, "LONG");
+        String latitude = as.getTopicProperty(topic, "LAT"); // ### get an interface place for this final string value
+        String longnitude = as.getTopicProperty(topic, "LONG"); // ### get an interface place for this final string value
+        String originId = as.getTopicProperty(topic, ImportServlet.PROPERTY_PROJECT_ORIGIN_ID);
         if(latitude.equals("") && longnitude.equals(""))
         {
             latitude = "0.0";
             longnitude = "0.0";
         }
         String name = topic.getName();
-        if (hasQuotationMarks(name)) {
-            name = convertHTMLForJSON(name);
-        }
+        name = toJSON(name);
+        //}
         object.append("{\"name\": \"" + name + "\",");
         object.append("\"id\": \"" + topic.getID() + "\",");
+        object.append("\"originId\": \"" + originId + "\",");
         object.append("\"lat\": \"" + latitude + "\",");
         object.append("\"long\": \"" + longnitude + "\",");
         // System.out.println(">>> createCritCatList(" + topic.getID()+") ...");
@@ -243,11 +302,7 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
             bean.append("\"label\": \"" + field.label + "\", ");
             if(field.type == 0) {
                 String value = field.value;
-                if(hasQuotationMarks(value)) {
-                    // preparing java string for json
-                    value = convertHTMLForJSON(value);
-                    value = removeControlChars(value);
-                }
+                value = toJSON(value);
                 bean.append("\"value\":  \"" + value + "\"");
             } else {
                 Vector relatedFields = field.values;
@@ -257,13 +312,21 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
                     bean.append("\"values\": [");
                     for (int r = 0; r < relatedFields.size(); r++) {
                         BaseTopic relatedTopic = (BaseTopic) relatedFields.get(r);
-                        bean.append("{\"name\": \"" + relatedTopic.getName() + "\",");
-                        // ### geoObject has it's own icon ?
-                        bean.append("\"icon\": \"" + as.getLiveTopic(relatedTopic).getIconfile() + "\"}");
-                        if (r == relatedFields.size()-1)  {
-                            bean.append("]");
+                        if ( relatedTopic == null ) {
+                            System.out.println("[ERROR] no topic in values["+r+"]... " + topicBean.getValue("Name"));
                         } else {
-                            bean.append(", ");
+                            bean.append("{\"name\": \"" + relatedTopic.getName() + "\",");
+                            // ### geoObject has it's own icon ?
+                            try {
+                                bean.append("\"icon\": \"" + as.getLiveTopic(relatedTopic).getIconfile() + "\"}");
+                            } catch (Exception lex) {
+                                System.out.println("[ERROR] liveException at " + lex.toString() + topicBean.getValue("Name"));
+                            }
+                            if ( r == relatedFields.size()-1 )  {
+                                bean.append("]");
+                            } else {
+                                bean.append(", ");
+                            }
                         }
                     }
                 }
@@ -275,6 +338,8 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
         }
         bean.append("]");
         bean.append("}");
+        // System.out.println("GeoObjectBean is: \n ------------------------------------------- \n " + bean.toString());
+        // System.out.println("---------------------------------------------\n");
         return bean.toString();
     }
 
@@ -458,14 +523,57 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
         value = value.replaceAll("\r", "\\\\r");
         value = value.replaceAll("\n", "\\\\n");
         value = value.replaceAll("\t", "\\\\t");
-        //value = value.replaceAll("\"", "\\\\\"");
+        value = value.replaceAll("\f", "\\\\f");
+        value = value.replaceAll("\b", "\\\\b");
+        value = value.replaceAll("\"", "\\\\\"");
         //System.out.println("replaced value is : " + value);
         return value;
+    }
+
+    private String toJSON(String text) {
+        // strip HTML tags
+        text = text.replaceAll("<html>", "");
+        text = text.replaceAll("</html>", "");
+        text = text.replaceAll("<head>", "");
+        text = text.replaceAll("</head>", "");
+        text = text.replaceAll("<body>", "");
+        text = text.replaceAll("</body>", "");
+        text = text.replaceAll("<p>", "");
+        text = text.replaceAll("<p style=\"margin-top: 0\">", "");
+        text = text.replaceAll("</p>", "");
+        // convert HTML entities
+        text = toUnicode(text);
+        //
+        text = text.trim();
+        // JSON conformity
+        text = removeControlChars(text);
+        // text = text.replaceAll("\r", "\\\\n");
+        // text = text.replaceAll("\n", "\\\\n");
+        // text = text.replaceAll("\"", "\\\\\"");
+        //
+        return text;
     }
 
     private String convertHTMLForJSON(String html)
     {
         html = html.replaceAll("\"", "\\\\\"");
+        // html = html.replaceAll("\r", "\\\\n");
+        // html = html.replaceAll("\n", "\\\\n");
+        // html = html.replaceAll("\t", "\\\\t");
         return html;
     }
+
+    private String toUnicode(String text)
+    {
+        StringBuffer buffer = new StringBuffer();
+        Pattern p = Pattern.compile("&#(\\d+);");
+        Matcher m = p.matcher(text);
+        while (m.find()) {
+            int c = Integer.parseInt(m.group(1));
+            m.appendReplacement(buffer, Character.toString((char) c));
+        }
+        m.appendTail(buffer);
+        return buffer.toString();
+    }
+
 }

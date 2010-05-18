@@ -28,8 +28,8 @@ public class ImportServlet extends DeepaMehtaServlet implements KiezAtlas {
 
     private ImportWorker worker = null;
 
-    // private final long UPDATE_INTERVAL = 86000000;
-    public static final long UPDATE_INTERVAL = 600000;
+    public static final long UPDATE_INTERVAL = 86000000; // approximately 24 hours
+    // public static final long UPDATE_INTERVAL = 600000; // approximately 10 mines
     // 
     public static final String ENGAGEMENT_WORKSPACE = "t-331306";
     public static final String CITYMAP_TO_PUBLISH = "t-331302";
@@ -40,6 +40,10 @@ public class ImportServlet extends DeepaMehtaServlet implements KiezAtlas {
     public static final String TOPICTYPE_ENG_EINSATZBEREICH = "t-331321";
     public static final String TOPICTYPE_ENG_MERKMAL = "t-331325";
     public static final String TOPICTYPE_ENG_BEZIRK = "t-331327";
+    //
+    public static final String PROPERTY_PROJECT_ORIGIN_ID = "OriginId";
+    public static final String PROPERTY_PROJECT_LAST_MODIFIED = "Timestamp";
+    public static final String PROPERTY_PROJECT_ORGANISATION = "Organisation";
 
 	protected String performAction(String action, RequestParameter params, Session session, CorporateDirectives directives)
 																									throws ServletException {
@@ -97,7 +101,7 @@ public class ImportServlet extends DeepaMehtaServlet implements KiezAtlas {
             //
             return PAGE_IMPORTS_HOME;
         } else if (action.equals(ACTION_DO_IMPORT)) {
-            BaseTopic workspace = (BaseTopic) session.getAttribute("workspaces");
+            BaseTopic workspace = (BaseTopic) session.getAttribute("importWorkspaces");
             if (session == null || workspace == null) {
                 return PAGE_IMPORTS_LOGIN;
             }
@@ -127,7 +131,7 @@ public class ImportServlet extends DeepaMehtaServlet implements KiezAtlas {
                 critWithNumbers.put(topic.getName(), instancesOfTopic.size());
             }
             Vector geoObjects = getGeoObjectInformation(ENGAGEMENT_WORKSPACE);
-			session.setAttribute("workspaces", workspace);
+			session.setAttribute("importWorkspaces", workspace);
             session.setAttribute("importCriterias", critWithNumbers);
             session.setAttribute("geoObjects", geoObjects);
 		} else if (page.equals(PAGE_REPORT_HOME)) {

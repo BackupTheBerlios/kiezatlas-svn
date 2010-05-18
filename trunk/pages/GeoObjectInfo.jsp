@@ -18,13 +18,13 @@
 	topicBean.removeFieldsContaining("Birthday");
 	topicBean.removeFieldsContaining("Gender");
 	topicBean.removeField("Person / Mobile Number");
-    topicBean.removeField("LONG");
-    topicBean.removeField("LAT");
+	topicBean.removeField("LONG");
+	topicBean.removeField("LAT");
 	topicBean.removeField("Person / Fax Number");
 	topicBean.removeField("Person / Phone Number");
 	topicBean.removeField("Person / Webpage");
 	topicBean.removeField("Forum / Aktivierung");
-    topicBean.removeField("Timestamp");
+	topicBean.removeField("Timestamp");
 	// --- image ---
 	String imageFile = topicBean.getValue("Image / File");
 	if (!imageFile.equals("")) {

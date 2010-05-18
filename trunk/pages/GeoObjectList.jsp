@@ -8,11 +8,15 @@
 	Hashtable addresses = (Hashtable) session.getAttribute("addresses");
 	String searchMode = (String) session.getAttribute("searchMode");
 	String searchValue = (String) session.getAttribute("searchValue");
+	String selectedCriteria = (String) session.getAttribute("defaultCriteria");
 	// --- heading ---
 	if (searchMode.equals(KiezAtlas.SEARCHMODE_BY_NAME)) {
 		out.println("Suchergebnis ");
 	}
-	out.println("<b>" + searchValue + "</b><div class=\"small\">" + insts.size() + " Objekte</div>");
+        // --- ### align new back button at the right side
+	out.println("<b>" + searchValue + "</b>&nbsp;&nbsp;&nbsp;<a class=\"small\" href==\"controller?action=" + KiezAtlas.ACTION_SHOW_CATEGORIES + "&critNr=" +selectedCriteria+ ">zur&uuml;ck</a>");
+        out.println("<div class=\"small\">" + insts.size() + " Objekte ");
+	out.println("</div>");
 	out.println("<p>");
 	// --- list of institutions ---
 	out.println("<table cellpadding=\"4\" cellspacing=\"0\">");

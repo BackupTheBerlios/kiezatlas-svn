@@ -12,8 +12,8 @@ import de.deepamehta.topics.LiveTopic;
 import de.deepamehta.topics.TypeTopic;
 import de.deepamehta.util.DeepaMehtaUtils;
 import de.kiezatlas.deepamehta.topics.GeoObjectTopic;
+import de.kiezatlas.deepamehta.ImportServlet;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.URL;
@@ -32,9 +32,12 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 /**
- * Ehrenamt Schnittstelle 0.9a
+ * Ehrenamt Schnittstelle 0.9b
+ * is a thread based worker which imports single projects and all occuring criterias resp. categories
+ * from an xml interface into one kiezatlas workspace - it reuses topics (e.g. addresstopics) known to
+ * the cm (by name), triggers a geolocation on each project with nice address
  * 
- * @author mre@deepamehta.de
+ * @author Malte Reißig (mre@deepamehta.de)
  */
 public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtlas {
 
@@ -117,7 +120,7 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
     }
 
     private void publishData(Vector topicIds) {
-        //System.out.println("[ImportWorker] prePublishing \""+topicIds.size()+"\" topics data info: " + cm.getTopic(ImportServlet.CITYMAP_TO_PUBLISH, 1).getName() + " " +
+        System.out.println("[ImportWorker] is starting to gather coordinates and publish \""+topicIds.size()+"\" topics into : " + cm.getTopic(ImportServlet.CITYMAP_TO_PUBLISH, 1).getName());// + " " +
           //      "/ " + cm.getTopic(ImportServlet.CITYMAP_TO_PUBLISH, 1).getID() + " ofType: " +cm.getTopic(ImportServlet.CITYMAP_TO_PUBLISH, 1).getType());
         // BaseTopic cityMap = as.getLiveTopic(ImportServlet.CITYMAP_TO_PUBLISH, 1);
         // System.out.println(">>> before corrupting everything, we publish into topic: " + cityMap.getName() + " of type " + cityMap.getType());
@@ -204,8 +207,8 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
         for (int k = 0; k < allRelatedTopics.size(); k++) {
             BaseTopic relTopic = (BaseTopic) allRelatedTopics.get(k);
             //
-            if (cm.getAssociationIDs(relTopic.getID(), 1).size() > 1) {
-               System.out.println(">>> relTopic ("+relTopic.getID()+") \""+relTopic.getName()+"\" not to delete, has "+cm.getAssociationIDs(relTopic.getID(), 1).size()+" other associations");
+            if (cm.getAssociationIDs(relTopic.getID(), 1).size() > 0) {
+               // System.out.println(">>> relTopic ("+relTopic.getID()+") \""+relTopic.getName()+"\" not to delete, has "+cm.getAssociationIDs(relTopic.getID(), 1).size()+" other associations");
             } else {
                directiveDeletion(relTopic.getID());
             }
@@ -255,7 +258,7 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
         // iterate over projects
         for(int p = 0; p < amountOfProjects; p++) {
             // fields of each project
-            String projectName = "", contactPerson = "", projectUrl = "", postcode = "", streetNr = "", bezirk = "", orgaName = "",
+            String projectName = "", originId = "", contactPerson = "", projectUrl = "", postcode = "", streetNr = "", bezirk = "", orgaName = "",
                     orgaWebsite = "", orgaContact = "", timeStamp = "";
             Vector merkmale = new Vector();
             Vector taetigkeiten = new Vector();
@@ -337,6 +340,9 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
                                     } else if (detailNode.getNodeName().equals("url")) {
                                         // System.out.println(">projectpage at : " + contentNode.getNodeValue());
                                         orgaWebsite = contentNode.getNodeValue();
+                                    } else if (detailNode.getNodeName().equals("id")) {
+                                        // System.out.println(">projectpage at : " + contentNode.getNodeValue());
+                                        originId = contentNode.getNodeValue();
                                     }
                                     //System.out.println("data is: " + contentNode.getNodeValue());
                                 }
@@ -347,7 +353,7 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
             }
             // projectData was gathered
             // store information per project now
-            String topicID = saveProjectData(projectName, contactPerson, projectUrl, postcode, streetNr, bezirk,
+            String topicID = saveProjectData(originId, projectName, contactPerson, projectUrl, postcode, streetNr, bezirk,
                         orgaName, orgaWebsite, orgaContact, timeStamp,
                     merkmale, taetigkeiten, zielgruppen, einsatzbereiche);
             //if (topicID == null) {
@@ -382,7 +388,7 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
      *  reusing existing addresses, webpages and persons
      *  building up the categorySystem by each item which is in some categories
      */
-    private String saveProjectData(String projectName, String contactPerson, String projectUrl, String postcode, String streetNr, String bezirk, String orgaName,
+    private String saveProjectData(String originId, String projectName, String contactPerson, String projectUrl, String postcode, String streetNr, String bezirk, String orgaName,
             String orgaWebsite, String orgaContact, String timeStamp, Vector merkmale, Vector taetigkeiten, Vector zielgruppen, Vector einsatzbereiche) {
         String topicId = "";
         String address = streetNr + ", " + postcode + " " + bezirk;
@@ -391,10 +397,9 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
         LiveTopic geoObjectTopic = as.createLiveTopic(as.getNewTopicID(), geoTypeId, projectName, null);
         //
         as.setTopicProperty(geoObjectTopic, PROPERTY_NAME, projectName);
-        // as.setTopicProperty(geoObjectTopic, PROPERTY_CITY, "Berlin");
-        as.setTopicProperty(geoObjectTopic, "Organisation", orgaName);
-        // as.setTopicProperty(geoObjectTopic, "Kontakt", orgaContact);
-        as.setTopicProperty(geoObjectTopic, "Timestamp", timeStamp); // instead of Zuletzt geändert
+        as.setTopicProperty(geoObjectTopic, ImportServlet.PROPERTY_PROJECT_ORGANISATION, orgaName);
+        as.setTopicProperty(geoObjectTopic, ImportServlet.PROPERTY_PROJECT_ORIGIN_ID, originId);
+        as.setTopicProperty(geoObjectTopic, ImportServlet.PROPERTY_PROJECT_LAST_MODIFIED, timeStamp);
         as.setTopicProperty(geoObjectTopic, PROPERTY_LOCKED_GEOMETRY, "off");
         //
         LiveTopic webpageTopic;
