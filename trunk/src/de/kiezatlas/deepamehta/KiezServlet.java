@@ -312,21 +312,13 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
                     bean.append("\"values\": [");
                     for (int r = 0; r < relatedFields.size(); r++) {
                         BaseTopic relatedTopic = (BaseTopic) relatedFields.get(r);
-                        if ( relatedTopic == null ) {
-                            System.out.println("[ERROR] no topic in values["+r+"]... " + topicBean.getValue("Name"));
+                        bean.append("{\"name\": \"" + relatedTopic.getName() + "\",");
+                        // ### geoObject has it's own icon ?
+                        bean.append("\"icon\": \"" + as.getLiveTopic(relatedTopic).getIconfile() + "\"}");
+                        if ( r == relatedFields.size()-1 )  {
+                            bean.append("]");
                         } else {
-                            bean.append("{\"name\": \"" + relatedTopic.getName() + "\",");
-                            // ### geoObject has it's own icon ?
-                            try {
-                                bean.append("\"icon\": \"" + as.getLiveTopic(relatedTopic).getIconfile() + "\"}");
-                            } catch (Exception lex) {
-                                System.out.println("[ERROR] liveException at " + lex.toString() + topicBean.getValue("Name"));
-                            }
-                            if ( r == relatedFields.size()-1 )  {
-                                bean.append("]");
-                            } else {
-                                bean.append(", ");
-                            }
+                            bean.append(", ");
                         }
                     }
                 }
@@ -338,8 +330,6 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
         }
         bean.append("]");
         bean.append("}");
-        // System.out.println("GeoObjectBean is: \n ------------------------------------------- \n " + bean.toString());
-        // System.out.println("---------------------------------------------\n");
         return bean.toString();
     }
 
