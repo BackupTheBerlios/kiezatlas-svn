@@ -32,12 +32,12 @@ import de.kiezatlas.deepamehta.topics.GeoObjectTopic;
 
 
 /**
- * Kiezatlas 1.6.2<br>
+ * Kiezatlas 1.6.5<br>
  * Requires DeepaMehta 2.0b8
  * <p>
- * Last change: 11.8.2008<br>
- * J&ouml;rg Richter<br>
- * jri@deepamehta.de
+ * Last change: 15.06.2010<br>
+ * J&ouml;rg Richter / Malte Rei&szlig;ig <br>
+ * jri@deepamehta.de / mre@deepamehta.de
  */
 public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 
@@ -71,6 +71,7 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 				initStylesheet(session);		// relies on city map
 				initSiteLogo(session);			// relies on city map
 				initSiteLinks(session);			// relies on city map
+                initSelectedCatAttribute(session);
 				//
 				updateShapes(session);			// relies on shape types;
 				return PAGE_FRAMESET;
@@ -79,8 +80,8 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 				session.setAttribute("error", e.getMessage());
 				return PAGE_ERROR;
 			}
-			
-		} 		
+
+		}
 		// session timeout?
 		if (getCityMap(session) == null) {
 			System.out.println("*** Session Expired ***");
@@ -103,7 +104,7 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 						session.setAttribute("defaultCriteria", "0");
 						setSearchMode("0", session);	// ### was SEARCHMODE_BY_CATEGORY
 					}
-					return PAGE_CATEGORY_LIST; 
+					return PAGE_CATEGORY_LIST;
 				} else {
 					// otherwise list all institutions
 					setSearchMode(SEARCHMODE_BY_NAME, session);
@@ -146,6 +147,7 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 			return PAGE_GEO_LIST;
 		// info
 		} else if (action.equals(ACTION_SHOW_GEO_INFO)) {
+            // ### should also set the current HotspotMarker (e.g. after searchByCategory)
 			String geoID = params.getValue("id");
 			setSelectedGeo(geoID, session);
 			TopicBean topicBean = as.createTopicBean(geoID, 1);
@@ -198,6 +200,8 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 			Vector selectedCats = getSelectedCats(session);
 			session.setAttribute("categories", categories);
 			session.setAttribute("selectedCats", selectedCats);
+            // disable enumeration rendering
+            session.setAttribute("enumerationFlag", false);
 			// hotspots
 			setCategoryHotspots(session);
 			// clear marker
@@ -208,15 +212,19 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 			String instTypeID = getInstitutionType(session).getID();
 			String searchMode = getSearchMode(session);
 			Vector insts;
+            // enable the rendering of enumeration
+            session.setAttribute("enumerationFlag", true);
 			if (searchMode.equals(SEARCHMODE_BY_NAME)) {
 				insts = cm.getViewTopics(mapID, 1, instTypeID, getSearchValue(session));
 				// hotspots
 				setHotspots(insts, ICON_HOTSPOT, session);
+                session.setAttribute("selectedCatId", "");
 			} else {
 				String catID = params.getValue("id");
-				insts = cm.getRelatedViewTopics(mapID, 1, catID, ASSOCTYPE_ASSOCIATION, instTypeID, 1);	// ### copy in setCategoryHotspots() 
-				// hotspots
-				setCategoryHotspots(session);
+				insts = cm.getRelatedViewTopics(mapID, 1, catID, ASSOCTYPE_ASSOCIATION, instTypeID, 1);	// ### copy in setCategoryHotspots()
+				// hotspots + return the index of the current CatID in the multi-dimensional hotspot vector
+				int catIndex = setSearchedCategoryHotspots(session, catID);
+                session.setAttribute("selectedCatId", ""+catIndex+"");
 			}
 			session.setAttribute("institutions", insts);
 			// categories & addresses
@@ -229,10 +237,10 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 					// categories
 					String critTypeID = getCriteria(0, session).criteria.getID();
 					categories.put(geo.getID(), geo.getCategories(critTypeID));
-					// address		
+					// address
 					BaseTopic address = geo.getAddress();
 					// if no related address put new hashtable in it for property city
-					Hashtable addressProps = address != null ? as.getTopicProperties(address) : new Hashtable(); 
+					Hashtable addressProps = address != null ? as.getTopicProperties(address) : new Hashtable();
 					addressProps.put(PROPERTY_CITY, geo.getCity());
 					addresses.put(geo.getID(), addressProps);
 				} catch (ClassCastException e) {
@@ -453,6 +461,44 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 		System.out.println("> \"hotspots\" stored in session: institutions for " + selCats.size() + " categories");
 	}
 
+    /**
+     * nearly the same to setCategoryHotspots, except that it
+     * takes a catID as an argument and returns it index in the enumeration
+     */
+	private int setSearchedCategoryHotspots(Session session, String catId) {
+		String mapID = getCityMap(session).getID();
+		String instTypeID = getInstitutionType(session).getID();
+		Vector selCats = getSelectedCats(session);
+		//
+		Vector hotspots = new Vector();
+		Vector cluster = new Vector();
+		Enumeration e = selCats.elements();
+        int catIndex = 0;
+        int finalCatIndex = 0;
+		while (e.hasMoreElements()) {
+			String catID = (String) e.nextElement();
+            if (catId == catID) { finalCatIndex = catIndex; };
+			Vector presentables = cm.getRelatedViewTopics(mapID, 1, catID, ASSOCTYPE_ASSOCIATION, instTypeID, 1);
+			String icon;
+			if (getSearchMode(session).equals("0")) {	// ### first search criteria uses distinct visualization
+				icon = as.getLiveTopic(catID, 1).getIconfile();
+				if (icon.startsWith("ka-")) {	// use only small icon if standard Kiezatlas category icons is used
+					icon = icon.substring(0, icon.length() - 4) + "-small.gif";		// ### could be property
+				}
+			} else {
+				icon = ICON_HOTSPOT;
+			}
+			presentables.insertElementAt(as.getCorporateWebBaseURL() + FILESERVER_ICONS_PATH + icon, 0);
+			hotspots.addElement(presentables);
+            catIndex++;
+		}
+		makeCluster(hotspots, cluster);
+		session.setAttribute("cluster", cluster);
+		session.setAttribute("hotspots", hotspots);
+		System.out.println("> \"hotspots\" stored in session: institutions for " + selCats.size() + " categories");
+        return finalCatIndex;
+	}
+
 	// ---
 
 	/**
@@ -473,7 +519,7 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 	}
 
 	// ---
-	
+
 	/**
 	 * @param	hotspots should be a vector of vector of PresentableTopics
 	 * @param	cluster is first an empty vector, afterwards it should be a vector of clusters
@@ -495,7 +541,7 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 					// addPresentable, checks for doubles
 					foundCluster.addPresentable(currentPT);
 				} else {
-					// es gibt noch kein cluster oder es wurde kein passendes gefunden also suchen, 
+					// es gibt noch kein cluster oder es wurde kein passendes gefunden also suchen,
 					// nach dem ersten auftreten von dem gleichen Point in allen hotspots
 					PresentableTopic foundPT = findPT(currentPT, hotspots);
 					if ( foundPT != null ) {
@@ -507,10 +553,43 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 			}
 			// ### System.out.println("> \"clusters\": "+clusters.toString());
 		}
+        //removeClusteredHotspots(hotspots, clusters);
 	}
-	
+
+    /** should remove a presentable from the hotspots vector when part of cluster
+     *  ### implement it the other way around
+     */
+    private void removeClusteredHotspots(Vector hotspots, Vector clusters) {
+        for (int i = 0; i < hotspots.size(); i++) {
+            Vector topics = (Vector) hotspots.get(i);
+            Vector doubled = new Vector();
+            for (int j = 1; j < topics.size(); j++) {
+                PresentableTopic topic = (PresentableTopic) topics.get(j);
+                if (isPartOfCluster(clusters, topic.getID())) {
+                    // topic is visible in cluster
+                    doubled.add(topic);
+                }
+            }
+            topics.removeAll(doubled);
+        }
+    }
+
+    private boolean isPartOfCluster(Vector clusters, String topicId) {
+        for (int i = 0; i < clusters.size(); i++) {
+            Cluster object = (Cluster) clusters.get(i);
+            Vector topics = object.getPresentables();
+            for (int j = 0; j < topics.size(); j++) {
+                PresentableTopic topic = (PresentableTopic) topics.get(j);
+                if (topic.getID().equals(topicId)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 	private Cluster findAndCheckClusters(PresentableTopic currentPT, Vector clusters){
-			for (int c=0; c < clusters.size(); c++) {	
+			for (int c=0; c < clusters.size(); c++) {
 				// checking each cluster for point of current pt
 				Cluster currentCluster = (Cluster) clusters.get(c);
 				// ### System.out.println(currentCluster.presentables.size() + " topics in current Cluster" + currentCluster.getPoint());
@@ -522,7 +601,7 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 			}
 			return null;
 	}
-	
+
 	private PresentableTopic findPT(PresentableTopic pt, Vector hotspots) {
 		for(int p=0; p < hotspots.size(); p++){
 			Vector scnd = (Vector)hotspots.get(p);
@@ -531,12 +610,12 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 				if (toCheck.getGeometry().equals(pt.getGeometry()) & (!toCheck.getID().equals(pt.getID()))) {
 					// if the topics don't have the same id but have the same point, they belong together
 					return toCheck;
-				} 			
-			}			
-		}		
+				}
+			}
+		}
 		return null;
 	}
-	
+
 	// ---
 
 	private void toggleShapeDisplay(String shapeTypeID, Session session) {
@@ -561,7 +640,7 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 				ShapeType shapeType = (ShapeType) e.nextElement();
 				// if type is selected ...
 				if (shapeType.isSelected) {
-					// ... query all shapes and add Shape objects to the "shapes" vector 
+					// ... query all shapes and add Shape objects to the "shapes" vector
 					Vector shapeTopics = cm.getViewTopics(mapID, 1, shapeType.typeID);
 					Enumeration e2 = shapeTopics.elements();
 					while (e2.hasMoreElements()) {
@@ -636,4 +715,8 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 	private Vector getSelectedCats(Session session) {
 		return getCurrentCriteria(session).selectedCategoryIDs;
 	}
+
+    private void initSelectedCatAttribute(Session session) {
+        session.setAttribute("selectedCatId", null); // necessary for the new cityMap
+    }
 }

@@ -222,7 +222,7 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	public static final String ACTION_SHOW_CATEGORIES = "showCategories";
 	public static final String ACTION_SHOW_INFO_EXTERNAL = "showInfo";
 	public static final String ACTION_SHOW_GEO_INFO = "showGeoObjectInfo";
-	public static final String ACTION_SEARCH = "search";		
+	public static final String ACTION_SEARCH = "search";
 	public static final String ACTION_SEARCH_BY_CATEGORY = "searchByCategory";
 	public static final String ACTION_SELECT_CATEGORY = "selectCategory";
 	public static final String ACTION_SHOW_GEO_FORUM = "showGeoObjectForum";
@@ -248,6 +248,7 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	public static final String ACTION_CLEAR_FILTER ="clearFilter";
 	public static final String ACTION_CREATE_FORM_LETTER ="createFormLetter";
 	public static final String ACTION_FILTER_ROUNDMAILING ="filterRoundMailing";
+	public static final String ACTION_FILTER_MAIL_ALL ="filterMailAll";
 	public static final String ACTION_CREATE_ROUNDMAILING ="createRoundMailing";
 	public static final String ACTION_DELETE_ENTRY ="deleteEntry";
 	public static final String ACTION_EXPORT_CITYMAP ="exportCityMap";
@@ -258,7 +259,7 @@ public interface KiezAtlas extends DeepaMehtaConstants {
     public static final String ACTION_SHOW_REPORT = "showImportReport";
     public static final String ACTION_DO_IMPORT = "doImport";
     public static final String ACTION_RESET_CRITERIAS = "resetCritCats";
-	
+
 
 
 

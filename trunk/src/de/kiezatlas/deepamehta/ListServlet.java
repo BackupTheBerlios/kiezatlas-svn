@@ -297,6 +297,22 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
             mailBoxes.append(formerRecipients);
             session.setAttribute("recipients", mailBoxes.toString()); // --. update the linkedcontent
 			return PAGE_LIST_MAILING;
+		} else if (action.equals(ACTION_FILTER_MAIL_ALL)){
+            String cityMap = (String) session.getAttribute("cityMapID");
+            CityMapTopic map = (CityMapTopic) as.getLiveTopic(cityMap, 1); // live/base
+            //
+            Vector mapTopics = cm.getViewTopics(map.getID(), 1);
+            StringBuffer mailBoxes = new StringBuffer("");
+            if (mapTopics.size() > 0) {
+                // ToDo check the Email property properly (Engagement Workspace?)
+                Vector mailTo = lookUpMailAdresses(mapTopics);
+                for (int j=0; j < mailTo.size(); j++) {
+                    String mailBox = (String) mailTo.get(j);
+                    mailBoxes.append(mailTo.get(j) + ", ");
+                }
+            }
+			session.setAttribute("recipients", mailBoxes.toString());
+			return PAGE_LIST_MAILING;
 		} else if (action.equals(ACTION_DELETE_ENTRY)){
 			String topicId = params.getParameter("id");
 			deleteTopic(topicId);
@@ -400,7 +416,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 				Vector insts = cm.getTopicIDs(instTypeID, cityMapID, true);		// sortByTopicName=true
 				Vector topicBeans = new Vector();
 				for (int i = 0; i < insts.size(); i++) {
-                    // Creates TopicBean 
+                    // Creates TopicBean
 					TopicBean topic = as.createTopicBean(insts.get(i).toString(), 1);
 					topicBeans.add(topic);
 				}
@@ -410,7 +426,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 				// fresh topic data & re sorted
 				if (sortBy != null) {
 					sortBeans(topicBeans, sortBy);
-					System.out.println(">>>> topics are fresh from server and sorted by: " 
+					System.out.println(">>>> topics are fresh from server and sorted by: "
 						+ session.getAttribute("sortField") );
 				} else {
 					System.out.println(">>>> topics are fresh from server with sort ByTopic Name");
@@ -496,12 +512,12 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
         geo.setGPSCoordinates(directives);
     }
 
-	
+
 	// **********************
 	// *** Custom Methods ***
 	// **********************
 
-	
+
 
 	private void sortBaseTopics(Vector baseTopics) {
 		// ### System.out.println(">>> sorting for german strings supported");
@@ -512,7 +528,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		// ### System.out.println(">>> sorting for german strings supported");
 		Collections.sort(topicBeans, new MyStringComparator( sortBy ));
 	}
-	
+
 	private Vector filterBeansByField(Vector topicBeans, String filterField, String filterText) {
 		Vector filteredBeans = new Vector();
 		//
@@ -523,7 +539,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		for (int i = 0; i < topicBeans.size(); i++) {
 			topicBean = (TopicBean) topicBeans.get(i);
 			beanField = (TopicBeanField) topicBean.getField(filterField);
-			// TopicBeanFields of TYPE_MULTI 
+			// TopicBeanFields of TYPE_MULTI
 			if (beanField.type == TopicBeanField.TYPE_MULTI) {
 				multiLoop:
 				for (int j = 0; j < beanField.values.size(); j++) {
@@ -566,10 +582,10 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		//
 		return filteredTopics;
 	}
-	
+
 	/**
-	 * Collects Email Addresses for all given beans by searching for TopicBeanFields {@link TopicBeanField} 
-	 * which are inherited by each bean as PROPERTY_EMAIL_ADDRESS as Email Topic (has to be named PROPERTY_EMAIL_ADDRESS) 
+	 * Collects Email Addresses for all given beans by searching for TopicBeanFields {@link TopicBeanField}
+	 * which are inherited by each bean as PROPERTY_EMAIL_ADDRESS as Email Topic (has to be named PROPERTY_EMAIL_ADDRESS)
 	 * and a TopicBeanField with the name "Person / Email Address" (Email of Person which is assigned to an Institution)
 	 * @param topics
 	 * @return a list of Strings which are all email adresses
@@ -682,7 +698,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
     }
 
 	/** See getMailAddresses
-	 * 
+	 *
 	 * @param bean
 	 * @return
 	 */
@@ -693,7 +709,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			// ### Value can be not null and just empty "" () have to verify this in the form processor
 			if (mailProp.value != null && !mailProp.value.equals("")) {
 				// Type Single
-				// System.out.println("type single mail property is: " + mailProp.value); 
+				// System.out.println("type single mail property is: " + mailProp.value);
 				return mailProp.value;
 			} else if(mailProp.values != null && mailProp.values.size() > 0){
 				// Type Multi
@@ -722,9 +738,9 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		}
 		return "";
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param topics
 	 * @return can be empty an empty string if the given topics were null
 	 */
@@ -770,16 +786,16 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		}
 		return letter;
 	}
-	
+
 	private String createTab() {
 		return "\t";
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * Related Topic Name, if no relatedPerson looks for Related Info Properties on Person
 	 * If no Lastname is set an empty String is returned, normally Firstname Lastname without Gender
-	 * 
+	 *
 	 * @param bean
 	 * @return <Code>""<Code> if no lastname is assigned to the person
 	 */
@@ -796,7 +812,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 				relatedPerson = person.getName();
 				return relatedPerson;
 			} else {
-				// System.out.println(">>> createFormLetter:getRelatedPerson(): Related Topic Name is empty, found props: " 
+				// System.out.println(">>> createFormLetter:getRelatedPerson(): Related Topic Name is empty, found props: "
 					// + lastName + ", "  +firstName);
 			}
 		} else if (lastName != null && !lastName.equals("")) {
@@ -811,11 +827,11 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		}
 		return relatedPerson;
 	}
-	
+
 	/**
 	 * Creates an address string with street, code, city divided by tabulator
 	 * Addresses are not allowed to be empty, Cities are. PostalCode is enough for us to send a letter.
-	 * 
+	 *
 	 * @param bean
 	 * @return <Code>null<Code> if no street and zip code could be found
 	 */
@@ -828,13 +844,13 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		if (street != null && postalCode != null) {
 			// if WEB_INFO_ is not deeply, beans do not have "Address / Street" as TopicBeanField. Street is named "Address" then
 			if (street.equals("") || postalCode.equals("")) {
-				// System.out.println("*** createFormLetter:skipAddr, neither street or postalCode was a 
+				// System.out.println("*** createFormLetter:skipAddr, neither street or postalCode was a
 					// provided as deep topicdata");
 				return null;
 			} else {
 				address = street + createTab() + postalCode + createTab();
 			}
-		// check for web_info related topic name 
+		// check for web_info related topic name
 		} else {
 			 Vector addresses= bean.getValues("Address");
 			 BaseTopic addressTopic = (BaseTopic) addresses.get(0);
@@ -854,7 +870,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		} else if (citys != null && citys.size() > 0) { // != null && cityField.type == TopicBeanField.TYPE_MULTI){
 				BaseTopic city = (BaseTopic) citys.get(0);
 				address += city.getName();
-				// System.out.println("**** found related city: " + address.toString());	
+				// System.out.println("**** found related city: " + address.toString());
 		// - no city data, but give berlin a plz try
 		} else {
 			if (postalCode != null) {
@@ -863,14 +879,14 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 				if (value > 10001 && value <= 14199) {
 					// is within 10001 and 14199
 					System.out.println("*** createFormLetter: no city assigned to Address: " + address + ", but internal postal " +
-						"code check delivered \"Berlin\" as the city");	
+						"code check delivered \"Berlin\" as the city");
 					address += "Berlin";
 				}
 			}
 		}
 		return address;
 	}
-	
+
 	private Vector getWorkspaces(String userID, Session session) {
 		Vector workspaces = new Vector();
 		//
@@ -891,7 +907,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		//
 		return workspaces;
 	}
-	
+
 	private boolean isKiezatlasWorkspace(String workspaceID) {
 		if (workspaceID.equals(WORKSPACE_KIEZATLAS)) {
 			return true;
@@ -1008,8 +1024,16 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
     private void updateTopicInCache(GeoObjectTopic geo, Session session) {
         Vector topics = getCachedTopicList(session);
         for (int i=0; i < topics.size(); i++) {
-            TopicBean t = (TopicBean) topics.get(i);
-            if (t.id.equals(geo.getID())) {
+            String topicId = "";
+            try {
+                TopicBean t = ((TopicBean) topics.get(i));
+                topicId = t.id;
+            } catch (ClassCastException cex) {
+                System.out.println(">> CatchedClassCastException: of object " + cex.getClass() + "GeoObject: " + ((GeoObjectTopic) topics.get(i)).getID());
+                topicId = ((GeoObjectTopic) topics.get(i)).getID();
+            }
+            // if (t instanceof TopicBean) { topicId = t.id } else { t }
+            if (topicId.equals(geo.getID())) {
                 topics.set(i, as.createTopicBean(geo.getID(), 1));
                 System.out.println(">>>> replaced topic ("+geo.getID()+") in cache, inserted a fresh bean");
             }
@@ -1020,8 +1044,8 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
     private void inserTopicIntoCache(GeoObjectTopic geo, Session session) {
         Vector topics = getCachedTopicList(session);
         TopicBean geoBean = as.createTopicBean(geo.getID(), 1);
-        topics.add(1, geoBean);
-        System.out.println(">>>> updated cache, inserted a fresh bean ("+geo.getID()+") ");
+        topics.add(1, geoBean); // put geoobject as bean in first place
+        System.out.println(">>>> updated cache, inserted a fresh bean ("+geoBean.id+") ");
         setCachedTopicList(topics, session);
     }
 
@@ -1039,7 +1063,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 
 	/**
 	 * Writes txt files with incremental number into the documents repository
-	 * 
+	 *
 	 * @param letter
 	 * @param fileName
 	 */
@@ -1092,9 +1116,10 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 	// --- Methods to maintain data in the session
 
     /**
-     * Stores the full List of Topics into the Session, independent of a filter. A filter always works on
-     * all elements in this list, so the user filter through all topics wether or not he has filtered before
-     * 
+     * Stores the full List of Topics into the Session, independent of a filter. If ACTION_FILTER is applied to this servlet and this session
+     * the calculations takes all elements in this list as abase: meaning that the filter operates alway on all topics wether or not
+     * it there was an ACTION_FILTER in session before
+     *
      * @param beans
      * @param session
      */
@@ -1102,7 +1127,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		System.out.println(">>> stored " + beans.size() + " \"cachedTopics\" in session");
 		session.setAttribute("cachedTopics", beans);
 	}
-	
+
 	private Vector getCachedTopicList(Session session) {
 		return (Vector) session.getAttribute("cachedTopics");
 	}
@@ -1126,7 +1151,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		session.setAttribute("geo", geo);
 		System.out.println("> \"geo\" stored in session: " + geo);
 	}
-	
+
 	private void setSortByField(String field, Session session) {
 		session.setAttribute("sortField", field);
 		System.out.println("> \"sortField\" stored in session: " + field);
@@ -1142,22 +1167,22 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		session.setAttribute("topics", beans);
 		System.out.println("> \"topics\" stored in session: " + beans.size());
 	}
-	
+
 	private void setFilterText(String value, Session session) {
 		session.setAttribute("filterText", value);
 		System.out.println("> \"filterText\" stored in session: " + value);
 	}
-	
+
 	private void setFilterField(String fieldName, Session session) {
 		session.setAttribute("filterField", fieldName);
 		System.out.println("> \"filterField\" stored in session: " + fieldName);
 	}
-	
+
 	private void setUseCache(Boolean flag, Session session) {
 		session.setAttribute("useCache", flag.toString());
 		System.out.println(">> \"useCache\" stored in session: " + flag.toString());
 	}
-	
+
 	// ---
 
 	private CityMapTopic getCityMap(Session session) {
@@ -1171,20 +1196,20 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 	private GeoObjectTopic getGeoObject(Session session) {
 		return (GeoObjectTopic) as.getLiveTopic((BaseTopic) session.getAttribute("geo"));
 	}
-	
+
 	/** Works just if sorting was once activated, uses session
-	 * 
+	 *
 	 * @param session
 	 * @return
 	 */
 	private String getSortByField(Session session) {
 		return (String) session.getAttribute("sortField");
 	}
-	
+
 	private Vector getListedTopics(Session session) {
 		return (Vector) session.getAttribute("topics");
 	}
-	
+
 	private Boolean isCacheUsed (Session session) {
 		if (session.getAttribute("useCache").equals("true")) {
 			return Boolean.TRUE;
@@ -1192,12 +1217,12 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			return Boolean.FALSE;
 		}
 	}
-	
+
 	private String getFilterField(Session session) {
 		return (String) session.getAttribute("filterField");
 	}
 
-    
+
 	// ********************************
 	// *** Inner Comparison Classes ***
 	// ********************************
@@ -1205,13 +1230,13 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 
 
 	private class MyStringComparator implements Comparator {
-		
+
 		private String sortBy;
-		
+
 		public MyStringComparator(String sortBy) {
 			this.sortBy = sortBy;
 		}
-		
+
 		public int compare( Object o1, Object o2 ) {
 			TopicBean beanOne = (TopicBean) o1;
 			TopicBean beanTwo = (TopicBean) o2;
@@ -1231,10 +1256,10 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			*/
 			return k; // ( 0 != i ) ? i : k;
 		}
-		
+
 		/**
 		 * Maybe not useful
-		 * 
+		 *
 		 * @param o
 		 * @return
 		 */
@@ -1285,5 +1310,5 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 		}
 
 	}
-	
+
 }

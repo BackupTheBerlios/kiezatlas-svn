@@ -141,7 +141,7 @@ public class ImportServlet extends DeepaMehtaServlet implements KiezAtlas {
 		}
 	}
 
-    @Override
+    
     public void destroy() {
         // worker.done();
         worker.setThreadDead();

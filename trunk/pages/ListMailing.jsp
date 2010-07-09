@@ -12,7 +12,7 @@
 	String filterField = (String) session.getAttribute("filterField");
 	Vector filterFieldNames = (Vector) session.getAttribute("filterFieldNames");
 	String recipients = (String) session.getAttribute("recipients");
-    // 
+    //
     out.println("<h3>Filtern zum Erstellen einer Rundmail-Empf&auml;ngerliste im Stadtplan \""+cityMapName+"\"</h3>");
     out.println("<div class=\"small\" style=\"position: absolute; right: 75px;\"><a href=\"?action="+KiezAtlas.ACTION_GO_HOME+"\">zur&uuml;ck</a></div>");
     //
@@ -31,9 +31,9 @@
     // out.println("<input type=\"text\" name=\"filterText\">\n");
     out.println("<input type=\"submit\" value=\"zum Verteiler hinzuf&uuml;gen\">\n");
     out.println("</form>\n");
+    out.println("<p/><b><a href=\"?action="+KiezAtlas.ACTION_FILTER_MAIL_ALL+"&cityMapID="+cityMapId+"\">Alle Adressen Hinzufügen</a></b>");
     if (!recipients.equals("")) {
-        out.println("<p/>");
-        out.println("<b><a href=\"mailto:?bcc="+recipients+"\">Rundmail erstellen</a>");
+        out.println("<b>&nbsp;&nbsp;&nbsp;<a href=\"mailto:?bcc="+recipients+"\">Rundmail erstellen</a>");
         out.println("&nbsp;&nbsp;&nbsp;<a href=\"?action="+KiezAtlas.ACTION_FILTER_ROUNDMAILING+"&cityMapID="+cityMapId+"\">Empf&auml;ngerliste zur&uuml;cksetzen</a></b>");
     }
 %>

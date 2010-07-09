@@ -36,7 +36,7 @@ import org.xml.sax.SAXParseException;
  * is a thread based worker which imports single projects and all occuring criterias resp. categories
  * from an xml interface into one kiezatlas workspace - it reuses topics (e.g. addresstopics) known to
  * the cm (by name), triggers a geolocation on each project with nice address
- * 
+ *
  * @author Malte Reißig (mre@deepamehta.de)
  */
 public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtlas {
@@ -92,7 +92,7 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
         } else {
             System.out.println("[ImportWorker] Thread named \""+getName()+"\" is dead ----");
         }
-        
+
     }
 
     public void run() {
@@ -101,7 +101,7 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
                 System.out.println("[ImportWorker] Thread \""+this.getName()+"\" was kicked off for workspace \"" + workspaceId + "\" at " + DeepaMehtaUtils.getTime().toString());
                 workerStarted = DeepaMehtaUtils.getTime(true);
                 // work here
-                String ehrenamtXml = sendGetRequest("http://ehrenamt.index.de/xml/index.cfm", "");
+                String ehrenamtXml = sendGetRequest("http://buerger-aktiv.index.de/kiezatlas/", "");
                 if (ehrenamtXml != null) {
                     // delete former import
                     clearImport(); // clears workspace if new topics are available
@@ -174,8 +174,8 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
         return workerStarted;
     }
 
-    /** completely remove all topics created by the last import 
-     *  e.g. delete from topicmap, delete related address topic, delete email topic, 
+    /** completely remove all topics created by the last import
+     *  e.g. delete from topicmap, delete related address topic, delete email topic,
      *  delete person topic, delete webpage topic, delete webpage topic if not used by any other topic ...
      */
     private void clearImport() {
@@ -369,9 +369,7 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
         System.out.println("[ImportWorker] stored data at "+DeepaMehtaUtils.getTime() +" for a total no of " + amountOfProjects + " " + getWorkspaceGeoType(workspaceId).getName());
     } catch (SAXParseException err) {
            System.out.println ("** Parsing error" + ", line "
-             + err.getLineNumber () + ", uri " + err.getSystemId ());
-        System.out.println(" " + err.getMessage ());
-
+             + err.getLineNumber () + ", column " + err.getColumnNumber() + ", message: " + err.getMessage());
     } catch (SAXException e) {
         Exception x = e.getException ();
         ((x == null) ? e : x).printStackTrace ();
@@ -536,12 +534,12 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
 
     private Vector readInCategories(String catSeperatedValue) {
         Vector cats = new Vector();
-        while (catSeperatedValue.indexOf(",") != -1) {
-            int commaIndex = catSeperatedValue.indexOf(",");
+        while (catSeperatedValue.indexOf(";") != -1) {
+            int pointer = catSeperatedValue.indexOf(";");
             String catName, restName = "";
-            if (commaIndex != -1) {
-                catName = catSeperatedValue.substring(0, commaIndex);
-                restName = catSeperatedValue.substring(commaIndex + 1);
+            if (pointer != -1) {
+                catName = catSeperatedValue.substring(0, pointer);
+                restName = catSeperatedValue.substring(pointer + 1);
                 cats.add(catName);
                 //System.out.println(">> cat: " + catName + " rest: " + restName);
             }
@@ -566,7 +564,8 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
                 System.out.println("[ImportWorker] sending request to: " + url.toURI().toURL().toString());
                 URLConnection conn = url.openConnection();
                 // Get the response
-                BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream(), "ISO-8859-1"));
+                // BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream(), "ISO-8859-1"));
+                BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
                 StringBuffer sb = new StringBuffer();
                 String line;
                 while ((line = rd.readLine()) != null) {
@@ -575,10 +574,19 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
                 rd.close();
                 result = sb.toString();
                 System.out.println("[ImportWorker] finished loading data from " + url);
+                DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
+                Document doc = docBuilder.parse(new InputSource(new StringReader(result)));
             } catch(UnknownHostException uke) {
                 System.out.println("*** ImportWorker Thread could not load the xml data to import from " + endpoint + " message is: " + uke.getMessage());
                 return null;
                 // done();
+            } catch (SAXParseException saxp) {
+                System.out.println ("** Parsing error" + ", line "
+                    + saxp.getLineNumber () + ", column " + saxp.getColumnNumber() + ", message: " + saxp.getMessage());
+                System.out.println("dataValue: " +result.substring(saxp.getColumnNumber()-15, saxp.getColumnNumber()+50));
+                System.out.println("*** Import Worker is skipping the import for today !");
+                return null;
             } catch (Exception ex) {
                 System.out.println("*** ImportWorker Thread encountered problem: " + ex.getMessage());
                 return null;
@@ -706,5 +714,5 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
 
         return criterias;
     }
-    
+
 }

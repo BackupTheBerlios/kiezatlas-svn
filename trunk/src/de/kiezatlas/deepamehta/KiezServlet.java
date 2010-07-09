@@ -142,7 +142,7 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
         Vector criterias = getKiezCriteriaTypes(workspaceId);
         BaseTopic geoType = getWorkspaceGeoType(workspaceId);
         Hashtable props = new Hashtable();
-        props.put(PROPERTY_NAME, query);       
+        props.put(PROPERTY_NAME, query);
         // String typeID, Hashtable propertyFilter, String topicmapID
         Vector results = cm.getTopics(geoType.getID(), props, topicmapId, false); // getTopic(query, props, topicmapId, directives);
         // getTopics: String typeID, String nameFilter, Hashtable propertyFilter, String relatedTopicID
@@ -198,7 +198,7 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
         StringBuffer messages = null;
         StringBuffer result = new StringBuffer("{\"result\": ");
         StringBuffer mapTopics = new StringBuffer("{ \"map\": \"" + mapId + "\", \"topics\": [");
-        // 
+        //
         BaseTopic geoType = (BaseTopic) getWorkspaceGeoType(workspaceId);
         Vector criterias = getKiezCriteriaTypes(workspaceId);
         Vector allTopics = cm.getTopics(geoType.getID(), new Hashtable(), mapId);
@@ -345,7 +345,7 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
     /**
      * creates a list of categorizations for each slim topic
      * checks for each criteria type if one is directly associated with the category
-     * 
+     *
      * @param topicId
      * @param workspaceId
      * @return
@@ -450,34 +450,29 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
      * @param workspaceId
      * @return
      */
-    private Vector getKiezCriteriaTypes(String workspaceId)
-    {
+    private Vector getKiezCriteriaTypes(String workspaceId) {
+        //
         Vector criterias = new Vector();
         TypeTopic critType = as.type("tt-ka-kriterium", 1);
         Vector subtypes = critType.getSubtypeIDs();
-        Vector workspacetypes = as.getRelatedTopics(workspaceId, "at-uses", 2);
-        for(int i = 0; i < workspacetypes.size(); i++)
-        {
+        Vector workspacetypes = as.getRelatedTopics(workspaceId, "at-uses", critType.getID(), 2, true);
+        for ( int i = 0; i < workspacetypes.size(); i++ ) {
             BaseTopic topic = (BaseTopic)workspacetypes.get(i);
-            for(int a = 0; a < subtypes.size(); a++)
-            {
+            for ( int a = 0; a < subtypes.size(); a++ ) {
                 String derivedOne = (String)subtypes.get(a);
-                if(derivedOne.equals(topic.getID()))
-                {
+                if ( derivedOne.equals(topic.getID()) ) {
                     //System.out.println(">>> use criteria (" + derivedOne + ") " + topic.getName());
                     criterias.add(topic);
                 }
             }
-
         }
-
         return criterias;
     }
 
     /**
-     * returns null if no topictype whihc is assigned to the given workspace, 
+     * returns null if no topictype whihc is assigned to the given workspace,
      * is a subtype of "GeoObjectTopic"
-     * 
+     *
      * @param workspaceId
      * @return
      */

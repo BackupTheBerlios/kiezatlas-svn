@@ -33,7 +33,7 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 
 
 
-	static final String VERSION = "1.6.2";
+	static final String VERSION = "1.6.5";
 	static {
 		System.out.println(">>> Kiezatlas " + VERSION);
 	}

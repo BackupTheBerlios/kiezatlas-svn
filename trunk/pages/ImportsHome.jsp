@@ -16,7 +16,7 @@
 	//
     //Enumeration e = workspaces.elements();
     //while (e.hasMoreElements()) {
-		// BaseTopic workspace = (BaseTopic) e.nextElement();
+		//BaseTopic workspace = (BaseTopic) e.nextElement();
 		out.println("<dt><b>" + workspace.getName() + "</b> beinhaltet "+geoObjects.size() +" Projekte </dt>");
 		Enumeration e2 = criterias.keys();
 		while (e2.hasMoreElements()) {
@@ -26,7 +26,7 @@
                 out.println(key.toString() + " (" +critInNumbers.toString()+ ")");
             out.println("</dd>");
 		}
-            // out.println("<dd><a href=\"?action="+KiezAtlas.ACTION_RESET_CRITERIAS+"&workspaceId="+workspace.getID()+"\"> resetCategories</a></dd>");
+            out.println("<dd><a href=\"?action="+KiezAtlas.ACTION_RESET_CRITERIAS+"&workspaceId="+workspace.getID()+"\"> resetCategories</a></dd>");
         out.println("</dl>");
         if (workerThreadState.equals("NEW")) {
             out.println("<p><i>");

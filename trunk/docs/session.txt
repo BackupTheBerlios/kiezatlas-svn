@@ -41,6 +41,8 @@ hotspots			Vector of Vector
 							element 1,2,..: PresentableTopic
 cluster				Vector of Clusters
 selectedGeo			GeoObject
+selectedCatId       If not null, or an empty string it is the index of the selectedCat in the hotspotsVector
+enumerationFlag     If true, numberedLabels are shown next to the GeoObjects of the selectedCat
 
 
 CategoryList

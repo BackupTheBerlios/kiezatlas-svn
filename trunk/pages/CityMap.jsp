@@ -5,6 +5,8 @@
 	Vector shapeTypes = (Vector) session.getAttribute("shapeTypes");
 	Vector shapes = (Vector) session.getAttribute("shapes");
 	Vector cluster = (Vector) session.getAttribute("cluster");
+    Boolean enumerationFlag = (Boolean) session.getAttribute("enumerationFlag");
+    String selectedCatId = (String) session.getAttribute("selectedCatId");
 	GeoObject selectedInst = (GeoObject) session.getAttribute("selectedGeo");
 	String stylesheet = (String) session.getAttribute("stylesheet");
 %>
@@ -14,7 +16,14 @@
 	<title>Kiezatlas</title>
 	<meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 	<style type="text/css">
-	<%= stylesheet %>
+        <%= stylesheet %>
+        <%
+        if (enumerationFlag) {
+            out.println("\n.numbers { visibility: hidden; font: Arial, sans; color: #002755; background: #fff; font-size:12px; font-weight: bold; font-decoriation: none; }");
+        } else {
+            out.println("\n.numbers { visibility: hidden; }");
+        }
+        %>
 	</style>
 	<!--[if lt IE 7]>
 	<script defer type="text/javascript" src="../pages/pngfix.js"></script>
@@ -27,7 +36,7 @@
 		var YOffset = 0;
 		var XOffset = 0;
 
-		function showMenu(id) {			
+		function showMenu(id) {
 			if (currentActiveMenu != "") {
 				hideMenu(currentActiveMenu);
 			}
@@ -50,7 +59,7 @@
 					currentActiveMenu = id;
 			}
 		}
-		
+
 		function hideMenu(id) {
 			if (document.getElementById) {
 				var currentMenu = "clusterMenu"+id;
@@ -68,7 +77,7 @@
 				return window.pageYOffset;
 			}
 		}
-		
+
 		function independentX() {
 			if (navigator.appName == "Microsoft Internet Explorer") {
 			    if(navigator.appVersion.indexOf("7.0") != -1) return document.documentElement.scrollLeft;
@@ -76,7 +85,7 @@
 			} else {
 			    return window.pageXOffset;
 			}
-		}		
+		}
 
 	</script>
 </head>
@@ -114,20 +123,34 @@
 				}
 			}
 		}
-		
+
 		// --- geoObjects ---
 		e = hotspots.elements();
+        int catIndex = 0;
 		while (e.hasMoreElements()) {
 			Vector presentables = (Vector) e.nextElement();
 			Enumeration e2 = presentables.elements();
 			String icon = (String) e2.nextElement();
+            boolean enumerateThis = false;
+            int presentableIndex = 0;
+            if (selectedCatId != null) {
+                if (selectedCatId.equals("") || catIndex == Integer.parseInt(selectedCatId)) {
+                    enumerateThis = true;
+                }
+            }
+            catIndex++;
 			while (e2.hasMoreElements()) {
+                presentableIndex++;
+                //
 				PresentableTopic inst = (PresentableTopic) e2.nextElement();
 				Point p = inst.getGeometry();
 				out.println("<a href=\"javascript:top.frames.right.location.href='controller?action=" +
 					KiezAtlas.ACTION_SHOW_GEO_INFO + "&id=" + inst.getID() + "'\">" +
 					"<img src=\"" + icon + "\" style=\"position:absolute; top:" + (p.y - 7) + "px; left:" +
-					(p.x - 7) + "px;\" alt=\"" + inst.getName() + "\" title=\"" + inst.getName() + "\" border=\"0\"></a>");
+					(p.x - 7) + "px;\" alt=\"" + inst.getName() + "\" title=\"" + inst.getName() + "\" border=\"0\">");
+                    if (enumerateThis) {
+                        out.println("<div id=\"numbers\" style=\"position: absolute; top:" + (p.y - 7) + "px; left:" + (p.x - 5) + "px;\" class=\"numbers\">"+ presentableIndex +"</div></a>");
+                    }
 			}
 		}
 		// cluster icons

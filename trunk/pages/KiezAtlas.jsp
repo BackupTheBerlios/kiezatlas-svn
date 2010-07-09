@@ -77,6 +77,8 @@
 			"<meta http-equiv=\"content-type\" content=\"text/html; charset=iso-8859-1\">" +
 			"\r<title>Kiezatlas</title>" +
 			"\r<style type=\"text/css\">\r" + stylesheet + "\r</style>\r" +
+            "\r<script src=\"../pages/jQuery-min.1.4.2.js\" type=\"text/javascript\"></script>\r" +
+            "\r<script src=\"../pages/util.js\" type=\"text/javascript\"></script>\r" +
 			"</head>\r" +
 			"<body" + (refreshMap ? " onLoad=\"top.frames.left.location.href='controller?action=initFrame&frame=" +
 				KiezAtlas.FRAME_LEFT + "'\"" : "") + ">\r\r");
@@ -200,7 +202,7 @@
 			return html.toString();
 		}
 	}
-	
+
 	String googleLink(String street, String postalCode, String city) throws IOException {
 		// ### System.out.println(">>> googleLink(): street=\"" + street + "\" postalCode=\"" + postalCode + "\" city=\"" + city + "\"");
 		StringBuffer html = new StringBuffer();
@@ -214,7 +216,7 @@
 		    return "";
 		}
 	}
-	
+
 	String mailtoUrl(Vector mailboxes) {
 		Enumeration e = mailboxes.elements();
 		StringBuffer url = new StringBuffer();
@@ -232,9 +234,9 @@
 		//
 		return url.toString();
 	}
-	
+
 	// --
-	
+
 	String fieldOptions(TopicBean bean, String[] hiddenProps, String[] hiddenPropsContaining, String checked) {
 		StringBuffer html = new StringBuffer();
 		for (int j = 0; j < hiddenProps.length; j++) {
@@ -275,7 +277,7 @@
 		}
 		return html.toString();
 	}
-	
+
 	// ---
 
 	boolean isSet(String str) {
