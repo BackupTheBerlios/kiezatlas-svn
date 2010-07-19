@@ -255,10 +255,10 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	public static final String ACTION_DOWNLOAD_CITYMAP ="downloadCityMap";
 	public static final String ACTION_SHOW_LIST_LEGEND ="showListLegend";
 	// import servlet
-    public static final String ACTION_SHOW_IMPORTS = "showImports";
-    public static final String ACTION_SHOW_REPORT = "showImportReport";
-    public static final String ACTION_DO_IMPORT = "doImport";
-    public static final String ACTION_RESET_CRITERIAS = "resetCritCats";
+  public static final String ACTION_SHOW_IMPORTS = "showImports";
+  public static final String ACTION_SHOW_REPORT = "showImportReport";
+  public static final String ACTION_DO_IMPORT = "doImport";
+  public static final String ACTION_RESET_CRITERIAS = "resetCritCats";
 
 
 

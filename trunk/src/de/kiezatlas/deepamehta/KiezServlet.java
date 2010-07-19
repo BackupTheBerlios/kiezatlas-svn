@@ -1,10 +1,10 @@
 package de.kiezatlas.deepamehta;
 
 import de.deepamehta.BaseTopic;
-import de.deepamehta.DeepaMehtaException;
 import de.deepamehta.service.*;
 import de.deepamehta.service.web.JSONRPCServlet;
 import de.deepamehta.topics.TypeTopic;
+import de.kiezatlas.deepamehta.topics.CityMapTopic;
 import java.util.Hashtable;
 import java.util.Vector;
 import java.util.regex.Matcher;
@@ -89,11 +89,12 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
     private String getWorkspaceCriterias(String params)
     {
         System.out.println(">>>> getWorkspaceCriterias(" + params + ")");
-        String parameters[] = params.split(":");
+        String parameters[] = params.split(",");
         String workspaceId = parameters[0];
+        String mapId = parameters[1];
         StringBuffer messages = null;
         StringBuffer result = new StringBuffer("{\"result\": ");
-        String criteriaList = createListOfCategorizations(workspaceId.substring(2, workspaceId.length()-2));
+        String criteriaList = createCritCatSystemList(workspaceId.substring(2, workspaceId.length()-2), mapId.substring(2, mapId.length()-2));
         result.append(criteriaList);
         result.append(", \"error\": " + messages + "}");
         return result.toString();
@@ -289,8 +290,9 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
         //
         TopicBean topicBean = as.createTopicBean(topic.getID(), 1);
         removeCredentialInformation(topicBean);
+        String topicName = removeQuotationMarksFromNames(topicBean.name);
         bean.append("{\"id\": \"" + topicBean.id + "\",");
-        bean.append("\"name\": \"" + topicBean.name + "\",");
+        bean.append("\"name\": \"" + topicName + "\",");
         bean.append("\"icon\": \"" + topicBean.icon + "\",");
         bean.append("\"properties\": [");
         Vector properties = topicBean.fields;
@@ -390,30 +392,32 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
             else
                 catList.append("]},");
         }
-
+        if (criterias.size() == 0) catList.append("]");
         return catList.toString();
     }
 
     /**
-     * list of categorizations for one workspace
+     * list of all categorizations for one workspace
      *
      * @param workspaceId
      * @return
      */
-    private String createListOfCategorizations(String workspaceId)
+    private String createCritCatSystemList(String workspaceId, String mapId)
     {
         StringBuffer objectList = new StringBuffer();
         objectList.append("[");
-        Vector criterias = getKiezCriteriaTypes(workspaceId);
-        for(int i = 0; i < criterias.size(); i++)
-        {
-            BaseTopic criteria = (BaseTopic) criterias.get(i);
-            objectList.append("{\"critId\": \"" + criteria.getID() + "\", ");
-            objectList.append("\"critName\": \"" + criteria.getName() + "\", ");
+        // Vector criterias = getKiezCriteriaTypes(workspaceId);
+        CityMapTopic mapTopic = (CityMapTopic) as.getLiveTopic(mapId, 1);
+        SearchCriteria[] crits = mapTopic.getSearchCriterias();
+        // Vector collectedCrits = new Vector();
+        for (int i = 0; i < crits.length; i++) {
+            SearchCriteria searchCriteria = crits[i];
+            // collectedCrits.add(searchCriteria.criteria.getID());
+            objectList.append("{\"critId\": \"" + searchCriteria.criteria.getID() + "\", ");
+            objectList.append("\"critName\": \"" + searchCriteria.criteria.getName() + "\", ");
             objectList.append("\"categories\": [");
-            Vector categories = cm.getTopics(criteria.getID());
-            for(int c = 0; c < categories.size(); c++)
-            {
+            Vector categories = cm.getTopics(searchCriteria.criteria.getID());
+            for (int c = 0; c < categories.size(); c++) {
                 objectList.append("{");
                 objectList.append("\"catId\":");
                 BaseTopic cat = (BaseTopic)categories.get(c);
@@ -423,7 +427,7 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
                 objectList.append("\"" + cat.getName() + "\", ");
                 objectList.append("\"catIcon\":");
                 objectList.append("\"" + as.getLiveTopic(cat).getIconfile() + "\"");
-
+                //
                 int index = categories.indexOf(cat);
                 if(index == categories.size() - 1) {
                     objectList.append("}");
@@ -431,9 +435,7 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
                     objectList.append("},");
                 }
             }
-
-            int andex = criterias.indexOf(criteria);
-            if(andex == criterias.size() - 1)
+            if(i == crits.length - 1)
                 objectList.append("]}");
             else
                 objectList.append("]},");
@@ -444,7 +446,7 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
     }
 
     /**
-     * simply retrieves the BaseTopics assigned to a workspace which are used
+     * simply retrieves the topics assigned to a workspace which are used
      * for navigation in web-frontends
      *
      * @param workspaceId
@@ -455,13 +457,13 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
         Vector criterias = new Vector();
         TypeTopic critType = as.type("tt-ka-kriterium", 1);
         Vector subtypes = critType.getSubtypeIDs();
-        Vector workspacetypes = as.getRelatedTopics(workspaceId, "at-uses", critType.getID(), 2, true);
+        Vector workspacetypes = as.getRelatedTopics(workspaceId, "at-uses", TOPICTYPE_TOPICTYPE, 2, true, true);
         for ( int i = 0; i < workspacetypes.size(); i++ ) {
             BaseTopic topic = (BaseTopic)workspacetypes.get(i);
             for ( int a = 0; a < subtypes.size(); a++ ) {
                 String derivedOne = (String)subtypes.get(a);
                 if ( derivedOne.equals(topic.getID()) ) {
-                    //System.out.println(">>> use criteria (" + derivedOne + ") " + topic.getName());
+                    // System.out.println(">>> use criteria (" + derivedOne + ") " + topic.getName());
                     criterias.add(topic);
                 }
             }
@@ -469,6 +471,8 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
         return criterias;
     }
 
+    // ### ToDo: as.getLiveTopic().getSearchCriteria();
+    
     /**
      * returns null if no topictype whihc is assigned to the given workspace,
      * is a subtype of "GeoObjectTopic"
@@ -501,6 +505,11 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
     private boolean hasQuotationMarks(String value)
     {
         return value.indexOf("\"") != -1;
+    }
+
+    private String removeQuotationMarksFromNames(String name) {
+        name = name.replaceAll("\"", "");
+        return name;
     }
 
     private String removeControlChars(String value) {

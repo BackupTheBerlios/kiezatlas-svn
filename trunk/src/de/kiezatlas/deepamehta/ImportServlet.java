@@ -17,7 +17,7 @@ import java.util.Vector;
 
 
 /**
- * Kiezatlas 1.6.2<br>
+ * Kiezatlas 1.6.5<br>
  * Requires DeepaMehta rev. 369
  * <p>
  * Last change: 06.12.2009<br>
@@ -26,26 +26,35 @@ import java.util.Vector;
  */
 public class ImportServlet extends DeepaMehtaServlet implements KiezAtlas {
 
-    private ImportWorker worker = null;
+  private ImportWorker ehrenamtWorker = null;
+  private ImportWorkerEvent eventWorker = null;
 
-    public static final long UPDATE_INTERVAL = 86000000; // approximately 24 hours
-    // public static final long UPDATE_INTERVAL = 600000; // approximately 10 mines
-    // 
-    public static final String ENGAGEMENT_WORKSPACE = "t-331306";
-    public static final String CITYMAP_TO_PUBLISH = "t-331302";
-    //
-    public static final String TOPICTYPE_ENG_PROJECT = "t-331314";
-    public static final String TOPICTYPE_ENG_ZIELGRUPPE = "t-331319";
-    public static final String TOPICTYPE_ENG_TAETIGKEIT = "t-331323";
-    public static final String TOPICTYPE_ENG_EINSATZBEREICH = "t-331321";
-    public static final String TOPICTYPE_ENG_MERKMAL = "t-331325";
-    public static final String TOPICTYPE_ENG_BEZIRK = "t-331327";
-    //
-    public static final String PROPERTY_PROJECT_ORIGIN_ID = "OriginId";
-    public static final String PROPERTY_PROJECT_LAST_MODIFIED = "Timestamp";
-    public static final String PROPERTY_PROJECT_ORGANISATION = "Organisation";
+  public static final long UPDATE_INTERVAL = 86000000; // approximately 24 hours
+  public static final long UPDATE_INTERVAL_TESTING = 3600000; // approximately 60 mins
+  //
+  public static final String ENGAGEMENT_WORKSPACE = "t-331306";
+  public static final String EVENTMENT_WORKSPACE = "t-453282";
+  public static final String CITYMAP_TO_PUBLISH = "t-331302";
+  public static final String EVENTMAP_TO_PUBLISH = "t-453286";
+  //
+  public static final String TOPICTYPE_ENG_PROJECT = "t-331314";
+  public static final String TOPICTYPE_ENG_ZIELGRUPPE = "t-331319";
+  public static final String TOPICTYPE_ENG_TAETIGKEIT = "t-331323";
+  public static final String TOPICTYPE_ENG_EINSATZBEREICH = "t-331321";
+  public static final String TOPICTYPE_ENG_MERKMAL = "t-331325";
+  public static final String TOPICTYPE_ENG_BEZIRK = "t-331327";
+  //
+  public static final String TOPICTYPE_EVT_EVENT = "t-453276";
+  public static final String TOPICTYPE_EVT_BEZIRK = "t-453278";
+  public static final String TOPICTYPE_EVT_KATEGORIE = "t-453280";
+  //
+  public static final String PROPERTY_PROJECT_ORIGIN_ID = "OriginId";
+  public static final String PROPERTY_PROJECT_LAST_MODIFIED = "Timestamp";
+  public static final String PROPERTY_PROJECT_ORGANISATION = "Organisation";
+  public static final String PROPERTY_EVENT_DESCRIPTION = "Beschreibung";
+  public static final String PROPERTY_EVENT_TIME = "Datum / Zeit";
 
-	protected String performAction(String action, RequestParameter params, Session session, CorporateDirectives directives)
+  protected String performAction(String action, RequestParameter params, Session session, CorporateDirectives directives)
 																									throws ServletException {
         if (action == null) {
             return PAGE_IMPORTS_LOGIN;
@@ -59,11 +68,18 @@ public class ImportServlet extends DeepaMehtaServlet implements KiezAtlas {
                 }
                 setUser(user, session);
                 session.setAttribute("timingInterval", ""+UPDATE_INTERVAL/1000/60);
-                if (worker != null) {
-                    session.setAttribute("workerThread", worker.getState().toString());
-                    session.setAttribute("workerThreadTime", worker.getKickOffTime());
+                session.setAttribute("timingIntervalTwo", ""+UPDATE_INTERVAL/1000/60);
+                if (ehrenamtWorker != null) {
+                    session.setAttribute("workerThread", ehrenamtWorker.getState().toString());
+                    session.setAttribute("workerThreadTime", ehrenamtWorker.getKickOffTime());
                 } else {
                     session.setAttribute("workerThread", "inactive");
+                }
+                if (eventWorker != null) {
+                    session.setAttribute("workerThreadTwo", eventWorker.getState().toString());
+                    session.setAttribute("workerThreadTimeTwo", eventWorker.getKickOffTime());
+                } else {
+                    session.setAttribute("workerThreadTwo", "inactive");
                 }
                 Vector unusables = getUnlocatableGeoObjects();
                 //
@@ -76,40 +92,49 @@ public class ImportServlet extends DeepaMehtaServlet implements KiezAtlas {
             if (session.getAttribute("membership") == null) {
                 session.setAttribute("membership", "Affiliated");
             }
-            session.setAttribute("workerThread", worker.getState().toString());
+            session.setAttribute("workerThread", ehrenamtWorker.getState().toString());
             
             return PAGE_IMPORTS_HOME;
         } else if (action.equals(ACTION_RESET_CRITERIAS)) {
+            // 4 lines of security check
+            Vector workspaces = (Vector) session.getAttribute("importWorkspaces");
+            BaseTopic workspace = (BaseTopic) workspaces.get(0);
+            if (session == null || workspace == null) {
+                return PAGE_IMPORTS_LOGIN;
+            }
+            String workspaceId = params.getValue("workspaceId");
             //
-            Vector taetigkeiten = cm.getTopics(TOPICTYPE_ENG_TAETIGKEIT);
-            Vector einsatzbereiche = cm.getTopics(TOPICTYPE_ENG_EINSATZBEREICH);
-            Vector merkmale = cm.getTopics(TOPICTYPE_ENG_MERKMAL);
-            Vector zielgruppen = cm.getTopics(TOPICTYPE_ENG_ZIELGRUPPE);
-            Vector bezirke = cm.getTopics(TOPICTYPE_ENG_BEZIRK);
-            bezirke.addAll(taetigkeiten);
-            bezirke.addAll(einsatzbereiche);
-            bezirke.addAll(merkmale);
-            bezirke.addAll(zielgruppen);
-            //
-            for (int i = 0; i < bezirke.size(); i++) {
-                BaseTopic category = (BaseTopic) bezirke.get(i);
-                CorporateDirectives newDirectives = as.deleteTopic(category.getID(), 1);
-                newDirectives.updateCorporateMemory(as, session, null, null);
+            if (workspaceId.equals(ENGAGEMENT_WORKSPACE)) {
+                ehrenamtWorker.resetCriteriaFlag();
+            } else if (workspaceId.equals(EVENTMENT_WORKSPACE)) {
+                eventWorker.resetCriteriaFlag();
             }
             return PAGE_IMPORTS_HOME;
         } else if (action.equals(ACTION_SHOW_REPORT)) {
             //
             return PAGE_IMPORTS_HOME;
         } else if (action.equals(ACTION_DO_IMPORT)) {
-            BaseTopic workspace = (BaseTopic) session.getAttribute("importWorkspaces");
+            // 4 lines of security check
+            Vector workspaces = (Vector) session.getAttribute("importWorkspaces");
+            BaseTopic workspace = (BaseTopic) workspaces.get(0);
             if (session == null || workspace == null) {
                 return PAGE_IMPORTS_LOGIN;
             }
-            if (worker == null) {
-                worker = new ImportWorker(as, cm, ENGAGEMENT_WORKSPACE, UPDATE_INTERVAL, directives);
-                worker.setDaemon(true);
+            String workspaceId = params.getValue("workspaceId");
+            //
+            if (workspaceId.equals(ENGAGEMENT_WORKSPACE)) {
+                if (ehrenamtWorker == null) {
+                  ehrenamtWorker = new ImportWorker(as, cm, ENGAGEMENT_WORKSPACE, UPDATE_INTERVAL, directives, "http://buerger-aktiv.index.de/kiezatlas/");
+                  ehrenamtWorker.setDaemon(true);
+                }
+                ehrenamtWorker.run();
+           } else if (workspaceId.equals(EVENTMENT_WORKSPACE)) {
+                if (eventWorker == null) {
+                  eventWorker = new ImportWorkerEvent(as, cm, EVENTMENT_WORKSPACE, UPDATE_INTERVAL, directives, "http://www.berlin.de/land/kalender/export_kiezatlas.php");
+                  eventWorker.setDaemon(true);
+                }
+                eventWorker.run();
             }
-            worker.run();
             //
             return PAGE_IMPORTS_HOME;
         }
@@ -122,18 +147,17 @@ public class ImportServlet extends DeepaMehtaServlet implements KiezAtlas {
             // next line: membership preferences are set according to workspaces
             // Vector workspaces = getWorkspaces(getUserID(session), session);
             //String workspaceId = ((BaseTopic)workspaces.get(0)).getID(); // take the first best
-            BaseTopic workspace = as.getLiveTopic(ENGAGEMENT_WORKSPACE, 1);
-            Vector criterias = getKiezCriteriaTypes(ENGAGEMENT_WORKSPACE);
-            Hashtable critWithNumbers = new Hashtable(criterias.size());
-            for (int i = 0; i < criterias.size(); i++) {
-                BaseTopic topic = (BaseTopic) criterias.get(i);
-                Vector instancesOfTopic = cm.getTopics(topic.getID());
-                critWithNumbers.put(topic.getName(), instancesOfTopic.size());
-            }
-            Vector geoObjects = getGeoObjectInformation(ENGAGEMENT_WORKSPACE);
-			session.setAttribute("importWorkspaces", workspace);
-            session.setAttribute("importCriterias", critWithNumbers);
-            session.setAttribute("geoObjects", geoObjects);
+            BaseTopic workspaceEngagement = as.getLiveTopic(ENGAGEMENT_WORKSPACE, 1);
+            BaseTopic workspaceEvent = as.getLiveTopic(EVENTMENT_WORKSPACE, 1);
+            Vector workspaces = new Vector();
+            workspaces.add(workspaceEngagement);
+            workspaces.add(workspaceEvent);
+            //
+            Vector geoProjectObjects = getGeoObjectInformation(ENGAGEMENT_WORKSPACE);
+            Vector geoEventObjects = getGeoObjectInformation(EVENTMENT_WORKSPACE);
+            session.setAttribute("importWorkspaces", workspaces);
+            session.setAttribute("geoProjectObjects", geoProjectObjects);
+            session.setAttribute("geoEventObjects", geoEventObjects);
 		} else if (page.equals(PAGE_REPORT_HOME)) {
             session.setAttribute("report", null);
             // 
@@ -144,11 +168,15 @@ public class ImportServlet extends DeepaMehtaServlet implements KiezAtlas {
     
     public void destroy() {
         // worker.done();
-        worker.setThreadDead();
+        ehrenamtWorker.setThreadDead();
+        eventWorker.setThreadDead();
         // call stop method, too
-        worker.done();
-        System.out.println("---- WorkerThread destroyed (" + worker.getClass() + ") ---");
-        worker = null;
+        ehrenamtWorker.done();
+        eventWorker.done();
+        System.out.println("---- WorkerThread destroyed (" + ehrenamtWorker.getClass() + ") ---");
+        System.out.println("---- WorkerThread destroyed (" + eventWorker.getClass() + ") ---");
+        ehrenamtWorker = null;
+        eventWorker = null;
         System.out.println("--- DeepaMehtaServlet destroyed (" + getClass() + ") ---");
 		as.shutdown();
 	}
@@ -160,6 +188,7 @@ public class ImportServlet extends DeepaMehtaServlet implements KiezAtlas {
 
     private Vector getUnlocatableGeoObjects() {
         Vector allTopics = cm.getTopics(TOPICTYPE_ENG_PROJECT);
+        allTopics.addAll(cm.getTopics(TOPICTYPE_EVT_EVENT));
         Vector unusableTopics = new Vector();
         for (int i = 0; i < allTopics.size(); i++) {
             BaseTopic geoTopic = (BaseTopic) allTopics.get(i);

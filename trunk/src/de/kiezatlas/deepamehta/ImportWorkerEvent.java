@@ -8,7 +8,6 @@ import de.deepamehta.service.ApplicationService;
 import de.deepamehta.service.CorporateDirectives;
 import de.deepamehta.service.CorporateMemory;
 import de.deepamehta.service.Session;
-import de.deepamehta.topics.EmailTopic;
 import de.deepamehta.topics.LiveTopic;
 import de.deepamehta.topics.TypeTopic;
 import de.deepamehta.util.DeepaMehtaUtils;
@@ -39,7 +38,7 @@ import org.xml.sax.SAXParseException;
  *
  * @author Malte Reißig (mre@deepamehta.de)
  */
-public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtlas {
+public class ImportWorkerEvent extends Thread implements DeepaMehtaConstants, KiezAtlas {
 
     private boolean threadDone = false;
     private boolean threadDead = false;
@@ -53,7 +52,7 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
     private String workerStarted;
     private String serviceURL;
 
-    public ImportWorker(ApplicationService as, CorporateMemory cm, String workspaceId, long interval, 
+    public ImportWorkerEvent(ApplicationService as, CorporateMemory cm, String workspaceId, long interval,
             CorporateDirectives directives, String url) {
 
         this.cm = cm;
@@ -78,7 +77,7 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
 
     public void resetCriteriaFlag() {
         resetCriteriaFlag = true;
-        System.out.println("[ImportWorker] has set resetCriteriaFlag for scheduled ehrenemt import");
+        System.out.println("[ImportWorker] has set resetCriteriaFlag for scheduled event import");
     }
 
     public void done() {
@@ -132,58 +131,46 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
     }
 
     private void publishData(Vector topicIds) {
-        System.out.println("[ImportWorker] is starting to gather coordinates and publish \""+topicIds.size()+"\" topics into : " + cm.getTopic(ImportServlet.CITYMAP_TO_PUBLISH, 1).getName());// + " " +
-        //
-        Vector unusable = new Vector(); // collection of GeoObjects without GPS Data
+        System.out.println("[ImportWorker] is starting to gather coordinates and publish \""+topicIds.size()+"\" topics into : " + cm.getTopic(ImportServlet.EVENTMAP_TO_PUBLISH, 1).getName());// + " " +
+        Vector unusable = new Vector(); // collection of GeoObjects with GPS Data
         for (int i = 0; i < topicIds.size(); i++) {
             GeoObjectTopic baseTopic = (GeoObjectTopic) as.getLiveTopic(((String)topicIds.get(i)), 1);
             // System.out.println("[GPSINFO] is LAT: " + as.getTopicProperty(baseTopic, PROPERTY_GPS_LAT) + " LON: " + as.getTopicProperty(baseTopic, PROPERTY_GPS_LONG));
             BaseTopic addressTopic = baseTopic.getAddress();
             if (as.getTopicProperty(baseTopic.getID(), 1, PROPERTY_GPS_LAT).equals("")) {
                 System.out.println("[ImportWorker] WARNING ***  \""+addressTopic.getName()+"\" is without GPS Data... dropping placement in CityMap");
-                // ### ToDo: Reporting Functionality
-                sendNotificationEmail(baseTopic.getName(), addressTopic.getName());
+                // ###TODO: Report Functionality
                 unusable.add(baseTopic); //
             } else if (as.getTopicProperty(addressTopic, PROPERTY_STREET).equals("über Gute-Tat.de")) {
                 unusable.add(baseTopic);
             } else {
                 // System.out.println(">>>> creating ViewTopic for " + baseTopic.getName() + " (" + baseTopic.getID() + ")" );
-                as.createViewTopic(ImportServlet.CITYMAP_TO_PUBLISH, 1, null, baseTopic.getID(), 1, 0, 0, false);
+                as.createViewTopic(ImportServlet.EVENTMAP_TO_PUBLISH, 1, null, baseTopic.getID(), 1, 0, 0, false);
             }
             // System.out.println(">>> ready to publish geoObject " +baseTopic.getName()+" ("+baseTopic.getID()+")");
         }
         int validEntries = topicIds.size() - unusable.size();
         //
-        System.out.println("[ImportWorker] stored " + validEntries + " in public cityMap \"" +as.getTopicProperty(ImportServlet.CITYMAP_TO_PUBLISH, 1, PROPERTY_WEB_ALIAS)+ "\"");
+        System.out.println("[ImportWorker] stored " + validEntries + " in public cityMap \"" +as.getTopicProperty(ImportServlet.EVENTMAP_TO_PUBLISH, 1, PROPERTY_WEB_ALIAS)+ "\"");
         System.out.println("[ImportWorker] didn`t published " + unusable.size() + " unlocatable \""+getWorkspaceGeoType(workspaceId).getName()+"e\" ");
-        /**for (int i = 0; i < unusable.size(); i++) {
-         * ### ToDo: report unusuable bojects in import interfaces
-            BaseTopic geoObject = (BaseTopic) unusable.get(i);
-            addToDirectoveToDelete(geoObject.getID());
-            Vector relatedTopics = as.getRelatedTopics(geoObject.getID(), ASSOCTYPE_ASSOCIATION, 2);
-            for (int j = 0; j < relatedTopics.size(); j++) {
-                BaseTopic relatedTopic = (BaseTopic) relatedTopics.get(j);
-                if (relatedTopic.getType().equals(ImportServlet.TOPICTYPE_ENG_BEZIRK) ||
-                        relatedTopic.getType().equals(ImportServlet.TOPICTYPE_ENG_ZIELGRUPPE) ||
-                        relatedTopic.getType().equals(ImportServlet.TOPICTYPE_ENG_EINSATZBEREICH) ||
-                        relatedTopic.getType().equals(ImportServlet.TOPICTYPE_ENG_TAETIGKEIT) ||
-                        relatedTopic.getType().equals(ImportServlet.TOPICTYPE_ENG_MERKMAL)) {
-                } else if (cm.getAssociationIDs(relatedTopic.getID(), 1).size() <= 1) {
-                    // if this address/person or webpage topic has just one or less assocs, it`s ok to delete it
-                    addToDirectoveToDelete(relatedTopic.getID());
-                }
-            }
-            //return null;
-        }
-        if (unusable.size() > 0) {
-            // delete all unusable topics and their related once
-            System.out.println("[ImportWorker] deleted " + unusable.size() + " objects cause of missspelled address");
-            directives.updateCorporateMemory(as, null, null, null);
-        }*/
+        //
     }
 
     public String getKickOffTime() {
         return workerStarted;
+    }
+
+    /** remove criteria system from configured workspace */
+    private void clearCriterias() {
+        Vector bezirke = cm.getTopics(ImportServlet.TOPICTYPE_EVT_BEZIRK);
+        Vector einsatzbereiche = cm.getTopics(ImportServlet.TOPICTYPE_EVT_KATEGORIE);
+        bezirke.addAll(einsatzbereiche);
+        //
+        for (int i = 0; i < bezirke.size(); i++) {
+            BaseTopic category = (BaseTopic) bezirke.get(i);
+            CorporateDirectives newDirectives = as.deleteTopic(category.getID(), 1);
+            newDirectives.updateCorporateMemory(as, null, null, null);
+        }
     }
 
     /** completely remove all topics created by the last import
@@ -200,11 +187,8 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
             Vector relatedTopics = as.getRelatedTopics(baseTopic.getID(), ASSOCTYPE_ASSOCIATION, 2);
             for (int j = 0; j < relatedTopics.size(); j++) {
                 BaseTopic relatedTopic = (BaseTopic) relatedTopics.get(j);
-                if (relatedTopic.getType().equals(ImportServlet.TOPICTYPE_ENG_BEZIRK) ||
-                        relatedTopic.getType().equals(ImportServlet.TOPICTYPE_ENG_ZIELGRUPPE) ||
-                        relatedTopic.getType().equals(ImportServlet.TOPICTYPE_ENG_EINSATZBEREICH) ||
-                        relatedTopic.getType().equals(ImportServlet.TOPICTYPE_ENG_TAETIGKEIT) ||
-                        relatedTopic.getType().equals(ImportServlet.TOPICTYPE_ENG_MERKMAL)) {
+                if (relatedTopic.getType().equals(ImportServlet.TOPICTYPE_EVT_BEZIRK) ||
+                        relatedTopic.getType().equals(ImportServlet.TOPICTYPE_EVT_KATEGORIE)) {
                     //
                 } else {
                     // store topicID in Vector for later removal
@@ -227,25 +211,6 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
         }
     }
 
-    /** remove criteria system from configured workspace */
-    private void clearCriterias() {
-        Vector taetigkeiten = cm.getTopics(ImportServlet.TOPICTYPE_ENG_TAETIGKEIT);
-        Vector einsatzbereiche = cm.getTopics(ImportServlet.TOPICTYPE_ENG_EINSATZBEREICH);
-        Vector merkmale = cm.getTopics(ImportServlet.TOPICTYPE_ENG_MERKMAL);
-        Vector zielgruppen = cm.getTopics(ImportServlet.TOPICTYPE_ENG_ZIELGRUPPE);
-        Vector bezirke = cm.getTopics(ImportServlet.TOPICTYPE_ENG_BEZIRK);
-        bezirke.addAll(taetigkeiten);
-        bezirke.addAll(einsatzbereiche);
-        bezirke.addAll(merkmale);
-        bezirke.addAll(zielgruppen);
-        //
-        for (int i = 0; i < bezirke.size(); i++) {
-            BaseTopic category = (BaseTopic) bezirke.get(i);
-            CorporateDirectives newDirectives = as.deleteTopic(category.getID(), 1);
-            newDirectives.updateCorporateMemory(as, null, null, null);
-        }
-    }
-    
     /** performs a clear deletion of a topic with all it`s associations and it`s removal from all maps*/
     private void directiveDeletion(String topicID) {
 		// CorporateDirectives myDirective = as.deleteTopic(topicID, 1);	// ### version=1
@@ -262,7 +227,7 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
 	}
 
     /**
-     * just reads in THE xml String from ehrenamt.de and saves every single project into the kiezatlas cm
+       * just reads in THE xml String from berlin.de and saves every single event into the kiezatlas cm
      *
      * @param xmlData
      * @return
@@ -289,12 +254,9 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
         // iterate over projects
         for(int p = 0; p < amountOfProjects; p++) {
             // fields of each project
-            String projectName = "", originId = "", contactPerson = "", projectUrl = "", postcode = "", streetNr = "", bezirk = "", orgaName = "",
+            String projectName = "", eventDescription = "", originId = "", contactPerson = "", projectUrl = "", postcode = "", streetNr = "", bezirk = "", orgaName = "",
                     orgaWebsite = "", orgaContact = "", timeStamp = "";
-            Vector merkmale = new Vector();
-            Vector taetigkeiten = new Vector();
             Vector zielgruppen = new Vector();
-            Vector einsatzbereiche = new Vector();
             NodeList projectDetail = listOfProjects.item(p).getChildNodes();
             // System.out.println(">> projectDetail has childs in number : " + projectDetail.getLength());
             for (int i = 0; i < projectDetail.getLength(); i++) {
@@ -333,18 +295,6 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
                                             // these are target groups for this project
                                             // System.out.println("> zielgruppen: "); // + anotherNode.getNodeValue());
                                             zielgruppen = readInCategories(anotherNode.getNodeValue());
-                                        } else if (contentNode.getNodeName().equals("einsatzbereiche")) {
-                                            // these elements describe the fields of work
-                                            // System.out.println("> einsatzbereiche: "); // + anotherNode.getNodeValue());
-                                            einsatzbereiche = readInCategories(anotherNode.getNodeValue());
-                                        } else if (contentNode.getNodeName().equals("taetigkeit")) {
-                                            // these elements describe the type of work
-                                            // System.out.println("> taetigkeiten: "); //  + anotherNode.getNodeValue());
-                                            taetigkeiten = readInCategories(anotherNode.getNodeValue());
-                                        } else if (contentNode.getNodeName().equals("merkmale")) {
-                                            // these elements describe the attributes of work
-                                            // System.out.println("> merkmale: "); // + anotherNode.getNodeValue());
-                                            merkmale = readInCategories(anotherNode.getNodeValue());
                                         } else {
                                             System.out.println("*** ImportServlet found unknown category for a POI while importing from ehrenamt.");
                                         }
@@ -358,6 +308,9 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
                                     } else if (detailNode.getNodeName().equals("projectname")) {
                                         // System.out.println("- Name is \" " + contentNode.getNodeValue() + "\"");
                                         projectName = contentNode.getNodeValue();
+                                    } else if (detailNode.getNodeName().equals("projectdescr")) {
+                                        // System.out.println("- Name is \" " + contentNode.getNodeValue() + "\"");
+                                        eventDescription = contentNode.getNodeValue();
                                     } else if (detailNode.getNodeName().equals("projecturl")) {
                                         // obsolete ? all needed infos should be right here..
                                         projectUrl = contentNode.getNodeValue();
@@ -384,18 +337,9 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
             }
             // projectData was gathered
             // store information per project now
-            String topicID = saveProjectData(originId, projectName, contactPerson, projectUrl, postcode, streetNr, bezirk,
-                        orgaName, orgaWebsite, orgaContact, timeStamp,
-                    merkmale, taetigkeiten, zielgruppen, einsatzbereiche);
-            //if (topicID == null) {
-                //ignore topic, failed to safe data
-              //  System.out.println("Missspelled Address Item: " + projectName);
-                //misspelledObjects.add(projectName);
-            //} else {
-                // add topicID
-                topicIds.add(topicID);
-            //}
-            // ???
+            String topicID = saveProjectData(originId, projectName, eventDescription, contactPerson, projectUrl, postcode, streetNr, bezirk,
+                        orgaName, orgaWebsite, orgaContact, timeStamp, zielgruppen);
+            topicIds.add(topicID);
         }//end of for loop with p for projects
         System.out.println("[ImportWorker] stored data at "+DeepaMehtaUtils.getTime() +" for a total no of " + amountOfProjects + " " + getWorkspaceGeoType(workspaceId).getName());
     } catch (SAXParseException err) {
@@ -413,22 +357,25 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
     }
 
     /**
-     *  save one item "Project" from ehrenamt.de into the corporate memory with
+     *  save one item "Event" into the corporate memory with
      *  reusing existing addresses, webpages and persons
      *  building up the categorySystem by each item which is in some categories
      */
-    private String saveProjectData(String originId, String projectName, String contactPerson, String projectUrl, String postcode, String streetNr, String bezirk, String orgaName,
-            String orgaWebsite, String orgaContact, String timeStamp, Vector merkmale, Vector taetigkeiten, Vector zielgruppen, Vector einsatzbereiche) {
+    private String saveProjectData(String originId, String eventName, String eventDescr, String contactPerson, String projectUrl, String postcode, String streetNr, String bezirk, String orgaName,
+            String orgaWebsite, String orgaContact, String timeStamp, Vector zielgruppen) {
         String topicId = "";
         String address = streetNr + ", " + postcode + " " + bezirk;
         // storing data in corporate memory
         String geoTypeId = getWorkspaceGeoType(workspaceId).getID();
-        LiveTopic geoObjectTopic = as.createLiveTopic(as.getNewTopicID(), geoTypeId, projectName, null);
+        LiveTopic geoObjectTopic = as.createLiveTopic(as.getNewTopicID(), geoTypeId, eventName, null);
         //
-        as.setTopicProperty(geoObjectTopic, PROPERTY_NAME, projectName);
+        as.setTopicProperty(geoObjectTopic, PROPERTY_NAME, eventName);
+        String descr = "";
+        if (eventDescr.length() > 256) { descr = eventDescr.substring(0, 256) + " ..."; } else { descr = eventDescr; }
+        as.setTopicProperty(geoObjectTopic, ImportServlet.PROPERTY_EVENT_DESCRIPTION, descr);
         as.setTopicProperty(geoObjectTopic, ImportServlet.PROPERTY_PROJECT_ORGANISATION, orgaName);
         as.setTopicProperty(geoObjectTopic, ImportServlet.PROPERTY_PROJECT_ORIGIN_ID, originId);
-        as.setTopicProperty(geoObjectTopic, ImportServlet.PROPERTY_PROJECT_LAST_MODIFIED, timeStamp);
+        as.setTopicProperty(geoObjectTopic, ImportServlet.PROPERTY_EVENT_TIME, timeStamp);
         as.setTopicProperty(geoObjectTopic, PROPERTY_LOCKED_GEOMETRY, "off");
         //
         LiveTopic webpageTopic;
@@ -473,6 +420,7 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
             addressTopic = as.getLiveTopic(knownAddress);
         } else {
             addressTopic = as.createLiveTopic(as.getNewTopicID(), TOPICTYPE_ADDRESS, streetNr, null);
+            System.out.println(">>> created new Address for " + streetNr);
         }
         // add postalcode to address topic
         as.setTopicProperty(addressTopic, PROPERTY_POSTAL_CODE, postcode);
@@ -486,6 +434,7 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
         }
         // fetch GPS Data from GeoCoder
         GeoObjectTopic geoObject = (GeoObjectTopic) geoObjectTopic;
+        // ### fixme: if address is just "Berlin" which seems to be happening, then G. has a coordinate for that spot !!!
         geoObject.setGPSCoordinates(directives);
         // bezirk label special move
         if (bezirk.startsWith("Berlin-") || bezirk.startsWith("berlin-")) {
@@ -493,32 +442,32 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
             bezirk = bezirk.substring(7);
         }
         // one to one
-        BaseTopic bezirkAlreadyKnown = cm.getTopic(ImportServlet.TOPICTYPE_ENG_BEZIRK, bezirk, 1);
+        BaseTopic bezirkAlreadyKnown = cm.getTopic(ImportServlet.TOPICTYPE_EVT_BEZIRK, bezirk, 1);
         if (bezirkAlreadyKnown != null) {
             // connect to known Bezirk
             // System.out.println(">> reusing BezirkTopic \""+bezirkAlreadyKnown.getName()+"\"");
             as.createLiveAssociation(as.getNewAssociationID(), ASSOCTYPE_ASSOCIATION, geoObjectTopic.getID(), bezirkAlreadyKnown.getID(), null, null);
         } else {
             // new Bezirk and connect to
-            System.out.println(">> creating "+as.getLiveTopic(ImportServlet.TOPICTYPE_ENG_BEZIRK, 1).getName()+"Topic \""+bezirk+"\"");
-            LiveTopic bezirkTopic = as.createLiveTopic(as.getNewTopicID(), ImportServlet.TOPICTYPE_ENG_BEZIRK, bezirk, null);
+            System.out.println(">> creating "+as.getLiveTopic(ImportServlet.TOPICTYPE_EVT_BEZIRK, 1).getName()+" Topic \""+bezirk+"\"");
+            LiveTopic bezirkTopic = as.createLiveTopic(as.getNewTopicID(), ImportServlet.TOPICTYPE_EVT_BEZIRK, bezirk, null);
             as.createLiveAssociation(as.getNewAssociationID(), ASSOCTYPE_ASSOCIATION, geoObjectTopic.getID(), bezirkTopic.getID(), null, null);
         }
         // one to many
         for (int i = 0; i < zielgruppen.size(); i++) {
             String zielgruppenName = (String) zielgruppen.get(i);
-            BaseTopic knownZielgruppe = cm.getTopic(ImportServlet.TOPICTYPE_ENG_ZIELGRUPPE, zielgruppenName, 1);
+            BaseTopic knownZielgruppe = cm.getTopic(ImportServlet.TOPICTYPE_EVT_KATEGORIE, zielgruppenName, 1);
             if (knownZielgruppe != null) {
                 // connect to known cat
-                // System.out.println(">> reusing ZielgruppenTopic \""+catAlreadyKnown.getName()+"\"");
+                // System.out.println(">> reusing ZielgruppenTopic \""+knownZielgruppe.getName()+"\"");
                 as.createLiveAssociation(as.getNewAssociationID(), ASSOCTYPE_ASSOCIATION, geoObjectTopic.getID(), knownZielgruppe.getID(), null, null);
             } else {
-                System.out.println(">> creating "+as.getLiveTopic(ImportServlet.TOPICTYPE_ENG_ZIELGRUPPE, 1).getName()+"Topic \""+zielgruppenName+"\"");
-                LiveTopic newZielgruppe = as.createLiveTopic(as.getNewTopicID(), ImportServlet.TOPICTYPE_ENG_ZIELGRUPPE, zielgruppenName, null);
+                System.out.println(">> creating "+as.getLiveTopic(ImportServlet.TOPICTYPE_EVT_KATEGORIE, 1).getName()+"Topic \""+zielgruppenName+"\"");
+                LiveTopic newZielgruppe = as.createLiveTopic(as.getNewTopicID(), ImportServlet.TOPICTYPE_EVT_KATEGORIE, zielgruppenName, null);
                 as.createLiveAssociation(as.getNewAssociationID(), ASSOCTYPE_ASSOCIATION, geoObjectTopic.getID(), newZielgruppe.getID(), null, null);
             }
         }
-        // one to many
+        /** / one to many
         for (int i = 0; i < taetigkeiten.size(); i++) {
             String taetigkeitName = (String) taetigkeiten.get(i);
             BaseTopic knownTaetigkeit = cm.getTopic(ImportServlet.TOPICTYPE_ENG_TAETIGKEIT, taetigkeitName, 1);
@@ -559,7 +508,7 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
                 LiveTopic newEinsatzbereich = as.createLiveTopic(as.getNewTopicID(), ImportServlet.TOPICTYPE_ENG_EINSATZBEREICH, einsatzbereichsName, null);
                 as.createLiveAssociation(as.getNewAssociationID(), ASSOCTYPE_ASSOCIATION, geoObjectTopic.getID(), newEinsatzbereich.getID(), null, null);
             }
-        }
+        }**/
         return geoObjectTopic.getID();
     }
 
@@ -635,62 +584,26 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
         return cm.getTopics(geoType.getID());
     }
 
-    // --- copy of BrowseServlet
-
-    private void sendNotificationEmail(String projectName, String addressData) {
-      try {
-        // GeoObjectTopic inst = (GeoObjectTopic) as.getLiveTopic(instID, 1);
-        // "from"
-        String from = as.getEmailAddress("t-rootuser");		// ###
-        if (from == null || from.equals("")) {
-          throw new DeepaMehtaException("email address of root user is unknown");
+	private Vector getWorkspaces(String userID, Session session) {
+		Vector workspaces = new Vector();
+		//
+        session.setAttribute("membership", "");
+        Vector ws = as.getRelatedTopics(userID, SEMANTIC_MEMBERSHIP, TOPICTYPE_WORKSPACE, 2);
+        Enumeration e = ws.elements();
+        if (!e.hasMoreElements()) {
+            Vector aws = as.getRelatedTopics(userID, SEMANTIC_AFFILIATED_MEMBERSHIP, TOPICTYPE_WORKSPACE, 2);
+            session.setAttribute("membership", "Affiliated");
+            e = aws.elements();
         }
-        // "to"
-        String to = "mre@newthinking.de";
-        // "subject"
-        String subject = "Ehrenamtsatlas: fehlerhafter Addresseintrag in der Ehrenamtsdatenbank \"" + projectName + "\"";
-        // "body"
-        String body = "Dies ist eine automatische Benachrichtigung von www.kiezatlas.de\r\r" +
-          "Dem Ehrenamtsprojekt \"" + projectName + "\" konnte nicht korrekt verortet werden:\r\r" +
-          "------------------------------\r" +
-          "Adresseintrag: " + addressData + "\r" +
-          "------------------------------\r\r" +
-          "\r" +
-          "www.berlin.de/buergeraktiv/atlas\r\r" +
-          "Mit freundlichen Grüßen\r" +
-          "ihr Kiezatlas-Team";
-        //
-        System.out.println(">>> send notification email");
-        System.out.println("  > SMTP server: \"" + as.getSMTPServer() + "\"");	// as.getSMTPServer() throws DME
-        System.out.println("  > from: \"" + from + "\"");
-        System.out.println("  > to: \"" + to + "\"");
-        // send email
-        EmailTopic.sendMail(as.getSMTPServer(), from, to, subject, body);		// EmailTopic.sendMail() throws DME
-      } catch (Exception e) {
-        System.out.println("*** notification email not send (" + e + ")");
-      }
-    }
-
-    private Vector getWorkspaces(String userID, Session session) {
-      Vector workspaces = new Vector();
-      //
-          session.setAttribute("membership", "");
-          Vector ws = as.getRelatedTopics(userID, SEMANTIC_MEMBERSHIP, TOPICTYPE_WORKSPACE, 2);
-          Enumeration e = ws.elements();
-          if (!e.hasMoreElements()) {
-              Vector aws = as.getRelatedTopics(userID, SEMANTIC_AFFILIATED_MEMBERSHIP, TOPICTYPE_WORKSPACE, 2);
-              session.setAttribute("membership", "Affiliated");
-              e = aws.elements();
-          }
-      while (e.hasMoreElements()) {
-        BaseTopic w = (BaseTopic) e.nextElement();
-        //if (isKiezatlasWorkspace(w.getID())) {
-        workspaces.addElement(w);
-        //}
-      }
-      //
-      return workspaces;
-    }
+		while (e.hasMoreElements()) {
+			BaseTopic w = (BaseTopic) e.nextElement();
+			//if (isKiezatlasWorkspace(w.getID())) {
+			workspaces.addElement(w);
+			//}
+		}
+		//
+		return workspaces;
+	}
 
     /**
      * returns null if no topictype whihc is assigned to the given workspace,

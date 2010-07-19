@@ -346,12 +346,17 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 
 	// ---
 
-    private String getAddressString() {
+  /** loadGPSCoordinates is the only one who uses this */
+  private String getAddressString() {
         String result;
         StringBuffer address = new StringBuffer();
         // Related Address Topic
         BaseTopic add = getAddress();
         if (add != null) {
+            if (add.getName().equals("")) {
+              System.out.println("*** loadGPSCoordinates.WARNING: addressString is empty for: " + getName());
+              return "";
+            } // no streetname and housenumber available return empty all to GeoCoder
             // Streetname and Housenumber
             address.append(add.getName());
         } else {
@@ -365,7 +370,7 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
         return result;
 	}
 
-    public BaseTopic getAddress() {
+  public BaseTopic getAddress() {
 		try {
 			return as.getRelatedTopic(getID(), ASSOCTYPE_ASSOCIATION, TOPICTYPE_ADDRESS, 2, true);		// emptyAllowed=true
 		} catch (AmbiguousSemanticException e) {
@@ -563,6 +568,7 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
     public String[] loadGPSCoordinates(CorporateDirectives directives) {
         //
         String givenAddress = getAddressString();
+        if (givenAddress.equals("")) return new String[4]; // skip gps fetch for just " Berlin" without a street
         StringBuffer requestUrl = new StringBuffer("http://maps.google.com/maps/geo?");
         requestUrl.append("q=");
         requestUrl.append(convertAddressForRequest(givenAddress));
@@ -581,7 +587,7 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
                     //System.out.println(inputLine);
                     String[] points = inputLine.split(",");
                     if (points[2].equals("0") && points[3].equals("0")) {
-                        System.out.println("    geoCoder is lazy, could not locate GeoObjects ("+this.getAddressString()+") G coordinates, trying again " + i);
+                        System.out.println("[WARNING] .. geoCoder is lazy, could not locate GeoObjects ("+this.getAddressString()+") G coordinates, trying again " + i);
                     } else {
                         return points;
                     }
@@ -593,10 +599,11 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
                 return new String[4];
             }
         }
-        System.out.println("    GeoObjectTopic ("+this.getID()+") was not able to load coordinates for "+convertAddressForRequest(givenAddress)+" !");
+        System.out.println("[WARNING] GeoObjectTopic ("+this.getID()+") was not able to load coordinates for "+convertAddressForRequest(givenAddress)+" !");
         return new String[4];
     }
 
+    /** */
     public void setGPSCoordinates(CorporateDirectives directives) {
         boolean emptyLat = (!as.getTopicProperty(this, PROPERTY_GPS_LAT).equals("")) ? true : false;
         boolean emptyLong = (!as.getTopicProperty(this, PROPERTY_GPS_LONG).equals("")) ? true : false;

@@ -147,7 +147,7 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 			return PAGE_GEO_LIST;
 		// info
 		} else if (action.equals(ACTION_SHOW_GEO_INFO)) {
-            // ### should also set the current HotspotMarker (e.g. after searchByCategory)
+      // ### should also set the current HotspotMarker (e.g. after searchByCategory)
 			String geoID = params.getValue("id");
 			setSelectedGeo(geoID, session);
 			TopicBean topicBean = as.createTopicBean(geoID, 1);
