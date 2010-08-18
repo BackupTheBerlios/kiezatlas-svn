@@ -1,0 +1,250 @@
+<!-- This comment will put IE 6, 7 and 8 in quirks mode -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+  <title>Ehrenamtsatlas - Bürgeraktiv im Kiezatlas</title>
+    <link rel="stylesheet" type="text/css" href="land.css">
+    <link rel="stylesheet" type="text/css" href="landmaps.css">
+    <script type="text/javascript" src="kiezatlas.js"></script>
+    <script type="text/javascript" src="OpenLayers.js"></script>
+    <script type="text/javascript" src="jquery-1.3.2.js"></script>
+    <script type="text/javascript" src="http://maps.google.com/maps?file=api&v=2&oe=utf-8&key=ABQIAAAADev2ctFkze28KEcta5b4WBSQDgFJvORzMhuwLQZ9zEDMQLdVUhTWXHB2vS0W0TdlEbDiH_qzhBEZ5A"></script>
+    <script type="text/javascript">
+      var topicId = 't-331302'; // CityMap TopicID
+  	  var workspaceId = 't-331306'; // Ehrenamt Workspace TopicId
+  	  var crtCritIndex = '0'; // initial criteria selected
+  	  // var originId = '<?php echo $originId ?>';
+	    var mapTopics = null; //eval('(' + <?php echo json_encode($mapTopics) ?> + ')');
+	    var workspaceCriterias = null; // eval('(' + <?php echo json_encode($workspaceCriterias) ?> + ')');
+	    var myLayerSwitcher = null;
+	    var gMarkers = [];
+	    var workspaceInfos = null;
+	    var allFeatures = [];
+	    var hotspots = [];
+	    var footerMessage = '<b><a href="http://www.kiezatlas.de">Kiezatlas</a></b> is powered by <a href="http://www.deepamehta.de">DeepaMehta</a>';
+	    var slimWidth = true; // if set to true totalWidth, the following totalidth is used
+    	  var helpVisible = false;
+	    var totalWidth = 1000; // 953
+	    var headerGap = 63;
+	    var map = "";
+	    var bounds = "";
+	    var markerGroupIds = new Array();
+	    var markerLayer = "";
+	    // gui elements
+	    var sideBarVisible = true;
+	    var debug = false;
+	    if (debug) {
+	      var debug_window = window.open('','','width=400,height=600,scrollbars=1');
+	    }
+	    var gKey = 'ABQIAAAADev2ctFkze28KEcta5b4WBSQDgFJvORzMhuwLQZ9zEDMQLdVUhTWXHB2vS0W0TdlEbDiH_qzhBEZ5A';
+	    //
+	    jQuery(document).ready(function(){
+	    	// register resize
+	      jQuery(window).resize(function() { 
+	        handleResize(); 
+	      });
+	      var myMapTopics = null;
+	      // do the ajax init is currently #unused
+	      loadCityMapTopics(topicId, workspaceId, myMapTopics);
+	      var loadedCriterias = null;
+	      loadWorkspaceCriterias(workspaceId, loadedCriterias);
+	      // log('ajaXinitialization for ' + myMapTopics.topics.length + ' mapTopics and '+loadedCriterias.length+ ' criterias was fine!!');
+	      log("mapTopics" + mapTopics);
+	      log("workspaceCrits" + workspaceCriterias);
+	      loadWorkspaceInfos(workspaceId);
+	      getCityMapName(topicId); // fetch and set CityMapName
+	      handleResize(); // do the layout
+	      // check if a special criteria was set through an entry url
+	      if (crtCritIndex >= workspaceCriterias.result.length) { 
+	        crtCritIndex = w;
+	      }
+	      // cityMap setup
+	      bounds = calculateInitialBounds();
+	      // after the dom is loaded we can init our parts of the app
+	      jQuery(window).load(function() {
+	      	document.namespaces;
+	      	openLayersInit(bounds);
+				  gMarkers = setupOpenMarkers();
+				  // initialize Features and their control
+				  // clusters = findInitialClusters(gMarkers);
+				  // createVectorizedMarkerLayer(gMarkers, map);
+				  initLayerAllFeatures(gMarkers, map);    
+				  showCritCatList();
+				  setWorkspaceInfos();
+				  inputFieldBehaviour();
+				  if (typeof originId != "undefined") {
+				    	log("log-originLinkToTopicID: " + originId);
+				    	selectAndShowInMap(originId);
+				    	// ### TODO: über gute-Tat.de
+		    	}
+				  // drawAllOpenMarkers(gMarkers, map);
+				  map.events.register("zoomend", map, redrawAfterZoomOperation);
+      	});
+      });
+	  
+      function openLayersInit(openBounds){
+	      var options = {
+		      projection: new OpenLayers.Projection("EPSG:900913"),
+		      displayProjection: new OpenLayers.Projection("EPSG:4326"),
+		      units: "m",
+		      maxResolution: 156543.0339,
+		      maxExtent: new OpenLayers.Bounds(-20037508.34, -20037508.34, 20037508.34, 20037508.34)
+	      };
+	      map = new OpenLayers.Map('map', options);
+	      var mapnik = new OpenLayers.Layer.TMS("OpenStreetMap", "http://tile.openstreetmap.org/", { type: 'png', 
+	        getURL: osm_getTileURL, displayOutsideMaxExtent: true, attribution: '<a href="http://www.openstreetmap.org/">OpenStreetMap</a>', 
+          numZoomLevels: 25 }
+	      );
+	      var gmap = new OpenLayers.Layer.Google("Google Maps", {sphericalMercator:true, numZoomLevels: 25});
+	      map.addLayers([gmap, mapnik]); // , markerLayer
+	      // MapControl Setup
+	      nav = new OpenLayers.Control.NavigationHistory();
+	      // parent control must be added to the map
+	      map.addControl(nav);
+	      //
+	      panel = new OpenLayers.Control.Panel(
+			    {div: document.getElementById("navPanel")}
+	      );
+		    myLayerSwitcher = new OpenLayers.Control.LayerSwitcher({
+		      'div':OpenLayers.Util.getElement('mapSwitcher'), 
+		      activeColor: "white"
+	      });
+		    map.addControl(myLayerSwitcher);
+	      panel.addControls([nav.next, nav.previous]);
+	      map.addControl(panel);
+		    // layerSwitcher, NavigationHistory, Panel
+	      // setBounds
+	      log('[Info] mapBounds will be set to: ' + openBounds);
+	      map.zoomToExtent(openBounds.transform(map.displayProjection, map.projection), 14);
+      }
+
+	    function setLayout(fullH, fullW) {
+	      var sideW = 320;
+	      if (slimWidth) {
+	        // if a slimWidth is wanted, use totalWidth as fullWidth
+	        fullW = totalWidth; // subtract scrollbar.. just for berlin.de
+	        var imgTag = '<img id="resizeButton" alt="Volle Breitseite" onclick="javascript:toggleWidth(event)" width="15" height="15" src="img/go-last.png">';
+	        jQuery("#headerButtons").html(imgTag);
+	      } else {
+	        fullW = fullW;
+	        var imgTag = '<img id="resizeButton" alt="Berliner Breitseite" onclick="javascript:toggleWidth(event)" width="15" height="15" src="img/go-first.png">';
+	        jQuery("#headerButtons").html(imgTag);
+	      }
+	      var topHeight = jQuery("#kaheader").css("height");
+	      var startHeight = jQuery("#kaheader").css("top");
+	      topHeight = parseInt(topHeight.substr(0, topHeight.length-2));
+	      startHeight = parseInt(startHeight.substr(0, startHeight.length-2));
+	      // topHeight = topHeight - startHeight;
+	      //
+	      var mapW = fullW - sideW - 6; // border
+	      var mapH = fullH - topHeight - startHeight - 1; // current headerHeight
+	      jQuery("#bobody").css("width", fullW);
+      	  jQuery("#bohead").css("width", fullW);
+	      jQuery("#kiezatlas").css("width", fullW);
+      	  jQuery("#kiezatlas").css("visibility", "visible"); // make the whole appframe visible
+	      //jQuery("#kiezatlas").css("height", fullH - startHeight);
+	      jQuery("#kaheader").css("width", fullW - 1);
+	      // jQuery("#map").css("top", topHeight);
+	      jQuery("#map").css("width", mapW);
+	      jQuery("#map").css("height", mapH);
+	      //
+	      jQuery("#mapControl").css("left", mapW - 185);
+	      jQuery("#mapControl").css("top", startHeight + 4);
+	      // jQuery("#mapSwitcher").css("left", 525);
+	      jQuery("#focusInput").css("left", 250);
+	      jQuery("#searchInput").css("left", fullW - sideW + 10);
+	      jQuery("#headerButtons").css("left", fullW - 20);
+	      // sidebarControl is 5px fat
+	      jQuery("#sideBarControl").css("left", mapW);
+	      jQuery("#sideBarControl").css("height", mapH);
+	      jQuery("#sideBarControl").css("width", 5);
+	      //
+	      jQuery("#sideBar").css("height", mapH - 1);
+	      jQuery("#sideBar").css("left", mapW + 4);
+	      // fine adjustment per browser from the top
+      	  jQuery("#map").css("top", topHeight + startHeight + 1);
+	      jQuery("#sideBar").css("top", topHeight + startHeight + 1);
+	      jQuery("#sideBarControl").css("top", topHeight + startHeight + 1);
+	      // set width and perform a jquery show('fast')
+	      setSideBarWidth(sideW);
+	      // jQuery("#sideBar").show('fast'); // showSideBar
+	      // jQuery("#sideBarControl").css("right", sideW);
+	      jQuery("#sideBarCriterias").css("width", sideW - 5);
+	      jQuery("#sideBarCategories").css("width", sideW - 5);
+	      var critHeight = jQuery("#sideBarCriterias").css("height");
+	      critHeight = parseInt(critHeight.substr(0, critHeight.length-2));
+	      if (critHeight == 0 || isNaN(critHeight)) {
+	        critHeight = 110;
+	      } else {
+	        critHeight = critHeight + 5;
+	      }
+	      var footerHeight = jQuery("#kafooter").css("height");
+	      footerHeight  = parseInt(footerHeight.substr(0, footerHeight.length-2));
+	      var sideBarHeight = mapH - critHeight - footerHeight;
+	      jQuery("#sideBarCategories").css("height", sideBarHeight);
+	      var fWidth = sideW - 6;
+	      var fOrientation = mapW - 5;
+	      // jQuery("#sideBarCategories").css("width", );
+	      // jQuery("#sideBar").css("right", sideW);
+	      jQuery("#kafooter").css("width", fWidth - 15);
+	      jQuery("#kafooter").css("left", fOrientation + 10);
+	      jQuery("#helpFont").css("left", fOrientation + 22);
+	      // ugly but convenient for dealing with ie7/8 layout fixes now
+	      if (jQuery.browser.msie) {
+	      	jQuery("input, textarea").css("height", 18);
+	      	jQuery("#kaheader").css("height", 22);
+	      }
+	    }
+    </script>
+  </head>
+  <body>
+    <div id="kiezatlas" style="visibility:hidden;">
+      <div id="kaheader">
+		    <div id="mapName"></div>
+		    <div id="focusInput">
+		      <form id="autoLocateInputField" action="javascript:focusRequest()">
+			    <label for="streetNameField">Stra&szlig;e ansteuern</label>
+			    <input id="streetNameField" type="text" size="18" value="Straßenname / Hnr."/>
+			    <ul>
+			    </ul>
+		      </form>
+		    </div>
+		    <div id="searchInput">
+		      <form id="searchForm" action="javascript:searchRequest()">
+			    <label for="searchInputField">Suchen</label>
+			    <input id="searchInputField" type="text" value="Name / Straße" size="15"/>
+			    <ul>
+			    </ul>
+		      </form>
+		    </div>
+		    <div id="headerButtons">
+		      <img id="resizeButton" alt="Volle Breite" onclick="javascript:toggleWidth(event)" src="img/go-first.png">
+		    </div>
+      </div>
+      <div id="map"></div>
+      <div id="mapControl">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		    <a href="javascript:toggleMapControl();">Kartenfunktionalit&auml;t</a>
+		    <div id="mapSwitcher" style="position: absolute; visibility: hidden;"></div>
+		    <div id="mapMarkerButtons" style="position: relative; top: 117px; left: 65px; visibility: hidden;">
+			    <a href="javascript:showAllMarker();" style="text-decoration: none;">> Alle einblenden</a> <br/>
+			    <a href="javascript:removeAllMarker();" style="text-decoration: none;">> Alle ausblenden</a> <br/>
+			    <a href="javascript:updateVisibleBounds();" style="text-decoration: none; position: relative; top: 5px; left: -27px">Kartenausschnitt <br/>zur&uuml;cksetzen</a>
+		    </div>
+      </div>
+      <div id="memu" style="visibility:hidden;"></div>
+      <div id="navPanel"></div>
+      <div id="sideBar">
+		    <div id="sideBarCriterias"></div>
+		    <div id="sideBarCategories"><table width="100%" cellpadding="2" cellspacing="0" id="sideBarCategoriesTable"></table></div>
+        <div id="progContainer"></div>
+      </div>
+      <div id="kafooter">
+        <a href="http://www.berlin.de/buergeraktiv/">Impressum</a> und <a href="http://ehrenamt.index.de">Haftungshinweise</a><br/><b> powered by <a href="http://www.kiezatlas.de">Kiezatlas</a></b>
+      </div>
+      <a id="helpFont" alt="Hilfe anzeigen" text="Hilfe anzeigen" href="javascript:help();">?</a>
+      <div id="sideBarControl" onclick="javascript:handleSideBar();"></div>
+    </div>
+  </body>
+</html>

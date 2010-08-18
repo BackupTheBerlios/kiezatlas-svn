@@ -159,8 +159,9 @@ workerThreadTime	String carrying the Threads starting time
 timingInterval		String varrying the Timing Interval in Milliseconds
 importCriterias		Vector of BaseTopics which represent the criterias of the configured workspace
 unusableGeoObjects	Vector of GeoObjectTopics which are from the workspaces "institutionType" which have no WGS 84 coordinates
-geoObjects		Vector of BaseTopics containing all imported GeoObjects
-importWorksapces        currently BaseTopic of one Importer Workspace
+geoProjectObjects		Vector of BaseTopics containing all imported ProjectGeoObjects
+geoEventtObjects		Vector of BaseTopics containing all imported EventGeoObjects
+importWorksapces        Vector of BaseTopic of ImportedWorkspace
 importCriteraias        Vector of Criterias related to the improter Workspace
 
 GeoObjectAdminForm

@@ -141,8 +141,6 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
             BaseTopic addressTopic = baseTopic.getAddress();
             if (as.getTopicProperty(baseTopic.getID(), 1, PROPERTY_GPS_LAT).equals("")) {
                 System.out.println("[ImportWorker] WARNING ***  \""+addressTopic.getName()+"\" is without GPS Data... dropping placement in CityMap");
-                // ### ToDo: Reporting Functionality
-                sendNotificationEmail(baseTopic.getName(), addressTopic.getName());
                 unusable.add(baseTopic); //
             } else if (as.getTopicProperty(addressTopic, PROPERTY_STREET).equals("über Gute-Tat.de")) {
                 unusable.add(baseTopic);
@@ -156,6 +154,7 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
         //
         System.out.println("[ImportWorker] stored " + validEntries + " in public cityMap \"" +as.getTopicProperty(ImportServlet.CITYMAP_TO_PUBLISH, 1, PROPERTY_WEB_ALIAS)+ "\"");
         System.out.println("[ImportWorker] didn`t published " + unusable.size() + " unlocatable \""+getWorkspaceGeoType(workspaceId).getName()+"e\" ");
+        sendNotificationEmail(unusable);
         /**for (int i = 0; i < unusable.size(); i++) {
          * ### ToDo: report unusuable bojects in import interfaces
             BaseTopic geoObject = (BaseTopic) unusable.get(i);
@@ -637,7 +636,7 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
 
     // --- copy of BrowseServlet
 
-    private void sendNotificationEmail(String projectName, String addressData) {
+    private void sendNotificationEmail(Vector unusableProjects) {
       try {
         // GeoObjectTopic inst = (GeoObjectTopic) as.getLiveTopic(instID, 1);
         // "from"
@@ -648,14 +647,18 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
         // "to"
         String to = "mre@newthinking.de";
         // "subject"
-        String subject = "Ehrenamtsatlas: fehlerhafter Addresseintrag in der Ehrenamtsdatenbank \"" + projectName + "\"";
+        String subject = "Ehrenamtsatlas: \"" + unusableProjects.size() + "\" fehlerhafte Addresseinträge in der Ehrenamtsdatenbank";
+        StringBuffer entries = new StringBuffer();
+        entries.append("------------------------------\r");
+          for (int i = 0; i < unusableProjects.size(); i++) {
+            GeoObjectTopic entry = (GeoObjectTopic) unusableProjects.get(i);
+            entries.append("Projekt: "+ entry.getName()+ " Adresseintrag: " + entry.getAddress() + "\r");
+          }
+        entries.append("------------------------------\r");
         // "body"
-        String body = "Dies ist eine automatische Benachrichtigung von www.kiezatlas.de\r\r" +
-          "Dem Ehrenamtsprojekt \"" + projectName + "\" konnte nicht korrekt verortet werden:\r\r" +
-          "------------------------------\r" +
-          "Adresseintrag: " + addressData + "\r" +
-          "------------------------------\r\r" +
-          "\r" +
+        String body = "Dies ist eine automatische Benachrichtigung erstellt von www.kiezatlas.de\r\r" +
+          "Folgende Ehrenamtsprojekte konnten aufgrund eines fehlerhaften Adresseintrags nicht korrekt verortet werden:\r\r" +
+          "" + entries.toString() + "\r" +
           "www.berlin.de/buergeraktiv/atlas\r\r" +
           "Mit freundlichen Grüßen\r" +
           "ihr Kiezatlas-Team";
