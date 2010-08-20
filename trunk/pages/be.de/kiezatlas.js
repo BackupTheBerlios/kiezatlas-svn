@@ -18,6 +18,7 @@
   //
   
   var SERVICE_URL = "http://www.kiezatlas.de:8080/rpc/"; // to be used by the jquery ajax methods
+  var TESTING_SERVICE_URL = "http://localhost:8080/kiezatlas/rpc/"; // to be used by the jquery ajax methods
   var HIDDEN_SERVICE_URL = "proxies/"; // to use your proxy service scripts
   var ICONS_URL = "http://www.kiezatlas.de/client/icons/"; // to be used by all icons if not relative to this folder
   var IMAGES_URL = "http://www.kiezatlas.de/client/images/"; // bo be used by all images in the sidebar
@@ -373,9 +374,10 @@
 
 
   /** ask my kiezatlas.de proxy for geoObjects */
-  function searchRequest() {
-    var queryString = jQuery("#searchInputField").attr("value");
-    log('start searching for ' + queryString);
+  function searchRequest(query) {
+    if (typeof query == "undefined") var queryString= jQuery("#searchInputField").attr("value");
+    else queryString = query;
+    if(debug) log('start searching for ' + queryString);
     queryString = urlencode(queryString);
     var anotherUrl = HIDDEN_SERVICE_URL + 'searchGeoObjects.php?query=' + queryString + '&topicmapId=' + topicId + '&workspaceId=' + workspaceId;
     showProgressInSideBar("Suchanfrage");
