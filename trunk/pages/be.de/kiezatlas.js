@@ -30,9 +30,10 @@
   var alternative_items = [];
   var lastStreetName = "";
   var debugUI = false;
-  // var debug = false;
   // deployment settings
   var onBerlinDe = true;
+  var headerGap = 0;
+  if (onBerlinDe) headerGap = 63
   var kiezKey = "ABQIAAAAyg-5-YjVJ1InfpWX9gsTuxRa7xhKv6UmZ1sBua05bF3F2fwOehRUiEzUjBmCh76NaeOoCu841j1qnQ";
   var berlinKey = "ABQIAAAADev2ctFkze28KEcta5b4WBSQDgFJvORzMhuwLQZ9zEDMQLdVUhTWXHB2vS0W0TdlEbDiH_qzhBEZ5A";
   var propFooterMessage = "";
@@ -52,18 +53,19 @@
       maxExtent: new OpenLayers.Bounds(-20037508.34, -20037508.34, 20037508.34, 20037508.34)
     };
     map = new OpenLayers.Map('map', options);
-    var mapnik = new OpenLayers.Layer.TMS("OpenStreetMap", "http://tile.openstreetmap.org/", { type: 'png', 
+    var mapnik = new OpenLayers.Layer.TMS("OpenStreetMap", "http://tile.openstreetmap.org/", {type: 'png', 
       getURL: osm_getTileURL, displayOutsideMaxExtent: true, 
       attribution: '<a href="http://www.openstreetmap.org/">OpenStreetMap</a>', 
-      numZoomLevels: 25 }
+      numZoomLevels: 25}
     );
     map.events.register("movestart", map, function (evnt) {
       // log("baseLayerBounds"+map.getBoundFromBaseLayer());
       if (map.getExtent()!= null) log("evt: " + map.getExtent().getCenterLonLat());
     });
-    var googleBaseLayer = new OpenLayers.Layer.Google("Google Maps", { sphericalMercator:true, numZoomLevels: 25} );
+    var googleBaseLayer = new OpenLayers.Layer.Google("Google Maps", {sphericalMercator:true, numZoomLevels: 25} );
     // districtLayer.setVisibility(true);
-    map.addLayers([googleBaseLayer, mapnik]); // , markerLayer
+    if (onBerlinDe) map.addLayers([googleBaseLayer, mapnik]); // , markerLayer
+    else map.addLayers([mapnik, googleBaseLayer]);
     // MapControl Setup
     nav = new OpenLayers.Control.NavigationHistory();
     // parent control must be added to the map
@@ -99,11 +101,12 @@
     startHeight = parseInt(startHeight.substr(0, startHeight.length-2));
     // topHeight = topHeight - startHeight;
     //
-    if (onBerlinDe) fullW = fullW - 1;
-    var mapW = fullW - sideW - 6; // border
-    var mapH = fullH - topHeight - startHeight - 1; // current headerHeight
-    jQuery("#bobody").css("width", fullW + 1);
-  	jQuery("#bohead").css("width", fullW + 1);
+    if (onBerlinDe) fullW = fullW - 1; // 
+    var mapW = fullW - sideW - 7; // border
+    // if (onBerlinDe) mapW = fullW - sideW - 7; // border
+    var mapH = fullH - topHeight - startHeight - 1; // current labs headerHeight
+    if (onBerlinDe) jQuery("#bobody").css("width", fullW + 1);
+  	if (onBerlinDe) jQuery("#bohead").css("width", fullW + 1);
     jQuery("#kiezatlas").css("width", fullW);
 	  jQuery("#kiezatlas").css("visibility", "visible"); // make the whole appframe visible
     //jQuery("#kiezatlas").css("height", fullH - startHeight);
@@ -115,11 +118,14 @@
     jQuery("#mapControl").css("left", mapW - 185);
     jQuery("#mapControl").css("top", startHeight + 3);
     // jQuery("#mapSwitcher").css("left", 525);
-    jQuery("#focusInput").css("left", 225);
-    jQuery("#focusAlternatives").css("left", 295);
+    if (onBerlinDe) jQuery("#focusInput").css("left", 225);
+    else jQuery("#focusInput").css("left", 345);
+    if (onBerlinDe) jQuery("#focusAlternatives").css("left", 295);
+    else jQuery("#focusAlternatives").css("left", 420);
     //jQuery("#focusAlternatives").css("top", 205);
     jQuery("#searchInput").css("left", fullW - sideW + 10);
-    jQuery("#headerButtons").css("left", fullW - 20);
+    if (onBerlinDe) jQuery("#headerButtons").css("left", fullW - 20);
+    else jQuery("#headerButtons").css("left", fullW - 30);
     // sidebarControl is 5px fat
     jQuery("#sideBarControl").css("left", mapW);
     jQuery("#sideBarControl").css("height", mapH);
@@ -129,7 +135,8 @@
     jQuery("#sideBar").css("left", mapW + 5);
     // fine adjustment per browser from the top
 	  jQuery("#map").css("top", topHeight + startHeight + 1);
-    jQuery("#sideBar").css("top", topHeight + startHeight + 1);
+    if (onBerlinDe) jQuery("#sideBar").css("top", topHeight + startHeight + 1);
+    else jQuery("#sideBar").css("top", topHeight + startHeight + 1);
     jQuery("#sideBarControl").css("top", topHeight + startHeight + 1);
     // set width and perform a jquery show('fast')
     setSideBarWidth(sideW);
@@ -149,7 +156,7 @@
     var sideBarHeight = mapH - critHeight - footerHeight;
     jQuery("#sideBarCategories").css("height", sideBarHeight);
     var fWidth = sideW - 6;
-    var fOrientation = mapW - 5;
+    var fOrientation = mapW - 3;
     // jQuery("#sideBarCategories").css("width", );
     // jQuery("#sideBar").css("right", sideW);
     jQuery("#kafooter").css("width", fWidth - 15);
@@ -174,6 +181,7 @@
       jQuery("#kafooter").css("background", "transparent");
       jQuery("#kafooter").css("bottom", 15);
       jQuery("#resizeButton").attr("src", "img/go-first.png");
+      if (!onBerlinDe) jQuery("#resizeButton").attr("width", 25);
       jQuery("#resizeButton").attr("title", "Seitenleiste einblenden");
       sideBarToggle = false;
     } else {
@@ -188,6 +196,7 @@
       jQuery("#kafooter").css("bottom", 2);
       // jQuery("#headerButtons").html(imgTag);
       jQuery("#resizeButton").attr("src", "img/go-last.png");
+      if (!onBerlinDe) jQuery("#resizeButton").attr("width", 25);
       jQuery("#resizeButton").attr("title", "Seitenleiste ausblenden");
   	  // jQuery("#kafooter").css("width", );
       handleResize(breitSeite);
@@ -223,8 +232,9 @@
 	      }
 	      resultHandler.append('<b>'+topic.name+'</b><br/>');
 	      // resultHandler.append('<table width="100%" cellpadding="2" cellspacing="0" id="sideBarCategoriesTable"></table>');
-	      resultHandler.append(''+getTopicPostalCode(topic) + ' Berlin <br/>');
-	      resultHandler.append(''+getTopicAddress(topic)+'<p/>');
+	      if (onBerlinDe) resultHandler.append(''+getTopicPostalCode(topic) + ' Berlin <br/>');
+        else resultHandler.append(''+getTopicPostalCode(topic) + ' ' + getTopicCity(topic) + '<br/>');
+        resultHandler.append(''+getTopicAddress(topic)+'<p/>');
 	      // resultHandler.append("Loaded Topic" + topic.name);
 	      topic = stripFieldsContaining(topic, "LAT");
 	      topic = stripFieldsContaining(topic, "LONG");
@@ -361,8 +371,9 @@
       dataType: 'json',
       success: function(obj){
         var workspace = obj.result;
-        if (debug) log('loading infos '+ workspace.logo+ '<< logo, ' + workspace.imprint + 
-          '<<imprint, ' + workspace.homepage + '<<homagepe');
+        if (debug) {
+          log('loading infos '+ workspace.logo+ '<< logo, ' + workspace.imprint + '<<imprint, ' + workspace.homepage + '<<homagepe');
+        }
         workspaceInfos = workspace;
       },
       error: function(x, s, e){ 
@@ -408,23 +419,29 @@
     * ###: localized to DE and BERLIN throug &q=... Berlin"
     */
   function focusRequest() {
-    var streetFocus = jQuery("#streetNameField").val() + '%20Berlin'; //lo
     if (debug) log('focusRqeust for ' + streetFocus);
+    var streetFocus = jQuery("#streetNameField").val();
+    if (onBerlinDe) streetFocus = jQuery("#streetNameField").val() + '%20Berlin'; //lo
     var swBerlin = "6881778.529613,1467590.9428711";
     var nwBerlin = "6920608.5399765,1518650.8777585";
     var viewPortBias = "&bounds="+swBerlin+"|"+nwBerlin;
     var url = HIDDEN_SERVICE_URL + 'geoProxy.php?q=' + urlencode(streetFocus) + viewPortBias + '&output=json&oe=utf8'
-      + '&sensotr=false&key=' + gKey + '=de';
+      + '&sensotr=false&key=';
+    if (onBerlinDe) url +=  berlinKey; else url += kiezKey;
+    if (onBerlinDe) url += '=de';
     // var viewPortURL = "1338106.6169795,6831635.8390675|1614197.1630961,6955769.5729803";
     jQuery.ajax({
       type: "GET",
       url: url,
       dataType: 'json',
       success: function(obj) {
-        alternative_items = null;
+        // alternative_items = null;
         autocomplete_item = 0;
         alternative_items = obj.Placemark;
-	      if (alternative_items.length > 1) {
+        if (alternative_items.length == 1) {
+          select_current_item();
+  	      focus_current_item();
+        } else if (alternative_items.length > 1) {
   	      show_alternatives_list(jQuery("#focusAlternatives"));
   	      // select_alternative_item(autocomplete_item);
   	      select_current_item();
@@ -435,7 +452,7 @@
           map.setCenter(toLonLat.transform(map.displayProjection, map.projection), 15);
 	      }
       },
-      error: function(x, s, e){ log('.. wrong street ?! (' + x.statusText+')'); }
+      error: function(x, s, e){log('.. wrong street ?! (' + x.statusText+')');}
     });
     if (!checkIfAllCategoriesSelected()) showAllMarker();
   }
@@ -474,11 +491,11 @@
           if (autocomplete_item < 0 || autocomplete_item > alternative_items.length) {
             jQuery("#autoLocateInputField").attr("action", "javascript:focusRequest()");
             // jQuery("#focusInput").attr("disabled", "enabled");
-            log("REQUEST" + event.keyCode);
+            if (debug) log("REQUEST" + event.keyCode);
           } else {
             jQuery("#autoLocateInputField").attr("action", "javascript:focus_current_item()");
             // jQuery("#focusInput").attr("disabled", "disabled");
-            log("FOCUS" + event.keyCode);
+            if (debug) log("FOCUS" + event.keyCode);
           }
           if (event.keyCode == 38) { // UP
             select_previous_item();
@@ -493,7 +510,7 @@
             alternative_items = null;
           } else if (event.keyCode == 13) { // ENTER
             jQuery("#focusInput").submit();
-            log("ENTER submitting  but resetting ? " + autocomplete_item);
+            if (debug) log("ENTER submitting  but resetting ? " + autocomplete_item);
           }
         } else {
           jQuery("#autoLocateInputField").attr("action", "javascript:focusRequest()");
@@ -506,12 +523,16 @@
       jQuery("#resultItem_" + autocomplete_item).css("background-color", "#999999");
       // autocomplete_item = atPos;
   }
-  
+
+  /** changed on 23.Agusta --- ### to test with berlin.de */
   function focus_current_item(itemNumber)  {
-      var item = alternative_items[autocomplete_item];
-      if (itemNumber != null) {
-        item = alternative_items[itemNumber];
-        select_next_item(itemNumber);
+      var item;
+      if (alternative_items != null) {
+        item = alternative_items[autocomplete_item]; // autoselection
+        if (itemNumber != null) {
+          item = alternative_items[itemNumber];
+          select_next_item(itemNumber);
+        }
       }
       // check if inputField.action with jQuery (line 293) was later changed 
       // than inputField.keyUp is received (line 314)
@@ -553,8 +574,8 @@
       'id="sideBarCategoriesTable"></table>');
     for (var i=0; i < resultObjects.length; i++) {
       var resultBaseTopic = resultObjects[i];
-      if (resultBaseTopic.lat == 0.0 || resultBaseTopic.long == 0.0) {
-       if (debug) log('..initResultList - skipping ' + resultBaseTopic.name );
+      if (resultBaseTopic.lat == 0.0 || resultBaseTopic.lon == 0.0) {
+        if (debug) log('..initResultList - skipping ' + resultBaseTopic.name );
       } else {
         jQuery("#sideBarCategoriesTable").append('<tr id="topicRow-'+resultBaseTopic.id+'" width="100%" '
           + ' class="topicRowDeselected"><td width="20px" valign="center" align="center"><b>'+(i+1)+'. </b></td>'
@@ -577,9 +598,15 @@
     var critLinkList = '<table width="95%" cellpadding="0" border="0"><tbody>';
       critLinkList += '<tr valign="top">'; // TODO: onclick
       critLinkList += '<td rowspan="'+workspaceCriterias.result.length+1+'" align="left">';
-      critLinkList += '<a id="sideBarLogoLink" href="http://www.berlin.de/buergeraktiv/">'
+      if (workspaceInfos != null) {
+        critLinkList += '<a id="sideBarLogoLink" href="http://www.berlin.de/buergeraktiv/">'
+        + ' <img id="sideBarLogo" src="'+IMAGES_URL + workspaceInfos.logo +'" alt="Das ' + workspaceInfos.name + '-Logo" '
+        + ' border="0" text="Das Bürgeraktiv Logo"></a></td>';
+      } else {
+        critLinkList += '<a id="sideBarLogoLink" href="http://www.berlin.de/buergeraktiv/">'
         + ' <img id="sideBarLogo" src="img/buergeraktiv-logo.gif" alt="Das Bürgeraktiv Logo" '
         + ' border="0" text="Das Bürgeraktiv Logo"></a></td>';
+      }
       critLinkList += '<td></td><td></td>';
       critLinkList += '</tr>';
     for (var i = 0; i < workspaceCriterias.result.length; i++) {  
@@ -591,7 +618,7 @@
       }
       critLinkList += '<td onclick="javascript:updateCategoryList(' + i + ');" align="right" class="critLinkNormal">'
         + critName + '</td>';
-      if (crtCritIndex == i) { critLinkList += '<td align="left">&#8226;</td></tr>'; } else { critLinkList += '<td></td></tr>'; }
+      if (crtCritIndex == i) {critLinkList += '<td align="left">&#8226;</td></tr>';} else {critLinkList += '<td></td></tr>';}
       // in any case, when switchin the criteria updateSidebar --
       // radio.setAttribute('onclick', 'javascript:updateCategoryList("' + i + '")'); 
     }
@@ -629,7 +656,7 @@
     // calculateNewBounds if its a "District" criteria
     if (catName == "Berlin") { // ### fixed hack
       updateVisibleBounds(null, false);
-    } else {
+    } else if (onBerlinDe) {
       for (i = 0; i < districtNames.length; i++) {
         if (districtNames[i].catName == catName) {
           var districtBounds = getBoundsOfCurrentVisibleFeatures(); // out features inside
@@ -654,42 +681,51 @@
     // Auslesen der Legendenelemente.
     // sideBarCategories.html('<table width="95%">');
     // var contentWidth = jQuery("#sideBar").css("width").substr(0,jQuery("#sideBar").css("width").length-2);
-    for (var i = 0; i < workspaceCriterias.result[criteria].categories.length; i++) {
-      // Schleife über alle Kategorien eines Kriteriums
-      var catIcon = [workspaceCriterias.result['' + criteria + ''].categories[i].catIcon];
-      var catName = [workspaceCriterias.result['' + criteria + ''].categories[i].catName];
-      var catId = new String([workspaceCriterias.result['' + criteria + ''].categories[i].catId]);
-      var catCSS = "catRowDeselected";
-      /*if (isCategoryVisible(catId)) {
-        if (debug) log("..updateCategeryList.isVisibleCat - reSelect in GUI! ");
-        catCSS = "catRowSelected";
-      }*/
-      //
-      jQuery("#sideBarCategoriesTable").append('<tr id="catRow-'+catId+'" width="100%" class="'+catCSS+'">' 
-        + ' <td width="25px" valign="center" align="center"><a href="" id="toggleHref-'+catId+'">' 
-          + '<img src="'+ICONS_URL+''+catIcon+'" border="0" id="catIconRow-'+catId+'" alt="'+catName+'-Icon" '
-          + 'text="Klicken zum Ein- und Ausblenden"></a></td>' 
-        + '<td valign="center"><a href="" id="catHref-'+catId+'">'+catName+'</a></td></tr>');
-      // javaScript sucks up when "t-12312321" is a stringId and NAN !
-      // mozilla alows onclick on a tableRow while webkit and others do neither allow onmouseclick nor onclick
-      jQuery("#toggleHref-"+catId).attr('href', 'javascript:toggleMarkerGroups("' + catId + '");');
-      // jQuery("#catIconRow-"+catId).attr('onclick', 'javascript:toggleMarkerGroups("' + catId + '")');
-      jQuery("#catHref-"+catId).attr('href', 'javascript:showCatInSideBar("' + catId + '", "'+catName+'");');
-      // jQuery("#catRow-"+catId).attr('onmouseover', 'hoverCatButton("' + catId + '")');
-      // jQuery("#catRow-"+catId).attr('onmouseout', 'outCatButton("' + catId + '")');
+    if (workspaceCriterias.result.length <= 0) {
+      // ### ToDo: Exception Handling
+      alert("Sorry for that inconvenience. Probably an error occured while loading the criterias.");
+    } else {
+      for (var i = 0; i < workspaceCriterias.result[criteria].categories.length; i++) {
+        // Schleife über alle Kategorien eines Kriteriums
+        var catIcon = [workspaceCriterias.result['' + criteria + ''].categories[i].catIcon];
+        var catName = [workspaceCriterias.result['' + criteria + ''].categories[i].catName];
+        var catId = new String([workspaceCriterias.result['' + criteria + ''].categories[i].catId]);
+        var catCSS = "catRowDeselected";
+        /*if (isCategoryVisible(catId)) {
+          if (debug) log("..updateCategeryList.isVisibleCat - reSelect in GUI! ");
+          catCSS = "catRowSelected";
+        }*/
+        //
+        jQuery("#sideBarCategoriesTable").append('<tr id="catRow-'+catId+'" width="100%" class="'+catCSS+'">'
+          + ' <td width="25px" valign="center" align="center"><a href="" id="toggleHref-'+catId+'">'
+            + '<img src="'+ICONS_URL+''+catIcon+'" border="0" id="catIconRow-'+catId+'" alt="'+catName+'-Icon" '
+            + 'text="Klicken zum Ein- und Ausblenden"></a></td>'
+          + '<td valign="center"><a href="" id="catHref-'+catId+'">'+catName+'</a></td></tr>');
+        // javaScript sucks up when "t-12312321" is a stringId and NAN !
+        // mozilla alows onclick on a tableRow while webkit and others do neither allow onmouseclick nor onclick
+        jQuery("#toggleHref-"+catId).attr('href', 'javascript:toggleMarkerGroups("' + catId + '");');
+        // jQuery("#catIconRow-"+catId).attr('onclick', 'javascript:toggleMarkerGroups("' + catId + '")');
+        jQuery("#catHref-"+catId).attr('href', 'javascript:showCatInSideBar("' + catId + '", "'+catName+'");');
+        // jQuery("#catRow-"+catId).attr('onmouseover', 'hoverCatButton("' + catId + '")');
+        // jQuery("#catRow-"+catId).attr('onmouseout', 'outCatButton("' + catId + '")');
+      }
     }
   }
   
   /** sets imprint, homepage and logo link associated with the current workspaceInfos*/
   function setWorkspaceInfos() {
-    var footer = '<span id="footerImprint"><a href="'+workspaceInfos.imprint+'">Impressum / Haftungshinweise</a></span>';
-    footer += '<span id="footerPoweredBy">'+footerMessage+'</span>';
-    jQuery("#kafooter").html(footer);
-    jQuery("#sideBarLogo").attr('src', ''+IMAGES_URL+workspaceInfos.logo+'');
-    jQuery("#sideBarLogo").attr('title', ''+workspaceInfos.name+'');
-    jQuery("#sideBarLogo").attr('alt', ''+workspaceInfos.name+' Logo');
-    jQuery("#sideBarLogoLink").attr('href', workspaceInfos.homepage);
-    log("set sideBar to: " + jQuery("#sideBarLogo").attr('src') + " and logo is: " + jQuery("#sideBarLogo").attr('title'));
+    if (workspaceInfos == null) { // ### Improve Exception Handling
+      alert("Sorry. The workspace you tried to access is not properly configured by the administrator.");
+    } else {
+      var footer = '<span id="footerImprint"><a href="'+workspaceInfos.imprint+'">Impressum / Haftungshinweise</a></span>';
+      footer += '<span id="footerPoweredBy">'+footerMessage+'</span>';
+      jQuery("#kafooter").html(footer);
+      jQuery("#sideBarLogo").attr('src', ''+IMAGES_URL+workspaceInfos.logo+'');
+        jQuery("#sideBarLogo").attr('title', ''+workspaceInfos.name+'');
+      jQuery("#sideBarLogo").attr('alt', ''+workspaceInfos.name+' Logo');
+      jQuery("#sideBarLogoLink").attr('href', workspaceInfos.homepage);
+      log("set sideBar to: " + jQuery("#sideBarLogo").attr('src') + " and logo is: " + jQuery("#sideBarLogo").attr('title'));
+    }
   }
   
   /** put numerous marker in the layer and draw them
@@ -1057,9 +1093,9 @@
     var defaultStyle = OpenLayers.Util.applyDefaults( dStyle, OpenLayers.Feature.Vector.style["default"]);
     var dStyleMap = new OpenLayers.StyleMap({
       "default": defaultStyle, 
-      "select": { strokeColor:"#B60033", strokeWidth: 2, fill: 0,
+      "select": {strokeColor:"#B60033", strokeWidth: 2, fill: 0,
         label : "${name}", fontSize: "12px", fontStyle: "bold",
-        fontFamily: "Arial,Helvetica,sans-serif", fontColor: "#B60033" }
+        fontFamily: "Arial,Helvetica,sans-serif", fontColor: "#B60033"}
     });
     var districtLayer = new OpenLayers.Layer.Vector("Bezirksgrenzen", {
       styleMap: dStyleMap,
@@ -1078,7 +1114,7 @@
     districtLayer.setVisibility(debug);
     map.addLayer(districtLayer);
     log('districtLayer loaded with overall: ' + districtLayer.features.length + ' polygons');
-    var districtSelect = new OpenLayers.Control.SelectFeature(districtLayer, { highlightOnly: true });
+    var districtSelect = new OpenLayers.Control.SelectFeature(districtLayer, {highlightOnly: true});
     //selecting kml based Features in the new layer disabled for now
     /** districtLayer.onSelect = function (feature) {
       // "featureselected": function(evt) { log("districtLayer clicked " + evt); },
@@ -1174,7 +1210,7 @@
               jQuery("#memu").html(htmlString);
               jQuery("#memu").css("visibility", "visible");
               jQuery("#memu").css("left", centerPoint.x);
-              jQuery("#memu").css("top", centerPoint.y + headerGap + 27);
+              jQuery("#memu").css("top", centerPoint.y + headerGap + 27); // ### headergap seems unneccessary
             }
           } else {
             // log("normalFeature just highlight");
@@ -1305,7 +1341,7 @@
         if (debug) log("*** mischeck: "+ poi.lonlat + "!=" + allMarkers[i].lonlat);
       }
     }
-    if (cluster.length >= 1) { cluster.push(poi); } else { log("nothing found equal: " + poi.lonlat.lon +"=="+ poi.lonlat.lat); }
+    if (cluster.length >= 1) {cluster.push(poi);} else {log("nothing found equal: " + poi.lonlat.lon +"=="+ poi.lonlat.lat);}
     // after one match we`re a cluster
     return cluster;
   }
@@ -1348,7 +1384,7 @@
         // log("clusterCheck found a featured position.. ");
       }
     }
-    log("> topicId is not in any cluster yet");
+    if (debug) log("> topicId is not in any cluster yet");
     return false;
   }
   
@@ -1494,7 +1530,7 @@
     for (var i = 0; i < gMarkers.length; i++) {
       // map.addOverlay(gMarkers[i]);
       var marker = gMarkers[i];
-      if (marker.lonlat == latLng) { return marker; }
+      if (marker.lonlat == latLng) {return marker;}
     }
     return null;
   }
@@ -1539,13 +1575,13 @@
       // jQuery(this).addClass("activeField").removeClass("idle");
       // set activeField
       // jQuery(this).width(150);
-      jQuery(this).animate({ width: 145 }, 500);
+      jQuery(this).animate({width: 145}, 500);
     });
     jQuery("#focusInput").blur(function() {
       // jQuery(this).removeClass("activeField").addClass("idle");
       // jQuery(this).width(75);
       // set idleField
-      jQuery(this).animate({ width: 115 }, 500);
+      jQuery(this).animate({width: 115}, 500);
     });
   }
 
@@ -1635,8 +1671,8 @@
     for (var it=0; it < topic.properties.length; it++) {
       // resultHandler.append('<tr><td>'+topic.properties[i].label+'</td><td>'+topic.properties[i].value+'</td></tr>');
       if (topic.properties[it].name.indexOf(fieldName) == -1) {
-      // log('fieldStrippin: ' + it);
-      newProps.push(topic.properties[it]);
+        // log('fieldStrippin: ' + it);
+        newProps.push(topic.properties[it]);
       } else {
       // flog('stripping Field ' + topic.properties[it].name);
       }
@@ -1655,6 +1691,7 @@
       return topic.properties[i].value;
       }
     }
+    return "";
   }
   
   function getImageSource(topic) {
@@ -1663,6 +1700,7 @@
         return topic.properties[i].value;
       }
     }
+    return "";
   }
 
   function getTopicPostalCode(topic) {
@@ -1671,8 +1709,22 @@
         return topic.properties[i].value; // + ' Berlin<br/>';
       }
     }
+    return "";
   }
-  
+
+  function getTopicCity(topic) {
+    for (var at=0; at < topic.properties.length; at++) {
+      // resultHandler.append('<tr><td>'+topic.properties[i].label+'</td><td>'+topic.properties[i].value+'</td></tr>');
+      if (topic.properties[at].name == "Address / City") {
+        return topic.properties[at].value; // + ' Berlin<br/>';
+      } else if (topic.properties[at].name == "Stadt") {
+        return topic.properties[at].value;
+      }
+    }
+    return "";
+  }
+
+
   // 
   // --- High Level CiyMap Functions 
   // 
@@ -1686,7 +1738,7 @@
       var skip = false;
       if (lat == 0.0 || lng == 0.0) {
         skip = true;
-      };
+      }
       if (!skip) {
         var point = new OpenLayers.LonLat(parseFloat(lng), parseFloat(lat));
         bounds.extend(point);
@@ -1723,7 +1775,7 @@
         var skip = false;
         if (point.lat == 0.0 || point.lon == 0.0) {
           skip = true;
-        };
+        }
         if (!skip) {
           counter++;
           // var point = new OpenLayers.LonLat(parseFloat(lng), parseFloat(lat));
@@ -1779,17 +1831,20 @@
     if (markerGroupIds.length == workspaceCriterias.result[crtCritIndex].categories.length) return true; else return false;
   }
   
-  /** produces a very clear markerGroupIds situation*/
+  /** produces a very clear markerGroupIds state */
   function deSelectAllCategories() {
     markerGroupIds = [];
-    //for (var i = 0; i < workspaceCriterias.result.length; i++) {
-    for (var j = 0; j < workspaceCriterias.result[crtCritIndex].categories.length; j++) {
-      var catId = workspaceCriterias.result[crtCritIndex].categories[j].catId;
-      // remove catId from groups
-      jQuery("#catRow-"+catId).attr("class", "catRowDeselected");  
+    if (workspaceCriterias.result.length <= 0) {
+      // ### ToDo: Exception Handling
+      alert("Sorry for that inconvenience. Probably an error occured while loading the criterias.");
+    } else {
+      for (var j = 0; j < workspaceCriterias.result[crtCritIndex].categories.length; j++) {
+        var catId = workspaceCriterias.result[crtCritIndex].categories[j].catId;
+        // remove catId from groups
+        jQuery("#catRow-"+catId).attr("class", "catRowDeselected");
+      }
     }
-    //}
-    log("deSelected All markerGroups to: " + markerGroupIds);
+    if(debug) log("deSelected All markerGroups to: " + markerGroupIds);
   }
   
   /** show all topics as Features in myNewLayer and select all Categories in Sidebar */
@@ -1808,7 +1863,7 @@
   /** TODO: nearly redundant code to removeAllMarker  */
   function reSetMarkers() {
     log("resetting all Markers thus Categories");
-    removeAllMarker();
+    removeAllMarker(); // and popups
     deSelectAllCategories();
   }
 
@@ -1828,7 +1883,6 @@
       featureToToggle.renderIntent = "delete";
     }
     myNewLayer.redraw();
-    deSelectAllCategories();
     removeAllPopUps();
   }
 
@@ -1837,7 +1891,7 @@
   // --- Little Helpers
   //
   
-    function selectAndShowInMap(originId) {
+  function selectAndShowInMap(originId) {
     var feature = checkFeatureByOriginId(originId);
     if (feature == null) {
       // project could not be assoiciated with a correct address, though is not published
@@ -1858,7 +1912,7 @@
       // 
       showTopicInMap(feature.data.topicId);
     }
-    }
+  }
   
   /** mapTile Function, not exactly clear what it does */
   function osm_getTileURL(bounds) {
@@ -1926,6 +1980,7 @@
     } else if (val.indexOf("@") != -1) {
       return '<a href="mailto:'+val+'">'+val+'</a>';
     }
+    return val;
   }
   
   function render_text(text) {
@@ -1933,8 +1988,10 @@
   }
   
   function makeWebpageLink(url, label) {
-    return urlMarkup = '<a href="'+url+'" target="_blank">Link zur T&auml;tigkeitsbeschreibung' 
+    if (onBerlinDe) urlMarkup = '<a href="'+url+'" target="_blank">Link zur T&auml;tigkeitsbeschreibung'
       + '<img src="/.img/ml/link_extern.gif" class="c7" alt="(externer Link)" border="0" height="11" width="12"></a>';
+    else urlMarkup = '<a href="'+url+'" target="_blank">'+label+'</a>';
+    return urlMarkup
   }
   
   function removeAllPopUps() {
@@ -1963,4 +2020,4 @@
       // setWorkspaceInfos();
       helpVisible = false;
     }
-  }  
+  }

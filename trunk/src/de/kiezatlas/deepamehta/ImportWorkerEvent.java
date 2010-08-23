@@ -575,64 +575,6 @@ public class ImportWorkerEvent extends Thread implements DeepaMehtaConstants, Ki
         return result;
     }
 
-    private Vector getGeoObjectInformation(String workspaceId) {
-        BaseTopic geoType = getWorkspaceGeoType(workspaceId);
-        if (geoType == null) {
-            System.out.println(">> Workspace ("+workspaceId+") is not configured properly");
-            return new Vector();
-        }
-        return cm.getTopics(geoType.getID());
-    }
-
-	private Vector getWorkspaces(String userID, Session session) {
-		Vector workspaces = new Vector();
-		//
-        session.setAttribute("membership", "");
-        Vector ws = as.getRelatedTopics(userID, SEMANTIC_MEMBERSHIP, TOPICTYPE_WORKSPACE, 2);
-        Enumeration e = ws.elements();
-        if (!e.hasMoreElements()) {
-            Vector aws = as.getRelatedTopics(userID, SEMANTIC_AFFILIATED_MEMBERSHIP, TOPICTYPE_WORKSPACE, 2);
-            session.setAttribute("membership", "Affiliated");
-            e = aws.elements();
-        }
-		while (e.hasMoreElements()) {
-			BaseTopic w = (BaseTopic) e.nextElement();
-			//if (isKiezatlasWorkspace(w.getID())) {
-			workspaces.addElement(w);
-			//}
-		}
-		//
-		return workspaces;
-	}
-
-    /**
-     * returns null if no topictype whihc is assigned to the given workspace,
-     * is a subtype of "GeoObjectTopic"
-     *
-     * @param workspaceId
-     * @return
-     */
-    private BaseTopic getWorkspaceSubType(String workspaceId, String superTypeId) {
-        //
-        TypeTopic geotype = as.type(superTypeId, 1);
-        Vector subtypes = geotype.getSubtypeIDs();
-        Vector workspacetypes = as.getRelatedTopics(workspaceId, ASSOCTYPE_USES, 2);
-        int i;
-        for (i = 0; i < workspacetypes.size(); i++) {
-            BaseTopic topic = (BaseTopic) workspacetypes.get(i);
-            int a;
-            for (a = 0; a < subtypes.size(); a++) {
-                // System.out.println(" counter: " + a);
-                String derivedOne = (String) subtypes.get(a);
-                // System.out.println("    " + derivedOne.getID() + ":" + derivedOne.getName());
-                if (derivedOne.equals(topic.getID())) {
-                    // System.out.println(" found geoType " + topic.getID() + ":" + topic.getName());
-                    return topic;
-                }
-            }
-        }
-        return null;
-    }
 
     /**
      * returns null if no topictype whihc is assigned to the given workspace,
@@ -661,38 +603,6 @@ public class ImportWorkerEvent extends Thread implements DeepaMehtaConstants, Ki
             }
         }
         return null;
-    }
-
-
-    /**
-     * simply retrieves the BaseTopics assigned to a workspace which are used
-     * for navigation in web-frontends
-     *
-     * @param workspaceId
-     * @return
-     */
-    private Vector getKiezCriteriaTypes(String workspaceId)
-    {
-        Vector criterias = new Vector();
-        TypeTopic critType = as.type(TOPICTYPE_CRITERIA, 1);
-        Vector subtypes = critType.getSubtypeIDs();
-        Vector workspacetypes = as.getRelatedTopics(workspaceId, "at-uses", 2);
-        for(int i = 0; i < workspacetypes.size(); i++)
-        {
-            BaseTopic topic = (BaseTopic)workspacetypes.get(i);
-            for(int a = 0; a < subtypes.size(); a++)
-            {
-                String derivedOne = (String)subtypes.get(a);
-                if(derivedOne.equals(topic.getID()))
-                {
-                    //System.out.println(">>> use criteria (" + derivedOne + ") " + topic.getName());
-                    criterias.add(topic);
-                }
-            }
-
-        }
-
-        return criterias;
     }
 
 }

@@ -97,6 +97,7 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
         String criteriaList = createCritCatSystemList(workspaceId.substring(2, workspaceId.length()-2), mapId.substring(2, mapId.length()-2));
         result.append(criteriaList);
         result.append(", \"error\": " + messages + "}");
+        System.out.println("[DEBUG] .. " + result.toString() + " \n ");
         return result.toString();
     }
 
@@ -128,7 +129,6 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
      * @return
      */
     private String searchTopics(String params, CorporateDirectives directives) {
-        System.out.println(">>>> searchGeoObjects(" + params +")");
         StringBuffer result = new StringBuffer("{\"result\": ");
         StringBuffer messages = null;
         String parameters[] = params.split(",");
@@ -145,13 +145,13 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
         Hashtable props = new Hashtable();
         props.put(PROPERTY_NAME, query);
         // String typeID, Hashtable propertyFilter, String topicmapID
-        Vector results = cm.getTopics(geoType.getID(), props, topicmapId, false); // getTopic(query, props, topicmapId, directives);
         // getTopics: String typeID, String nameFilter, Hashtable propertyFilter, String relatedTopicID
-        // getRelated: String topicID, String assocType, String relTopicType, int relTopicPos
-        Vector topicsToQuery = cm.getViewTopics(topicmapId, 1);
+        Vector results = cm.getTopics(geoType.getID(), props, topicmapId, false);
+        /*Vector topicsToQuery = cm.getViewTopics(topicmapId, 1);
         Vector streetResults = new Vector();
         for (int i = 0; i < topicsToQuery.size(); i++) {
             BaseTopic topic = (BaseTopic) topicsToQuery.get(i);
+            // if (topic.getName().indexOf(query) != -1) results.add(topic); // by name
             Vector addresses = cm.getRelatedTopics(topic.getID(), ASSOCTYPE_ASSOCIATION, TOPICTYPE_ADDRESS, 2);
             for (int j = 0; j < addresses.size(); j++) {
                 BaseTopic addressTopic = (BaseTopic) addresses.get(j);
@@ -161,9 +161,9 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
                     // System.out.println(">>>> streetFound + " + streetName+ " for " + topic.getName());
                 }
             }
-        }
-        results.addAll(streetResults);
-        System.out.println(">>>> found " + results.size() + " named and "+streetResults.size()+ " streetnames like " + query);
+        }*/
+        // results.addAll(streetResults);
+        System.out.println(">>>> found " + results.size() + " by name");// +" named and "+streetResults.size()+ " streetnames like " + query);
         //
         result.append("[");
         for (int i=0; i < results.size(); i++) {
@@ -189,7 +189,6 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
      */
     private String getGeoMapTopics(String params, Session session, CorporateDirectives directives)
     {
-        System.out.println(">>>> getGeoMapTopics(" + params + ")");
         String parameters[] = params.split(",");
         String mapId = parameters[0];
         String workspaceId = parameters[1];
@@ -229,7 +228,6 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
 
     private String createWorkspaceInfos(String workspaceId)
     {
-        // System.out.println(">>> createWorkspaceInfos(" + workspaceId+") ...");
         StringBuffer object = new StringBuffer();
         String workspaceName = as.getTopicProperty(workspaceId, 1, PROPERTY_NAME);
         String logoURL = "";
@@ -356,14 +354,12 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
     {
         StringBuffer catList = new StringBuffer("[");
         BaseTopic topic = cm.getTopic(topicId, 1);
-        for(int i = 0; i < criterias.size(); i++)
-        {
+        for(int i = 0; i < criterias.size(); i++) {
             BaseTopic criteria = (BaseTopic) criterias.get(i);
             // which topics are related and are of type criteria
             Vector categories = as.getRelatedTopics(topic.getID(), "at-association", criteria.getID(), 2);
             int andex;
-            if(categories.size() == 0)
-            {
+            if(categories.size() == 0) {
                 catList.append("{\"critId\": \"" + criteria.getID() + "\", ");
                 catList.append("\"categories\": []");
                 andex = criterias.indexOf(criteria);
@@ -376,8 +372,7 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
             }
             catList.append("{\"critId\": \"" + criteria.getID() + "\", ");
             catList.append("\"categories\": [");
-            for(int c = 0; c < categories.size(); c++)
-            {
+            for(int c = 0; c < categories.size(); c++) {
                 BaseTopic cat = (BaseTopic)categories.get(c);
                 int index = categories.indexOf(cat);
                 // awkyard
@@ -541,20 +536,8 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
         text = text.trim();
         // JSON conformity
         text = removeControlChars(text);
-        // text = text.replaceAll("\r", "\\\\n");
-        // text = text.replaceAll("\n", "\\\\n");
-        // text = text.replaceAll("\"", "\\\\\"");
         //
         return text;
-    }
-
-    private String convertHTMLForJSON(String html)
-    {
-        html = html.replaceAll("\"", "\\\\\"");
-        // html = html.replaceAll("\r", "\\\\n");
-        // html = html.replaceAll("\n", "\\\\n");
-        // html = html.replaceAll("\t", "\\\\t");
-        return html;
     }
 
     private String toUnicode(String text)

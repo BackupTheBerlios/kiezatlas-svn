@@ -650,10 +650,10 @@ public class ImportWorker extends Thread implements DeepaMehtaConstants, KiezAtl
         String subject = "Ehrenamtsatlas: \"" + unusableProjects.size() + "\" fehlerhafte Addresseinträge in der Ehrenamtsdatenbank";
         StringBuffer entries = new StringBuffer();
         entries.append("------------------------------\r");
-          for (int i = 0; i < unusableProjects.size(); i++) {
+        for (int i = 0; i < unusableProjects.size(); i++) {
             GeoObjectTopic entry = (GeoObjectTopic) unusableProjects.get(i);
             entries.append("Projekt: "+ entry.getName()+ " Adresseintrag: " + entry.getAddress() + "\r");
-          }
+        }
         entries.append("------------------------------\r");
         // "body"
         String body = "Dies ist eine automatische Benachrichtigung erstellt von www.kiezatlas.de\r\r" +
