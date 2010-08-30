@@ -74,11 +74,6 @@
     panel = new OpenLayers.Control.Panel(
 	    {div: document.getElementById("navPanel")}
     );
-    // OpenLayers.Control.CustomLayerSwitcher = OpenLayers.Class(OpenLayers.Control.LayerSwitcher, {
-    //  CLASS_NAME: "OpenLayers.Control.CustomLayerSwitcher"
-    // });
-    // myLayerSwitcher.moveTo(new OpenLayers.Pixel(50, 300));
-    // myLayerSwitcher.moveTo(new OpenLayers.Pixel(150, 400));
     myLayerSwitcher = new OpenLayers.Control.LayerSwitcher({
       'div':OpenLayers.Util.getElement('mapSwitcher'), 
       activeColor: "white"
@@ -90,7 +85,7 @@
     // setBounds
     if (debug) log('[Info] mapBounds will be set to: ' + openBounds);
     map.zoomToExtent(openBounds.transform(map.displayProjection, map.projection));
-    map.zoomTo(11);
+    if (onBerlinDe) map.zoomTo(LEVEL_OF_CITY_ZOOM);
   }
   
   function setLayout(fullH, fullW) {
@@ -225,10 +220,10 @@
 	      jQuery("#progContainer").hide();//("hidden", "true");
 	      resultHandler.empty();
 	      var imgSrc = getImageSource(topic);
-	      if (typeof(imgSrc) != "undefined") {
+        if (imgSrc != "undefined") {
 	        imgSrc = IMAGES_URL + imgSrc;
-	        var imgWidth = jQuery("#sideBar").css("width");
-  	      resultHandler.append('<img src="'+imgSrc+'" width="' + imgWidth + '">');
+	        // var imgWidth = jQuery("#sideBar").css("width");
+  	      resultHandler.append('<img src="'+imgSrc+'"><br/>');
 	      }
 	      resultHandler.append('<b>'+topic.name+'</b><br/>');
 	      // resultHandler.append('<table width="100%" cellpadding="2" cellspacing="0" id="sideBarCategoriesTable"></table>');
@@ -263,8 +258,10 @@
 	            stringValue = topic.properties[i].values[k].name;
 	            var htmlValue = "";
 	            if (stringValue.startsWith("http://")) {
-	              htmlValue = makeWebpageLink(stringValue, topic.name);
-	            } else {
+	              htmlValue = makeWebpageLink(stringValue, stringValue);
+	            } else if (stringValue.indexOf("@") != -1) {
+	              htmlValue = makeEmailLink(stringValue, stringValue);
+              } else {
 	              htmlValue = stringValue;
 	            }
 	            propertyList += '<br/><img style="border-style: none; vertical-align: middle;" '
@@ -714,6 +711,14 @@
   
   /** sets imprint, homepage and logo link associated with the current workspaceInfos*/
   function setWorkspaceInfos() {
+    var footerMessage = "";
+    if (onBerlinDe) {
+      footerMessage = '<b><a href="http://www.kiezatlas.de">Kiezatlas</a></b> '
+	      + 'is powered by <a href="http://www.deepamehta.de">DeepaMehta</a>';
+    } else {
+      footerMessage = '<b><a href="http://www.kiezatlas.de">Kiezatlas <i>Labs</i></a></b> '
+	      + 'are powered by <a href="http://www.deepamehta.de">DeepaMehta</a>';
+    }
     if (workspaceInfos == null) { // ### Improve Exception Handling
       alert("Sorry. The workspace you tried to access is not properly configured by the administrator.");
     } else {
@@ -1673,8 +1678,11 @@
       if (topic.properties[it].name.indexOf(fieldName) == -1) {
         // log('fieldStrippin: ' + it);
         newProps.push(topic.properties[it]);
+      } else if (topic.properties[it].name.indexOf("Email") != -1) {
+        // save Email Address Property being stripped by a command called "Address""
+        newProps.push(topic.properties[it]);
       } else {
-      // flog('stripping Field ' + topic.properties[it].name);
+        // flog('stripping Field ' + topic.properties[it].name);
       }
     }
     topic.properties = newProps;
@@ -1700,7 +1708,7 @@
         return topic.properties[i].value;
       }
     }
-    return "";
+    return "undefined";
   }
 
   function getTopicPostalCode(topic) {
@@ -1792,14 +1800,14 @@
   function updateVisibleBounds(newBounds, resetMarkers, zoomLevel) {
     if (newBounds == null) {
       map.zoomToExtent(calculateInitialBounds().transform(map.displayProjection, map.projection));
-      map.zoomTo(11);
+      // map.zoomTo(11);
     } else {
       // map.zoomToExtent(newBounds.transform(map.displayProjection, map.projection));
       map.panTo(newBounds.getCenterLonLat());
       map.zoomTo(zoomLevel);
     }
     if (resetMarkers == true) {
-      removeAllMarker();
+      reSetMarkers();
     }
    
   }
@@ -1993,6 +2001,11 @@
     else urlMarkup = '<a href="'+url+'" target="_blank">'+label+'</a>';
     return urlMarkup
   }
+
+  function makeEmailLink(url, label) {
+    urlMarkup = '<a href="mailto:'+url+'" target="_blank">'+label+'</a>';
+    return urlMarkup
+  }
   
   function removeAllPopUps() {
     for (var i=0; i < map.popups.length; i++) {
@@ -2021,3 +2034,4 @@
       helpVisible = false;
     }
   }
+  

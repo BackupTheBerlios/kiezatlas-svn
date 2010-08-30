@@ -78,8 +78,6 @@
 	    var hotspots = [];
 	    var districtNames = [];
       var markerGroupIds = new Array();
-	    var footerMessage = '<b><a href="http://www.kiezatlas.de">Kiezatlas</a></b> ' 
-	      + 'is powered by <a href="http://www.deepamehta.de">DeepaMehta</a>';
     	var helpVisible = false;
 	    // var slimWidth = false;
 	    // var totalWidth = 1000; // 953
@@ -159,7 +157,7 @@
 		    <div id="searchInput">
 		      <form id="searchForm" action="javascript:searchRequest()">
 			    <label for="searchInputField">Suchen</label>
-			    <input id="searchInputField" type="text" value="Name / Straße" size="15"/>
+			    <input id="searchInputField" type="text" value="Name" size="15"/>
 			    <ul>
 			    </ul>
 		      </form>
