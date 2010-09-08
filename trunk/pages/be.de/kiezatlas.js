@@ -25,6 +25,7 @@
   var LEVEL_OF_DETAIL_ZOOM = 15; // the map focus when a mapinternal infoWindow is rendered
   var LEVEL_OF_DISTRICT_ZOOM = 12;
   var LEVEL_OF_CITY_ZOOM = 11;
+  //
   var sideBarToggle = true;
   var autocomplete_item = 0;
   var alternative_items = [];
@@ -45,6 +46,7 @@
   
     
   function openLayersInit(openBounds){
+    // Map Options
     var options = {
       projection: new OpenLayers.Projection("EPSG:900913"),
       displayProjection: new OpenLayers.Projection("EPSG:4326"),
@@ -53,23 +55,31 @@
       maxExtent: new OpenLayers.Bounds(-20037508.34, -20037508.34, 20037508.34, 20037508.34)
     };
     map = new OpenLayers.Map('map', options);
+    // BaseLayer
     var mapnik = new OpenLayers.Layer.TMS("OpenStreetMap", "http://tile.openstreetmap.org/", {type: 'png', 
       getURL: osm_getTileURL, displayOutsideMaxExtent: true, 
       attribution: '<a href="http://www.openstreetmap.org/">OpenStreetMap</a>', 
       numZoomLevels: 25}
     );
-    map.events.register("movestart", map, function (evnt) {
-      // log("baseLayerBounds"+map.getBoundFromBaseLayer());
-      if (map.getExtent()!= null) log("evt: " + map.getExtent().getCenterLonLat());
-    });
     var googleBaseLayer = new OpenLayers.Layer.Google("Google Maps", {sphericalMercator:true, numZoomLevels: 25} );
-    // districtLayer.setVisibility(true);
     if (onBerlinDe) map.addLayers([googleBaseLayer, mapnik]); // , markerLayer
     else map.addLayers([mapnik, googleBaseLayer]);
+    //
     // MapControl Setup
     nav = new OpenLayers.Control.NavigationHistory();
+    myLayerSwitcher = OpenLayers.Control.CustomLayerSwitcher = 
+    OpenLayers.Class(OpenLayers.Control.LayerSwitcher, {
+      CLASS_NAME: "OpenLayers.Control.CustomLayerSwitcher"
+    });
+    // myLayerSwitcher.moveTo(new OpenLayers.Pixel(50, 300));
+    // myLayerSwitcher.moveTo(new OpenLayers.Pixel(150, 400));
     // parent control must be added to the map
     map.addControl(nav);
+    map.events.register("movestart", map, function (evnt) {
+      // log("baseLayerBounds"+map.getBoundFromBaseLayer());
+      if (map.getExtent()!= null && debug) log("evt: " + map.getExtent().getCenterLonLat());
+    });
+    //
     //
     panel = new OpenLayers.Control.Panel(
 	    {div: document.getElementById("navPanel")}
@@ -79,7 +89,11 @@
       activeColor: "white"
     });
     map.addControl(myLayerSwitcher);
-    panel.addControls([nav.next, nav.previous]);
+    // event binding for the new hover controlMenu ### ToDo: find a better place for this
+    jQuery("#mapControl").bind("mouseover", overMapControl);
+    jQuery("#mapControl").bind("mouseout", outMapControl);
+    // 
+    if (!onBerlinDe) panel.addControls([nav.next, nav.previous]);
     map.addControl(panel);
     // layerSwitcher, NavigationHistory, Panel
     // setBounds
@@ -97,8 +111,8 @@
     // topHeight = topHeight - startHeight;
     //
     if (onBerlinDe) fullW = fullW - 1; // 
-    var mapW = fullW - sideW - 7; // border
-    // if (onBerlinDe) mapW = fullW - sideW - 7; // border
+    var mapW = fullW - sideW - 7;
+    if (onBerlinDe) mapW = fullW - sideW - 6; // border
     var mapH = fullH - topHeight - startHeight - 1; // current labs headerHeight
     if (onBerlinDe) jQuery("#bobody").css("width", fullW + 1);
   	if (onBerlinDe) jQuery("#bohead").css("width", fullW + 1);
@@ -110,8 +124,8 @@
     jQuery("#map").css("width", mapW);
     jQuery("#map").css("height", mapH);
     //
-    jQuery("#mapControl").css("left", mapW - 185);
-    jQuery("#mapControl").css("top", startHeight + 3);
+    jQuery("#mapControl").css("left", mapW - 128);
+    jQuery("#mapControl").css("top", startHeight + topHeight + 8);
     // jQuery("#mapSwitcher").css("left", 525);
     if (onBerlinDe) jQuery("#focusInput").css("left", 225);
     else jQuery("#focusInput").css("left", 345);
@@ -902,25 +916,25 @@
       var id = topicListToShow[m];
       var featureToShow = checkDrawnFeaturesForTopicId(id);
       if ( featureToShow != null ) { // is wether already drawn in cluster or normal, no need for handling it again
-        // log("[WARNING] that topic ("+id+")is already drawn in " + featureToShow.data.topicName); 
-        featureToShow.attributes.marker = "hotspot";
-        featureToShow.attributes.size = "20";      
         // skipping
       } else {
         featureToShow = checkFeatureById(id);
         if ( featureToShow != null ) {
           // there was a feature for this topic initialized
           var pos = new OpenLayers.LonLat(featureToShow.data.lon, featureToShow.data.lat);
-          var clusterFeature = checkLayerForVisibleFeatureOnPosition(pos); // for a visible feature on that position
+          // for a visible feature on that position which is not the same topic id
+          // // (occurs because topics are in multiple categories)
+          var clusterFeature = checkLayerForVisibleFeatureOnPosition(pos, id);
           if ( clusterFeature != null ) { 
             // on this position there is already a feature drawn, make it a cluster or at least append it
             // clusterFeature.data.cluster.push(featureToShow.data);
             if (featureToShow.data.cluster == null) { // is a new cluster
               var newCluster = new Array();
+              // check if data.cluster is an Array of feature.data objects ???
               if ( clusterFeature.data.cluster == null ) { // starting new cluster
                 newCluster.push(clusterFeature.data);
                 newCluster.push(featureToShow.data);
-                log("> starting a cluster at " + pos + " with " + clusterFeature.data.topicName + " / " + featureToShow.data.topicName);
+                if (debug) log("> starting a cluster at " + pos + " with " + clusterFeature.data.topicName + " / " + featureToShow.data.topicName);
               } else {
                 for(j=0;j<clusterFeature.data.cluster.length;j++) {
                  newCluster.push(clusterFeature.data.cluster[j]);
@@ -1164,25 +1178,24 @@
     var myStyle = new OpenLayers.Style( { 
       graphicName: "circle", fillOpacity: "1", fillColor: "#378fe0", strokeColor: "blue", pointRadius: 5, 
       graphicTitle: "${label}", labelYOffset: "7px", externalGraphic: "${iconUrl}", graphicWidth: "${size}", 
-      fontSize: "10px", fontFamily: "Verdana, Arial", fontColor: "#ffffff" } );
+      fontSize: "10px", fontFamily: "Verdana, Arial", fontColor: "#ffffff"} );
     var symbolizer = OpenLayers.Util.applyDefaults( myStyle, OpenLayers.Feature.Vector.style["default"]);
     var myStyleMap = new OpenLayers.StyleMap({
       "default": symbolizer, 
-      "select": { strokeColor:"red", fillOpacity: "1", fillColor:"white", strokeWidth: 2 , graphicWidth: 21 },
-      "temporary": { strokeColor:"white", fillOpacity: "1", fillColor: "blue", strokeWidth: 2, graphicWidth: 21 }
+      "select": {strokeColor:"red", fillOpacity: "1", fillColor:"white", strokeWidth: 2 , graphicWidth: 21},
+      "temporary": {strokeColor:"white", fillOpacity: "1", fillColor: "blue", strokeWidth: 2, graphicWidth: 21}
     });
     //"hotspot": {pointRadius: 8}});
     var lookup = {
-      "normal": { pointRadius: 5 }, // normal
-      "hotspot": { pointRadius: 7 } // hotspot / cluster
+      "normal": {pointRadius: 5}, // normal
+      "hotspot": {pointRadius: 7} // hotspot / cluster
     };
     myStyleMap.addUniqueValueRules("default", "marker", lookup);
     // myStyleMap.addUniqueValueRules("temporary", "label", labelook);
     myNewLayer = new OpenLayers.Layer.Vector('Kiezatlas Marker', {
-      styleMap: myStyleMap
+      styleMap: myStyleMap, displayInLayerSwitcher: false
       // strategies: [ new OpenLayers.Strategy.Cluster() ]
     });
-    // create features..
     var selectFeatureHandler = new OpenLayers.Control.SelectFeature(myNewLayer, {
       multiple: false,
       clickout: false,
@@ -1191,57 +1204,12 @@
       highlightOnly: false,
       renderIntent: "select",
       onSelect: function() {
-      jQuery("#memu").css("visibility", "hidden");  
+        // jQuery("#memu").css("visibility", "hidden");
       }
     });
-    // its style display property is set to ‘none’,
-    var highlightCtrl = new OpenLayers.Control.SelectFeature(myNewLayer, {
-      hover: true,
-      highlightOnly: true,
-      renderIntent: "temporary",
-      eventListeners: { // makes use of the global propertyMap for eventListeners
-        // beforefeaturehighlighted: function(e) { e.feature.attributes.label = e.feature.data.topicName; },
-        featurehighlighted: function(e) {
-          var marker = e.feature.attributes.marker;
-          if (marker == "hotspot") {
-            //log("hotSpotFeature highlght, to show contextMenu at l:" + e.feature.geometry.bounds.getCenterPixel()); // + "b:"+ e.feature.geometry.bounds.bottom);
-          var centerPoint = myNewLayer.getViewPortPxFromLonLat(e.feature.geometry.bounds.getCenterLonLat());
-          var htmlString = "";
-          if ( e.feature.data.cluster != null && e.feature.data.cluster != undefined ) {
-            for (i=0; i<e.feature.data.cluster.length; i++) {
-              htmlString += '<a href=javascript:showInfoWindowForTopicId("'
-                + e.feature.data.cluster[i].topicId+'");>'+e.feature.data.cluster[i].topicName+'</a><br/>';
-              }
-              jQuery("#memu").html(htmlString);
-              jQuery("#memu").css("visibility", "visible");
-              jQuery("#memu").css("left", centerPoint.x);
-              jQuery("#memu").css("top", centerPoint.y + headerGap + 27); // ### headergap seems unneccessary
-            }
-          } else {
-            // log("normalFeature just highlight");
-            // e.feature.attributes.label = "";
-          }
-        },
-        featureunhighlighted: function(e) { 
-            // TODO: is wrong one, if one is already selected and the user wants to deal with a cluster
-            // log("feature" + e.feature.data.topicId + " unhighlighted");
-            var marker = e.feature.attributes.marker;
-            if (marker == "hotspot") {
-              jQuery("#memu").css("visibility", "hidden");
-              // var testXY = e.feature.geometry.clone().transform(map.projection, map.displayProjection);
-              // log("hotSpotFeature highlght, to hide contextMenu at l:" + myNewLayer.getViewPortPxFromLonLat(testXY));
-              // + "t:"+ e.feature.geometry.bounds.top);
-            } else {
-              // e.feature.attributes.label = " ";
-            }
-        }
-      } // eventListeners end
-    });
     mainMap.addControl(selectFeatureHandler);
-    mainMap.addControl(highlightCtrl);
     selectFeatureHandler.activate();
-    highlightCtrl.activate();
-    // mainMap.addControl(featureHandler);
+    //
     var featureHandler = new OpenLayers.Handler.Feature(selectFeatureHandler, myNewLayer, {
       //stopClick: true,
       stopUp: true,
@@ -1258,6 +1226,54 @@
         removeAllPopUps();
       }
     }); // end FeatureHandlerInit
+    /* commented out the mouseover cluster menu 
+      var highlightCtrl = new OpenLayers.Control.SelectFeature(myNewLayer, {
+      hover: true,
+      highlightOnly: true,
+      renderIntent: "temporary",
+      eventListeners: { // makes use of the global propertyMap for eventListeners
+        // beforefeaturehighlighted: function(e) { e.feature.attributes.label = e.feature.data.topicName; },
+        // ### ToDo: most probably unused and to be removed
+        featurehighlighted: function(e) {
+          var marker = e.feature.attributes.marker;
+          if (marker == "hotspot") {
+            //log("hotSpotFeature highlght, to show contextMenu at l:" + e.feature.geometry.bounds.getCenterPixel()); // + "b:"+ e.feature.geometry.bounds.bottom);
+            var centerPoint = myNewLayer.getViewPortPxFromLonLat(e.feature.geometry.bounds.getCenterLonLat());
+            var htmlString = "";
+            if ( e.feature.data.cluster != null && e.feature.data.cluster != undefined ) {
+              for (i=0; i<e.feature.data.cluster.length; i++) {
+                htmlString += '<a href=javascript:showInfoWindowForTopicId("'
+                  + e.feature.data.cluster[i].topicId+'");>'+e.feature.data.cluster[i].topicName+'</a><br/>';
+                }
+                jQuery("#memu").html(htmlString);
+                jQuery("#memu").css("visibility", "visible");
+                jQuery("#memu").css("left", centerPoint.x);
+                jQuery("#memu").css("top", centerPoint.y + headerGap + 27); // ### headergap seems unneccessary
+            }
+          } else {
+            // log("normalFeature just highlight");
+            // e.feature.attributes.label = "";
+          }
+        },
+        featureunhighlighted: function(e) {
+            // TODO: is wrong one, if one is already selected and the user wants to deal with a cluster
+            // log("feature" + e.feature.data.topicId + " unhighlighted");
+            var marker = e.feature.attributes.marker;
+            if (marker == "hotspot") {
+              jQuery("#memu").css("visibility", "hidden");
+              // var testXY = e.feature.geometry.clone().transform(map.projection, map.displayProjection);
+              // log("hotSpotFeature highlght, to hide contextMenu at l:" + myNewLayer.getViewPortPxFromLonLat(testXY));
+              // + "t:"+ e.feature.geometry.bounds.top);
+            } else {
+              // e.feature.attributes.label = " ";
+            }
+        }
+      } // eventListeners end
+    });
+    mainMap.addControl(highlightCtrl);
+    highlightCtrl.activate();
+    */
+    // mainMap.addControl(featureHandler);
     featureHandler.activate();
     // log("featureHandler activated: " + featureHandler.activate());// = true;
     allFeatures = [points.length];
@@ -1351,7 +1367,7 @@
     return cluster;
   }
   
-
+  /** yet unused method */
   function checkLayerForFeatureOnPosition(lonlat) {
     for(i=0; i<myNewLayer.features.length; i++) {
       if (parseFloat(myNewLayer.features[i].data.lon) == parseFloat(lonlat.lon) 
@@ -1363,8 +1379,14 @@
     return null;
   }
   
-  function checkLayerForVisibleFeatureOnPosition(lonlat) {
-    for (i=0; i<myNewLayer.features.length; i++) {
+  /** used for creating cluster*/
+  function checkLayerForVisibleFeatureOnPosition(lonlat, topicId) {
+    for ( i = 0; i < myNewLayer.features.length; i++) {
+      if (myNewLayer.features[i].data.topicId == topicId) {
+        // alert("skipped" + topicId + " caused by multiple categories ")
+        // we don't want to cluster an item with itself cause it may be assigned to multiple categories'
+        return null;
+      }
       if (myNewLayer.features[i].renderIntent != "delete") {
         if (parseFloat(myNewLayer.features[i].data.lon) == parseFloat(lonlat.lon) 
             && parseFloat(myNewLayer.features[i].data.lat) == parseFloat(lonlat.lat)) {
@@ -1472,11 +1494,16 @@
     var idString = ""+ featureData.topicId + "";
     var htmlString = '<b>' + featureData.topicName + '</b><br/><a href=javascript:showTopicInSideBar("'
       + idString+'")>weitere Details</a>';
-    if ( clusteredId != null ) {
-      var clusteredTopic = getTopicById(clusteredId);
-      idString = clusteredId;
-      htmlString = '<b>' + clusteredTopic.name + '</b><br/><a href=javascript:showTopicInSideBar("'
-        + idString+'")>weitere Details</a>';
+    // if ( clusteredId != null ) {
+    if ( featureData.cluster != null ) {
+      htmlString = "<b class=\"redTitle\">Es gibt hier mehrere M&ouml;glichkeiten an einem Ort:</b><p/>";
+      for (i=0; i < featureData.cluster.length; i++) {
+        var clusterTopicId = featureData.cluster[i].topicId;
+        var clusterTopic = getTopicById(clusterTopicId);
+        htmlString += '<b>' + clusterTopic.name + '</b>&nbsp; - <a href=javascript:showTopicInSideBar("'
+          + clusterTopicId + '")>weitere Details</a><br/>';
+      }
+      // htmlString += "</li>";
     }
     // just make sure that there is not more than 1active PopUpWindow
     removeAllPopUps();
@@ -1806,20 +1833,34 @@
       map.panTo(newBounds.getCenterLonLat());
       map.zoomTo(zoomLevel);
     }
+    // render all markers as "delete" and deselect all categories
     if (resetMarkers == true) {
       reSetMarkers();
     }
-   
+    // in any case - reset the sidebar to the latest critIndex
+    updateCategoryList(crtCritIndex);
+  }
+  
+  /** called by the CustomLayerSwitcher.onInputClick */
+  function clickInfoForMapControlMenu() {
+    outMapControl();
+  }
+  
+  function overMapControl() {
+    jQuery("#mapControl").css("height", 138);
+    toggleMapControl();
+  }
+  
+  function outMapControl() {
+    jQuery("#mapControl").css("height", 20);
+    toggleMapControl();  
   }
   
   function toggleMapControl() {
     if (jQuery("#mapSwitcher").css("visibility") == "hidden") {
       jQuery("#mapSwitcher").css("visibility", "visible");
-      jQuery("#mapMarkerButtons").css("visibility", "visible");
     } else {
       jQuery("#mapSwitcher").css("visibility", "hidden");
-      jQuery("#mapMarkerButtons").css("visibility", "hidden");
-      // jQuery("#mapMarkerButtons")
     }
   }
   

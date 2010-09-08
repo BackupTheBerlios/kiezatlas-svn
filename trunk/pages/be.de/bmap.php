@@ -56,6 +56,7 @@
     <link rel="stylesheet" type="text/css" href="landmaps.css">
     <script type="text/javascript" src="kiezatlas.js"></script>
     <script type="text/javascript" src="OpenLayers.js"></script>
+    <script type="text/javascript" src="CustomLayerSwitcher.js"></script>
     <script type="text/javascript" src="jquery-1.3.2.js"></script>
     <script type="text/javascript" src="http://maps.google.com/maps?file=api&v=2&oe=utf-8&key=ABQIAAAADev2ctFkze28KEcta5b4WBSQDgFJvORzMhuwLQZ9zEDMQLdVUhTWXHB2vS0W0TdlEbDiH_qzhBEZ5A"></script>
     <script type="text/javascript">
@@ -170,15 +171,17 @@
       </div>
       <div id="map"></div>
 	    <div id="focusAlternatives"></div>
-      <div id="mapControl">
+      <div id="mapControl">&nbsp;
         <a href="javascript:showAllMarker();" id="toggleMarkerHref">
           <img border="0" src="img/FreiwilligenAgentur.png" title="Alle Markierer einblenden" width="15" height="15">
         </a>
-			    <!-- <a href="javascript:removeAllMarker();" style="text-decoration: none;">> Alle ausblenden</a> <br/>-->
-			  <a href="javascript:updateVisibleBounds(null, true);" id="resetMarkerHref">
-			    <img border="0" src="img/Stop.png" title="zurücksetzen der Kartenansicht und Informationsebenen" width="15" height="15">
-        </a>&nbsp;
-		    <a href="javascript:toggleMapControl();" id="mapFunctions">Kartenfunktionalit&auml;t</a>
+        <!-- <img border="0" id="divider" src="img/division.png" title="" width="1" height="10"> -->
+		      <!-- <a href="javascript:removeAllMarker();" style="text-decoration: none;">> Alle ausblenden</a> <br/>-->
+		    <a href="javascript:updateVisibleBounds(null, true);" id="resetMarkerHref">
+		      <img border="0" src="img/Stop.png" title="zurücksetzen der Kartenansicht und Informationsebenen" width="15" height="15">
+        </a>
+        <!-- <img border="0" id="divider" src="img/division.png" title="" width="1" height="10"> -->
+        <span id="moreLabel">Mehr..</span>
 		    <div id="mapSwitcher" style="position: absolute; visibility: hidden;"></div>
       </div>
       <div id="memu" style="visibility:hidden;"></div>
