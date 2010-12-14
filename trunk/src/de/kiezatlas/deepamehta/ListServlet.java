@@ -1,11 +1,11 @@
 package de.kiezatlas.deepamehta;
 
-import de.deepamehta.AmbiguousSemanticException;
 import de.kiezatlas.deepamehta.topics.CityMapTopic;
 import de.kiezatlas.deepamehta.topics.GeoObjectTopic;
 //
 import de.deepamehta.BaseTopic;
 import de.deepamehta.DeepaMehtaException;
+import de.deepamehta.AmbiguousSemanticException;
 import de.deepamehta.service.CorporateDirectives;
 import de.deepamehta.service.Session;
 import de.deepamehta.service.TopicBean;
@@ -13,6 +13,7 @@ import de.deepamehta.service.TopicBeanField;
 import de.deepamehta.service.web.DeepaMehtaServlet;
 import de.deepamehta.service.web.RequestParameter;
 import de.deepamehta.topics.TypeTopic;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -22,12 +23,14 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import javax.servlet.ServletException;
 //
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.TimeZone;
 import java.util.Vector;
+
+import javax.servlet.ServletException;
+
 import org.apache.commons.fileupload.FileItem;
 
 
@@ -116,16 +119,16 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			}
 			EditServlet.writeFiles(params.getUploads(), geo.getImage(), as);
 			//
-            setGPSCoordinates(geo, directives); //{ // ### should load coordinates if address was changed
-            if (session.getAttribute("isSlim").equals("true")) {
-                setUseCache(Boolean.FALSE, session);	// slim list don't use the cache
-                return PAGE_SLIM_LIST;
-            } else {
-                // make sure that element in cache is updated
-                updateTopicInCache(geo, session);
-                setUseCache(Boolean.TRUE, session);	// re-filtering and -sorting is handled in preparePage with cached topics now
-                return PAGE_LIST;
-            }
+      setGPSCoordinates(geo, directives); //{ // ### should load coordinates if address is empty
+      if (session.getAttribute("isSlim").equals("true")) {
+          setUseCache(Boolean.FALSE, session);	// slim list don't use the cache
+          return PAGE_SLIM_LIST;
+      } else {
+          // make sure that element in cache is updated
+          updateTopicInCache(geo, session);
+          setUseCache(Boolean.TRUE, session);	// re-filtering and -sorting is handled in preparePage with cached topics now
+          return PAGE_LIST;
+      }
 		} else if (action.equals(ACTION_SHOW_EMPTY_GEO_FORM)) {
 			return PAGE_GEO_EMPTY_FORM;
 		} else if (action.equals(ACTION_CREATE_GEO)) {
@@ -145,7 +148,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			// --- get geo object ---
 			setGeoObject(cm.getTopic(geoObjectID, 1), session);
 			GeoObjectTopic geo = getGeoObject(session);
-			setGPSCoordinates(geo, directives); //{ // ### should load coordinates if address was changed
+			setGPSCoordinates(geo, directives); //{ // loads gps coordinates
             // --- store image ---
 			EditServlet.writeFiles(params.getUploads(), geo.getImage(), as);
             if (session.getAttribute("isSlim").equals("true")) {
@@ -381,10 +384,10 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
                 if (!mapAlias.equals("")) {
                     session.setAttribute("link", as.getCorporateWebBaseURL()+FILESERVER_DOCUMENTS_PATH+mapAlias+".csv");
                 } else {
-                    session.setAttribute("link", as.getCorporateWebBaseURL()+sc.getContextPath()); // point back if it's a "guest"
+                    session.setAttribute("link", as.getCorporateWebBaseURL()+sc.getContext("list").getServletContextName()); // point back if it's a "guest"
                 }
             } else {
-                session.setAttribute("link", as.getCorporateWebBaseURL()+sc.getContextPath()); // point back if it's a "guest";
+                session.setAttribute("link", as.getCorporateWebBaseURL()+sc.getContext("list").getServletContextName()); // point back if it's a "guest";
             }
             session.setAttribute("title", "Download der &ouml;ffentlichen Daten des Stadtplans \"" + mapName + "\"");
             return PAGE_DOWNLOAD_PAGE;

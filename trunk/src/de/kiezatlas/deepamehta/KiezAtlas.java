@@ -5,10 +5,10 @@ import de.deepamehta.DeepaMehtaConstants;
 
 
 /**
- * Kiezatlas 1.6.2<br>
+ * Kiezatlas 1.6.7<br>
  * Requires DeepaMehta 2.0b8.
  * <p>
- * Last change: 11.8.2008<br>
+ * Last change: 2.11.2010<br>
  * J&ouml;rg Richter<br>
  * jri@deepamehta.de
  */
@@ -49,7 +49,7 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 
 
 
-    static final String TOPICTYPE_CITY = "tt-city";
+  static final String TOPICTYPE_CITY = "tt-city";
 	static final String TOPICTYPE_CITYMAP = "tt-ka-stadtplan";
 	static final String TOPICTYPE_KIEZ_GEO = "tt-ka-geoobject";
 	static final String TOPICTYPE_KIEZ_GEO_SEARCH = "tt-ka-geoobject-search";
@@ -72,7 +72,7 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 
 
 	static final String ASSOCTYPE_OUTLINE = "at-ka-outline";
-    static final String ASSOCTYPE_AFFILIATED = "at-ka-affiliated";
+  static final String ASSOCTYPE_AFFILIATED = "at-ka-affiliated";
 	static final String ASSOCTYPE_HOMEPAGE_LINK = "at-ka-homepage-link";
 	static final String ASSOCTYPE_IMPRESSUM_LINK = "at-ka-impressum-link";
 
@@ -131,8 +131,8 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	static final String PROPERTY_AGENCY_KIND = "Art";
 	static final String PROPERTY_YADE_X = "YADE x";
 	static final String PROPERTY_YADE_Y = "YADE y";
-    static final String PROPERTY_GPS_LONG = "LONG";
-    static final String PROPERTY_GPS_LAT = "LAT";
+  static final String PROPERTY_GPS_LONG = "LONG";
+  static final String PROPERTY_GPS_LAT = "LAT";
 	static final String PROPERTY_LAST_MODIFIED = "Zuletzt geändert";
 	//
 	static final String PROPERTY_FORUM_ACTIVITION = "Aktivierung";
@@ -162,21 +162,24 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	// ----------------
 
 
-    static final String ITEM_LOAD_COORDINATES = "Load GPS Coordinates";
-    static final String  CMD_START_GEOCODING = "loadGeoCodes";
+  static final String ITEM_LOAD_COORDINATES = "Load All GPS Coordinates";
+  static final String  CMD_START_GEOCODING = "loadGeoCodes";
 
-    static final String ITEM_LOCK_GEOMETRY = "Lock";
-    static final String  CMD_LOCK_GEOMETRY = "lockGeometry";
+  static final String ITEM_LOAD_EMPTY_COORDINATES = "Load Empty GPS Coordinates";
+  static final String  CMD_START_EMPTY_GEOCODING = "loadEmptyGeoCodes";
+
+  static final String ITEM_LOCK_GEOMETRY = "Lock";
+  static final String  CMD_LOCK_GEOMETRY = "lockGeometry";
 	//
-    static final String ITEM_UNLOCK_GEOMETRY = "Unlock";
-    static final String  CMD_UNLOCK_GEOMETRY = "unlockGeometry";
+  static final String ITEM_UNLOCK_GEOMETRY = "Unlock";
+  static final String  CMD_UNLOCK_GEOMETRY = "unlockGeometry";
 	//
-    static final String ITEM_REPOSITION_ALL = "Reposition all";
-    static final String  CMD_REPOSITION_ALL = "repositionAll";
-    static final String ICON_REPOSITION_ALL = "location.png";
+  static final String ITEM_REPOSITION_ALL = "Reposition all";
+  static final String  CMD_REPOSITION_ALL = "repositionAll";
+  static final String ICON_REPOSITION_ALL = "location.png";
 	//
-    static final String ITEM_MAKE_SHAPE = "Make Shape";
-    static final String  CMD_MAKE_SHAPE = "makeShape";
+  static final String ITEM_MAKE_SHAPE = "Make Shape";
+  static final String  CMD_MAKE_SHAPE = "makeShape";
 
 
 
@@ -197,6 +200,8 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	public static final int SERVLET_LIST = 3;
 	public static final int SERVLET_UPLOAD = 4;
 	public static final int SERVLET_IMPORT = 5;
+	public static final int SERVLET_MAPS = 6;
+	public static final int SERVLET_ATLAS = 7;
 
 
 
@@ -259,6 +264,8 @@ public interface KiezAtlas extends DeepaMehtaConstants {
   public static final String ACTION_SHOW_REPORT = "showImportReport";
   public static final String ACTION_DO_IMPORT = "doImport";
   public static final String ACTION_RESET_CRITERIAS = "resetCritCats";
+  // Maps Servlets
+  public static final String ACTION_GEO_CODE = "geoCode";
 
 
 
@@ -291,36 +298,40 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 
 
 
+	// atlas
+  static final String PAGE_BERLIN_ATLAS = "be.de/BerlinAtlas";
+  static final String PAGE_MAP_ATLAS = "be.de/AlternativeAtlas";
 	// browse
-    static final String PAGE_FRAMESET = "frameset";
-    static final String PAGE_CITY_MAP = "CityMap";
-    static final String PAGE_CATEGORY_LIST = "CategoryList";
-    static final String PAGE_GEO_LIST = "GeoObjectList";
-    static final String PAGE_GEO_INFO = "GeoObjectInfo";
-    static final String PAGE_GEO_FORUM = "GeoObjectForum";
-    static final String PAGE_COMMENT_FORM = "CommentForm";
-    // edit
-    static final String PAGE_GEO_LOGIN = "GeoObjectLogin";
-    static final String PAGE_GEO_HOME = "GeoObjectHome";
-    static final String PAGE_GEO_FORM = "GeoObjectForm";
-    static final String PAGE_FORUM_ADMINISTRATION = "ForumAdministration";
-    // list
-    static final String PAGE_LIST_LOGIN = "ListLogin";
-    static final String PAGE_LIST_HOME = "ListHome";
-    static final String PAGE_LIST = "List";
-    static final String PAGE_SLIM_LIST = "SlimList";
-    static final String PAGE_GEO_ADMIN_FORM = "GeoObjectAdminForm";
-    static final String PAGE_GEO_EMPTY_FORM = "GeoObjectEmptyForm";
+  static final String PAGE_FRAMESET = "frameset";
+  static final String PAGE_CITY_MAP = "CityMap";
+  static final String PAGE_CATEGORY_LIST = "CategoryList";
+  static final String PAGE_GEO_LIST = "GeoObjectList";
+  static final String PAGE_GEO_INFO = "GeoObjectInfo";
+  static final String PAGE_GEO_FORUM = "GeoObjectForum";
+  static final String PAGE_COMMENT_FORM = "CommentForm";
+  static final String PAGE_MAP_LOGIN = "MapLogin";
+  // edit
+  static final String PAGE_GEO_LOGIN = "GeoObjectLogin";
+  static final String PAGE_GEO_HOME = "GeoObjectHome";
+  static final String PAGE_GEO_FORM = "GeoObjectForm";
+  static final String PAGE_FORUM_ADMINISTRATION = "ForumAdministration";
+  // list
+  static final String PAGE_LIST_LOGIN = "ListLogin";
+  static final String PAGE_LIST_HOME = "ListHome";
+  static final String PAGE_LIST = "List";
+  static final String PAGE_SLIM_LIST = "SlimList";
+  static final String PAGE_GEO_ADMIN_FORM = "GeoObjectAdminForm";
+  static final String PAGE_GEO_EMPTY_FORM = "GeoObjectEmptyForm";
 	static final String PAGE_LINK_PAGE = "Print"; // Link Page
 	static final String PAGE_DOWNLOAD_PAGE = "Download"; // Link Page
 	static final String PAGE_LIST_INFO = "ListHelp";
 	static final String PAGE_LIST_MAILING = "ListMailing";
 	// import
-    static final String PAGE_IMPORTS_LOGIN = "ImportsLogin";
-    static final String PAGE_IMPORTS_HOME = "ImportsHome";
-    static final String PAGE_REPORT_HOME = "ReportInfo";
-    // error
-    static final String PAGE_ERROR = "error";
-    // service
-    static final String PAGE_SERVE = "Serve";
+  static final String PAGE_IMPORTS_LOGIN = "ImportsLogin";
+  static final String PAGE_IMPORTS_HOME = "ImportsHome";
+  static final String PAGE_REPORT_HOME = "ReportInfo";
+  // error
+  static final String PAGE_ERROR = "error";
+  // service
+  static final String PAGE_SERVE = "Serve";
 }

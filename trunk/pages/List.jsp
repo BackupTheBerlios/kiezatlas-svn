@@ -19,7 +19,7 @@
 	String filterField = (String) session.getAttribute("filterField");
 	String sortField = (String) session.getAttribute("sortField");
 	Vector mailboxes = (Vector) session.getAttribute("emailList");
-    String membership = (String) session.getAttribute("membership");
+  String membership = (String) session.getAttribute("membership");
 	TopicBean bean = null;
 	if (topics.size() > 0) {
 	    // get table headers, just if topics are provided

@@ -7,7 +7,7 @@
 	<!-- General description of the web application -->
 
 	<display-name>Kiezatlas</display-name>
-	<description>Version 1.6.5b
+	<description>Version 1.6.7
 		Written by Jörg Richter (jri@deepamehta.de) and Malte Reißig (mre@deepamehta.de)</description>
 
 	<!-- Context initialization parameters that define shared
@@ -65,7 +65,7 @@
 
 	<servlet>
 		<servlet-name>Import Servlet</servlet-name>
-		<description>for berlin.de/buergeraktiv/kiezatlas</description>
+		<description>for berlin.de/buergeraktiv/atlas</description>
 		<servlet-class>de.kiezatlas.deepamehta.ImportServlet</servlet-class>
 	</servlet>
 
@@ -75,6 +75,18 @@
 		<servlet-class>de.kiezatlas.deepamehta.KiezServlet</servlet-class>
 	</servlet>
 
+	<servlet>
+		<servlet-name>Atlas Servlet</servlet-name>
+		<description>www.berlin.de/atlas as the new /browse</description>
+		<servlet-class>de.kiezatlas.deepamehta.AtlasServlet</servlet-class>
+	</servlet>
+
+	<servlet>
+		<servlet-name>Map Servlet</servlet-name>
+		<description>/map as the new /browse</description>
+		<servlet-class>de.kiezatlas.deepamehta.MapServlet</servlet-class>
+	</servlet>
+
 	<!-- Define mappings that are used by the servlet container to
 		 translate a particular request URI (context-relative) to a
 		 particular servlet.
@@ -82,7 +94,7 @@
 
     
 
-    <servlet-mapping>
+  <servlet-mapping>
 		<servlet-name>Browse Servlet</servlet-name>
 		<url-pattern>/browse/*</url-pattern>
 	</servlet-mapping>
@@ -102,14 +114,24 @@
 		<url-pattern>/upload/*</url-pattern>
 	</servlet-mapping>
 
-    <servlet-mapping>
+  <servlet-mapping>
 		<servlet-name>Import Servlet</servlet-name>
 		<url-pattern>/imports/*</url-pattern>
 	</servlet-mapping>
 
-    <servlet-mapping>
+  <servlet-mapping>
 		<servlet-name>Service Servlet</servlet-name>
 		<url-pattern>/rpc/*</url-pattern>
+	</servlet-mapping>
+
+  <servlet-mapping>
+		<servlet-name>Atlas Servlet</servlet-name>
+		<url-pattern>/atlas/*</url-pattern>
+	</servlet-mapping>
+
+  <servlet-mapping>
+		<servlet-name>Map Servlet</servlet-name>
+		<url-pattern>/map/*</url-pattern>
 	</servlet-mapping>
 
 	<!-- Define the default session timeout for your application,

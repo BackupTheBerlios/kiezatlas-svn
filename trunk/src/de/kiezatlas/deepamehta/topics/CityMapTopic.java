@@ -22,18 +22,18 @@ import java.util.*;
 
 
 /**
- * Kiezatlas 1.6.2<br>
+ * Kiezatlas 1.6.7<br>
  * Requires DeepaMehta 2.0b8
  * <p>
- * Last change: 11.8.2008<br>
- * J&ouml;rg Richter<br>
- * jri@deepamehta.de
+ * Last change: 28.11.2010<br>
+ * J&ouml;rg Richter / Malte Reißig<br>
+ * jri@deepamehta.de / mre@deepamehta.de
  */
 public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 
 
 
-	static final String VERSION = "1.6.5";
+	static final String VERSION = "1.6.7";
 	static {
 		System.out.println(">>> Kiezatlas " + VERSION);
 	}
@@ -341,6 +341,14 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 
 	private Vector getYADERefPoints() {
 		return cm.getViewTopics(getID(), 1, TOPICTYPE_YADE_POINT);
+	}
+
+  public static boolean isProtected(BaseTopic map, ApplicationService as) {
+    if (as.getTopicProperty(map, PROPERTY_PASSWORD).equals("")) return false; else return true;
+	}
+
+  public static boolean passwordCorrect(BaseTopic map, ApplicationService as, String password) {
+    if (as.getTopicProperty(map, PROPERTY_PASSWORD).equals(password)) return false; else return true;
 	}
 
 	// --- lookupCityMap (3 forms) ---

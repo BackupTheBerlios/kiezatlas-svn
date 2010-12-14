@@ -30,7 +30,7 @@
 <%!
 	// --- header area ---
 
-	// edit / list / upload
+	// edit / list / upload / maps-login
 	void begin(int servlet, HttpSession session, JspWriter out) throws IOException {
 		String title = "Kiezatlas";
 		switch (servlet) {
@@ -41,7 +41,10 @@
 		case KiezAtlas.SERVLET_LIST:
 			title = title + " - Listenzugang";
 			break;
-        case KiezAtlas.SERVLET_IMPORT:
+		case KiezAtlas.SERVLET_MAPS:
+			title = title + " - Stadtplanzugang";
+			break;
+    case KiezAtlas.SERVLET_IMPORT:
 			title = title + " - Importzugang";
 			break;
 		}
@@ -104,6 +107,14 @@
 		out.println("</div>");								// --- end header area
 		out.println();
 		out.println("<div class=\"content-area\">");		// --- begin content area
+	}
+
+	// atlas / maps
+	void startMaps(HttpSession session, JspWriter out) throws IOException {
+    String header = "<!-- This comment will put IE 6, 7 and 8 in quirks mode -->\r" +
+      "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\r" +
+      "<html xmlns=\"http://www.w3.org/1999/xhtml\">\r";
+      out.println(header);
 	}
 
 	// --- footer area ---

@@ -50,11 +50,6 @@
                 out.println("<a href=\"?action=" + KiezAtlas.ACTION_FILTER_ROUNDMAILING +
                     "&cityMapID=" + cityMap.getID() + "\" class=\"small\"><img src=\"http://www.kiezatlas.de/client/icons/mail.gif\" " +
                     "border=\"0\" height=\"15px\" width=\"15px\" title=\"zum verfassen einer Rundmail\" alt=\"zum verfassen einer Rundmail\"></a>");
-                if (user.getName().equals("root")) {
-                    out.println("<a href=\"http://www.kiezatlas.de/maps/map.php?&topicId=" + cityMap.getID() + "&workspaceId="+workspace.getID()+"\" " +
-                            "class=\"small\"><img src=\"http://www.kiezatlas.de/client/icons/layer-switcher-maximize.png\" border=\"0\" height=\"15px\" " +
-                            "width=\"15px\" alt=\"Link zum alternativen Interface\"></a>");
-                }
             out.println("</dd>");
 		}
 	}

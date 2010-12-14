@@ -605,9 +605,9 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 
     /** */
     public void setGPSCoordinates(CorporateDirectives directives) {
-        boolean emptyLat = (!as.getTopicProperty(this, PROPERTY_GPS_LAT).equals("")) ? true : false;
-        boolean emptyLong = (!as.getTopicProperty(this, PROPERTY_GPS_LONG).equals("")) ? true : false;
-        if (emptyLat && emptyLong) {
+        boolean emptyLat = (as.getTopicProperty(this, PROPERTY_GPS_LAT).equals("")) ? true : false;
+        boolean emptyLong = (as.getTopicProperty(this, PROPERTY_GPS_LONG).equals("")) ? true : false;
+        if (!emptyLat && !emptyLong) {
             directives.add(DIRECTIVE_SHOW_MESSAGE, "WGS 84 coordinates are already known to the system, " +
                     "skipping repositioning. (Means: Changes to the <i>Address</i> do not <i>automatically</i> update " +
                     "the position of this GeoObject in a \"Citymap\".", new Integer(NOTIFICATION_DEFAULT));

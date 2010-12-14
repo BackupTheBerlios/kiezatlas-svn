@@ -5,6 +5,14 @@ import de.deepamehta.service.*;
 import de.deepamehta.service.web.JSONRPCServlet;
 import de.deepamehta.topics.TypeTopic;
 import de.kiezatlas.deepamehta.topics.CityMapTopic;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.Hashtable;
 import java.util.Vector;
 import java.util.regex.Matcher;
@@ -17,17 +25,20 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
 
     protected String performPostRequest(String remoteMethod, String params, Session session, CorporateDirectives directives)
     {
+        // System.out.println("POST Request received... " + remoteMethod + ":" + params);
         String result = "";
-        if(remoteMethod.equals("getMapTopics")) {
+        if ( remoteMethod.equals("getMapTopics") ) {
             result = getGeoMapTopics(params, session, directives);
-        } else if(remoteMethod.equals("getGeoObjectInfo")) {
+        } else if ( remoteMethod.equals("getGeoObjectInfo") ) {
             result = getGeoObjectInfo(params);
-        } else if(remoteMethod.equals("getWorkspaceCriterias")) {
+        } else if ( remoteMethod.equals("getWorkspaceCriterias") ) {
             result = getWorkspaceCriterias(params);
-        } else if(remoteMethod.equals("getWorkspaceInfos")) {
+        } else if ( remoteMethod.equals("getWorkspaceInfos") ) {
             result = getWorkspaceInfos(params);
-        } else if(remoteMethod.equals("searchGeoObjects")) {
+        } else if ( remoteMethod.equals("searchGeoObjects") ) {
             result = searchTopics(params, directives);
+        } else if ( remoteMethod.equals("geoCode") ) {
+            result = getGeoCode(params);
         }
         return result;
     }
@@ -88,16 +99,13 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
      */
     private String getWorkspaceCriterias(String params)
     {
-        System.out.println(">>>> getWorkspaceCriterias(" + params + ")");
-        String parameters[] = params.split(",");
-        String workspaceId = parameters[0];
-        String mapId = parameters[1];
+        String mapId = params.substring(2, params.length()-2);
         StringBuffer messages = null;
         StringBuffer result = new StringBuffer("{\"result\": ");
-        String criteriaList = createCritCatSystemList(workspaceId.substring(2, workspaceId.length()-2), mapId.substring(2, mapId.length()-2));
+        String criteriaList = createCritCatSystemList(mapId);
         result.append(criteriaList);
         result.append(", \"error\": " + messages + "}");
-        System.out.println("[DEBUG] .. " + result.toString() + " \n ");
+        // System.out.println("[DEBUG] .. " + result.toString() + " \n ");
         return result.toString();
     }
 
@@ -194,7 +202,6 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
         String workspaceId = parameters[1];
         mapId = mapId.substring(2,mapId.length()-2);
         workspaceId = workspaceId.substring(2, workspaceId.length()-2);
-        // LOG System.out.println("INFO: mapId is " + mapId + ", " + " and workspaceId is " + workspaceId);
         StringBuffer messages = null;
         StringBuffer result = new StringBuffer("{\"result\": ");
         StringBuffer mapTopics = new StringBuffer("{ \"map\": \"" + mapId + "\", \"topics\": [");
@@ -222,6 +229,46 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
         return result.toString();
     }
 
+    private String getGeoCode(String params) {
+        // Set your return content type
+        // String q = params;// .getParameter("q");
+        String parameters[] = params.split(",");
+        String query = parameters[0];
+        String key = parameters[1];
+        String locale = parameters[2];
+        String result = "";
+        // String topicmapId = parameters[2];
+        query = query.substring(2, query.length()-1);
+        key = key.substring(2, key.length()-1);
+        locale = locale.substring(2, locale.length()-2);
+        try {
+            query = URLEncoder.encode(query, "UTF-8");
+            // Website url to open
+            String url = "http://maps.google.com/maps/geo?q="+query+"&output=json&oe=utf8&sensotr=false&key="+key+locale;
+            URLConnection connection = new URL(url).openConnection();
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setRequestProperty("Charset", "ISO-8859-1");
+            // Get the response
+            BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = rd.readLine()) != null) {
+              sb.append(line);
+            }
+            rd.close();
+            result = sb.toString();
+        } catch (UnsupportedEncodingException ex) {
+            System.out.println("*** KiezServlet.getGeoCode ERROR: " + ex.getMessage());
+        } catch (MalformedURLException mux) {
+            System.out.println("*** KiezServlet.getGeoCode ERROR: " + mux.getMessage());
+        } catch (IOException ioex) {
+            System.out.println("*** KiezServlet.getGeoCode ERROR: " + ioex.getMessage());
+        }
+        //
+        return result;
+    }
+
+
     // -------------------
     // --- Utility Methods
     // -------------------
@@ -246,7 +293,6 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
         object.append("\"imprint\": \"" + impressumURL + "\",");
         object.append("\"homepage\": \"" + homepageURL + "\"");
         object.append("}");
-        // System.out.println("workspaceInfos are imp:" + impressumURL + " home:" + homepageURL + " logo:" + logoURL);
         return object.toString();
     }
 
@@ -397,7 +443,7 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
      * @param workspaceId
      * @return
      */
-    private String createCritCatSystemList(String workspaceId, String mapId)
+    private String createCritCatSystemList(String mapId)
     {
         StringBuffer objectList = new StringBuffer();
         objectList.append("[");
@@ -411,7 +457,8 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
             objectList.append("{\"critId\": \"" + searchCriteria.criteria.getID() + "\", ");
             objectList.append("\"critName\": \"" + searchCriteria.criteria.getName() + "\", ");
             objectList.append("\"categories\": [");
-            Vector categories = cm.getTopics(searchCriteria.criteria.getID());
+            Vector categories = cm.getTopics(searchCriteria.criteria.getID(), null, new Hashtable(), null, null, true); // sort
+            // String typeID, String nameFilter, Hashtable propertyFilter, String relatedTopicID, String assocTypeID, boolean sortByTopicName
             for (int c = 0; c < categories.size(); c++) {
                 objectList.append("{");
                 objectList.append("\"catId\":");
@@ -530,6 +577,8 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
         text = text.replaceAll("<p>", "");
         text = text.replaceAll("<p style=\"margin-top: 0\">", "");
         text = text.replaceAll("</p>", "");
+        text = text.replaceAll("'", "\'");
+        // text = text.replaceAll("\'", "");
         // convert HTML entities
         text = toUnicode(text);
         //
