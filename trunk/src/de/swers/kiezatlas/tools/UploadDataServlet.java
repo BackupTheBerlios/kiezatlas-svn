@@ -37,21 +37,21 @@ import de.swers.kiezatlas.tools.XMLAddressFileReader;
  *
  * @author Ramazan Sarikaya
  */
-public class UploadDataServlet extends DeepaMehtaServlet implements de.kiezatlas.deepamehta.KiezAtlas{
+public class UploadDataServlet extends DeepaMehtaServlet implements de.kiezatlas.deepamehta.KiezAtlas {
     
-        static final String PAGE_LOGIN = "UploadDataLogin";
-        static final String PAGE_HOME = "UploadDataHome";
-        static final String PAGE_LOGIN_TRY_AGAIN = "UploadDataLoginTryAgain";
+  static final String PAGE_LOGIN = "UploadDataLogin";
+  static final String PAGE_HOME = "UploadDataHome";
+  static final String PAGE_LOGIN_TRY_AGAIN = "UploadDataLoginTryAgain";
 
-        static final String ACTION_UPLOAD_DATA = "UploadDataAction";
-        static final String ACTION_UPLOAD_DONE = "UploadDataDone";
-        
-        static final String PREFIX_NEUKOELLN =  "t-NKLSTI-";
-        
-        public void doPost(HttpServletRequest request, HttpServletResponse response)
-    														throws IOException, ServletException {
-            super.doPost(request, response);	// ###
-        }
+  static final String ACTION_UPLOAD_DATA = "UploadDataAction";
+  static final String ACTION_UPLOAD_DONE = "UploadDataDone";
+
+  static final String PREFIX_NEUKOELLN =  "t-NKLSTI-";
+
+  public void doPost(HttpServletRequest request, HttpServletResponse response)
+                          throws IOException, ServletException {
+      super.doPost(request, response);	// ###
+  }
         
 	protected String performAction(String action, RequestParameter params, Session session, CorporateDirectives directives) throws ServletException {
 		if (action == null) {
@@ -91,7 +91,7 @@ public class UploadDataServlet extends DeepaMehtaServlet implements de.kiezatlas
 	// **********************
 
 
-       	private String writeData(Vector fileItems) {
+    private String writeData(Vector fileItems) {
 		System.out.println(">>> UploadDataServlet.writeData(): " + fileItems.size() + " files uploaded");
 		try {
 			Enumeration e = fileItems.elements();

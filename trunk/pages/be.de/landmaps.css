@@ -61,8 +61,8 @@ background:#3F5DA6;
 .topicRowSelected { background: #e6edff; }
 .olControlAttribution { position:absolute; bottom: 3px !important; }
 .redTitle { color: #b60033; }
-.layersDiv { position:relative; left: 5px;}
+.layersDiv { position:relative; left: 5px; max-width: 110px; text-align: right; }
 .dataLbl { color: #4170D4; }
 .baseLbl { color: #4170D4; }
-.dataLayersDiv { border: 1px solid #e6edff; padding: 2px; }
-.baseLayersDiv { border: 1px solid #e6edff; padding: 2px; }
+.dataLayersDiv { border: 1px solid #e6edff; padding: 2px; text-align: right;  }
+.baseLayersDiv { border: 1px solid #e6edff; padding: 2px; text-align: right; }

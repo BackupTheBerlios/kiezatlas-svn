@@ -1,11 +1,11 @@
 <?php
     require_once "HTTP/Request.php";
-	// getMapTopics
+	  // getMapTopics
     $workspaceId = $_GET['workspaceId'];
     $topicId = $_GET['topicId'];
     $originId = $_GET['linkTo'];
     $body = '{"method": "getMapTopics", "params": ["'.$topicId.'" , "'.$workspaceId.'"]}';
-    $req1 =& new HTTP_Request("http://www.kiezatlas.de:8080/rpc/");
+    $req1 =& new HTTP_Request("http://localhost:8080/kiezatlas/rpc/");
     // http://localhost:8080/kiezatlas/rpc/ -- http://www.kiezatlas.de:8080/rpc/
     $req1->addHeader("Content-Type", "application/json");
     // $req2->addHeader("Charset", "utf-8");
@@ -19,8 +19,8 @@
     $mapTopics = utf8_encode($resp1);
 
     // getWorkspaceCriterias
-    $body = '{"method": "getWorkspaceCriterias", "params": ["'.$workspaceId.'", "'.$topicId.'"]}';
-    $req2 =& new HTTP_Request("http://www.kiezatlas.de:8080/rpc/");
+    $body = '{"method": "getWorkspaceCriterias", "params": ["'.$topicId.'"]}';
+    $req2 =& new HTTP_Request("http://localhost:8080/kiezatlas/rpc/");
     $req2->addHeader("Content-Type", "application/json"); 
     // $req2->addHeader("Charset", "utf-8");
     $req2->setBody($body);
@@ -92,6 +92,8 @@
 	      var debug_window = window.open('','','width=400,height=600,scrollbars=1');
 	    }
 	    var gKey = 'ABQIAAAADev2ctFkze28KEcta5b4WBSQDgFJvORzMhuwLQZ9zEDMQLdVUhTWXHB2vS0W0TdlEbDiH_qzhBEZ5A';
+      // kiezatlas.js deployment switch
+      onBerlinDe = true;
 	    //
 	    jQuery(document).ready(function(){
 	    	// register resize
@@ -157,8 +159,8 @@
 		    </div>
 		    <div id="searchInput">
 		      <form id="searchForm" action="javascript:searchRequest()">
-			    <label for="searchInputField">Suchen</label>
-			    <input id="searchInputField" type="text" value="Name" size="15"/>
+			    <label for="searchInputField">Suche</label>
+			    <input id="searchInputField" type="text" value="Einsatzm&#246;glichkeit" size="15"/>
 			    <ul>
 			    </ul>
 		      </form>
@@ -177,7 +179,7 @@
         </a>
         <!-- <img border="0" id="divider" src="img/division.png" title="" width="1" height="10"> -->
 		      <!-- <a href="javascript:removeAllMarker();" style="text-decoration: none;">> Alle ausblenden</a> <br/>-->
-		    <a href="javascript:updateVisibleBounds(null, true);" id="resetMarkerHref">
+		    <a href="javascript:updateVisibleBounds(null, true, null, true);" id="resetMarkerHref">
 		      <img border="0" src="img/Stop.png" title="zurücksetzen der Kartenansicht und Informationsebenen" width="15" height="15">
         </a>
         <!-- <img border="0" id="divider" src="img/division.png" title="" width="1" height="10"> -->

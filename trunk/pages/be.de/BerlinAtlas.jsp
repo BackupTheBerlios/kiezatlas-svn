@@ -77,7 +77,7 @@
       if (debug) log("mapTopics:" + mapTopics.result.topics.length);
       if (debug) log("workspaceCrits:" + workspaceCriterias.result.length);
       if (debug) log("districtNames:" + workspaceCriterias.result[4].categories[0].catName);
-      if (workspaceCriterias.result.length >= 4) districtNames = workspaceCriterias.result[4].categories;
+      if (onBerlinDe && workspaceCriterias.result.length > 4) districtNames = workspaceCriterias.result[4].categories;
       setWorkspaceInfos();
       setCityMapName(mapTitle);
       handleResize(); // do the layout

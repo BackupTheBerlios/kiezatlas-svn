@@ -4,8 +4,8 @@
     $workspaceId = $_GET['workspaceId'];
     $topicId = $_GET['topicId'];
     $body = '{"method": "getWorkspaceCriterias", "params": ["'.$workspaceId.'", "'.$topicId.'"]}';
-    // $req2 =& new HTTP_Request("http://www.kiezatlas.de:8080/rpc/ http://www.kiezatlas.de:8080/rpc/");
-    $req2 =& new HTTP_Request("http://www.kiezatlas.de:8080/rpc/");
+    // $req2 =& new HTTP_Request("http://www.kiezatlas.de:8080/rpc/");
+    $req2 =& new HTTP_Request("http://localhost:8080/kiezatlas/rpc/");
     $req2->addHeader("Content-Type", "application/json"); 
     // $req2->addHeader("Charset", "utf-8");
     $req2->setBody($body);

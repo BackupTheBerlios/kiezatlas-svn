@@ -45,7 +45,7 @@
 .topicRowSelected { background: #e6edff; }
 .olControlAttribution { position:absolute; bottom: 5px !important; right: 5px ! important; font-weight: bold;}
 .redTitle { color: #b60033; }
-.layersDiv { position:relative; left: 5px;}
+.layersDiv { position:relative; left: 5px }
 .dataLbl { color: #4170D4; }
 .baseLbl { color: #4170D4; }
 .dataLayersDiv { border: 1px solid #e6edff; padding: 2px; }

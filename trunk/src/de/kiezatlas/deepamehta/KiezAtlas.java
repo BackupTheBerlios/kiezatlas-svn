@@ -62,6 +62,7 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	static final String TOPICTYPE_OUTLINE_POINT = "tt-ka-outlinepoint";
 	static final String TOPICTYPE_SHAPE = "tt-ka-shape";
 	static final String TOPICTYPE_STYLESHEET = "tt-ka-stylesheet";
+	static final String TOPICTYPE_IMPORTER_SETTINGS = "tt-ka-importersettings";
 
 
 
@@ -143,7 +144,19 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	static final String PROPERTY_TARGET_WEBALIAS = "Target Web Alias";
 	//
 	static final String PROPERTY_CSS = "CSS";
-
+  //
+  // TOPICTYPE_IMPORTER_SETTINGS Properties
+  static final String PROPERTY_ICONS_MAP = "Icons / Kategorien";
+  static final String PROPERTY_ICON_CAT_DIVIDER = ":";
+  static final String PROPERTY_IMPORT_CONTENT_REPORT = "Content Report Mailbox";
+  static final String PROPERTY_IMPORT_SERVICE_REPORT = "Service Report Mailbox";
+  // Event imported Properties
+  static final String PROPERTY_EVENT_DESCRIPTION = "Beschreibung";
+  static final String PROPERTY_EVENT_TIME = "Datum / Zeit";
+  // Event and Engagment imported Properties
+  static final String PROPERTY_PROJECT_ORIGIN_ID = "OriginId";
+  static final String PROPERTY_PROJECT_LAST_MODIFIED = "Timestamp";
+  static final String PROPERTY_PROJECT_ORGANISATION = "Organisation";
 
 
 	// -----------------------

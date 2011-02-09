@@ -30,3 +30,11 @@ function toggleNumeration() {
     }*/
     //alert("changed-css attributes");
 }
+
+function deselectOptions (id){
+   var i;
+   var select = document.getElementById(id);
+   for (i=0; i<select.options.length; i++) {
+     select.options[i].selected = false;
+   }
+}

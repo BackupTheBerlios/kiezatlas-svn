@@ -75,14 +75,14 @@
       if (debug) log("mapTopics:" + mapTopics.result.topics.length);
       if (debug) log("workspaceCrits:" + workspaceCriterias.result.length);
       if (debug) log("districtNames:" + workspaceCriterias.result[4].categories[0].catName);
-      if (workspaceCriterias.result.length >= 4) districtNames = workspaceCriterias.result[4].categories;
+      if (onBerlinDe && workspaceCriterias.result.length > 4) districtNames = workspaceCriterias.result[4].categories;
       setWorkspaceInfos();
       setCityMapName('<%= map.getName() %>'); // fetch and set CityMapName
-      handleResize(); // do the layout
       // check if a special criteria was set through an entry url
       if (crtCritIndex >= workspaceCriterias.result.length) {
         crtCritIndex = 0;// workspaceCriterias.result.length;
       }
+      handleResize(); // do the layout
       // cityMap setup
       bounds = calculateInitialBounds();
       // after the dom is loaded we can init our parts of the app

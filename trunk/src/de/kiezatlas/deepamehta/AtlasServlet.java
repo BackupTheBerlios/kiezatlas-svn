@@ -47,6 +47,7 @@ import java.net.UnknownHostException;
  */
 public class AtlasServlet extends DeepaMehtaServlet implements KiezAtlas {
 
+  
 
   // --
   // --- KiezAtlas Service Settings
@@ -320,6 +321,7 @@ public class AtlasServlet extends DeepaMehtaServlet implements KiezAtlas {
     String logoURL = "";
     BaseTopic logo = as.getRelatedTopic(workspaceId, ASSOCTYPE_ASSOCIATION, TOPICTYPE_IMAGE, 2, true);
     if (logo != null) logoURL = as.getTopicProperty(logo, PROPERTY_FILE);
+    System.out.println("AtlasServlet.getWorkspaceLogo => " + logoURL);
     return logoURL;
   }
 

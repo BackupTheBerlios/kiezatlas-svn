@@ -5,8 +5,8 @@
     $workspaceId = $_GET['workspaceId'];
     $topicId = $_GET['topicId'];
     $body = '{"method": "getMapTopics", "params": ["'.$topicId.'" , "'.$workspaceId.'"]}';
-    $req1 =& new HTTP_Request("http://www.kiezatlas.de:8080/rpc/");
-    // $req1 =& new HTTP_Request("http://localhost:8080/kiezatlas/rpc/");
+    // $req1 =& new HTTP_Request("http://www.kiezatlas.de:8080/rpc/");
+    $req1 =& new HTTP_Request("http://localhost:8080/kiezatlas/rpc/");
     // http://www.kiezatlas.de:8080/rpc/ --
     $req1->addHeader("Content-Type", "application/json");
     // $req2->addHeader("Charset", "utf-8");

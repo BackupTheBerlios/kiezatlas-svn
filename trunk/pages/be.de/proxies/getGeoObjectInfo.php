@@ -1,8 +1,8 @@
 <?php
   require_once("HTTP/Request.php");
     $topicId = $_GET['topicId'];
-    // $request = new HTTP_Request('http://localhost:8080/kiezatlas/rpc/');
-    $request = new HTTP_Request('http://www.kiezatlas.de:8080/rpc/');
+    $request = new HTTP_Request('http://localhost:8080/kiezatlas/rpc/');
+    // $request = new HTTP_Request('http://www.kiezatlas.de:8080/rpc/');
     $body = '{"method": "getGeoObjectInfo", "params": ["'.$topicId.'"]}';
     $request->addHeader("Content-Type", "application/json");
     $request->setBody($body);

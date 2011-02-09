@@ -245,18 +245,18 @@ public class GPSConverterTopic extends LiveTopic implements KiezAtlas {
 
 
 
-    private Vector getAssignedWorkspaces() {
-        Vector workspaces = as.getRelatedTopics(this.getID(), ASSOCTYPE_ASSOCIATION, TOPICTYPE_WORKSPACE, 2);
-        // System.out.println("    workspaces found count: " + workspaces.size());
-        return workspaces;
-    }
+  private Vector getAssignedWorkspaces() {
+      Vector workspaces = as.getRelatedTopics(this.getID(), ASSOCTYPE_ASSOCIATION, TOPICTYPE_WORKSPACE, 2);
+      // System.out.println("    workspaces found count: " + workspaces.size());
+      return workspaces;
+  }
 
-    public Vector disabledProperties(Session session) {
-		Vector disabledProps = new Vector();
-		//
-        disabledProps.addElement(PROPERTY_DESCRIPTION);
-		//
-		return disabledProps;
+  public Vector disabledProperties(Session session) {
+      Vector disabledProps = new Vector();
+      //
+          disabledProps.addElement(PROPERTY_DESCRIPTION);
+      //
+      return disabledProps;
 	}
 
     /**

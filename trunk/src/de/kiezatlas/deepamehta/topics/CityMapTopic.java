@@ -348,7 +348,7 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 	}
 
   public static boolean passwordCorrect(BaseTopic map, ApplicationService as, String password) {
-    if (as.getTopicProperty(map, PROPERTY_PASSWORD).equals(password)) return false; else return true;
+    if (as.getTopicProperty(map, PROPERTY_PASSWORD).equals(password)) return true; else return false;
 	}
 
 	// --- lookupCityMap (3 forms) ---

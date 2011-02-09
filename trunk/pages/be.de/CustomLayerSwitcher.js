@@ -502,7 +502,6 @@ OpenLayers.Control.LayerSwitcher =
         this.layersDiv.id = this.id + "_layersDiv";
         // this.layersDiv.setAttribute("right", "25px");
         // this.layersDiv.style.border = "thin solid red";
-        // this.layersDiv.style.position = "relative right: 100px top: 200px; !important";
         // mright: 100px";
         OpenLayers.Element.addClass(this.layersDiv, "layersDiv");
         // base layer div
@@ -521,7 +520,13 @@ OpenLayers.Control.LayerSwitcher =
         OpenLayers.Element.addClass(this.dataLayersDiv, "dataLayersDiv");
 
         if (this.ascending) {
-            this.P = document.createElement("p");
+            this.P = document.createElement("br");
+            if (navigator.appName == "Microsoft Internet Explorer") {
+              this.P = document.createElement("p");
+              this.P.innerHTML = "&nbsp;"
+              this.layersDiv.style.left = "-65px";
+              // this.layersDiv.style.top = "15px";
+            }
             this.BR = document.createElement("br");
             this.layersDiv.appendChild(this.P);
             this.layersDiv.appendChild(this.baseLbl);
@@ -530,7 +535,13 @@ OpenLayers.Control.LayerSwitcher =
             this.layersDiv.appendChild(this.dataLbl);
             this.layersDiv.appendChild(this.dataLayersDiv);
         } else {
-            this.P = document.createElement("p");
+            this.P = document.createElement("br");
+            if (navigator.appName == "Microsoft Internet Explorer") {
+              this.P = document.createElement("p");
+              this.P.innerHTML = "&nbsp;"
+              this.layersDiv.style.left = "-65px";
+              // this.layersDiv.style.top = "15px";
+            }
             this.BR = document.createElement("br");
             this.layersDiv.appendChild(this.P);
             this.layersDiv.appendChild(this.dataLbl);

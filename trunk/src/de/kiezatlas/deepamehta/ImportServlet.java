@@ -11,9 +11,7 @@ import de.deepamehta.topics.TypeTopic;
 import javax.servlet.ServletException;
 //
 import java.util.Enumeration;
-import java.util.Hashtable;
 import java.util.Vector;
-
 
 
 /**
@@ -33,9 +31,7 @@ public class ImportServlet extends DeepaMehtaServlet implements KiezAtlas {
   public static final long UPDATE_INTERVAL_TESTING = 3600000; // approximately 60 mins
   //
   public static final String ENGAGEMENT_WORKSPACE = "t-331306";
-  public static final String EVENTMENT_WORKSPACE = "t-453282";
   public static final String CITYMAP_TO_PUBLISH = "t-331302";
-  public static final String EVENTMAP_TO_PUBLISH = "t-453286";
   //
   public static final String TOPICTYPE_ENG_PROJECT = "t-331314";
   public static final String TOPICTYPE_ENG_ZIELGRUPPE = "t-331319";
@@ -43,6 +39,9 @@ public class ImportServlet extends DeepaMehtaServlet implements KiezAtlas {
   public static final String TOPICTYPE_ENG_EINSATZBEREICH = "t-331321";
   public static final String TOPICTYPE_ENG_MERKMAL = "t-331325";
   public static final String TOPICTYPE_ENG_BEZIRK = "t-331327";
+  //
+  public static final String EVENTMENT_WORKSPACE = "t-453282";
+  public static final String EVENTMAP_TO_PUBLISH = "t-453286";
   //
   public static final String TOPICTYPE_EVT_EVENT = "t-453276";
   public static final String TOPICTYPE_EVT_BEZIRK = "t-453278";
@@ -222,26 +221,26 @@ public class ImportServlet extends DeepaMehtaServlet implements KiezAtlas {
         return cm.getTopics(geoType.getID());
     }
 	
-	private Vector getWorkspaces(String userID, Session session) {
-		Vector workspaces = new Vector();
-		//
-        session.setAttribute("membership", "");
-        Vector ws = as.getRelatedTopics(userID, SEMANTIC_MEMBERSHIP, TOPICTYPE_WORKSPACE, 2);
-        Enumeration e = ws.elements();
-        if (!e.hasMoreElements()) {
-            Vector aws = as.getRelatedTopics(userID, SEMANTIC_AFFILIATED_MEMBERSHIP, TOPICTYPE_WORKSPACE, 2);
-            session.setAttribute("membership", "Affiliated");
-            e = aws.elements();
-        }
-		while (e.hasMoreElements()) {
-			BaseTopic w = (BaseTopic) e.nextElement();
-			//if (isKiezatlasWorkspace(w.getID())) {
-			workspaces.addElement(w);
-			//}
-		}
-		//
-		return workspaces;
-	}
+    private Vector getWorkspaces(String userID, Session session) {
+      Vector workspaces = new Vector();
+      //
+          session.setAttribute("membership", "");
+          Vector ws = as.getRelatedTopics(userID, SEMANTIC_MEMBERSHIP, TOPICTYPE_WORKSPACE, 2);
+          Enumeration e = ws.elements();
+          if (!e.hasMoreElements()) {
+              Vector aws = as.getRelatedTopics(userID, SEMANTIC_AFFILIATED_MEMBERSHIP, TOPICTYPE_WORKSPACE, 2);
+              session.setAttribute("membership", "Affiliated");
+              e = aws.elements();
+          }
+      while (e.hasMoreElements()) {
+        BaseTopic w = (BaseTopic) e.nextElement();
+        //if (isKiezatlasWorkspace(w.getID())) {
+        workspaces.addElement(w);
+        //}
+      }
+      //
+      return workspaces;
+    }
 
     /**
      * returns null if no topictype whihc is assigned to the given workspace,

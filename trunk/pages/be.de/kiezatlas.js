@@ -1,26 +1,27 @@
   
   /** 
-   * This is a JavaScript Kiezatlas Citymap Service Client
-   * and it is composed of other components which are:
-   * - houdy.html (the html skeleton)
-   * - maps.css (the style definition)
-   * - OpenLayers.js (Version 2.8)
+   * This is the JavaScript Kiezatlas Citymap Client
    * 
    * @author Malte Rei&szlig;ig (malte@deepamehta.org)
    * @license GPL v3
    * 
-   * Latest Modifications: 22nd of November 2010
+   * Latest Modifications: 03rd of Feburary 2011
+   *
    * 
+   * TODO: code cleanup, improving some wording on method signatures, some error handling
+   * INFO: getters/checkers return "null" as a negative result/ error
    */
 
-  //
-  // --- Constants help you to setup this script
-  //
-  
+
+
+  // --
+  // --- Settings helping you to configure this script
+  // --
+
   var SERVICE_URL = "http://www.kiezatlas.de/rpc/"; // to be used by the jquery ajax methods
   var TESTING_SERVICE_URL = "http://localhost:8080/kiezatlas/rpc/"; // to be used by the jquery ajax methods
   var ICONS_URL = "http://www.kiezatlas.de/client/icons/"; // to be used by all icons if not relative to this folder
-  var IMAGES_URL = "http://www.kiezatlas.de/client/images/"; // bo be used by all images in the sidebar
+  var IMAGES_URL = "http://www.kiezatlas.de/images/"; // bo be used by all images in the sidebar
   var LEVEL_OF_DETAIL_ZOOM = 15; // the map focus when a mapinternal infoWindow is rendered
   var LEVEL_OF_DISTRICT_ZOOM = 12;
   var LEVEL_OF_CITY_ZOOM = 11;
@@ -39,70 +40,57 @@
   var propFooterMessage = "";
   var helpLink = "";
 
+
+
   //
   // --- Init & Layout
-  // 
-  
+  //   
     
   function openLayersInit(openBounds){
     // Map Options
     var options = {
       projection: new OpenLayers.Projection("EPSG:900913"),
-      displayProjection: new OpenLayers.Projection("EPSG:4326"),
-      units: "m",
-      maxResolution: 156543.0339,
-      // maxExtent: new OpenLayers.Bounds(-20037508.34, -20037508.34, 20037508.34, 20037508.34)
-      maxExtent: openBounds
+      displayProjection: new OpenLayers.Projection("EPSG:4326"), units: "m",
+      maxResolution: 156543.0339, numZoomLevels: 25
+      // maxExtent: openBounds // an internal error occurs when using OpenStreetMap BaseLayer togegher with maxExtent
     };
     map = new OpenLayers.Map('map', options);
+    //
     // BaseLayer
-    var mapnik = new OpenLayers.Layer.TMS("OpenStreetMap", "http://tile.openstreetmap.org/", {type: 'png', 
-      getURL: osm_getTileURL, displayOutsideMaxExtent: true, 
-      attribution: '<a href="http://www.openstreetmap.org/">OpenStreetMap</a>', 
-      numZoomLevels: 25}
-    );
-    mapnik.restrictExtent = bounds;
-    var googleBaseLayer = new OpenLayers.Layer.Google("Google Maps", {sphericalMercator:true, numZoomLevels: 25} );
+    var mapnik = new OpenLayers.Layer.TMS("OpenStreetMap", "http://tile.openstreetmap.org/", {
+      type: 'png', getURL: osm_getTileURL, displayOutsideMaxExtent: false,
+      attribution: '<a href="http://www.openstreetmap.org/">OpenStreetMap</a>',
+      maxExtent: new OpenLayers.Bounds(-20037508.34, -20037508.34, 20037508.34, 20037508.34)
+      // note: maxExtent bug, this bounds cannot be smaller than the whole world, otherwise projection error occurs
+    });
+    var googleBaseLayer = new OpenLayers.Layer.Google("Google Maps", { 
+      sphericalMercator:true, maxExtent: openBounds
+    });
     if (onBerlinDe) map.addLayers([googleBaseLayer, mapnik]); // , markerLayer
     else map.addLayers([googleBaseLayer, mapnik]);
-    //
+    // 
     // MapControl Setup
     nav = new OpenLayers.Control.NavigationHistory();
     myLayerSwitcher = OpenLayers.Control.CustomLayerSwitcher = 
     OpenLayers.Class(OpenLayers.Control.LayerSwitcher, {
       CLASS_NAME: "OpenLayers.Control.CustomLayerSwitcher"
     });
-    // myLayerSwitcher.moveTo(new OpenLayers.Pixel(50, 300));
-    // myLayerSwitcher.moveTo(new OpenLayers.Pixel(150, 400));
-    // parent control must be added to the map
+    // a parental control must be added to the map
     map.addControl(nav);
-    map.events.register("movestart", map, function (evnt) {
-      // log("baseLayerBounds"+map.getBoundFromBaseLayer());
-      if (map.getExtent()!= null && debug) log("evt: " + map.getExtent().getCenterLonLat());
-    });
     //
-    //
-    panel = new OpenLayers.Control.Panel(
-	    {div: document.getElementById("navPanel")}
-    );
-    // jQuery("#OpenLayers.Control.PanZoom_5_zoomworld").unbind();
-    // jQuery("#OpenLayers.Control.PanZoom_5_zoomworld").click( function () {
-    //    updateVisibleBounds(null, true, null, true);
-    // });
+    panel = new OpenLayers.Control.Panel( { div: document.getElementById("navPanel") });
     myLayerSwitcher = new OpenLayers.Control.LayerSwitcher({
-      'div':OpenLayers.Util.getElement('mapSwitcher'), 
-      activeColor: "white"
+      'div':OpenLayers.Util.getElement('mapSwitcher'), activeColor: "white"
     });
     map.addControl(myLayerSwitcher);
     // event binding for the new hover controlMenu ### ToDo: find a better place for this
     jQuery("#mapControl").bind("mouseover", overMapControl);
     jQuery("#mapControl").bind("mouseout", outMapControl);
-    // 
+    //  special: left sided forth / back navigation menu on kiezatlas.de/map/*
     if (!onBerlinDe) panel.addControls([nav.next, nav.previous]);
     map.addControl(panel);
     // layerSwitcher, NavigationHistory, Panel
-    // setBounds
-    if (debug) log('[Info] mapBounds will be set to: ' + openBounds);
+    if (debug) log('mapBounds will be set to: ' + openBounds);
     map.zoomToExtent(openBounds.transform(map.displayProjection, map.projection));
     if (onBerlinDe) map.zoomTo(LEVEL_OF_CITY_ZOOM);
   }
@@ -122,7 +110,7 @@
   	if (onBerlinDe) jQuery("#bohead").css("width", fullW + 1);
     if (onBerlinDe) jQuery("#kiezatlas").css("width", fullW);
 	  jQuery("#kiezatlas").css("visibility", "visible"); // make the wrapping container visible
-    //jQuery("#kiezatlas").css("height", fullH - startHeight);
+    // jQuery("#kiezatlas").css("height", fullH - startHeight);
     jQuery("#kaheader").css("width", fullW);
     // jQuery("#map").css("top", topHeight);
     jQuery("#map").css("width", mapW);
@@ -158,7 +146,7 @@
     // jQuery("#sideBar").show('fast'); // showSideBar
     // jQuery("#sideBarControl").css("right", sideW);
     jQuery("#sideBarCriterias").css("width", sideW - 5);
-    jQuery("#sideBarCategories").css("width", sideW - 5);
+    jQuery("#sideBarCategories").css("width", sideW - 7);
     var critHeight = jQuery("#sideBarCriterias").css("height");
     critHeight = parseInt(critHeight.substr(0, critHeight.length-2));
     if (critHeight == 0 || isNaN(critHeight)) {
@@ -177,6 +165,7 @@
     jQuery("#kafooter").css("width", fWidth - 15);
     jQuery("#kafooter").css("left", fOrientation + 10);
     jQuery("#helpFont").css("left", fOrientation + 22);
+    jQuery("#layersDiv").css("left", -25);
     // ugly but convenient for dealing with ie7/8 layout fixes now
     if (jQuery.browser.msie) {
     	jQuery("input, textarea").css("height", 18);
@@ -185,9 +174,10 @@
   }
   
   function handleSideBar() { // e
+    var breitSeite; // complete content-window-width
     if(sideBarToggle) {
       // jQuery("#sideBarControl").css("cursor", "w-resize");
-      var breitSeite = windowWidth() - 5; // 1317;//
+      breitSeite = windowWidth() - 5; // 1317;//
       jQuery("#sideBarControl").css("left", breitSeite);
       jQuery("#map").css("width", breitSeite);
       jQuery("#sideBar").hide("fast");
@@ -203,7 +193,7 @@
     } else {
       // jQuery("#kafooter").css("opacity", "1.0");
       jQuery("#kafooter").css("background", "#fff");
-      var breitSeite = windowWidth(); // 1339;//
+      breitSeite = windowWidth(); // 1339;//
       // jQuery("#sideBar").show("fast");
       // jQuery("#sideBarControl").attr("onclick", "javascript:handleSideBar();");
       sideBarToggle = true;
@@ -221,17 +211,21 @@
     if (debug) log('[DEBUG] handleSidebar got: ' + e.type + ' at '+ posx+':'+posy + '');
   }
 
+
+
   // 
   // --- Client Side Requests (to proxy scripts)
   // 
 
-  function getGeoObjectInfo(topicId, resultHandler) {
+  /** a get and show method implemented as
+   *  an asynchronous call which renders the html directly into the sidebar when the result has arrived **/
+  function getGeoObjectInfo(itemId, resultHandler) {
     // log('requesting info for: ' + topicId);
     if (resultHandler == 'abc') {
       resultHandler = jQuery("#sideBarCategories");
     }
-    var url = SERVICE_URL; // + 'getGeoObjectInfo.php?topicId=' + topicId;
-    var body = '{"method": "getGeoObjectInfo", "params": ["' + topicId + '"]}';// '{' + urlencode(streetFocus) + '}';
+    var url = TESTING_SERVICE_URL;
+    var body = '{"method": "getGeoObjectInfo", "params": ["' + itemId + '"]}';// '{' + urlencode(streetFocus) + '}';
     jQuery.ajax({
 	    type: "POST",
 	    url: url,
@@ -249,11 +243,29 @@
   	      resultHandler.append('<img src="'+imgSrc+'"><br/>');
 	      }
 	      resultHandler.append('<b>'+topic.name+'</b><br/>');
-	      // resultHandler.append('<table width="100%" cellpadding="2" cellspacing="0" id="sideBarCategoriesTable"></table>');
-	      if (onBerlinDe) resultHandler.append(''+getTopicPostalCode(topic) + ' Berlin <br/>');
-        else resultHandler.append(''+getTopicPostalCode(topic) + ' ' + getTopicCity(topic) + '<br/>');
-        resultHandler.append(''+getTopicAddress(topic)+'<p/>');
-	      // resultHandler.append("Loaded Topic" + topic.name);
+        // address related stuff follows
+        var cityName = getTopicCity(topic);
+        var street = getTopicAddress(topic);
+	      if (cityName == " Berlin" || cityName == "Berlin" || onBerlinDe) { // TODO: sloppy condition for maps berlin.de
+          var publicTransportURL = 'http://www.fahrinfo-berlin.de/Stadtplan/index?query=' + street +
+            '&search=Suchen&formquery=&address=true';
+          var imageLink = '<a href="'+ publicTransportURL + '" target="_blank">'
+            + '<img src=\"'+IMAGES_URL+'fahrinfo.gif" border="0" hspace="20"></a>';
+          if (onBerlinDe || topicId == "t-331302") { // ehrenamt map datasets have no city property
+            resultHandler.append(''+getTopicPostalCode(topic) + ' Berlin<br/>'); 
+          } else { 
+            resultHandler.append(''+getTopicPostalCode(topic) + ' ' + cityName + '<br/>');
+          }
+          resultHandler.append('' + street + '&nbsp;' + imageLink + '<p/>');
+        } else {
+          if (topicId == "t-331302") { // ehrenamt map on datasets have no city property
+            resultHandler.append(''+getTopicPostalCode(topic) + ' Berlin<br/>');
+          } else {
+            resultHandler.append(''+getTopicPostalCode(topic) + ' ' + cityName + '<br/>');
+          }
+          resultHandler.append('' + street + '<p/>');
+        }
+	      // stripping unwanted fields of the data container
 	      topic = stripFieldsContaining(topic, "LAT");
 	      topic = stripFieldsContaining(topic, "LONG");
 	      topic = stripFieldsContaining(topic, "Locked Geometry");
@@ -272,10 +284,10 @@
 	        // propertyList += '<tr>';
 	        propertyList += '<p><span class="propertyLabel">'+topic.properties[i].label+':&nbsp;</span>';
 	        if (topic.properties[i].type == 0) {
-	          // Type Single
+	          // DM Property Type Single
 	          propertyList += '<span class="propertyField">'+topic.properties[i].value+'</span></p>';
 	        } else {
-	          // Type Multi
+	          // DM Property Type Multi
             propertyList += '<span class="propertyField">';
 		        for (var k=0; k < topic.properties[i].values.length; k++) {
 	            stringValue = topic.properties[i].values[k].name;
@@ -292,7 +304,6 @@
 	          }
             propertyList += '</span></p>';
 	        }
-	        // propertyList += '</tr>';
 	        propertyList += '</p>';
 	      }
 	      resultHandler.append(propertyList);
@@ -317,7 +328,7 @@
   /** toload all topics with javascript, not with php, is currently #unused but possible */ 
   function loadCityMapTopics(mapId, workspaceId) {
     // log('requesting mapTopics for: ' + mapId);
-    var url = TESTING_SERVICE_URL; // + 'getMapTopics.php?topicId=' + mapId + '&workspaceId=' + workspaceId;
+    var url = SERVICE_URL; // + 'getMapTopics.php?topicId=' + mapId + '&workspaceId=' + workspaceId;
     var body = '{"method": "getMapTopics", "params": ["' + mapId+ '" , "' + workspaceId + '"]}';
     jQuery.ajax({
       type: "POST",
@@ -338,8 +349,7 @@
   }
 
   function loadWorkspaceCriterias(workspaceId) {
-    // log('requesting workspaceCriterias for: ' + workspaceId);
-    var url = SERVICE_URL; // + 'getWorkspaceCriterias.php?workspaceId=' + workspaceId + '&topicId=' + topicId;
+    var url = SERVICE_URL;
     var body = '{"method": "getWorkspaceCriterias", "params": ["' + topicId + '"]}';
     jQuery.ajax({
 	    type: "POST",
@@ -396,7 +406,7 @@
   /** sends an ajax request to the google geocoder through a proxy script 
     * and moves the center / focuse of the mapTiles to the first result of coordinates
     * 
-    * ###: localized to DE and BERLIN throug &q=... Berlin"
+    * ### TODO: improve the dynamic localization of the viewPortBias, try again to make use of mapBounds
     */
   function focusRequest() {
     if (debug) log('focusRqeust for ' + streetFocus);
@@ -458,8 +468,6 @@
   //
   // --- Handling of alternatives after a focusRequest() 
   //
-
-
   
   /**
    *  Alternatives List for focusRequest and mapNavigation
@@ -520,7 +528,7 @@
       // autocomplete_item = atPos;
   }
 
-  /** changed on 23.Agusta --- ### to test with berlin.de */
+  /** changed on 23.Augusta --- */
   function focus_current_item(itemNumber)  {
       var item;
       if (alternative_items != null) {
@@ -530,8 +538,8 @@
           select_next_item(itemNumber);
         }
       }
-      // check if inputField.action with jQuery (line 293) was later changed 
-      // than inputField.keyUp is received (line 314)
+      // TODO: check if inputField.action with jQuery (line 293)
+      // was later changed than inputField.keyUp is received (line 314)
       if (item != undefined) { 
         var toLonLat= new OpenLayers.LonLat(item.Point.coordinates[0], item.Point.coordinates[1]);
         map.setCenter(toLonLat.transform(map.displayProjection, map.projection), 15);
@@ -557,8 +565,10 @@
       log("selectingPrevItem:" + autocomplete_item);
   }
 
+
+
   // 
-  // --- Sidebar Specific Code
+  // --- Sidebar Specific GUI Code
   // 
   
   function initResultList(resultObjects) {
@@ -658,23 +668,22 @@
     }
   }
   
-  /** always initalizes the correct critCatList, to */
+  /** renders the current criteria and category list*/
   function updateCategoryList(criteria) {
     if (debug) log('.updateCategoryList(' + criteria+ ')'); // and updating gl currentIndex');
     crtCritIndex = criteria; // update
      // clear`s catList and hides all visible marker
     reSetMarkers();
     removeAllPopUps();
-    initCriteriaList(); // init CriteriaList
+    initCriteriaList(); // initializes the upper list of criterias
     var sideBarCategories = jQuery("#sideBarCategories");
     sideBarCategories.empty();
-    sideBarCategories.append('&nbsp;&nbsp;<b class="redTitle">Informationsebenen sind: </b><p/>');
+    sideBarCategories.append('<p/>'); // formerly: &nbsp;&nbsp;<b class="redTitle">Informationsebenen sind: </b></p>
     sideBarCategories.append('<table width="97%" cellpadding="2" cellspacing="0" id="sideBarCategoriesTable"></table>');
-    // Auslesen der Legendenelemente.
     // sideBarCategories.html('<table width="95%">');
     // var contentWidth = jQuery("#sideBar").css("width").substr(0,jQuery("#sideBar").css("width").length-2);
     if (workspaceCriterias.result.length <= 0) {
-      // ### ToDo: Exception Handling
+      // ### TODO: Exception Handling
       alert("Sorry for that inconvenience. Probably an error occured while loading the criterias.");
     } else {
       for (var i = 0; i < workspaceCriterias.result[criteria].categories.length; i++) {
@@ -683,7 +692,8 @@
         var catName = [workspaceCriterias.result['' + criteria + ''].categories[i].catName];
         var catId = new String([workspaceCriterias.result['' + criteria + ''].categories[i].catId]);
         var catCSS = "catRowDeselected";
-        /*if (isCategoryVisible(catId)) {
+        /** deactivated category row selection effect
+        if (isCategoryVisible(catId)) {
           if (debug) log("..updateCategeryList.isVisibleCat - reSelect in GUI! ");
           catCSS = "catRowSelected";
         }*/
@@ -693,18 +703,17 @@
             + '<img src="'+ICONS_URL+''+catIcon+'" border="0" id="catIconRow-'+catId+'" alt="'+catName+'-Icon" '
             + 'text="Klicken zum Ein- und Ausblenden"></a></td>'
           + '<td valign="center"><a href="" id="catHref-'+catId+'">'+catName+'</a></td></tr>');
-        // javaScript sucks up when "t-12312321" is a stringId and NAN !
         // mozilla alows onclick on a tableRow while webkit and others do neither allow onmouseclick nor onclick
         jQuery("#toggleHref-"+catId).attr('href', 'javascript:toggleMarkerGroups("' + catId + '");');
-        // jQuery("#catIconRow-"+catId).attr('onclick', 'javascript:toggleMarkerGroups("' + catId + '")');
         jQuery("#catHref-"+catId).attr('href', 'javascript:showCatInSideBar("' + catId + '", "'+catName+'");');
+        // registering ui effects
         // jQuery("#catRow-"+catId).attr('onmouseover', 'hoverCatButton("' + catId + '")');
         // jQuery("#catRow-"+catId).attr('onmouseout', 'outCatButton("' + catId + '")');
       }
     }
   }
 
-  /** sets imprint, homepage and logo link associated with the current workspaceInfos*/
+  /** sets imprint, homepage and logo link associated with the current workspaceInfos */
   function setWorkspaceInfos() {
     var footerMessage = "";
     if (onBerlinDe) {
@@ -718,14 +727,68 @@
     footer += '<span id="footerPoweredBy">'+footerMessage+'</span>';
     jQuery("#kafooter").html(footer);
     jQuery("#sideBarLogo").attr('src', '' + IMAGES_URL + workspaceLogo);
-    jQuery("#sideBarLogo").attr('title', 'A KiezAtlas 1.7 Logo');
+    jQuery("#sideBarLogo").attr('title', 'The KiezAtlas 1.7 Logo');
     jQuery("#sideBarLogo").attr('alt', mapTitle + ' Logo');
     jQuery("#sideBarLogoLink").attr('href', workspaceHomepage);
     if (debug) log("set sideBar to: " + jQuery("#sideBarLogo").attr('src') + " and logo is: " + jQuery("#sideBarLogo").attr('title'));
   }
-  
-  /** put numerous marker in the layer and draw them
-    * called by initResultList, showCatInSidebar
+
+  function isCurrentlyVisibleCat(categoryId) {
+    for (var j = 0; j < markerGroupIds.length; j++) {
+      if(markerGroupIds[j] == categoryId) {
+        if (debug) log("...helper.isCurrentlyVisibleCat " + catId + " YEAH..");
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function showCritCatList() {
+    // Automatisierte, workspaceabhängig Erstellung der Seitenleisteninhalte.
+    updateCategoryList(crtCritIndex);
+  }
+
+  /** produces a very clear markerGroupIds situation*/
+  function selectAllCategories() {
+    markerGroupIds = []; // clear all, then put every catId inside
+    //for (var i = 0; i < workspaceCriterias.result.length; i++) {
+    for (var j = 0; j < workspaceCriterias.result[crtCritIndex].categories.length; j++) {
+      var catId = workspaceCriterias.result[crtCritIndex].categories[j].catId;
+      markerGroupIds.push(catId);
+      jQuery("#catRow-"+catId).attr("class", "catRowSelected");
+    }
+    log("selected All markerGroups: " + markerGroupIds);
+  }
+
+  function checkIfAllCategoriesSelected() {
+    if (markerGroupIds.length == workspaceCriterias.result[crtCritIndex].categories.length) return true; else return false;
+  }
+
+  /** produces a very clear markerGroupIds state */
+  function deSelectAllCategories() {
+    markerGroupIds = [];
+    if (workspaceCriterias.result.length <= 0) {
+      // ### ToDo: Exception Handling
+      alert("Sorry for that inconvenience. Probably an error occured while loading the criterias.");
+    } else {
+      for (var j = 0; j < workspaceCriterias.result[crtCritIndex].categories.length; j++) {
+        var catId = workspaceCriterias.result[crtCritIndex].categories[j].catId;
+        // remove catId from groups
+        jQuery("#catRow-"+catId).attr("class", "catRowDeselected");
+      }
+    }
+    if(debug) log("deSelected All markerGroups to: " + markerGroupIds);
+  }
+
+
+
+  // --
+  // --- Map specific GUI Code
+  // --
+
+  /**
+    * put numerous marker in the layer and draw them
+    * @see initResultList, showCatInSidebar
     * info: is used to display search or catSearch results _ontop/independent of already visible categories_
     */
   function showTopicsInMap(topicsToShow) {
@@ -738,7 +801,7 @@
         log("[ERROR] no feature found for " + topic.id );
       }
     }
-    // render new state
+    // rerender
     myNewLayer.redraw();
   }
 
@@ -774,6 +837,34 @@
       map.panTo(position);
       map.zoomTo(LEVEL_OF_DETAIL_ZOOM); // level of detail
       showInfoWindowForMarker(featureToToggle.data);
+    }
+  }
+  
+  function selectAndShowInMap(originId, isTopicId) {
+    var feature = null;
+    if (isTopicId) {
+      feature = checkFeatureByTopicId(originId);
+    } else {
+      feature = checkFeatureByOriginId(originId);
+    }
+    if (feature == null) {
+      // project could not be assoiciated with a correct address, though is not published
+      // ### TODO: showInfo in SideBar
+        var helpHtmlOne = '<br/><b class="redTitle">Entschuldigen sie bitte, die Projektadresse ist unbekannt.</b><p/> '
+          + 'F&uuml;r diese <i>Einsatzm&ouml;glichkeit</i> ist die Adresse des Einsatzortes nicht bekannt bzw. '
+          + 'fehlerhaft und daher k&ouml;nnen wir ihnen an dieser Stelle keine zus&auml;tzlichen Informationen anzeigen. <p/>'
+          + ' Die Kontaktinformationen zu dieser <i>Einsatzm&ouml;glichkeit</i> erhalten sie auf der '
+          + ' <a href="http://www.berlin.de/buergeraktiv/ehrenamtsnetz/angebote/'
+          + 'index.cfm?dateiname=ea_projekt_beschreibung.cfm&cfide=0.304475484697&&anwender_id=5&id=0&ehrenamt_id=0&projekt_id='
+          + originId +'&seite=1&organisation_id=0">vorherigen Seite.</a><br/>';
+          helpHtmlOne += '<br/> Sie k&ouml;nnen nat&uuml;rlich auch in dieser Ansicht weiter nach <a href="javascript:updateCategoryList(1);">Einsatzm&ouml;glichkeiten</a> in ihrer Umgebung navigieren.';
+        jQuery("#sideBarCategories").html(helpHtmlOne);
+    } else {
+      // log("linking in and showing " + feature.data.topicName);
+      var catId = getTopicById(feature.data.topicId).criterias[1].categories[0]; // NOTE: just works for the herewith fixed default 2 TODO: createSlimGeoObject(has to assemble the crtierias with the help of CityMpa.getSeachCriteria() to mach always to the first criteria);criteria (zielgruppe)
+      toggleMarkerGroups(catId);
+      //
+      showTopicInMap(feature.data.topicId);
     }
   }
 
@@ -1009,19 +1100,6 @@
     log('showingMarkerGroup and catIdRow is now: ' + jQuery("#catRow-"+category).attr("class"));
     return topicsToShow;
   }
-
-  function isCategoryVisible(myCatId) {
-    // log('howManyCatsVisible: ' + markerGroupIds.length);
-    for (var i = 0; i < markerGroupIds.length; i++) {
-      // log('>> check if ' + myCatId + ' is..' + markerGroupIds[i]);
-      if (markerGroupIds[i] == myCatId) {
-        //printOut(' is currently visible, to hide, checked ' +markerGroupIds.toString());
-        return true;
-      } else {
-        //return false;
-      }
-    }
-  }
   
   /** toggles a OpenLayersMarker for a given topicId 
     * toggles a OpenLayersFeature on myNewLayer for a given topicId (it`s definitely already on the layer, just hide or show it)
@@ -1078,14 +1156,13 @@
     }
     return cats;
   }
-  
+
+  /** TODO: cleanup... **/
   function initBerlinDistrictsLayer() {
     var dStyle = new OpenLayers.Style( { 
       strokeColor: "#4170D4", strokeWidth: 1.5, fill: 0
-      //fontWeight: "bold",
-      //labelAlign: "${align}",
-      //labelXOffset: "${xOffset}",
-      //labelYOffset: "${yOffset}"
+      // fontWeight: "bold", labelAlign: "${align}",
+      // labelXOffset: "${xOffset}", labelYOffset: "${yOffset}"
     });
     var defaultStyle = OpenLayers.Util.applyDefaults( dStyle, OpenLayers.Feature.Vector.style["default"]);
     var dStyleMap = new OpenLayers.StyleMap({
@@ -1139,16 +1216,10 @@
     //
   }
 
-  function showCritCatList() {
-    // Automatisierte, workspaceabhängig Erstellung der Seitenleisteninhalte.
-    updateCategoryList(crtCritIndex);
-  }
-
-  // 
-  // --- Layer, Map and "Feature to Topic" Related Code  (setup, getters, infoWindows, kiezatlas-citymap-logic)
-  //
-  
-  /** initializes myNewLayer and allFeatures*/
+  /**
+   * initializes myNewLayer and allFeatures
+   * TOOD: cleanup..
+   **/
   function initLayerAllFeatures(points, mainMap) {
       // create a lookup table with different symbolizers for the different
       // state values
@@ -1486,7 +1557,6 @@
     return null;
   }
 
-
   /** create and show popuop and render marker as selected */
   function showInfoWindowForMarker(featureData, clusteredId) {
     var idString = ""+ featureData.topicId + "";
@@ -1594,8 +1664,19 @@
   }
   
   //
-  // --- Style Methods
-  // 
+  // --- Utility Methods for Style and Layout
+  //
+
+  function getCatIconURL(categoryId) {
+    for (var j = 0; j < workspaceCriterias.result[crtCritIndex].categories.length; j++) {
+      if(workspaceCriterias.result[crtCritIndex].categories[j].catId == categoryId) {
+        log("<b>catIcon is: </b>" + workspaceCriterias.result[crtCritIndex].categories[j].catIcon);
+        return workspaceCriterias.result[crtCritIndex].categories[j].catIcon;
+      }
+      // var catToShow = mapTopics.result.topics[i].criterias[j].categories
+    }
+    return null;
+  }
 
   /** TODO: fix **/
   function inputFieldBehaviour() {
@@ -1614,10 +1695,6 @@
       jQuery(this).animate({width: 115}, 500);
     });
   }
-
-  //
-  // --- Layout Methods
-  //
    
   function toggleWidth(e) {
       if (slimWidth) {
@@ -1680,7 +1757,7 @@
   /** TODO: to show progress always in center and with a label .. */
   function showProgressInSideBar(progressVal) {
     // sideBarControl
-    /*showSideBar*/(305);
+    /* showSideBar (305); */
     // jQuery("#sideBarCategoriesTable").empty(); // '<a href="javascript:clearCriteriaSelection();">Auswahl aufheben</a>');
     // sideContent
     jQuery("#progContainer").html('<b>' + progressVal + '</b><br/><img src="../pages/be.de/img/aLoading.gif" alt="Loading">');
@@ -1690,6 +1767,8 @@
   function hideProgressFromSideBar() {
     jQuery("#progContainer").hide("fast");
   }
+
+
   
   //
   // --- Topic Data Container Utilities
@@ -1754,14 +1833,14 @@
         return topic.properties[at].value;
       }
     }
-    return "";
+    return null;
   }
+
 
 
   // 
   // --- High Level CiyMap Functions 
   // 
-  
   
   function calculateInitialBounds() {
     var bounds = new OpenLayers.Bounds();
@@ -1845,7 +1924,7 @@
   }
   
   function overMapControl() {
-    jQuery("#mapControl").css("height", 138);
+    jQuery("#mapControl").css("height", 145);
     toggleMapControl();
   }
   
@@ -1860,38 +1939,6 @@
     } else {
       jQuery("#mapSwitcher").css("visibility", "hidden");
     }
-  }
-  
-  /** produces a very clear markerGroupIds situation*/
-  function selectAllCategories() {
-    markerGroupIds = []; // clear all, then put every catId inside
-    //for (var i = 0; i < workspaceCriterias.result.length; i++) {  
-    for (var j = 0; j < workspaceCriterias.result[crtCritIndex].categories.length; j++) {
-      var catId = workspaceCriterias.result[crtCritIndex].categories[j].catId;
-      markerGroupIds.push(catId);
-      jQuery("#catRow-"+catId).attr("class", "catRowSelected");    
-    }
-    log("selected All markerGroups: " + markerGroupIds);
-  }
-  
-  function checkIfAllCategoriesSelected() {
-    if (markerGroupIds.length == workspaceCriterias.result[crtCritIndex].categories.length) return true; else return false;
-  }
-  
-  /** produces a very clear markerGroupIds state */
-  function deSelectAllCategories() {
-    markerGroupIds = [];
-    if (workspaceCriterias.result.length <= 0) {
-      // ### ToDo: Exception Handling
-      alert("Sorry for that inconvenience. Probably an error occured while loading the criterias.");
-    } else {
-      for (var j = 0; j < workspaceCriterias.result[crtCritIndex].categories.length; j++) {
-        var catId = workspaceCriterias.result[crtCritIndex].categories[j].catId;
-        // remove catId from groups
-        jQuery("#catRow-"+catId).attr("class", "catRowDeselected");
-      }
-    }
-    if(debug) log("deSelected All markerGroups to: " + markerGroupIds);
   }
   
   /** show all topics as Features in myNewLayer and select all Categories in Sidebar */
@@ -1933,38 +1980,11 @@
     removeAllPopUps();
   }
 
+
   
   //
-  // --- Little Helpers
+  // --- Other Little Helpers
   //
-  
-  function selectAndShowInMap(originId, isTopicId) {
-    var feature = null;
-    if (isTopicId) {
-      feature = checkFeatureByTopicId(originId);
-    } else {
-      feature = checkFeatureByOriginId(originId);
-    }
-    if (feature == null) {
-      // project could not be assoiciated with a correct address, though is not published
-      // ### TODO: showInfo in SideBar
-        var helpHtmlOne = '<br/><b class="redTitle">Entschuldigen sie bitte, die Projektadresse ist unbekannt.</b><p/> ' 
-          + 'F&uuml;r diese <i>Einsatzm&ouml;glichkeit</i> ist die Adresse des Einsatzortes nicht bekannt bzw. ' 
-          + 'fehlerhaft und daher k&ouml;nnen wir ihnen an dieser Stelle keine zus&auml;tzlichen Informationen anzeigen. <p/>' 
-          + ' Die Kontaktinformationen zu dieser <i>Einsatzm&ouml;glichkeit</i> erhalten sie auf der ' 
-          + ' <a href="http://www.berlin.de/buergeraktiv/ehrenamtsnetz/angebote/' 
-          + 'index.cfm?dateiname=ea_projekt_beschreibung.cfm&cfide=0.304475484697&&anwender_id=5&id=0&ehrenamt_id=0&projekt_id=' 
-          + originId +'&seite=1&organisation_id=0">vorherigen Seite.</a><br/>';
-          helpHtmlOne += '<br/> Sie k&ouml;nnen nat&uuml;rlich auch in dieser Ansicht weiter nach <a href="javascript:updateCategoryList(1);">Einsatzm&ouml;glichkeiten</a> in ihrer Umgebung navigieren.';
-        jQuery("#sideBarCategories").html(helpHtmlOne);
-    } else {
-      // log("linking in and showing " + feature.data.topicName);
-      var catId = getTopicById(feature.data.topicId).criterias[1].categories[0]; // NOTE: just works for the herewith fixed default 2 TODO: createSlimGeoObject(has to assemble the crtierias with the help of CityMpa.getSeachCriteria() to mach always to the first criteria);criteria (zielgruppe)
-      toggleMarkerGroups(catId);
-      // 
-      showTopicInMap(feature.data.topicId);
-    }
-  }
   
   /** mapTile Function, not exactly clear what it does */
   function osm_getTileURL(bounds) {
@@ -1979,26 +1999,6 @@
     } else {
       x = ((x % limit) + limit) % limit;
       return this.url + z + "/" + x + "/" + y + "." + this.type;
-    }
-  }
-  
-  function isCurrentlyVisibleCat(categoryId) {
-    for (var j = 0; j < markerGroupIds.length; j++) {
-      if(markerGroupIds[j] == categoryId) {
-        if (debug) log("...helper.isCurrentlyVisibleCat " + catId + " YEAH..");
-        return true;
-      }
-    }
-    return false;
-  }
-  
-  function getCatIconURL(categoryId) {
-    for (var j = 0; j < workspaceCriterias.result[crtCritIndex].categories.length; j++) {
-      if(workspaceCriterias.result[crtCritIndex].categories[j].catId == categoryId) {
-        log("<b>catIcon is: </b>" + workspaceCriterias.result[crtCritIndex].categories[j].catIcon);
-        return workspaceCriterias.result[crtCritIndex].categories[j].catIcon;
-      }
-      // var catToShow = mapTopics.result.topics[i].criterias[j].categories
     }
   }
   

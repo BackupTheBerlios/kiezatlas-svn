@@ -2,7 +2,8 @@
 <!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN" "http://java.sun.com/dtd/web-app_2_3.dtd">
 <web-app>
 
-    <Listener className="de.kiezatlas.deepamehta.LifeCycleWatcher"/>
+  <Listener className="de.kiezatlas.deepamehta.LifeCycleWatcher"/>
+  <Listener classNAme="org.quartz.ee.servlet.QuartzInitializerListener"/>
 
 	<!-- General description of the web application -->
 
@@ -34,6 +35,25 @@
 			Supported values are "jsp" (default) and "xslt" (experimental)
 		</description>
 	</context-param>
+
+  <!-- Context-Information for starting up the Quartz Timing Framework
+
+   <context-param>
+     <param-name>quartz:shutdown-on-unload</param-name>
+     <param-value>true</param-value>
+   </context-param>
+
+   <context-param>
+     <param-name>quartz:wait-on-shutdown</param-name>
+     <param-value>false</param-value>
+   </context-param>
+
+   <context-param>
+     <param-name>quartz:start-scheduler-on-load</param-name>
+     <param-value>true</param-value>
+   </context-param>
+
+    -->
 
 	<!-- Servlet definitions for the servlets that make up
 		 the web application.
@@ -87,12 +107,22 @@
 		<servlet-class>de.kiezatlas.deepamehta.MapServlet</servlet-class>
 	</servlet>
 
+	<!-- <servlet>
+	  <servlet-name>SlimerServlet</servlet-name>
+	  <servlet-class>de.kiezatlas.deepamehta.SlimerServlet</servlet-class>
+    <init-param>
+	    <param-name>shutdown-on-unload</param-name>
+	    <param-value>true</param-value>
+	  </init-param>
+	  <load-on-startup>0</load-on-startup>
+	</servlet>
+  -->
+
 	<!-- Define mappings that are used by the servlet container to
 		 translate a particular request URI (context-relative) to a
 		 particular servlet.
 	-->
 
-    
 
   <servlet-mapping>
 		<servlet-name>Browse Servlet</servlet-name>
@@ -137,10 +167,8 @@
 	<!-- Define the default session timeout for your application,
 		 in minutes.
 	-->
-
     
-
-    <session-config>
+  <session-config>
 		<session-timeout>120</session-timeout>
 	</session-config>
 

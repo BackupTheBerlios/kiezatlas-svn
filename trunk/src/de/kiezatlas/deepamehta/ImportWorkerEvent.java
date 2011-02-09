@@ -7,7 +7,7 @@ import de.deepamehta.assocs.LiveAssociation;
 import de.deepamehta.service.ApplicationService;
 import de.deepamehta.service.CorporateDirectives;
 import de.deepamehta.service.CorporateMemory;
-import de.deepamehta.service.Session;
+import de.deepamehta.topics.EmailTopic;
 import de.deepamehta.topics.LiveTopic;
 import de.deepamehta.topics.TypeTopic;
 import de.deepamehta.util.DeepaMehtaUtils;
@@ -18,7 +18,6 @@ import java.io.StringReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
-import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 import javax.xml.parsers.DocumentBuilder;
@@ -153,6 +152,7 @@ public class ImportWorkerEvent extends Thread implements DeepaMehtaConstants, Ki
         //
         System.out.println("[ImportWorker] stored " + validEntries + " in public cityMap \"" +as.getTopicProperty(ImportServlet.EVENTMAP_TO_PUBLISH, 1, PROPERTY_WEB_ALIAS)+ "\"");
         System.out.println("[ImportWorker] didn`t published " + unusable.size() + " unlocatable \""+getWorkspaceGeoType(workspaceId).getName()+"e\" ");
+        sendNotificationEmail(unusable);
         //
     }
 
@@ -573,6 +573,50 @@ public class ImportWorkerEvent extends Thread implements DeepaMehtaConstants, Ki
             }
         }
         return result;
+    }
+
+    // --- copy of BrowseServlet
+
+    private void sendNotificationEmail(Vector unusableProjects) {
+      try {
+        // GeoObjectTopic inst = (GeoObjectTopic) as.getLiveTopic(instID, 1);
+        // "from"
+        String from = as.getEmailAddress("t-rootuser");		// ###
+        if (from == null || from.equals("")) {
+          throw new DeepaMehtaException("email address of root user is unknown");
+        }
+        // "to"
+        String to = "mre@newthinking.de";
+        // "subject"
+        String subject = "Ehrenamtsatlas: folgende Veranstaltungen haben einen fehlerhaften Addresseintrag";
+        StringBuffer entries = new StringBuffer();
+        entries.append("------------------------------\r");
+        for (int i = 0; i < unusableProjects.size(); i++) {
+            GeoObjectTopic entry = (GeoObjectTopic) unusableProjects.get(i);
+            entries.append("Veranstaltung: ");
+            entries.append(entry.getName());
+            entries.append(" mit Adresseintrag: ");
+            entries.append(entry.getAddress().getName());
+            entries.append("\r");
+        }
+        entries.append("------------------------------\r");
+        // "body"
+        String body = "Dies ist eine automatische Benachrichtigung erstellt von www.kiezatlas.de\r\r" +
+          "Folgende Veranstaltungen konnten aufgrund eines fehlerhaften Adresseintrags nicht korrekt verortet werden:\r\r" +
+          "" + entries.toString() + "\r" +
+          "www.berlin.de/buergeraktiv/atlas\r\r" +
+          "Mit freundlichen Grüßen\r" +
+          "ihr Kiezatlas-Team";
+        //
+        System.out.println(">>> send notification email");
+        System.out.println("  > SMTP server: \"" + as.getSMTPServer() + "\"");	// as.getSMTPServer() throws DME
+        System.out.println("  > from: \"" + from + "\"");
+        System.out.println("  > to: \"" + to + "\"");
+        // send email
+        EmailTopic.sendMail(as.getSMTPServer(), from, to, subject, body);		// EmailTopic.sendMail() throws DME
+      } catch (Exception e) {
+        System.out.println("*** notification email not send (" + e + ")");
+      }
     }
 
 
