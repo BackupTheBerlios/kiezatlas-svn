@@ -7,7 +7,8 @@
   String workspaceImprint = (String) session.getAttribute("workspaceImprint");
   String workspaceLogo = (String) session.getAttribute("workspaceLogo");
   String workspaceHomepage = (String) session.getAttribute("workspaceHomepage");
-	String searchTerm = (String) session.getAttribute("searchTerm");
+  String mapAlias = (String) session.getAttribute("mapAlias");
+  String searchTerm = (String) session.getAttribute("searchTerm");
 	String originId = (String) session.getAttribute("originId");
 	String topicId = (String) session.getAttribute("topicId");
 	Integer critIndex = (Integer) session.getAttribute("critIndex");
@@ -30,9 +31,11 @@
   <script type="text/javascript" src="http://maps.google.com/maps?file=api&v=2&oe=utf-8&key=ABQIAAAADev2ctFkze28KEcta5b4WBSQDgFJvORzMhuwLQZ9zEDMQLdVUhTWXHB2vS0W0TdlEbDiH_qzhBEZ5A"></script>
   <script type="text/javascript">
     var mapTitle = '<%= map.getName() %>';
+    var mapAlias = '<%= mapAlias %>';
     var topicId = '<%= map.getID()%>';
     var workspaceId = '<%= workspace.getID() %>';
     var crtCritIndex = <%= critIndex %>;
+    var searchTerm = '<%= searchTerm %>';
     var linkTo = '<%= originId %>';
     var linkToTopicId = '<%= topicId %>';
     var mapTopics = <%= mapTopics %>;
@@ -105,6 +108,9 @@
           selectAndShowInMap(linkTo, false);
         } else if (linkToTopicId != 'null') {
           selectAndShowInMap(linkToTopicId, true);
+        }
+        if (searchTerm != 'null') {
+          searchRequest(searchTerm);
         }
         map.events.register("zoomend", map, redrawAfterZoomOperation);
       });

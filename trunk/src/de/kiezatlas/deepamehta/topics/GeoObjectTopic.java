@@ -573,6 +573,7 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
         requestUrl.append("q=");
         requestUrl.append(convertAddressForRequest(givenAddress));
         // requested. put and remove address
+        // TODO: adapt to new Google Geocode API v3
         requestUrl.append("&output=csv&oe=utf8&sensotr=false&key=ABQIAAAAyg-5-YjVJ1InfpWX9gsTuxRa7xhKv6UmZ1sBua05bF3F2fwOehRUiEzUjBmCh76NaeOoCu841j1qnQ&gl=de");
         for (int i = 0; i < 3; i++) {
             try {
@@ -584,7 +585,7 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
                                     con.getInputStream()));
                 String inputLine;
                 while ((inputLine = in.readLine()) != null) {
-                    //System.out.println(inputLine);
+                    // System.out.println("[DEBUG] GeoCodeResponse: " + inputLine);
                     String[] points = inputLine.split(",");
                     if (points[2].equals("0") && points[3].equals("0")) {
                         System.out.println("[WARNING] .. geoCoder is lazy, could not locate GeoObjects ("+this.getAddressString()+") G coordinates, trying again " + i);
@@ -622,11 +623,11 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
                     // System.out.println("[INFO] GeoObjectTopic.setGPSCoordinates(): successful to " + point[2] +"," + point[3] +" for address:" + getAddressString());
                 } else {
                     directives.add(DIRECTIVE_SHOW_MESSAGE, "Address could not be resolved to WGS 84 coordinates. Leaving the topic like it is. ", new Integer(NOTIFICATION_ERROR));
-                    System.out.println("[WARNING] GeoObjectTopic.setGPSCoordinates(): was not successful for " + getAddressString());
+                    // System.out.println("[WARNING] GeoObjectTopic.setGPSCoordinates(): was not successful for " + getAddressString());
                 }
             } else {
                 directives.add(DIRECTIVE_SHOW_MESSAGE, "Address could not be resolved to WGS 84 coordinates. Leaving the topic like it is. ", new Integer(NOTIFICATION_ERROR));
-                System.out.println("[WARNING] GeoObjectTopic.setGPSCoordinates(): was not successful for " + getAddressString());
+                // System.out.println("[WARNING] GeoObjectTopic.setGPSCoordinates(): was not successful for " + getAddressString());
             }
         }
     }

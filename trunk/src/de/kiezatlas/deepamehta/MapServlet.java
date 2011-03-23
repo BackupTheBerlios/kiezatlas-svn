@@ -49,12 +49,13 @@ public class MapServlet extends DeepaMehtaServlet implements KiezAtlas {
 
 
   // --
-  // --- KiezAtlas Service Settings
+  // --- KiezAtlas Service Settings / Kiezatlas Labs City Map Servlet
   // --
 
 
 
   private final String urlStr = "http://www.kiezatlas.de/rpc/";
+  // private final String urlStr = "http://localhost:8080/kiezatlas/rpc/";
   private final String charset = "ISO-8859-1";
 
 
@@ -70,16 +71,17 @@ public class MapServlet extends DeepaMehtaServlet implements KiezAtlas {
 				}
         // application states represented in URL - just passing params to javascript
         Integer critIndex = 0;
-        if (params.getParameter("critId") != null) Integer.parseInt(params.getParameter("critId"));
-        session.setAttribute("originId", params.getParameter("linkTo"));
+        if (params.getParameter("critId") != null) critIndex = Integer.parseInt(params.getParameter("critId"))-1; // [0]
+        session.setAttribute("originId", params.getParameter("linkTo")); // linkTo here for backwards compatibility rsn
         session.setAttribute("topicId", params.getParameter("topicId"));
         session.setAttribute("critIndex", critIndex);
         session.setAttribute("searchTerm", params.getParameter("search"));
-				//
+        //
 				String alias = pathInfo.substring(1);
         if (pathInfo.indexOf("&") != -1) {
           alias = pathInfo.substring(1, pathInfo.indexOf("&"));
         }
+        session.setAttribute("mapAlias", alias);
 				BaseTopic mapTopic = CityMapTopic.lookupCityMap(alias, true, as); // throwIfNotFound=true
         setCityMap(mapTopic, session);
         if (!CityMapTopic.isProtected(mapTopic, as)) {

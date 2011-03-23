@@ -405,7 +405,9 @@ public class GPSConverterTopic extends LiveTopic implements KiezAtlas {
                         BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
                         String inputLine;
                         while ((inputLine = in.readLine()) != null) {
-                            //System.out.println(inputLine);
+                            // System.out.println("[DEBUG] GeoCodeResponse: "inputLine);
+                            // Note: The Google Maps Geocoding API Version 2 has been officially deprecated as of March 8, 2010.
+                            // and as of Google's Deprecation Policy will be shut down after 3 years from this date on.
                             String[] points = inputLine.split(",");
                             if (points[2].equals("0") && points[3].equals("0")) {
                                 if (!faultyObjects.contains(geoObject)) {

@@ -107,7 +107,7 @@
 		<servlet-class>de.kiezatlas.deepamehta.MapServlet</servlet-class>
 	</servlet>
 
-	<!-- <servlet>
+	<servlet>
 	  <servlet-name>SlimerServlet</servlet-name>
 	  <servlet-class>de.kiezatlas.deepamehta.SlimerServlet</servlet-class>
     <init-param>
@@ -116,7 +116,6 @@
 	  </init-param>
 	  <load-on-startup>0</load-on-startup>
 	</servlet>
-  -->
 
 	<!-- Define mappings that are used by the servlet container to
 		 translate a particular request URI (context-relative) to a

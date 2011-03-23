@@ -244,7 +244,9 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
         try {
             query = URLEncoder.encode(query, "UTF-8");
             // Website url to open
-            String url = "http://maps.google.com/maps/geo?q="+query+"&output=json&oe=utf8&sensotr=false&key="+key+locale;
+            String url = "http://maps.googleapis.com/maps/api/geocode/json?address=" + query + "&sensor=false";
+            System.out.println("GeoCode =>\"" + url + "\"");
+            // String url = "http://maps.google.com/maps/geo?q="+query+"&output=json&oe=utf8&sensotr=false&key="+key+locale;
             URLConnection connection = new URL(url).openConnection();
             connection.setRequestProperty("Content-Type", "application/json");
             connection.setRequestProperty("Charset", "ISO-8859-1");

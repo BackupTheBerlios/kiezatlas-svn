@@ -91,9 +91,9 @@ public class SlimerServlet implements Servlet, ApplicationServiceHost {
       JobDetail engagementJob = new JobDetail("engagement", "importer", TimedEngagementImporter.class);
       JobDetail eventJob = new JobDetail("event", "importer", TimedEventImporter.class);
       Trigger indexdeTrigger = TriggerUtils.makeDailyTrigger(1, 1);
-      // Trigger indexdeTrigger = TriggerUtils.makeMinutelyTrigger(1, 1);
-      Trigger eventTrigger = TriggerUtils.makeDailyTrigger(6, 0);
-      // Trigger eventTrigger = TriggerUtils.makeMinutelyTrigger(6, 0);
+      // Trigger indexdeTrigger = TriggerUtils.makeMinutelyTrigger(15, 2);
+      Trigger eventTrigger = TriggerUtils.makeDailyTrigger(6, 15);
+      // Trigger eventTrigger = TriggerUtils.makeMinutelyTrigger(5, 2);
       indexdeTrigger.setName("engagement");
       indexdeTrigger.setGroup("importer");
       eventTrigger.setName("event");
@@ -122,14 +122,14 @@ public class SlimerServlet implements Servlet, ApplicationServiceHost {
   public void destroy() {
     try {
       if (scheduler != null) {
-        scheduler.shutdown(true);
-        // shutdown() does not return until executing Jobs complete execution..
+        scheduler.shutdown();
       }
+      serviceProvider.shutdown();
     } catch (Exception ex) {
       System.out.println("ERROR: while stopping the Quartz Framework...");
       ex.printStackTrace();
     }
-    System.out.println("INFO: QuartzTimer stopped and destroyed..");
+    System.out.println("INFO: QuartzTimer and ApplicationService stopped and destroyed..");
   }
 
   public String getCommInfo() {

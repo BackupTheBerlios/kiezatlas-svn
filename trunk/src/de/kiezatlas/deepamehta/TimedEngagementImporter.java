@@ -18,6 +18,7 @@ import java.io.StringReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Vector;
 import javax.xml.parsers.DocumentBuilder;
@@ -54,7 +55,7 @@ public class TimedEngagementImporter implements Job, DeepaMehtaConstants, KiezAt
     private String contentReportRecipient = "";
     private String serviceReportRecipient = "";
     private String iconCatMapString = "";
-    private Object[] iconCatMap = null; // holds an array of String[catId,icon.gif]-Arrays
+    private HashMap iconCatMap = null; // holds an array of String[catId,icon.gif]-Arrays
     // 
     // Imported Engagement Types
     static final String TOPICTYPE_ENG_PROJECT = "t-331314";
@@ -74,7 +75,8 @@ public class TimedEngagementImporter implements Job, DeepaMehtaConstants, KiezAt
     }
 
     public void execute(JobExecutionContext context) throws JobExecutionException {
-      BaseTopic settings = null; // getImporterSettingsTopic();
+      //
+      BaseTopic settings = getImporterSettingsTopic();
       if (settings != null) {
         contentReportRecipient = as.getTopicProperty(settings, PROPERTY_IMPORT_CONTENT_REPORT);
         serviceReportRecipient = as.getTopicProperty(settings, PROPERTY_IMPORT_SERVICE_REPORT);
@@ -86,29 +88,34 @@ public class TimedEngagementImporter implements Job, DeepaMehtaConstants, KiezAt
       //
       if (iconCatMapString.length() > 0) {
         String[] lines = iconCatMapString.split("\n");
-        iconCatMap = new Object[lines.length];
+        iconCatMap = new HashMap(lines.length);
         for (int i = 0; i < lines.length; i++) {
-          String[] pair = lines[i].split(":");
-          iconCatMap[i] = pair;
+          String[] pair = lines[i].split("\t");
+          if (pair.length > 1) {
+            if (!pair[1].equals("")) {
+              iconCatMap.put(pair[0], pair[1]);
+              System.out.println("validIconConfig => " + iconCatMap.get(pair[0]));
+            }
+          }
         }
-        //
-        /* for (int i = 0; i < iconCatMap.length; i++) {
-          String[] pair = (String[]) iconCatMap[i];
-          System.out.println("  catId: " + pair[0] + " iconSrc: " + pair[1]);
-        } */
-        System.out.println("[EngagementJob] number of items configured in iconCatMap: " + iconCatMap.length);
+        // 
+        System.out.println("[EngagementJob] number of items configured in iconCatMap: " + iconCatMap.size());
       }
       // work here
       String ehrenamtXml = sendGetRequest(serviceUrl, "");
       if (ehrenamtXml != null) {
         System.out.println("[EngagementJob] loaded data.. but is doing nothing for now...." + cityMapId);
         // delete former import
-        // clearCriterias();
+        clearCriterias();
         // clears workspace if new topics are available
-        // clearImport();
+        clearImport();
         // store and publish new topics
-        // Vector topicIds = parseAndStoreData(ehrenamtXml);
-        // publishData(topicIds);
+        Vector topicIds = parseAndStoreData(ehrenamtXml);
+        if (settings != null && as.getTopicProperty(settings, PROPERTY_ICONS_MAP).length() == 0) {
+          // just store a new configuration template for an iconMap if there's no config available
+          as.setTopicProperty(settings, PROPERTY_ICONS_MAP, iconCatMapString);
+        }
+        publishData(topicIds);
       }
     }
 
@@ -134,10 +141,10 @@ public class TimedEngagementImporter implements Job, DeepaMehtaConstants, KiezAt
         Vector unusable = new Vector(); // collection of GeoObjects without GPS Data
         for (int i = 0; i < topicIds.size(); i++) {
             GeoObjectTopic baseTopic = (GeoObjectTopic) as.getLiveTopic(((String)topicIds.get(i)), 1);
-            // System.out.println("[GPSINFO] is LAT: " + as.getTopicProperty(baseTopic, PROPERTY_GPS_LAT) + " LON: " + as.getTopicProperty(baseTopic, PROPERTY_GPS_LONG));
             BaseTopic addressTopic = baseTopic.getAddress();
             if (as.getTopicProperty(baseTopic.getID(), 1, PROPERTY_GPS_LAT).equals("")) {
-                System.out.println("[EngagementJob] WARNING ***  \""+addressTopic.getName()+"\" is without GPS Data... dropping placement in CityMap");
+                System.out.println("[EngagementJob] WARNING *** \" " + baseTopic.getName() + "\" / \""
+                        + addressTopic.getName() + "\" is missing LAT... dropping placement in CityMap");
                 unusable.add(baseTopic); //
             } else if (as.getTopicProperty(addressTopic, PROPERTY_STREET).equals("über Gute-Tat.de")) {
                 unusable.add(baseTopic);
@@ -162,7 +169,9 @@ public class TimedEngagementImporter implements Job, DeepaMehtaConstants, KiezAt
         /** import data is, date of last import, complete or not complete, error objects */
         Vector allGeoObjects = cm.getTopics(getWorkspaceGeoType(workspaceId).getID());
         Vector allRelatedTopics = new Vector();
+        System.out.println(" --- ");
         System.out.println("[EngagementJob] cleaning up ("+getWorkspaceGeoType(workspaceId).getName()+"). In number--- (" +allGeoObjects.size()+ ")");
+        System.out.println(" ---");
         for (int i = 0; i < allGeoObjects.size(); i++) {
             BaseTopic baseTopic = (BaseTopic) allGeoObjects.get(i);
             Vector relatedTopics = as.getRelatedTopics(baseTopic.getID(), ASSOCTYPE_ASSOCIATION, 2);
@@ -237,22 +246,20 @@ public class TimedEngagementImporter implements Job, DeepaMehtaConstants, KiezAt
      */
     private Vector parseAndStoreData(String xmlData) {
     Vector topicIds = new Vector();
+    // Vector originCatIds = new Vector(); // filled and used for iconizing an imported categorical system
+    //
     try {
-
         DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
         Document doc = docBuilder.parse(new InputSource(new StringReader(xmlData)));
-
         // normalize text representation..
         doc.getDocumentElement().normalize();
         //
         NodeList listOfProjects = doc.getElementsByTagName("project");
         int amountOfProjects = listOfProjects.getLength();
         System.out.println("");
-        System.out.println(" --- Import started at " + DeepaMehtaUtils.getTime() +" for a total no of " + amountOfProjects + " " + getWorkspaceGeoType(workspaceId).getName());
+        System.out.println("[EngagementJob] Import started at " + DeepaMehtaUtils.getTime() +" for a total no of " + amountOfProjects + " " + getWorkspaceGeoType(workspaceId).getName());
         // for(int s = 0; s < listOfProjects.getLength(); s++){
-        System.out.println(" -- ");
-        System.out.println("");
         Vector misspelledObjects = new Vector();
         // iterate over projects
         for(int p = 0; p < amountOfProjects; p++) {
@@ -351,7 +358,7 @@ public class TimedEngagementImporter implements Job, DeepaMehtaConstants, KiezAt
                 }
             }
             // projectData was gathered
-            // store information per project now
+            // store information per project directly
             String topicID = saveProjectData(originId, projectName, contactPerson, projectUrl, postcode, streetNr, bezirk,
                         orgaName, orgaWebsite, orgaContact, timeStamp,
                     merkmale, taetigkeiten, zielgruppen, einsatzbereiche);
@@ -363,7 +370,6 @@ public class TimedEngagementImporter implements Job, DeepaMehtaConstants, KiezAt
                 // add topicID
                 topicIds.add(topicID);
             //}
-            // ???
         }//end of for loop with p for projects
         System.out.println("[EngagementJob] stored data at " + DeepaMehtaUtils.getTime() +" for a total no of " + amountOfProjects + " " + getWorkspaceGeoType(workspaceId).getName());
         } catch (SAXParseException err) {
@@ -455,11 +461,12 @@ public class TimedEngagementImporter implements Job, DeepaMehtaConstants, KiezAt
         // fetch GPS Data from GeoCoder
         GeoObjectTopic geoObject = (GeoObjectTopic) geoObjectTopic;
         geoObject.setGPSCoordinates(directives);
-        // bezirk label special move
+        // bezirk-label special move
         if (bezirk.startsWith("Berlin-") || bezirk.startsWith("berlin-")) {
-            // slice a bit redundancy
+            // slice a bit redundant information
             bezirk = bezirk.substring(7);
         }
+        // create availalbe categories if not yet known to the cm and associate the item to all of its categories
         // one to one
         BaseTopic bezirkAlreadyKnown = cm.getTopic(TOPICTYPE_ENG_BEZIRK, bezirk, 1);
         if (bezirkAlreadyKnown != null) {
@@ -471,6 +478,12 @@ public class TimedEngagementImporter implements Job, DeepaMehtaConstants, KiezAt
             System.out.println(">> creating "+as.getLiveTopic(TOPICTYPE_ENG_BEZIRK, 1).getName()+"Topic \""+bezirk+"\"");
             LiveTopic bezirkTopic = as.createLiveTopic(as.getNewTopicID(), TOPICTYPE_ENG_BEZIRK, bezirk, null);
             as.createLiveAssociation(as.getNewAssociationID(), ASSOCTYPE_ASSOCIATION, geoObjectTopic.getID(), bezirkTopic.getID(), null, null);
+            // create template for iconMap too
+            if (iconCatMap == null) iconCatMapString += bezirkTopic.getName() + "\t\n";
+            if (iconCatMap != null && iconCatMap.get(bezirkTopic.getName()) != null) {
+                as.setTopicProperty(bezirkTopic, PROPERTY_ICON, iconCatMap.get(bezirkTopic.getName()).toString());
+                System.out.println(" >>> found and set icon for .. " + bezirkTopic.getName() + " => " + iconCatMap.get(bezirkTopic.getName()));
+            }
         }
         // one to many
         for (int i = 0; i < zielgruppen.size(); i++) {
@@ -484,6 +497,11 @@ public class TimedEngagementImporter implements Job, DeepaMehtaConstants, KiezAt
                 System.out.println(">> creating "+as.getLiveTopic(TOPICTYPE_ENG_ZIELGRUPPE, 1).getName()+"Topic \""+zielgruppenName+"\"");
                 LiveTopic newZielgruppe = as.createLiveTopic(as.getNewTopicID(), TOPICTYPE_ENG_ZIELGRUPPE, zielgruppenName, null);
                 as.createLiveAssociation(as.getNewAssociationID(), ASSOCTYPE_ASSOCIATION, geoObjectTopic.getID(), newZielgruppe.getID(), null, null);
+                if (iconCatMap == null) iconCatMapString += newZielgruppe.getName() + "\t\n";
+                if (iconCatMap != null && iconCatMap.get(newZielgruppe.getName()) != null) {
+                    as.setTopicProperty(newZielgruppe, PROPERTY_ICON, iconCatMap.get(newZielgruppe.getName()).toString());
+                    System.out.println(" >>> found and set icon for .. " + newZielgruppe.getName() + " => " + iconCatMap.get(newZielgruppe.getName()));
+                }
             }
         }
         // one to many
@@ -498,6 +516,11 @@ public class TimedEngagementImporter implements Job, DeepaMehtaConstants, KiezAt
                 System.out.println(">> creating "+as.getLiveTopic(TOPICTYPE_ENG_TAETIGKEIT, 1).getName()+"Topic \""+taetigkeitName+"\"");
                 LiveTopic newTaetigkeiten = as.createLiveTopic(as.getNewTopicID(), TOPICTYPE_ENG_TAETIGKEIT, taetigkeitName, null);
                 as.createLiveAssociation(as.getNewAssociationID(), ASSOCTYPE_ASSOCIATION, geoObjectTopic.getID(), newTaetigkeiten.getID(), null, null);
+                if (iconCatMap == null) iconCatMapString += newTaetigkeiten.getName() + "\t\n";
+                if (iconCatMap != null && iconCatMap.get(newTaetigkeiten.getName()) != null) {
+                    as.setTopicProperty(newTaetigkeiten, PROPERTY_ICON, iconCatMap.get(newTaetigkeiten.getName()).toString());
+                    System.out.println(" >>> found and set icon for .. " + newTaetigkeiten.getName() + " => " + iconCatMap.get(newTaetigkeiten.getName()));
+                }
             }
         }
         // one to many
@@ -512,6 +535,11 @@ public class TimedEngagementImporter implements Job, DeepaMehtaConstants, KiezAt
                 System.out.println(">> creating "+as.getLiveTopic(TOPICTYPE_ENG_MERKMAL, 1).getName()+"Topic \""+merkmalsName+"\"");
                 LiveTopic newMerkmal = as.createLiveTopic(as.getNewTopicID(), TOPICTYPE_ENG_MERKMAL, merkmalsName, null);
                 as.createLiveAssociation(as.getNewAssociationID(), ASSOCTYPE_ASSOCIATION, geoObjectTopic.getID(), newMerkmal.getID(), null, null);
+                if (iconCatMap == null) iconCatMapString += newMerkmal.getName() + "\t\n";
+                if (iconCatMap != null && iconCatMap.get(newMerkmal.getName()) != null) {
+                    as.setTopicProperty(newMerkmal, PROPERTY_ICON, iconCatMap.get(newMerkmal.getName()).toString());
+                    System.out.println(" >>> found and set icon for .. " + newMerkmal.getName() + " => " + iconCatMap.get(newMerkmal.getName()));
+                }
             }
         }
         // one to many
@@ -526,6 +554,11 @@ public class TimedEngagementImporter implements Job, DeepaMehtaConstants, KiezAt
                 System.out.println(">> creating "+as.getLiveTopic(TOPICTYPE_ENG_EINSATZBEREICH, 1).getName()+"Topic \""+einsatzbereichsName+"\"");
                 LiveTopic newEinsatzbereich = as.createLiveTopic(as.getNewTopicID(), TOPICTYPE_ENG_EINSATZBEREICH, einsatzbereichsName, null);
                 as.createLiveAssociation(as.getNewAssociationID(), ASSOCTYPE_ASSOCIATION, geoObjectTopic.getID(), newEinsatzbereich.getID(), null, null);
+                if (iconCatMap == null) iconCatMapString += newEinsatzbereich.getName() + "\t\n";
+                if (iconCatMap != null && iconCatMap.get(newEinsatzbereich.getName()) != null) {
+                    as.setTopicProperty(newEinsatzbereich, PROPERTY_ICON, iconCatMap.get(newEinsatzbereich.getName()).toString());
+                    System.out.println(" >>> found and set icon for .. " + newEinsatzbereich.getName() + " => " + iconCatMap.get(newEinsatzbereich.getName()));
+                }
             }
         }
         return geoObjectTopic.getID();

@@ -6,6 +6,7 @@
   String workspaceCriterias = (String) session.getAttribute("workspaceCriterias");
   String workspaceImprint = (String) session.getAttribute("workspaceImprint");
   String workspaceLogo = (String) session.getAttribute("workspaceLogo");
+  String mapAlias = (String) session.getAttribute("mapAlias");
   String workspaceHomepage = (String) session.getAttribute("workspaceHomepage");
 	String searchTerm = (String) session.getAttribute("searchTerm");
 	String originId = (String) session.getAttribute("originId");
@@ -28,11 +29,15 @@
   <script type="text/javascript" src="http://maps.google.com/maps?file=api&v=2&oe=utf-8&key=ABQIAAAAyg-5-YjVJ1InfpWX9gsTuxRa7xhKv6UmZ1sBua05bF3F2fwOehRUiEzUjBmCh76NaeOoCu841j1qnQ"></script>
   <script type="text/javascript">
     var mapTitle = '<%= map.getName() %>';
-    var topicId = '<%= map.getID()%>';
+    var mapAlias = '<%= mapAlias %>';
+    var topicId = '<%= map.getID() %>'; // unlike the topicId param from the requestURL
     var workspaceId = '<%= workspace.getID() %>';
+    // options
     var crtCritIndex = <%= critIndex %>;
-    var linkTo = '<%= originId %>';
+    var searchTerm = '<%= searchTerm %>';
     var linkToTopicId = '<%= topicId %>';
+    var linkTo = '<%= originId %>';
+    // body
     var mapTopics = <%= mapTopics %>; // null; //eval('(' + <?php echo json_encode($mapTopics) ?> + ')');
     var workspaceCriterias = <%= workspaceCriterias %>; // eval('(' + <?php echo json_encode($workspaceCriterias) ?> + ')');
     // var workspaceInfos = null;
@@ -63,7 +68,7 @@
     }
     var gKey = 'ABQIAAAAyg-5-YjVJ1InfpWX9gsTuxRa7xhKv6UmZ1sBua05bF3F2fwOehRUiEzUjBmCh76NaeOoCu841j1qnQ';
     //
-    jQuery(document).ready(function(){
+    jQuery(document).ready(function() {
       // register resize
       jQuery(window).resize(function() {
         handleResize();
@@ -74,7 +79,7 @@
       // loadWorkspaceInfos(workspaceId);
       if (debug) log("mapTopics:" + mapTopics.result.topics.length);
       if (debug) log("workspaceCrits:" + workspaceCriterias.result.length);
-      if (debug) log("districtNames:" + workspaceCriterias.result[4].categories[0].catName);
+      // if (debug) log("districtNames:" + workspaceCriterias.result[4].categories[0].catName);
       if (onBerlinDe && workspaceCriterias.result.length > 4) districtNames = workspaceCriterias.result[4].categories;
       setWorkspaceInfos();
       setCityMapName('<%= map.getName() %>'); // fetch and set CityMapName
@@ -87,7 +92,8 @@
       bounds = calculateInitialBounds();
       // after the dom is loaded we can init our parts of the app
       jQuery(window).load(function() {
-        document.namespaces;
+        // if (console != undefined) console.log("testLog...");
+        document.namespaces; // some curios ie workaround for openlayers
         openLayersInit(bounds);
         gMarkers = setupOpenMarkers();
         // initialize Features and their control
@@ -102,10 +108,18 @@
         } else if (linkToTopicId != 'null') {
           selectAndShowInMap(linkToTopicId, true);
         }
+        if (searchTerm != 'null') {
+          searchRequest(searchTerm);
+        }
         map.events.register("zoomend", map, redrawAfterZoomOperation);
         map.maxExtent = bounds;
         map.raiseLayer(myNewLayer);
       });
+      /** we cannot use this event cause every request will force a re-generation of everything, no caching possible */
+      /** jQuery(window).unload(function() {
+        alert("setting url to: " + permaLink)
+        window.location.replace(permaLink);
+      });*/
     });
   </script>
 </head>
@@ -144,9 +158,12 @@
 		    <a href="javascript:updateVisibleBounds(null, true, null, true);" id="resetMarkerHref">
 		      <img border="0" src="../pages/be.de/img/Stop.png" title="zurücksetzen der Kartenansicht und Informationsebenen" width="15" height="15">
         </a>
+        <a href="javascript:showPermaLink();" id="permaLinkHref">
+		      <img border="0" src="../pages/be.de/img/gnome_permalink.png" title="Sitezustand teilen" width="16" height="16">
+        </a>
         <!-- <img border="0"atlas id="divider" src="img/division.png" title="" width="1" height="10"> -->
-        <span id="moreLabel">Mehr..</span>
-		    <div id="mapSwitcher" style="position: absolute; visibility: hidden;"></div>
+        <span id="moreLabel">&nbsp;Mehr..</span>
+        <div id="mapSwitcher" style="position: absolute; visibility: hidden;"></div>
       </div>
       <div id="memu" style="visibility:hidden;"></div>
       <div id="navPanel"></div>
@@ -159,6 +176,7 @@
         <a href="http://www.berlin.de/buergeraktiv/">Impressum</a> und <a href="http://ehrenamt.index.de">Haftungshinweise</a><br/><b> powered by <a href="http://www.kiezatlas.de">Kiezatlas</a></b>
       </div>
       <div id="sideBarControl"></div> <!-- onclick="javascript:handleSideBar();" -->
+      <!-- <div id="dialog-message" title="To share your view, copy this link:"><p id="modalMessage"></p></div> -->
     </div>
   </body>
 </html>

@@ -437,6 +437,9 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 			// ### session.setAttribute("impressumLink", "");
 			System.out.println("*** NO IMPRESSUM LINK FOUND (there is no webpage topic assigned to the Kiez-Atlas workspace)");
 		}
+    String webAlias = as.getTopicProperty(getCityMap(session), PROPERTY_WEB_ALIAS);
+    session.setAttribute("webAlias", webAlias);
+    System.out.println(">>> \"webAlias\" stored in session: \"" + webAlias + "\"");
 	}
 
 	private void setSelectedGeo(String geoID, Session session) {

@@ -104,6 +104,13 @@
 				"<a href=\"controller?action=" + KiezAtlas.ACTION_SHOW_CATEGORIES + "&critNr=" + i + "\">" + critName + "</a></td></tr>");
 		}
 		out.println("</table>");
+    // introduce breadcrumb and link to new maps-interface
+    out.println("" +
+      "<div id=\"navigation-helper\" class=\"secondary-text\" style=\"border-top: 1px dashed #fff; margin-top:3px; " +
+      "padding-left: 2px; padding-bottom: 0px; padding-top:3px;\">" +
+        "<a href=\"http://www.kiezatlas.de/map/"+session.getAttribute("webAlias")+"\" " +
+         "title=\"Zur neuen Stadtplanoberfl&auml;che wechseln\" target=\"_blank\">Zur neuen Ansicht</a>" +
+      "</div>");
 		out.println("</div>");								// --- end header area
 		out.println();
 		out.println("<div class=\"content-area\">");		// --- begin content area

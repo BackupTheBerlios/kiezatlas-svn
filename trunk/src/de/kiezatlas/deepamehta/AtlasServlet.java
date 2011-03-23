@@ -50,7 +50,7 @@ public class AtlasServlet extends DeepaMehtaServlet implements KiezAtlas {
   
 
   // --
-  // --- KiezAtlas Service Settings
+  // --- KiezAtlas Service Settings / berlin.de City Map Servlet
   // --
 
 
@@ -81,6 +81,7 @@ public class AtlasServlet extends DeepaMehtaServlet implements KiezAtlas {
         if (pathInfo.indexOf("&") != -1) {
           alias = pathInfo.substring(1, pathInfo.indexOf("&"));
         }
+        session.setAttribute("mapAlias", alias);
 				BaseTopic mapTopic = CityMapTopic.lookupCityMap(alias, true, as); // throwIfNotFound=true
         setCityMap(mapTopic, session);
         if (!CityMapTopic.isProtected(mapTopic, as)) {
@@ -321,7 +322,6 @@ public class AtlasServlet extends DeepaMehtaServlet implements KiezAtlas {
     String logoURL = "";
     BaseTopic logo = as.getRelatedTopic(workspaceId, ASSOCTYPE_ASSOCIATION, TOPICTYPE_IMAGE, 2, true);
     if (logo != null) logoURL = as.getTopicProperty(logo, PROPERTY_FILE);
-    System.out.println("AtlasServlet.getWorkspaceLogo => " + logoURL);
     return logoURL;
   }
 

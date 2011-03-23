@@ -70,9 +70,10 @@ public class TimedEventImporter implements Job, DeepaMehtaConstants, KiezAtlas {
     }
 
     public void execute(JobExecutionContext context) throws JobExecutionException {
+      //
       System.out.println("[EventJob] was kicked off for workspace \"" + workspaceId + "\" at "
               + DeepaMehtaUtils.getTime().toString());
-      BaseTopic settings = null; //getImporterSettingsTopic();
+      BaseTopic settings = getImporterSettingsTopic(); // 
       if (settings != null) {
         contentReportRecipient = as.getTopicProperty(settings, PROPERTY_IMPORT_CONTENT_REPORT);
         serviceReportRecipient = as.getTopicProperty(settings, PROPERTY_IMPORT_SERVICE_REPORT);
@@ -86,13 +87,13 @@ public class TimedEventImporter implements Job, DeepaMehtaConstants, KiezAtlas {
       if (ehrenamtXml != null) {
         System.out.println("[EventJob] loaded data.. but is doing nothing for now.. " + cityMapId);
         // delete former import
-        // clearCriterias();
+        clearCriterias();
         // clears workspace if new topics are available
-        // clearImport();
+        clearImport();
         // store and publish new topics
-        // Vector topicIds = parseAndStoreData(ehrenamtXml);
+        Vector topicIds = parseAndStoreData(ehrenamtXml);
         //
-        // publishData(topicIds);
+        publishData(topicIds);
       }
     }
 
@@ -147,6 +148,7 @@ public class TimedEventImporter implements Job, DeepaMehtaConstants, KiezAtlas {
             BaseTopic category = (BaseTopic) bezirke.get(i);
             CorporateDirectives newDirectives = as.deleteTopic(category.getID(), 1);
             newDirectives.updateCorporateMemory(as, null, null, null);
+            System.out.println("[INFO] deleted Event Category: " + category.getName());
         }
     }
 
