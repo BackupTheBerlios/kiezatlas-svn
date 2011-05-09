@@ -31,7 +31,7 @@ import org.quartz.SchedulerException;
  *
  * @author Malte Reißig (mre@deepamehta.de)
  */
-public class SlimerServlet implements Servlet, ApplicationServiceHost {
+public class TimerServlet implements Servlet, ApplicationServiceHost {
 
   Scheduler scheduler = null;
   ServletContext sc = null;
@@ -59,14 +59,13 @@ public class SlimerServlet implements Servlet, ApplicationServiceHost {
     try {
         // ApplicationServiceInstance instance = ApplicationServiceInstance.lookup(service, "../config/dm.properties");
         // as = ApplicationService.create(this, instance); // throws DME ### servlet is not properly inited
+        SchedulerFactory sf = new StdSchedulerFactory();
         serviceProvider = new PojoApplicationServiceProvider();
         serviceProvider.setServiceName(service);
         serviceProvider.startup();
         as = serviceProvider.getApplicationService();
         cm = as.cm;
-        SchedulerFactory sf = new StdSchedulerFactory();
         scheduler = sf.getScheduler();
-        // Scheduler will not execute jobs until it has been started (though they can be scheduled before start())
         scheduler.start();
         schedule();
     } catch (Exception e){
@@ -90,7 +89,7 @@ public class SlimerServlet implements Servlet, ApplicationServiceHost {
       //
       JobDetail engagementJob = new JobDetail("engagement", "importer", TimedEngagementImporter.class);
       JobDetail eventJob = new JobDetail("event", "importer", TimedEventImporter.class);
-      Trigger indexdeTrigger = TriggerUtils.makeDailyTrigger(1, 1);
+      Trigger indexdeTrigger = TriggerUtils.makeDailyTrigger(0, 45);
       // Trigger indexdeTrigger = TriggerUtils.makeMinutelyTrigger(15, 2);
       Trigger eventTrigger = TriggerUtils.makeDailyTrigger(6, 15);
       // Trigger eventTrigger = TriggerUtils.makeMinutelyTrigger(5, 2);
@@ -101,7 +100,7 @@ public class SlimerServlet implements Servlet, ApplicationServiceHost {
       try {
         scheduler.scheduleJob(engagementJob, indexdeTrigger);
         scheduler.scheduleJob(eventJob, eventTrigger);
-        System.out.println("INFO: The Engagement and Event Importer Jobs are now scheduled for ... some time..");
+        System.out.println("INFO: The Importer Jobs are now scheduled for... 00:45 AM (Project) and 06:15 AM (Event)");
       } catch (SchedulerException ex) {
         ex.printStackTrace();
       }
@@ -121,15 +120,21 @@ public class SlimerServlet implements Servlet, ApplicationServiceHost {
 
   public void destroy() {
     try {
-      if (scheduler != null) {
-        scheduler.shutdown();
-      }
+      // shutdown service and scheduler jobs
+      scheduler.shutdown();
       serviceProvider.shutdown();
+      TimerJobParameterHolder.getInstance().clearReferences();
+      // null references
+      serviceProvider = null;
+      scheduler = null;
+      sc = null;
+      as = null;
+      cm = null;
+      System.out.println("INFO: QuartzTimer and ApplicationService are stopped and destroyed..");
     } catch (Exception ex) {
       System.out.println("ERROR: while stopping the Quartz Framework...");
       ex.printStackTrace();
     }
-    System.out.println("INFO: QuartzTimer and ApplicationService stopped and destroyed..");
   }
 
   public String getCommInfo() {

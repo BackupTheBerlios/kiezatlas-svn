@@ -6,20 +6,27 @@
 
 #kiezatlas { font: 76% Arial, Helvetica, sans-serif; width:100%; }
 #kaheader { position: absolute; left:0px; top:0px; height:27px; background:#3f5da6; }
-#focusInput { position: absolute; height: 22px; top:5px; font-family: "Arial", "Sans-Serif"; font-size: 11px; color: #fff } 
+#focusInput { position: absolute; height: 22px; top:5px; font-family: "Arial", "Sans-Serif"; font-size: 11px; color: #fff }
 #focusInput input, #focusInput textarea { border: 1px solid #ffffff; font-family: "Arial", "Sans-Serif"; font-size: 11px; padding: 4px; background-color:#009; color: #fff; width:180px; }
-#searchInput { position: absolute; height: 22px; top:5px; font-family: "Arial", "Sans-Serif"; font-size: 11px; color: #fff } 
+#searchInput { position: absolute; height: 22px; top:5px; font-family: "Arial", "Sans-Serif"; font-size: 11px; color: #fff }
 #searchInput input, #searchInput textarea { border: 1px solid #ffffff; font-family: "Arial", "Sans-Serif"; font-size: 11px; padding: 4px; background-color:#009; color: #fff; width:140px; }
 #headerButtons { position: absolute; top:1px; }
-#mapName { position: absolute; left:10px; top:10px; width:350px; height:20px; font-family:"Verdana", "Tahoma", "sans-serif"; font-size:11px; color:#fff; }
+#mapName { position: absolute; left:10px; top:7px; width:350px; height:20px; font-family:"Verdana", "Tahoma", "sans-serif"; font-size:11px; color:#fff; }
 #mapControl { position: absolute; vertical-align: top; width:120px; height:20px; color:#4170D4; font: 10px Arial, Helvetica, sans-serif; font-weight: bold; background-color: #fff; border: 1px solid #3f5da6; opacity: 0.8; }
 #mapControl a { color:#3f5da6; font-size: 10px; }
-#resetMarkerHref { position: relative; top: 4px; }
-#toggleMarkerHref { position: relative; top: 4px; }
-#permaLinkHref { position: relative; top: 4px; }
+#resetMarkerHref { position: relative; top: 2px; }
+#toggleMarkerHref { position: relative; top: 2px; }
+#permaLinkHref { position: relative; top: 2px; }
+#permaLink { position: absolute; right: 460px; top: 35px; width: 300px; height: 21px; font-family: "Arial", "Sans-Serif"; font-size: 10px; color: #009; background-color: #fff; opacity: 0.8; }
+#permaLinkLabel { cursor: pointer; border: 1px solid #3f5da6; position: absolute; right: 760px; top: 35px; width: 100px; height: 21px; font-weight:bold; font-family: "Arial", "Sans-Serif"; font-size: 10px; color: #009; background-color: #fff; opacity: 0.8; }
+#permaLink input, #permaLink textarea { border: 1px solid #3f5da6; font-family: "Arial", "Sans-Serif"; font-size: 10px; padding: 4px; background-color:#fff; color: #009; width: 290px; }
+#dialogMessage { margin-left: auto; margin-right: auto; position: relative; top: 150px; width: 310px; height: 150px; background-color: #fff; border: 1px solid #3f5da6; cursor: pointer }
+#modalTitle { position: relative; top: 5px; padding: 10px; margin-right: auto; margin-left: auto; width: 260px; }
+#modalMessage { padding: 10px; width: 290px; }
+#closeDialog { position: relative; top: 130px; left: 175px; }
 #mapSwitcher { font: 10px Arial, Helvetica, sans-serif; color: #4170d4 !important; }
 #mapMarkerButtons { font: 12px Arial, Helvetica, sans-serif; color: #4170d4; font-weight:bold; !important; text-decoration: none;}
-#memu { position: absolute top: 4px left: 10px; background-color: #fff; width:325px; font-family:"Verdana", "Tahoma", "sans-serif"; font-size:11px; opacity:0.8; padding: 5px; padding-left: 10px; color:#000099; }
+#memu { position: absolute; top: 4px; left: 10px; background-color: #fff; width:325px; font-family:"Verdana", "Tahoma", "sans-serif"; font-size:11px; opacity:0.8; padding: 5px; padding-left: 10px; color:#000099; }
 #memu a .hover { color:#3f5da6; }
 #map { position: absolute; left:0px; }
 #focusAlternatives { background-color:#FFFFFF; border-color:-moz-use-text-color #4170D4 #4170D4; border-right:1px solid #4170D4; border-style:none solid solid; border-width:0 1px 1px; color:#000000; font-size:10px; opacity:0.75; padding:5px; position:absolute; top:30px; visibility:hidden; width:172px; }
@@ -29,7 +36,7 @@
 #sideBarCategories { position:relative; left:5px; top:10px; overflow:auto; font-family:"Verdana", "Tahoma", "sans-serif"; font-size:12px;}
 #sideBarControl { position: absolute; width:5px; top:29px; background:#3f5da6; }
 #progContainer { position:absolute; top:45%; left:35%; width:50%; height:50%; font-family: "Times New Roman, Times, serif"; font-size:10px; }
-#kafooter { background: #fff; height:35px; position:absolute; bottom:1px; font-family: "Verdana", "Tahoma", "sans-serif"; font-size:10px; }
+#kafooter { background: #fff; height:35px; position:absolute; bottom:2px; font-family: "Verdana", "Tahoma", "sans-serif"; font-size:10px; }
 #footerImprint { position:absolute; right:8px; bottom: 21px; font-family: "Verdana", "Tahoma", "sans-serif"; font-size:10px; }
 #footerPoweredBy { position:absolute; right:8px; bottom: 5px; font-family: "Verdana", "Tahoma", "sans-serif"; font-size:10px; }
 #helpFont { position: absolute; bottom: 5px; font-size: 12px; font-weight: bold; color: #4170d4; text-decoration: none;}
@@ -43,8 +50,8 @@
 .catRowSelected { background: #E6EDFF; }
 .propertyLabel { position:relative; left: 1px; font-weight: bold; }
 .propertyField { position:relative; left: 1px; }
-.additionalInfo { width: 270px; background: #E8E8E8; margin-left: auto; margin-right: auto; padding-top: 5px; padding-bottom: 5px; padding-left:5px; padding-right:15px; border: 1px dashed #000;}
-.additionalInfoWhite { width: 270px; margin-left: auto; margin-right: auto; padding-top: 5px; padding-bottom: 5px; padding-left:5px; padding-right:5px; border: 1px dashed #000;}
+.additionalInfo { width: 270px; margin-left: 5px; padding-top: 4px; padding-right: 4px; padding-bottom: 4px; padding-left:4px; border: 1px dashed #000; }
+.additionalInfoWhite { width: 270px; margin-left: 5px; padding-top: 4px; padding-right: 4px; padding-bottom: 4px; padding-left:4px; border: 1px dashed #000; }
 .topicRowDeselected { background: #fff; }
 .topicRowSelected { background: #e6edff; }
 .olControlAttribution { position:absolute; bottom: 5px !important; right: 5px ! important; font-weight: bold;}

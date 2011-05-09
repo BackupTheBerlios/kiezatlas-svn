@@ -19,6 +19,13 @@ public class TimerJobParameterHolder {
 		}
 		return instance;
 	}
+
+  public void clearReferences() {
+		if (parameters != null) {
+			parameters = new HashMap<String, Object>();
+		}
+    System.out.println("DEBUG: TimerJobParameterHolder.clearedReferences()... " + parameters.values());
+	}
 	
 	public Map<String, Object> getParameters() {
 		return parameters;

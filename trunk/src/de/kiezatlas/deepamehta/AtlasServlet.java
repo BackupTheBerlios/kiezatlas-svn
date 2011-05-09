@@ -56,6 +56,7 @@ public class AtlasServlet extends DeepaMehtaServlet implements KiezAtlas {
 
 
   private final String urlStr = "http://www.kiezatlas.de/rpc/";
+  // private final String urlStr = "http://localhost:8080/kiezatlas/rpc/";
   private final String charset = "ISO-8859-1";
 
 
@@ -71,9 +72,10 @@ public class AtlasServlet extends DeepaMehtaServlet implements KiezAtlas {
 				}
         // application states represented in URL - just passing params to javascript
         Integer critIndex = 0;
-        if (params.getParameter("critId") != null) Integer.parseInt(params.getParameter("critId"));
+        if (params.getParameter("critId") != null) critIndex = Integer.parseInt(params.getParameter("critId"))-1;
         session.setAttribute("originId", params.getParameter("linkTo"));
         session.setAttribute("topicId", params.getParameter("topicId"));
+        session.setAttribute("baseLayer", params.getParameter("baseLayer"));
         session.setAttribute("critIndex", critIndex);
         session.setAttribute("searchTerm", params.getParameter("search"));
 				//
@@ -259,7 +261,7 @@ public class AtlasServlet extends DeepaMehtaServlet implements KiezAtlas {
         rd.close();
         return result;
     } catch(UnknownHostException uke) {
-        System.out.println("*** [ATLAS] could not load the json data to import from " + urlStr + " message is: " + uke.getMessage());
+        System.out.println("*** [ATLAS] could not load CityMap-Data from " + urlStr + " cause is: " + uke.getCause());
         return null;
         // done();
     } catch (Exception ex) {
@@ -291,7 +293,7 @@ public class AtlasServlet extends DeepaMehtaServlet implements KiezAtlas {
         result = line;
         return result;
     } catch(UnknownHostException uke) {
-        System.out.println("*** [ATLAS] could not load the json data to import from " + urlStr + " message is: " + uke.getMessage());
+        System.out.println("*** [ATLAS] could not load CityMap-Data from " + urlStr + " message is: " + uke.getCause());
         return null;
         // done();
     } catch (UnsupportedEncodingException ex) {

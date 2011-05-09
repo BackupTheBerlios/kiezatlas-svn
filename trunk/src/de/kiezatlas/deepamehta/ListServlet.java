@@ -67,17 +67,17 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			String username = params.getValue("username");
 			String password = params.getValue("password");
 			if (as.loginCheck(username, password)) {
-				BaseTopic user = cm.getTopic(TOPICTYPE_USER, username, 1);
-                setUser(user, session);
-                return PAGE_LIST_HOME;
+        BaseTopic user = cm.getTopic(TOPICTYPE_USER, username, 1);
+        setUser(user, session);
+        return PAGE_LIST_HOME;
 			} else {
 				return PAGE_LIST_LOGIN;
 			}
 		} else if (action.equals(ACTION_SHOW_INSTITUTIONS)) {
 			if (session.getAttribute("membership") == null) {
-                session.setAttribute("membership", "Affiliated");
-            }
-            BaseTopic cityMap = cm.getTopic(params.getValue("cityMapID"), 1);
+        session.setAttribute("membership", "Affiliated");
+      }
+      BaseTopic cityMap = cm.getTopic(params.getValue("cityMapID"), 1);
 			String instTypeID = ((CityMapTopic) as.getLiveTopic(cityMap)).getInstitutionType().getID();
 			setCityMap(cityMap, session);
 			setInstTypeID(instTypeID, session);
@@ -85,10 +85,10 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			session.setAttribute("sortField", null);
 			session.setAttribute("filterField", null);
 			setUseCache(Boolean.FALSE, session);
-            session.setAttribute("isSlim", "false");
+      session.setAttribute("isSlim", "false");
 			return PAGE_LIST;
 		} else if (action.equals(ACTION_SHOW_INSTITUTIONS_SLIM)) {
-            BaseTopic cityMap = cm.getTopic(params.getValue("cityMapID"), 1);
+      BaseTopic cityMap = cm.getTopic(params.getValue("cityMapID"), 1);
 			String instTypeID = ((CityMapTopic) as.getLiveTopic(cityMap)).getInstitutionType().getID();
 			setCityMap(cityMap, session);
 			setInstTypeID(instTypeID, session);
@@ -151,262 +151,262 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			setGPSCoordinates(geo, directives); //{ // loads gps coordinates
             // --- store image ---
 			EditServlet.writeFiles(params.getUploads(), geo.getImage(), as);
-            if (session.getAttribute("isSlim").equals("true")) {
-                setUseCache(Boolean.FALSE, session);	// slim list don't uses the cache
-                return PAGE_SLIM_LIST;
-            } else {
-                setUseCache(Boolean.TRUE, session);	// re-filtering and -sorting is handled in preparePage with fresh topics now
-                inserTopicIntoCache(geo, session);
-                return PAGE_LIST;
-            }
+      if (session.getAttribute("isSlim").equals("true")) {
+          setUseCache(Boolean.FALSE, session);	// slim list don't uses the cache
+          return PAGE_SLIM_LIST;
+      } else {
+          setUseCache(Boolean.TRUE, session);	// re-filtering and -sorting is handled in preparePage with fresh topics now
+          inserTopicIntoCache(geo, session);
+          return PAGE_LIST;
+      }
 		} else if (action.equals(ACTION_GO_HOME)) {
 			setFilterField(null, session);
 			setFilterText(null, session);
 			setSortByField(null, session);
-            session.setAttribute("isSlim", "false");
-            return PAGE_LIST_HOME;
+      session.setAttribute("isSlim", "false");
+      return PAGE_LIST_HOME;
 		} else if (action.equals(ACTION_SORT_BY)) {
-            // just sort currently rendered list of topics
-			Vector topicBeans = getListedTopics(session);
-			String sortBy = params.getParameter("sortField");
-			sortBeans(topicBeans, sortBy);
-			setListedTopics(topicBeans, session);
-			setSortByField(sortBy, session);
-			setUseCache(Boolean.TRUE, session);
-            // not used yet
-            if (session.getAttribute("isSlim").equals("true")) {
-               return PAGE_SLIM_LIST;
-            }
-			return PAGE_LIST;
+      // just sort currently rendered list of topics
+      Vector topicBeans = getListedTopics(session);
+      String sortBy = params.getParameter("sortField");
+      sortBeans(topicBeans, sortBy);
+      setListedTopics(topicBeans, session);
+      setSortByField(sortBy, session);
+      setUseCache(Boolean.TRUE, session);
+      // not used yet
+      if (session.getAttribute("isSlim").equals("true")) {
+         return PAGE_SLIM_LIST;
+      }
+      return PAGE_LIST;
 		} else if (action.equals(ACTION_FILTER)) {
-            // always filter on the full list of cached topics
-			Vector cachedTopics = getCachedTopicList(session);
-			String filterField = params.getParameter("filterField");
-            // resulting topics can be either topicbeans or basetopics
-            Vector topics;
-			if (filterField != null) {
-                String filterText = params.getParameter("filterText");
-                if (session.getAttribute("isSlim").equals("true")) {
-                    topics = filterTopicsByName(cachedTopics, filterField, filterText);
-                    setListedTopics(topics, session);
-                    setFilterField(filterField, session);
-                    setFilterText(filterText, session);
-                    setUseCache(Boolean.TRUE, session);
-                    return PAGE_SLIM_LIST;
-                } else {
-                    topics = filterBeansByField(cachedTopics, filterField, filterText);
-                    setListedTopics(topics, session);
-                    setFilterField(filterField, session);
-                    setFilterText(filterText, session);
-                    setUseCache(Boolean.TRUE, session);
-                    return PAGE_LIST;
-                }
-			}
-			setUseCache(Boolean.TRUE, session);
-			return PAGE_LIST;
+      // always filter on the full list of cached topics
+      Vector cachedTopics = getCachedTopicList(session);
+      String filterField = params.getParameter("filterField");
+      // resulting topics can be either topicbeans or basetopics
+      Vector topics;
+      if (filterField != null) {
+          String filterText = params.getParameter("filterText");
+          if (session.getAttribute("isSlim").equals("true")) {
+              topics = filterTopicsByName(cachedTopics, filterField, filterText);
+              setListedTopics(topics, session);
+              setFilterField(filterField, session);
+              setFilterText(filterText, session);
+              setUseCache(Boolean.TRUE, session);
+              return PAGE_SLIM_LIST;
+          } else {
+              topics = filterBeansByField(cachedTopics, filterField, filterText);
+              setListedTopics(topics, session);
+              setFilterField(filterField, session);
+              setFilterText(filterText, session);
+              setUseCache(Boolean.TRUE, session);
+              return PAGE_LIST;
+          }
+      }
+      setUseCache(Boolean.TRUE, session);
+      return PAGE_LIST;
 		} else if (action.equals(ACTION_CLEAR_FILTER)) {
-			// -- reset filter and search attributes to "null"
-			// session.setAttribute("filterField", null);
-			Vector topics = getCachedTopicList(session);
-			setListedTopics(topics, session);
-			session.setAttribute("filterText", null);
-			session.setAttribute("filterField", null);
-			setUseCache(Boolean.TRUE, session);
-			System.out.println(">>> cleared Filter");
-            if (session.getAttribute("isSlim").equals("true")) {
-               return PAGE_SLIM_LIST;
-            }
-			return PAGE_LIST;
+      // -- reset filter and search attributes to "null"
+      // session.setAttribute("filterField", null);
+      Vector topics = getCachedTopicList(session);
+      setListedTopics(topics, session);
+      session.setAttribute("filterText", null);
+      session.setAttribute("filterField", null);
+      setUseCache(Boolean.TRUE, session);
+      System.out.println(">>> cleared Filter");
+      if (session.getAttribute("isSlim").equals("true")) {
+         return PAGE_SLIM_LIST;
+      }
+      return PAGE_LIST;
 		} else if (action.equals(ACTION_CREATE_FORM_LETTER)) {
-			String letter = "";
-			if(getFilterField(session) != null) {
-				letter = createFormLetter(getListedTopics(session));
-				// System.out.println("Take Filtered Topic List: " + letter);
-			} else {
-				letter = createFormLetter(getCachedTopicList(session));
-				// System.out.println("Take Cached Topic List: " + letter);
-			}
-			if(letter != null && letter.equals("")) {
-				setUseCache(Boolean.TRUE, session);
-				return PAGE_LIST;
-			}
-			String link = as.getCorporateWebBaseURL() + FILESERVER_DOCUMENTS_PATH;
-			link += writeLetter(letter, "Adressen.txt");
-			session.setAttribute("formLetter", link);
-			return PAGE_LINK_PAGE;
+      String letter = "";
+      if(getFilterField(session) != null) {
+        letter = createFormLetter(getListedTopics(session));
+        // System.out.println("Take Filtered Topic List: " + letter);
+      } else {
+        letter = createFormLetter(getCachedTopicList(session));
+        // System.out.println("Take Cached Topic List: " + letter);
+      }
+      if(letter != null && letter.equals("")) {
+        setUseCache(Boolean.TRUE, session);
+        return PAGE_LIST;
+      }
+      String link = as.getCorporateWebBaseURL() + FILESERVER_DOCUMENTS_PATH;
+      link += writeLetter(letter, "Adressen.txt");
+      session.setAttribute("formLetter", link);
+      return PAGE_LINK_PAGE;
 		} else if (action.equals(ACTION_FILTER_ROUNDMAILING)) {
-            String cityMap = (String) params.getValue("cityMapID");
-            // re-set the map
-            session.setAttribute("cityMapID", cityMap);
-            CityMapTopic map = (CityMapTopic) as.getLiveTopic(cityMap, 1); // live/base
-            SearchCriteria[] criterias = map.getSearchCriterias();
-            Vector categories = new Vector();
-            for (int i = 0; i < criterias.length; i++) {
-                String critId = criterias[i].criteria.getID();
-                Vector cats = cm.getTopics(critId); // ics(crit.getID(), new Hashtable(), map.getID(), directives);
-                categories.addAll(cats);
-            }
-            sortBaseTopics(categories);
-            // Vector allTopics = cm.getViewTopics(map.getID(), 1);
-            session.setAttribute("availableCategories", categories);
-            session.setAttribute("filterField", "");
-            session.setAttribute("filterFieldNames", new Vector());
-            session.setAttribute("cityMapName", map.getName());
-            session.setAttribute("recipients", "");
-			return PAGE_LIST_MAILING;
+      String cityMap = (String) params.getValue("cityMapID");
+      // re-set the map
+      session.setAttribute("cityMapID", cityMap);
+      CityMapTopic map = (CityMapTopic) as.getLiveTopic(cityMap, 1); // live/base
+      SearchCriteria[] criterias = map.getSearchCriterias();
+      Vector categories = new Vector();
+      for (int i = 0; i < criterias.length; i++) {
+          String critId = criterias[i].criteria.getID();
+          Vector cats = cm.getTopics(critId); // ics(crit.getID(), new Hashtable(), map.getID(), directives);
+          categories.addAll(cats);
+      }
+      sortBaseTopics(categories);
+      // Vector allTopics = cm.getViewTopics(map.getID(), 1);
+      session.setAttribute("availableCategories", categories);
+      session.setAttribute("filterField", "");
+      session.setAttribute("filterFieldNames", new Vector());
+      session.setAttribute("cityMapName", map.getName());
+      session.setAttribute("recipients", "");
+      return PAGE_LIST_MAILING;
 		} else if (action.equals(ACTION_CREATE_ROUNDMAILING)) {
-            String cityMap = (String) session.getAttribute("cityMapID");
-            String formerRecipients = (String) session.getAttribute("recipients");
-            Vector filterFieldNames = (Vector) session.getAttribute("filterFieldNames");
-            // String filterText = (String) session.getAttribute("filterText");
-            String filterField = (String) params.getValue("filterField");
-            filterFieldNames.add(as.getLiveTopic(filterField, 1).getName());
-            session.setAttribute("filterFieldNames", filterFieldNames);
-            //
-            CityMapTopic map = (CityMapTopic) as.getLiveTopic(cityMap, 1); // live/base
-            Vector mapTopics = cm.getViewTopics(map.getID(), 1);
-            Vector filteredTopics = new Vector();
-            for (int i = 0; i < mapTopics.size(); i++) {
-                BaseTopic topic = (BaseTopic) mapTopics.get(i);
-                try {
-                   // checking if a topic has the relation to the filterField assuming it's a subtype of criteria
-                   Vector cats = (Vector) as.getRelatedTopics(topic.getID(), ASSOCTYPE_ASSOCIATION, 2);
-                   fcats:
-                   for (int j = 0; j < cats.size(); j++) {
-                        BaseTopic kaTopic = (BaseTopic) cats.get(j);
-                        if (kaTopic.getID().equals(filterField)) {
-                            filteredTopics.add(topic);
-                            break fcats;
-                        }
-                   }
-                } catch (DeepaMehtaException ex) {
-                    // System.out.println("*** ListServlet.Exc is: " + ex.getMessage() + " remvoing topic from results.. " + topic.getName());
-                }
-            }
-            // Vector allTopics = cm.getViewTopics(map.getID(), 1);
-            StringBuffer mailBoxes = new StringBuffer("");
-            if (filteredTopics.size() > 0) {
-                // ToDo check the Email property properly (Engagement Workspace?)
-                Vector mailTo = lookUpMailAdresses(filteredTopics);
-                for (int j=0; j < mailTo.size(); j++) {
-                    String mailBox = (String) mailTo.get(j);
-                    if (formerRecipients.indexOf(mailBox) == -1) {
-                        // checked for double
-                        mailBoxes.append(mailTo.get(j) + ", ");
-                    }
-                }
-                System.out.println(""+ mailTo.size() + ". mailBoxes:" + mailBoxes.toString() + " formerRecipients: " + formerRecipients);
-            }
-            mailBoxes.append(formerRecipients);
-            session.setAttribute("recipients", mailBoxes.toString()); // --. update the linkedcontent
-			return PAGE_LIST_MAILING;
+      String cityMap = (String) session.getAttribute("cityMapID");
+      String formerRecipients = (String) session.getAttribute("recipients");
+      Vector filterFieldNames = (Vector) session.getAttribute("filterFieldNames");
+      // String filterText = (String) session.getAttribute("filterText");
+      String filterField = (String) params.getValue("filterField");
+      filterFieldNames.add(as.getLiveTopic(filterField, 1).getName());
+      session.setAttribute("filterFieldNames", filterFieldNames);
+      //
+      CityMapTopic map = (CityMapTopic) as.getLiveTopic(cityMap, 1); // live/base
+      Vector mapTopics = cm.getViewTopics(map.getID(), 1);
+      Vector filteredTopics = new Vector();
+      for (int i = 0; i < mapTopics.size(); i++) {
+          BaseTopic topic = (BaseTopic) mapTopics.get(i);
+          try {
+             // checking if a topic has the relation to the filterField assuming it's a subtype of criteria
+             Vector cats = (Vector) as.getRelatedTopics(topic.getID(), ASSOCTYPE_ASSOCIATION, 2);
+             fcats:
+             for (int j = 0; j < cats.size(); j++) {
+                  BaseTopic kaTopic = (BaseTopic) cats.get(j);
+                  if (kaTopic.getID().equals(filterField)) {
+                      filteredTopics.add(topic);
+                      break fcats;
+                  }
+             }
+          } catch (DeepaMehtaException ex) {
+              // System.out.println("*** ListServlet.Exc is: " + ex.getMessage() + " remvoing topic from results.. " + topic.getName());
+          }
+      }
+      // Vector allTopics = cm.getViewTopics(map.getID(), 1);
+      StringBuffer mailBoxes = new StringBuffer("");
+      if (filteredTopics.size() > 0) {
+          // ToDo check the Email property properly (Engagement Workspace?)
+          Vector mailTo = lookUpMailAdresses(filteredTopics);
+          for (int j=0; j < mailTo.size(); j++) {
+              String mailBox = (String) mailTo.get(j);
+              if (formerRecipients.indexOf(mailBox) == -1) {
+                  // checked for double
+                  mailBoxes.append(mailTo.get(j) + ", ");
+              }
+          }
+          System.out.println(""+ mailTo.size() + ". mailBoxes:" + mailBoxes.toString() + " formerRecipients: " + formerRecipients);
+      }
+      mailBoxes.append(formerRecipients);
+      session.setAttribute("recipients", mailBoxes.toString()); // --. update the linkedcontent
+      return PAGE_LIST_MAILING;
 		} else if (action.equals(ACTION_FILTER_MAIL_ALL)){
-            String cityMap = (String) session.getAttribute("cityMapID");
-            CityMapTopic map = (CityMapTopic) as.getLiveTopic(cityMap, 1); // live/base
-            //
-            Vector mapTopics = cm.getViewTopics(map.getID(), 1);
-            StringBuffer mailBoxes = new StringBuffer("");
-            if (mapTopics.size() > 0) {
-                // ToDo check the Email property properly (Engagement Workspace?)
-                Vector mailTo = lookUpMailAdresses(mapTopics);
-                for (int j=0; j < mailTo.size(); j++) {
-                    String mailBox = (String) mailTo.get(j);
-                    mailBoxes.append(mailTo.get(j) + ", ");
-                }
-            }
+      String cityMap = (String) session.getAttribute("cityMapID");
+      CityMapTopic map = (CityMapTopic) as.getLiveTopic(cityMap, 1); // live/base
+      //
+      Vector mapTopics = cm.getViewTopics(map.getID(), 1);
+      StringBuffer mailBoxes = new StringBuffer("");
+      if (mapTopics.size() > 0) {
+          // ToDo check the Email property properly (Engagement Workspace?)
+          Vector mailTo = lookUpMailAdresses(mapTopics);
+          for (int j=0; j < mailTo.size(); j++) {
+              String mailBox = (String) mailTo.get(j);
+              mailBoxes.append(mailTo.get(j) + ", ");
+          }
+      }
 			session.setAttribute("recipients", mailBoxes.toString());
 			return PAGE_LIST_MAILING;
 		} else if (action.equals(ACTION_DELETE_ENTRY)){
 			String topicId = params.getParameter("id");
 			deleteTopic(topicId);
-            if (session.getAttribute("isSlim").equals("true")) {
-                setUseCache(Boolean.FALSE, session);
-                return PAGE_SLIM_LIST;
-            } else {
-                removeTopicFromCache(topicId, session);
-                setUseCache(Boolean.TRUE, session);
-            }
+      if (session.getAttribute("isSlim").equals("true")) {
+        setUseCache(Boolean.FALSE, session);
+        return PAGE_SLIM_LIST;
+      } else {
+        removeTopicFromCache(topicId, session);
+        setUseCache(Boolean.TRUE, session);
+      }
 			return PAGE_LIST;
 		} else if (action.equals(ACTION_EXPORT_CITYMAP)) {
-            String cityMap = (String) params.getValue("cityMapID");
-            CityMapTopic map = (CityMapTopic) as.getLiveTopic(cityMap, 1); // live/base
-            String mapAlias = map.getProperty(PROPERTY_WEB_ALIAS);
-            BaseTopic instType = as.getLiveTopic(map.getInstitutionType());
-            Vector allTopics = cm.getViewTopics(map.getID(), 1);
-            System.out.println(">>> ListServlet got request to export \"" + mapAlias + "\" with " + instType.getName() + " ("+ allTopics.size() +")");
-            // ### ToDo render approximate waiting time into the displayed result webpage
-            // String absoluteFileNamePath = "/home/monty/source/deepaMehta/install/client/documents/"+mapAlias+".csv"; // ### hardcoded
-            String absoluteFileNamePath = "/home/jrichter/deepamehta/install/client/documents/"+mapAlias+".csv"; // ### hardcoded
-            File fileToWrite = new File(absoluteFileNamePath); //
-            // Time
-            Calendar cal = Calendar.getInstance();
-            long now = cal.getTimeInMillis();
-            // Date
-            SimpleDateFormat sfc = new SimpleDateFormat("E HH:mm dd MMM yy");
-            Date date = new Date();
-            String timestamp = sfc.format(date);
-            try {
-                if (fileToWrite.exists()) {
-                    long touched = fileToWrite.lastModified();
-                    // check wether the file is pretty fresh or not
-                    System.out.println("  > file already exists and\"" + absoluteFileNamePath + "\"");
-                    System.out.println("  > and system knows that now it's " + now + " and the file was touched " + fileToWrite.lastModified());
-                    if (now-21600000 < touched) { // timestamp is smaller than now minus 10 000 seconds
-                        session.setAttribute("title", "Die Daten sind aktueller als 6 Stunden und werden daher vorerst nicht wieder aktualisiert.");
-                    } else {
-                        // go ahead and write the file
-                        worker = new Thread(new DownloadWorker(as, cm, map, absoluteFileNamePath));
-                        // start the worker to export the map to the document-repository
-                        worker.start();
-                        // System.out.println(">> File is going to be written, data is older than 6hrs and the user requested so");
-                        session.setAttribute("title", "In wenigen Minuten stehen die aktuellsten Daten des Stadtplans zum Download bereit");
-                    }
-                } else {
-                    // go ahead and write the file
-                    worker = new Thread(new DownloadWorker(as, cm, map, absoluteFileNamePath));
-                    // start the worker to export the map to the document-repository
-                    worker.start();
-                    session.setAttribute("title", "In wenigen Minuten stehen die aktuellsten Daten des Stadtplans zum Download bereit");
-                }
-            } catch (Exception ex) {
-                System.out.println("*** ListServlet.exportCityMapError " + ex.getLocalizedMessage());
-            }
-            session.setAttribute("link", as.getCorporateWebBaseURL()+FILESERVER_DOCUMENTS_PATH+mapAlias+".csv");
-            return PAGE_DOWNLOAD_PAGE;
-        } else if (action.equals(ACTION_DOWNLOAD_CITYMAP)) {
-            // get webAlias
-            String cityMap = (String) params.getValue("cityMapID");
-            String mapName = "";
-            if (cityMap != null) {
-                CityMapTopic map = (CityMapTopic) as.getLiveTopic(cityMap, 1); // live/base
-                mapName = map.getName();
-                String mapAlias = map.getProperty(PROPERTY_WEB_ALIAS);
-                if (!mapAlias.equals("")) {
-                    session.setAttribute("link", as.getCorporateWebBaseURL()+FILESERVER_DOCUMENTS_PATH+mapAlias+".csv");
-                } else {
-                    session.setAttribute("link", as.getCorporateWebBaseURL()+sc.getContext("list").getServletContextName()); // point back if it's a "guest"
-                }
-            } else {
-                session.setAttribute("link", as.getCorporateWebBaseURL()+sc.getContext("list").getServletContextName()); // point back if it's a "guest";
-            }
-            session.setAttribute("title", "Download der &ouml;ffentlichen Daten des Stadtplans \"" + mapName + "\"");
-            return PAGE_DOWNLOAD_PAGE;
-        } else if (action.equals(ACTION_SHOW_LIST_LEGEND)) {
-            return PAGE_LIST_INFO;
-        }
+      String cityMap = (String) params.getValue("cityMapID");
+      CityMapTopic map = (CityMapTopic) as.getLiveTopic(cityMap, 1); // live/base
+      String mapAlias = map.getProperty(PROPERTY_WEB_ALIAS);
+      BaseTopic instType = as.getLiveTopic(map.getInstitutionType());
+      Vector allTopics = cm.getViewTopics(map.getID(), 1);
+      System.out.println(">>> ListServlet got request to export \"" + mapAlias + "\" with " + instType.getName() + " ("+ allTopics.size() +")");
+      // ### ToDo render approximate waiting time into the displayed result webpage
+      // String absoluteFileNamePath = "/home/monty/source/deepaMehta/install/client/documents/"+mapAlias+".csv"; // ### hardcoded
+      String absoluteFileNamePath = "/home/jrichter/deepamehta/install/client/documents/"+mapAlias+".csv"; // ### hardcoded
+      File fileToWrite = new File(absoluteFileNamePath); //
+      // Time
+      Calendar cal = Calendar.getInstance();
+      long now = cal.getTimeInMillis();
+      // Date
+      SimpleDateFormat sfc = new SimpleDateFormat("E HH:mm dd MMM yy");
+      Date date = new Date();
+      String timestamp = sfc.format(date);
+      try {
+          if (fileToWrite.exists()) {
+              long touched = fileToWrite.lastModified();
+              // check wether the file is pretty fresh or not
+              System.out.println("  > file already exists and\"" + absoluteFileNamePath + "\"");
+              System.out.println("  > and system knows that now it's " + now + " and the file was touched " + fileToWrite.lastModified());
+              if (now-21600000 < touched) { // timestamp is smaller than now minus 10 000 seconds
+                  session.setAttribute("title", "Die Daten sind aktueller als 6 Stunden und werden daher vorerst nicht wieder aktualisiert.");
+              } else {
+                  // go ahead and write the file
+                  worker = new Thread(new DownloadWorker(as, cm, map, absoluteFileNamePath));
+                  // start the worker to export the map to the document-repository
+                  worker.start();
+                  // System.out.println(">> File is going to be written, data is older than 6hrs and the user requested so");
+                  session.setAttribute("title", "In wenigen Minuten stehen die aktuellsten Daten des Stadtplans zum Download bereit");
+              }
+          } else {
+              // go ahead and write the file
+              worker = new Thread(new DownloadWorker(as, cm, map, absoluteFileNamePath));
+              // start the worker to export the map to the document-repository
+              worker.start();
+              session.setAttribute("title", "In wenigen Minuten stehen die aktuellsten Daten des Stadtplans zum Download bereit");
+          }
+      } catch (Exception ex) {
+          System.out.println("*** ListServlet.exportCityMapError " + ex.getLocalizedMessage());
+      }
+      session.setAttribute("link", as.getCorporateWebBaseURL()+FILESERVER_DOCUMENTS_PATH+mapAlias+".csv");
+      return PAGE_DOWNLOAD_PAGE;
+    } else if (action.equals(ACTION_DOWNLOAD_CITYMAP)) {
+      // get webAlias
+      String cityMap = (String) params.getValue("cityMapID");
+      String mapName = "";
+      if (cityMap != null) {
+          CityMapTopic map = (CityMapTopic) as.getLiveTopic(cityMap, 1); // live/base
+          mapName = map.getName();
+          String mapAlias = map.getProperty(PROPERTY_WEB_ALIAS);
+          if (!mapAlias.equals("")) {
+              session.setAttribute("link", as.getCorporateWebBaseURL()+FILESERVER_DOCUMENTS_PATH+mapAlias+".csv");
+          } else {
+              session.setAttribute("link", as.getCorporateWebBaseURL()+sc.getContext("list").getServletContextName()); // point back if it's a "guest"
+          }
+      } else {
+          session.setAttribute("link", as.getCorporateWebBaseURL()+sc.getContext("list").getServletContextName()); // point back if it's a "guest";
+      }
+      session.setAttribute("title", "Download der &ouml;ffentlichen Daten des Stadtplans \"" + mapName + "\"");
+      return PAGE_DOWNLOAD_PAGE;
+    } else if (action.equals(ACTION_SHOW_LIST_LEGEND)) {
+        return PAGE_LIST_INFO;
+    }
 		//
 		return super.performAction(action, params, session, directives);
 	}
 
 	protected void preparePage(String page, RequestParameter params, Session session, CorporateDirectives directives) {
 		if (page.equals(PAGE_LIST_HOME)) {
-            // next line: membership preferences are set according to workspaces
+      // next line: membership preferences are set according to workspaces
 			Vector workspaces = getWorkspaces(getUserID(session), session);
 			Hashtable cityMaps = getCityMaps(workspaces);
-            Hashtable mapCounts = getMapCounts(cityMaps);
-            Hashtable mapTimes = getMapTimes(cityMaps);
-            session.setAttribute("mapTimes", mapTimes);
-            session.setAttribute("mapCounts", mapCounts);
+      Hashtable mapCounts = getMapCounts(cityMaps);
+      Hashtable mapTimes = getMapTimes(cityMaps);
+      session.setAttribute("mapTimes", mapTimes);
+      session.setAttribute("mapCounts", mapCounts);
 			session.setAttribute("workspaces", workspaces);
 			session.setAttribute("cityMaps", cityMaps);
 			session.setAttribute("emailList", null);
@@ -419,11 +419,11 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 				Vector insts = cm.getTopicIDs(instTypeID, cityMapID, true);		// sortByTopicName=true
 				Vector topicBeans = new Vector();
 				for (int i = 0; i < insts.size(); i++) {
-                    // Creates TopicBean
+          // Creates TopicBean
 					TopicBean topic = as.createTopicBean(insts.get(i).toString(), 1);
 					topicBeans.add(topic);
 				}
-                //
+        //
 				setCachedTopicList(topicBeans, session);
 				System.out.println(">>> refreshed "+topicBeans.size()+" topics for the fat list");
 				// fresh topic data & re sorted
@@ -931,6 +931,7 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 			String workspaceID = ((BaseTopic) e.nextElement()).getID();
 			BaseTopic topicmap = as.getWorkspaceTopicmap(workspaceID);
 			Vector maps = cm.getTopics(TOPICTYPE_CITYMAP, new Hashtable(), topicmap.getID());
+			// Vector maps = cm.getTopics(TOPICTYPE_CITYMAP, null, new Hashtable(), topicmap.getID(), null, true); // sorted
 			cityMaps.put(workspaceID, maps);
 		}
 		//

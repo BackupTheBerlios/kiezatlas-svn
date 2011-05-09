@@ -109,7 +109,7 @@
       "<div id=\"navigation-helper\" class=\"secondary-text\" style=\"border-top: 1px dashed #fff; margin-top:3px; " +
       "padding-left: 2px; padding-bottom: 0px; padding-top:3px;\">" +
         "<a href=\"http://www.kiezatlas.de/map/"+session.getAttribute("webAlias")+"\" " +
-         "title=\"Zur neuen Stadtplanoberfl&auml;che wechseln\" target=\"_blank\">Zur neuen Ansicht</a>" +
+         "title=\"Zur interaktiven Kartenansicht wechseln\" target=\"_blank\">weitere Ansichten</a>" +
       "</div>");
 		out.println("</div>");								// --- end header area
 		out.println();
@@ -143,8 +143,10 @@
 			"\r" +
 			"<div class=\"footer-area\">\r" +				// --- begin footer area
 			"<table width=\"100%\"><tr>\r" +
-			"<td class=\"secondary-text\">Powered by<br><a href=\"http://www.deepamehta.de/\" target=\"_blank\"><b>DeepaMehta</b></a></td>\r" +
-			"<td class=\"secondary-text\" align=\"right\"><a href=\"" + impressumURL + "\" target=\"_blank\">Impressum +<br>Haftungshinweise</a></td>\r" +
+			"<td class=\"secondary-text\"><a href=\"http://www.kiezatlas.de\" target=\"_blank\"><b>Kiezatlas</b></a> is powered by<br>" +
+      "<a href=\"http://www.deepamehta.de/\" target=\"_blank\"><b>DeepaMehta</b></a></td>\r" +
+			"<td class=\"secondary-text\" align=\"right\"><a href=\"" + impressumURL + "\" target=\"_blank\">Impressum +<br>" +
+      "Haftungshinweise</a></td>\r" +
 			"</tr></table>\r" +
 			"</div>\r\r" +									// --- begin footer area
 			"</body>\r</html>\r";
@@ -202,7 +204,7 @@
 	}
 
 	// ---
-
+//
 	String mapLink(String street, String postalCode, String city) throws IOException {
 		// ### System.out.println(">>> mapLink(): street=\"" + street + "\" postalCode=\"" + postalCode + "\" city=\"" + city + "\"");
 		StringBuffer html = new StringBuffer();

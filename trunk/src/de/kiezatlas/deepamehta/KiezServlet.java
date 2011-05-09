@@ -4,7 +4,9 @@ import de.deepamehta.BaseTopic;
 import de.deepamehta.service.*;
 import de.deepamehta.service.web.JSONRPCServlet;
 import de.deepamehta.topics.TypeTopic;
+
 import de.kiezatlas.deepamehta.topics.CityMapTopic;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -39,6 +41,8 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
             result = searchTopics(params, directives);
         } else if ( remoteMethod.equals("geoCode") ) {
             result = getGeoCode(params);
+        } else if ( remoteMethod.equals("oldGeoCode") ) {
+            result = getOldGeoCode(params);
         }
         return result;
     }
@@ -270,6 +274,51 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
         return result;
     }
 
+    private String getOldGeoCode(String params) {
+        // Set your return content type
+        // String q = params;// .getParameter("q");
+        String parameters[] = params.split(",");
+        String query = parameters[0];
+        String key = parameters[1];
+        String locale = parameters[2];
+        String result = "";
+        // String topicmapId = parameters[2];
+        query = query.substring(2, query.length()-1);
+        key = key.substring(2, key.length()-1);
+        locale = locale.substring(2, locale.length()-2);
+        try {
+            // query = URLEncoder.encode(query, "UTF-8");
+            query = query.replaceAll(" ", "%20");
+            // Website url to open
+            // ### FIXME: "gl=+locale"
+            if (locale.equals("")) {
+              locale = "de";
+            }
+            String url = "http://maps.google.com/maps/geo?q=" + query + "&oe=utf8&key="+key+"&output=json&sensotr=false&gl="+locale;
+            System.out.println("OldGeoCode =>\"" + url + "\"");
+            // String url = "http://maps.google.com/maps/geo?q="+query+"&output=json&oe=utf8&sensotr=false&key="+key+locale;
+            URLConnection connection = new URL(url).openConnection();
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setRequestProperty("Charset", "ISO-8859-1");
+            // Get the response
+            BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = rd.readLine()) != null) {
+              sb.append(line);
+            }
+            rd.close();
+            result = sb.toString();
+        } catch (UnsupportedEncodingException ex) {
+            System.out.println("*** KiezServlet.getOldGeoCode ERROR: " + ex.getMessage());
+        } catch (MalformedURLException mux) {
+            System.out.println("*** KiezServlet.getOldGeoCode ERROR: " + mux.getMessage());
+        } catch (IOException ioex) {
+            System.out.println("*** KiezServlet.getOldGeoCode ERROR: " + ioex.getMessage());
+        }
+        //
+        return result;
+    }
 
     // -------------------
     // --- Utility Methods
@@ -457,7 +506,7 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
             SearchCriteria searchCriteria = crits[i];
             // collectedCrits.add(searchCriteria.criteria.getID());
             objectList.append("{\"critId\": \"" + searchCriteria.criteria.getID() + "\", ");
-            objectList.append("\"critName\": \"" + searchCriteria.criteria.getName() + "\", ");
+            objectList.append("\"critName\": \"" + toJSON(searchCriteria.criteria.getName()) + "\", ");
             objectList.append("\"categories\": [");
             Vector categories = cm.getTopics(searchCriteria.criteria.getID(), null, new Hashtable(), null, null, true); // sort
             // String typeID, String nameFilter, Hashtable propertyFilter, String relatedTopicID, String assocTypeID, boolean sortByTopicName
@@ -468,7 +517,7 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
                 // System.out.println(">>>> category(" + cat.getName() +" icon: "+ as.getLiveTopic(cat).getIconfile());
                 objectList.append("\"" + cat.getID() + "\", ");
                 objectList.append("\"catName\":");
-                objectList.append("\"" + cat.getName() + "\", ");
+                objectList.append("\"" + toJSON(cat.getName()) + "\", ");
                 objectList.append("\"catIcon\":");
                 objectList.append("\"" + as.getLiveTopic(cat).getIconfile() + "\"");
                 //
@@ -580,6 +629,7 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
         text = text.replaceAll("<p style=\"margin-top: 0\">", "");
         text = text.replaceAll("</p>", "");
         text = text.replaceAll("'", "\'");
+        text = text.replaceAll("&", "&amp;");
         // text = text.replaceAll("\'", "");
         // convert HTML entities
         text = toUnicode(text);

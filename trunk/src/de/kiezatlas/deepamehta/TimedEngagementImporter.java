@@ -94,7 +94,8 @@ public class TimedEngagementImporter implements Job, DeepaMehtaConstants, KiezAt
           if (pair.length > 1) {
             if (!pair[1].equals("")) {
               iconCatMap.put(pair[0], pair[1]);
-              System.out.println("validIconConfig => " + iconCatMap.get(pair[0]));
+              // System.out.println("validIconConfig => " + iconCatMap.get(pair[0]));
+              // ### TODO: Save Icons For Categories
             }
           }
         }
@@ -116,6 +117,10 @@ public class TimedEngagementImporter implements Job, DeepaMehtaConstants, KiezAt
           as.setTopicProperty(settings, PROPERTY_ICONS_MAP, iconCatMapString);
         }
         publishData(topicIds);
+        //
+        as = null;
+        cm = null;
+        directives = null;
       }
     }
 
@@ -157,26 +162,29 @@ public class TimedEngagementImporter implements Job, DeepaMehtaConstants, KiezAt
         int validEntries = topicIds.size() - unusable.size();
         //
         System.out.println("[EngagementJob] stored " + validEntries + " in public cityMap \"" +as.getTopicProperty(cityMapId, 1, PROPERTY_WEB_ALIAS)+ "\"");
-        System.out.println("[EngagementJob] didn`t published " + unusable.size() + " unlocatable \""+getWorkspaceGeoType(workspaceId).getName()+"e\" ");
-        sendNotificationEmail(unusable);
+        System.out.println("[EngagementJob] skipped " + unusable.size() + " unlocatable \""+getWorkspaceGeoType(workspaceId).getName()+"\" ");
+        sendNotificationEmail(unusable, false);
     }
 
     /** completely remove all topics created by the last import
-     *  e.g. delete from topicmap, delete related address topic, delete email topic,
-     *  delete person topic, delete webpage topic, delete webpage topic if not used by any other topic ...
+     *  - delete from topicmap
+     *  - email topic, person topic, webpage topic, and adress topic just, if not used by any other topic ...
      */
     private void clearImport() {
-        /** import data is, date of last import, complete or not complete, error objects */
+        /** DANGEROUS GROUNDS */
+        // collect all topics which will possibly be removed..
         Vector allGeoObjects = cm.getTopics(getWorkspaceGeoType(workspaceId).getID());
         Vector allRelatedTopics = new Vector();
         System.out.println(" --- ");
-        System.out.println("[EngagementJob] cleaning up ("+getWorkspaceGeoType(workspaceId).getName()+"). In number--- (" +allGeoObjects.size()+ ")");
+        System.out.println("[EngagementJob] deleting " +allGeoObjects.size()+ " topics of type \"" +
+                getWorkspaceGeoType(workspaceId).getID()+"\"");
         System.out.println(" ---");
         for (int i = 0; i < allGeoObjects.size(); i++) {
             BaseTopic baseTopic = (BaseTopic) allGeoObjects.get(i);
             Vector relatedTopics = as.getRelatedTopics(baseTopic.getID(), ASSOCTYPE_ASSOCIATION, 2);
             for (int j = 0; j < relatedTopics.size(); j++) {
                 BaseTopic relatedTopic = (BaseTopic) relatedTopics.get(j);
+                // to get all related topics except, the categories subtypes of tt-topictpy-crit.
                 if (relatedTopic.getType().equals(TOPICTYPE_ENG_BEZIRK) ||
                         relatedTopic.getType().equals(TOPICTYPE_ENG_ZIELGRUPPE) ||
                         relatedTopic.getType().equals(TOPICTYPE_ENG_EINSATZBEREICH) ||
@@ -191,13 +199,17 @@ public class TimedEngagementImporter implements Job, DeepaMehtaConstants, KiezAt
             directiveDeletion(baseTopic.getID());
             //
         }
+        /** Starting to delete topics which were directly associated to the GeoObjectTopic a.k.a.  base-topic */
+
         //
         System.out.println("[EngagementJob] is starting to delete "+allRelatedTopics.size()+" relatedTopics (just if one entry has no associations)---");
         for (int k = 0; k < allRelatedTopics.size(); k++) {
             BaseTopic relTopic = (BaseTopic) allRelatedTopics.get(k);
             //
             if (cm.getAssociationIDs(relTopic.getID(), 1).size() > 0) {
-               // System.out.println(">>> relTopic ("+relTopic.getID()+") \""+relTopic.getName()+"\" not to delete, has "+cm.getAssociationIDs(relTopic.getID(), 1).size()+" other associations");
+              // if there's any asscoiation left for this topic, forget about it's deletion
+              // Note: the former topic (and with it all associations) will be already gone at this point,
+              // see upper loop and line: 198
             } else {
                directiveDeletion(relTopic.getID());
             }
@@ -234,7 +246,7 @@ public class TimedEngagementImporter implements Job, DeepaMehtaConstants, KiezAt
                 newDirectives.updateCorporateMemory(as, null, null, null);
             }
         } catch (DeepaMehtaException dex) {
-            // yeah, it`s not known to CM..
+            // ok, it`s not known to CM..
         }
     }
 
@@ -638,16 +650,19 @@ public class TimedEngagementImporter implements Job, DeepaMehtaConstants, KiezAt
 
     // --- copy of BrowseServlet
 
-    private void sendNotificationEmail(Vector unusableProjects) {
+    private void sendNotificationEmail(Vector unusableProjects, boolean severeFlag) {
       try {
+        // "to"
+        String to = contentReportRecipient;
+        if (severeFlag) {
+          to = serviceReportRecipient;
+        }
         // GeoObjectTopic inst = (GeoObjectTopic) as.getLiveTopic(instID, 1);
         // "from"
         String from = as.getEmailAddress("t-rootuser");		// ###
         if (from == null || from.equals("")) {
           throw new DeepaMehtaException("email address of root user is unknown");
         }
-        // "to"
-        String to = "mre@newthinking.de";
         // "subject"
         String subject = "Ehrenamtsatlas: folgende Projekte haben einen fehlerhaften Addresseintrag";
         StringBuffer entries = new StringBuffer();

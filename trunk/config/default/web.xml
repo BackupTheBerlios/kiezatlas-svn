@@ -8,7 +8,7 @@
 	<!-- General description of the web application -->
 
 	<display-name>Kiezatlas</display-name>
-	<description>Version 1.6.7
+	<description>Version 1.6.8
 		Written by Jörg Richter (jri@deepamehta.de) and Malte Reißig (mre@deepamehta.de)</description>
 
 	<!-- Context initialization parameters that define shared
@@ -84,12 +84,6 @@
 	</servlet>
 
 	<servlet>
-		<servlet-name>Import Servlet</servlet-name>
-		<description>for berlin.de/buergeraktiv/atlas</description>
-		<servlet-class>de.kiezatlas.deepamehta.ImportServlet</servlet-class>
-	</servlet>
-
-	<servlet>
 		<servlet-name>Service Servlet</servlet-name>
 		<description>JSON RPC Service</description>
 		<servlet-class>de.kiezatlas.deepamehta.KiezServlet</servlet-class>
@@ -108,8 +102,8 @@
 	</servlet>
 
 	<servlet>
-	  <servlet-name>SlimerServlet</servlet-name>
-	  <servlet-class>de.kiezatlas.deepamehta.SlimerServlet</servlet-class>
+	  <servlet-name>TimerServlet</servlet-name>
+	  <servlet-class>de.kiezatlas.deepamehta.TimerServlet</servlet-class>
     <init-param>
 	    <param-name>shutdown-on-unload</param-name>
 	    <param-value>true</param-value>
@@ -141,11 +135,6 @@
 	<servlet-mapping>
 		<servlet-name>Neukoelln Import Servlet</servlet-name>
 		<url-pattern>/upload/*</url-pattern>
-	</servlet-mapping>
-
-  <servlet-mapping>
-		<servlet-name>Import Servlet</servlet-name>
-		<url-pattern>/imports/*</url-pattern>
 	</servlet-mapping>
 
   <servlet-mapping>

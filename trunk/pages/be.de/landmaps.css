@@ -1,7 +1,7 @@
 /* 
- * Kiezatlas Alternative Maps Interface - berlin.de Stylesheet
+ * Kiezatlas Alternative CityMaps Interface - berlin.de/atlas Stylesheet
  * 
- * @author Malte Reißig - mre@deepamehta.de (14th of May 2010)
+ * @author Malte Rei&szlig;ig - mre@deepamehta.de (4th of May 2011)
  */
 
 /** cutout 
@@ -14,57 +14,70 @@ background:#3F5DA6;
 .olControlPanel .olControlNavigationItemInactive { background-color: #aaa  font: 76% Arial,Helvetica,sans-serif}
 ; background-color: #6C6C6C; background-image: http://www.berlin.de/.img/bde/menubar-grey-bg.gif; border-right-color: white; border-right-style: groove; border-right-width: 2px; border-left-style: groove; border-left-width: 2px; 
 */
-#kiezatlas { font: 76% Arial, Helvetica, sans-serif;  }
-#kaheader { position: absolute; left:0px; top:63px; background: #e6edff; height: 21px; border: 0px solid #4170D4; border-right: 1px solid #4170D4; border-bottom: 1px solid #4170D4; font: Arial, Helvetica, sans-serif; }
-#focusInput { position: absolute; top: 3px; color: #4170D4; font-size: 10px; }
-#focusInput input, #focusInput textarea {  height: 15px; border: 1px solid #4170D4; padding-left: 4px; font-size:10px; background-color:#fff; color: #000; width:180px;}
-#focusAlternatives { position: absolute; top: 85px; width: 167px; background-color: #ffffff; opacity: 0.75; border: 1px solid #4170D4; border-top: 0px; font-size: 10px; padding: 5px; color: #000000; visibility: hidden; }
-#searchInput { position: absolute; top: 3px; color: #4170D4; font-size: 10px; }
-#searchInput input, #searchInput textarea { height: 15px; border: 1px solid #4170D4; padding-left: 4px; font-size: 10px; background-color:#fff; color: #000; width:140px;}
-#mapName { font: 10px Arial, Helvetica, sans-serif; font-weight: bold; position: absolute; left:3px; top: 6px; color: #4170D4; }
-#headerButtons { position: absolute; top: 3px;}
-#mapControl { position: absolute; vertical-align: top; width:120px; height:20px; color:#4170D4; font: 10px Arial, Helvetica, sans-serif; font-weight: bold; background-color: #fff; border: 1px solid #4170D4; opacity: 0.8; }
-#mapControl a { color:#4170D4; font-size: 10px; }
-#moreLabel { position: relative; left: 4px; top: -1px; }
-#mapFunctions { position: relative; top: 1px; }
-#toggleMarkerHref { position: relative; left: 0px; top: 2px; }
-#resetMarkerHref { position: relative; left: 2px; top: 2px; }
-#divider { position: relative; left: 2px; top: 0px; }
-#mapSwitcher { font: 10px Arial, Helvetica, sans-serif; font-weight: bold; color: #4170d4 !important; text-align: right;  }
-#mapMarkerButtons { font-family: sans-serif; font-size: smaller; color: #4170d4; font-weight:bold; !important; opacity: 0.75; text-decoration: none;}
-#memu { position: absolute; background-color: #fff; width:325px; opacity:0.8; padding: 5px; padding-left: 10px; color:#3f5da6; }
-#memu a .hover { color:#4170D4; }
-#map { position: absolute; left:0px; }
-#navPanel{ position: absolute; left: 5px; bottom: 50px;}
-#sideBar { position: absolute; border-top: 0px solid #4170d4; border-bottom: 1px solid #4170d4; border-right: 1px solid #4170D4; border-left: 1px solid #4170D4; background:#fff; }
-#sideBarCriterias { position:relative; left:5px; top:5px; cursor:pointer; }
-#sideBarCategories { position:relative; left:5px; top:10px; overflow:auto; }
-#sideBarControl { position: absolute; width:5px; top:29px; background: #4170D4; }
-#progContainer { position:absolute; top:45%; left:35%; width:50%; height:50%; opacity: 0.6; }
-#kafooter { background: #fff; height:34px; position:absolute; bottom:2px; }
-#footerImprint { position:absolute; right:8px; bottom: 18px; }
-#footerImprint a { color: #b60033; text-decoration: none; font-weight: bold; }
-#footerPoweredBy { position:absolute; right:8px; bottom: 3px; }
-#footerPoweredBy a {  color: #b60033; text-decoration: none; font-weight: bold;}
-#helpFont { position: absolute; bottom: 5px; font-size: 12px; font-weight: bold; color: #4170d4; text-decoration: none;}
-#helpPageOne { position: relative; left: 0px; top: 0px; }
-.berlinMapName { position: relative; left: 3em; top: 0px; width: 145px; height: 30px; background: url("/.img/bde/menubar-grey-bg.gif") repeat-x scroll 0 0 #6C6C6C; border-top: 0px solid #fff; border-left: 1px solid #fff; border-right: 1px solid #fff; border-bottom: 0px solid #fff; }
-.olControlPanel { background-color: #4170D4; }
-.olControlLayerSwitcher olControlNoSelect { background-color: #4170D4; position: absolute; top: 352px !important; }
-.olControlLayerSwitcher { background-color: #4170D4; position: absolute; top: 352px !important; }
-.critLinkNormal { text-decoration: underline; }
-.catRowDeselected { background: #fff; }
-.catRowSelected { background: #E6EDFF; }
-.propertyLabel { position:relative; left: 1px; font-weight: bold; }
-.propertyField { position:relative; left: 1px; }
-.topicRowDeselected { background: #fff; }
-.topicRowSelected { background: #e6edff; }
-.olControlAttribution { position:absolute; bottom: 3px !important; }
-.redTitle { color: #b60033; }
-.layersDiv { position:relative; left: 5px; max-width: 110px; text-align: right; }
-.dataLbl { color: #4170D4; }
-.baseLbl { color: #4170D4; }
-.dataLayersDiv { border: 1px solid #e6edff; padding: 2px; text-align: right;  }
-.baseLayersDiv { border: 1px solid #e6edff; padding: 2px; text-align: right; }
-.additionalInfo { width: 270px; background: #E8E8E8; margin-left: auto; margin-right: auto; padding-top: 5px; padding-bottom: 5px; padding-left:5px; padding-right:5px; border: 1px dashed #000;}
-.additionalInfoWhite { width: 270px; margin-left: auto; margin-right: auto; padding-top: 5px; padding-bottom: 5px; padding-left:5px; padding-right:5px; border: 1px dashed #000;}
+#kiezatlas { font: 100% Arial, Helvetica, sans-serif;  }
+#kaheader { position: absolute; left:0px; top:141px; background: #e6edff; height: 21px; border: 0px solid #4170D4; border-right: 1px solid #4170D4; border-bottom: 1px solid #4170D4; font: Arial, Helvetica, sans-serif; }
+#kiezatlas #focusInput { position: absolute; top: 5px; color: #4170D4; font-size: 10px; }
+#kiezatlas #focusInput input, #kiezatlas #focusInput textarea {  height: 15px; border: 1px solid #4170D4; padding-left: 4px; font-size:10px; background-color:#fff; color: #000; width:180px;}
+#kiezatlas #focusAlternatives { position: absolute; top: 164px; width: 167px; background-color: #ffffff; opacity: 0.75; border: 1px solid #4170D4; border-top: 0px; font-size: 10px; padding: 5px; color: #000000; visibility: hidden; }
+#kiezatlas #searchInput { position: absolute; top: 5px; color: #4170D4; font-size: 10px; }
+#kiezatlas #searchInput input, #kiezatlas #searchInput textarea { height: 15px; border: 1px solid #4170D4; padding-left: 4px; font-size: 10px; background-color:#fff; color: #000; width:140px;}
+#kiezatlas #mapName { font: 10px Arial, Helvetica, sans-serif; position: absolute; left:3px; top: 8px; color: #4170D4; }
+#kiezatlas #headerButtons { position: absolute; top: 3px;}
+#kiezatlas #mapControl { position: absolute; vertical-align: top; width:120px; height:20px; color:#4170D4; font: 10px Arial, Helvetica, sans-serif; font-weight: bold; background-color: #fff; border: 1px solid #4170D4; opacity: 0.8; }
+#kiezatlas #mapControl a { color:#4170D4; font-size: 10px; }
+#kiezatlas #moreLabel { position: relative; left: 4px; top: -1px; }
+#kiezatlas #mapFunctions { position: relative; top: 1px; }
+#kiezatlas #toggleMarkerHref { position: relative; left: 0px; top: 1px; }
+#kiezatlas #resetMarkerHref { position: relative; left: 2px; top: 1px; }
+#kiezatlas #permaLinkHref { position: relative; top: 1px; }
+#kiezatlas #permaLink { position: absolute; left: 275px; top: 170px; } /** width: 300px; height: 20px; font-family: "Arial", "Sans-Serif"; font-size: 10px; color: #009; background-color: #fff; opacity: 0.8; */
+#kiezatlas #permaLinkLabel { cursor: pointer; border: 1px solid #4170D4; position: absolute; right: 760px; top: 35px; width: 100px; height: 20px; font-weight:bold; font-family: "Arial", "Sans-Serif"; font-size: 10px; color: #009; background-color: #fff; opacity: 0.8; }
+#kiezatlas #permaLink input,#kiezatlas #permaLink textarea { border: 1px solid #4170D4; font-family: "Arial", "Sans-Serif"; font-size: 10px; padding-right:4px; padding-bottom: 0px; padding-top: 2px; padding-left: 4px; height: 18px; background-color:#fff; color: #009; width: 290px; opacity: 0.8; }
+#kiezatlas #dialogMessage { position: absolute; top: 250px; left: 200px; width: 300px; height: 160px; background-color: #fff; border: 1px solid #3f5da6; }
+#kiezatlas #modalTitle { position: relative; top: 10px; padding: 10px; margin-right: auto; margin-left: auto; }
+#kiezatlas #modalMessage { padding: 10px; }
+#kiezatlas #closeDialog { position: relative; top: 145px; left: 160px; }
+#kiezatlas #divider { position: relative; left: 2px; top: 0px; }
+#kiezatlas #mapSwitcher { font: 10px Arial, Helvetica, sans-serif; font-weight: bold; color: #4170d4 !important; text-align: right;  }
+#kiezatlas #mapMarkerButtons { font-family: sans-serif; font-size: smaller; color: #4170d4; font-weight:bold; !important; opacity: 0.75; text-decoration: none;}
+#kiezatlas #memu { position: absolute; background-color: #fff; width:325px; opacity:0.8; padding: 5px; padding-left: 10px; color:#3f5da6; }
+#kiezatlas #memu a .hover { color:#4170D4; }
+#kiezatlas #map { position: absolute; left:0px; }
+#kiezatlas #navPanel{ position: absolute; left: 5px; bottom: 50px;}
+#kiezatlas #sideBar { position: absolute; border-top: 0px solid #4170d4; border-bottom: 1px solid #4170d4; border-right: 1px solid #4170D4; border-left: 1px solid #4170D4; background:#fff; }
+#kiezatlas #sideBarCriterias { position:relative; left:5px; top:3px; cursor:pointer; }
+#kiezatlas #sideBarCategories { position:relative; left:5px; top:10px; overflow:auto; }
+#kiezatlas #sideBarControl { position: absolute; width:5px; top:29px; background: #4170D4; }
+#kiezatlas #progContainer { position:absolute; top:45%; left:35%; width:50%; height:50%; opacity: 0.6; }
+#kiezatlas #kafooter { background: #fff; height:35px; position:absolute; bottom:2px; }
+#kiezatlas #footerImprint { position:absolute; right:8px; bottom: 18px; }
+#kiezatlas #footerImprint a { color: #b60033; text-decoration: none; font-weight: bold; }
+#kiezatlas #footerPoweredBy { position:absolute; right:8px; bottom: 3px; }
+#kiezatlas #footerPoweredBy a {  color: #b60033; text-decoration: none; font-weight: bold;}
+#kiezatlas #helpFont { position: absolute; bottom: 5px; font-size: 12px; font-weight: bold; color: #4170d4; text-decoration: none;}
+#kiezatlas #helpPageOne { position: relative; left: 0px; top: 0px; }
+/** overwriting new bde css */
+#kiezatlas tr { vertical-align: middle; }
+#kiezatlas table { border-collapse: separate; border-spacing: 0px; font-size: 100%; }
+/** some classy definitions */
+#kiezatlas .berlinMapName { position: relative; left: 3em; top: 0px; width: 145px; height: 30px; background: url("/.img/bde/menubar-grey-bg.gif") repeat-x scroll 0 0 #6C6C6C; border-top: 0px solid #fff; border-left: 1px solid #fff; border-right: 1px solid #fff; border-bottom: 0px solid #fff; }
+#kiezatlas .critLinkNormal { text-decoration: underline; }
+#kiezatlas .catRowDeselected { background: #fff; }
+#kiezatlas .catRowSelected { background: #E6EDFF; }
+#kiezatlas .iconCell { text-align: center; padding-top:4px; }
+#kiezatlas .propertyLabel { position:relative; left: 1px; font-weight: bold; }
+#kiezatlas .propertyField { position:relative; left: 1px; }
+#kiezatlas .topicRowDeselected { background: #fff; }
+#kiezatlas .topicRowSelected { background: #e6edff; }
+#kiezatlas .redTitle { color: #b60033; }
+#kiezatlas .layersDiv { position:relative; left: 5px; max-width: 110px; text-align: right; }
+#kiezatlas .dataLbl { color: #4170D4; }
+#kiezatlas .baseLbl { color: #4170D4; }
+#kiezatlas .dataLayersDiv { border: 1px solid #e6edff; padding: 2px; text-align: right;  }
+#kiezatlas .baseLayersDiv { border: 1px solid #e6edff; padding: 2px; text-align: right; }
+#kiezatlas .additionalInfo { width: 270px; background: #E8E8E8; margin-left: auto; margin-right: auto; padding-top: 5px; padding-bottom: 5px; padding-left:5px; padding-right:5px; border: 1px dashed #000;}
+#kiezatlas .additionalInfoWhite { width: 270px; margin-left: auto; margin-right: auto; padding-top: 5px; padding-bottom: 5px; padding-left:5px; padding-right:5px; border: 1px dashed #000;}
+#kiezatlas .olControlPanel { background-color: #4170D4; }
+#kiezatlas .olControlLayerSwitcher olControlNoSelect { background-color: #4170D4; position: absolute; top: 352px !important; }
+#kiezatlas .olControlLayerSwitcher { background-color: #4170D4; position: absolute; top: 352px !important; }
+#kiezatlas .olControlAttribution { position:absolute; bottom: 3px !important; }

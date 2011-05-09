@@ -5,6 +5,18 @@ Web Session Attributes
 Jörg Richter
 10.8.2008
 
+Malte Reißig
+20.04.2011
+
+MapServlet && AtlasServlet
+==========================
+
+critId          
+originId        
+topicId         
+baseLayer       
+critIndex       
+searchTerm      
 
 
 BrowseServlet
@@ -151,18 +163,6 @@ sortField			Topic Bean Field Name, der zur Sortierung heanrgezogen wird (String)
 filterField		    Topic Bean Field Name, der zur Filterung heanrgezogen wird (String) bzw. "null", wenn ungefiltert
 emailList			Liste von Email-Adressen (Vector of String)
 
-
-Import
-------
-workerThread		String carrying the Threads curent state
-workerThreadTime	String carrying the Threads starting time
-timingInterval		String varrying the Timing Interval in Milliseconds
-importCriterias		Vector of BaseTopics which represent the criterias of the configured workspace
-unusableGeoObjects	Vector of GeoObjectTopics which are from the workspaces "institutionType" which have no WGS 84 coordinates
-geoProjectObjects		Vector of BaseTopics containing all imported ProjectGeoObjects
-geoEventtObjects		Vector of BaseTopics containing all imported EventGeoObjects
-importWorksapces        Vector of BaseTopic of ImportedWorkspace
-importCriteraias        Vector of Criterias related to the improter Workspace
 
 GeoObjectAdminForm
 ------------------

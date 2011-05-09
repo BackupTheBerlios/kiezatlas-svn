@@ -53,7 +53,6 @@ public class MapServlet extends DeepaMehtaServlet implements KiezAtlas {
   // --
 
 
-
   private final String urlStr = "http://www.kiezatlas.de/rpc/";
   // private final String urlStr = "http://localhost:8080/kiezatlas/rpc/";
   private final String charset = "ISO-8859-1";
@@ -74,6 +73,7 @@ public class MapServlet extends DeepaMehtaServlet implements KiezAtlas {
         if (params.getParameter("critId") != null) critIndex = Integer.parseInt(params.getParameter("critId"))-1; // [0]
         session.setAttribute("originId", params.getParameter("linkTo")); // linkTo here for backwards compatibility rsn
         session.setAttribute("topicId", params.getParameter("topicId"));
+        session.setAttribute("baseLayer", params.getParameter("baseLayer"));
         session.setAttribute("critIndex", critIndex);
         session.setAttribute("searchTerm", params.getParameter("search"));
         //

@@ -85,7 +85,7 @@ public class TimedEventImporter implements Job, DeepaMehtaConstants, KiezAtlas {
       // work here
       String ehrenamtXml = sendGetRequest(serviceUrl, "");
       if (ehrenamtXml != null) {
-        System.out.println("[EventJob] loaded data.. but is doing nothing for now.. " + cityMapId);
+        System.out.println("[EventJob] loaded data.. and is now scheduled to 06:15 AM.. for cityMapID: " + cityMapId);
         // delete former import
         clearCriterias();
         // clears workspace if new topics are available
@@ -133,7 +133,7 @@ public class TimedEventImporter implements Job, DeepaMehtaConstants, KiezAtlas {
         int validEntries = topicIds.size() - unusable.size();
         //
         System.out.println("[EventJob] stored " + validEntries + " in public cityMap \"" +as.getTopicProperty(cityMapId, 1, PROPERTY_WEB_ALIAS)+ "\"");
-        System.out.println("[EventJob] didn`t stored " + unusable.size() + " in public cityMapId \""+getWorkspaceGeoType(workspaceId).getName()+"e\" cause they were unlocatable");
+        System.out.println("[EventJob] skipped " + unusable.size() + " unlocatable \""+getWorkspaceGeoType(workspaceId).getName()+"\"");
         sendNotificationEmail(unusable);
         //
     }
@@ -160,15 +160,16 @@ public class TimedEventImporter implements Job, DeepaMehtaConstants, KiezAtlas {
         /** import data is, date of last import, complete or not complete, error objects */
         Vector allGeoObjects = cm.getTopics(getWorkspaceGeoType(workspaceId).getID());
         Vector allRelatedTopics = new Vector();
-        System.out.println("[EventJob] cleaning up ("+getWorkspaceGeoType(workspaceId).getName()+"). In number--- (" +allGeoObjects.size()+ ")");
+        System.out.println("[EventJob] cleaning up " +allGeoObjects.size()+ " of type \""
+                + getWorkspaceGeoType(workspaceId).getID()+"\" --- ");
         for (int i = 0; i < allGeoObjects.size(); i++) {
             BaseTopic baseTopic = (BaseTopic) allGeoObjects.get(i);
             Vector relatedTopics = as.getRelatedTopics(baseTopic.getID(), ASSOCTYPE_ASSOCIATION, 2);
             for (int j = 0; j < relatedTopics.size(); j++) {
                 BaseTopic relatedTopic = (BaseTopic) relatedTopics.get(j);
+                // to get all related topics except, the categories subtypes of tt-topictpy-crit.
                 if (relatedTopic.getType().equals(TOPICTYPE_EVT_BEZIRK) ||
                         relatedTopic.getType().equals(TOPICTYPE_EVT_KATEGORIE)) {
-                    //
                 } else {
                     // store topicID in Vector for later removal
                     allRelatedTopics.add(relatedTopic);
@@ -178,7 +179,7 @@ public class TimedEventImporter implements Job, DeepaMehtaConstants, KiezAtlas {
             //
         }
         //
-        System.out.println("[EventJob] is starting to delete "+allRelatedTopics.size()+" relatedTopics (just if one entry has no associations)---");
+        System.out.println("[EventJob] "+allRelatedTopics.size()+" relatedTopics to be deleted (just if one entry has no associations)---");
         for (int k = 0; k < allRelatedTopics.size(); k++) {
             BaseTopic relTopic = (BaseTopic) allRelatedTopics.get(k);
             //
