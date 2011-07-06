@@ -5,6 +5,8 @@
  */
 
 #kiezatlas { font: 76% Arial, Helvetica, sans-serif; width:100%; }
+#kiezatlas a { text-decoration: none; }
+#kiezatlas a:hover { text-decoration: underline; }
 #kaheader { position: absolute; left:0px; top:0px; height:27px; background:#3f5da6; }
 #focusInput { position: absolute; height: 22px; top:5px; font-family: "Arial", "Sans-Serif"; font-size: 11px; color: #fff }
 #focusInput input, #focusInput textarea { border: 1px solid #ffffff; font-family: "Arial", "Sans-Serif"; font-size: 11px; padding: 4px; background-color:#009; color: #fff; width:180px; }
@@ -55,7 +57,7 @@
 .topicRowDeselected { background: #fff; }
 .topicRowSelected { background: #e6edff; }
 .olControlAttribution { position:absolute; bottom: 5px !important; right: 5px ! important; font-weight: bold;}
-.redTitle { color: #b60033; }
+.redTitle a, .redTitle a:hover, .redTitle a:-webkit-any-link { color: #b60033; }
 .layersDiv { position:relative; left: 5px }
 .dataLbl { color: #4170D4; }
 .baseLbl { color: #4170D4; }

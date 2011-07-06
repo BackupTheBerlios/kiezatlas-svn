@@ -524,7 +524,7 @@ OpenLayers.Control.LayerSwitcher =
             if (navigator.appName == "Microsoft Internet Explorer") {
               this.P = document.createElement("p");
               this.P.innerHTML = "&nbsp;"
-              this.layersDiv.style.left = "-65px";
+              this.layersDiv.style.left = "-90px";
               // this.layersDiv.style.top = "15px";
             }
             this.BR = document.createElement("br");
@@ -539,7 +539,7 @@ OpenLayers.Control.LayerSwitcher =
             if (navigator.appName == "Microsoft Internet Explorer") {
               this.P = document.createElement("p");
               this.P.innerHTML = "&nbsp;"
-              this.layersDiv.style.left = "-65px";
+              this.layersDiv.style.left = "-90px";
               // this.layersDiv.style.top = "15px";
             }
             this.BR = document.createElement("br");

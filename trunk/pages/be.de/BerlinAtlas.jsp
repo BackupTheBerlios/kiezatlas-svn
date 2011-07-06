@@ -23,8 +23,12 @@
 <head>
   <meta http-equiv="content-type" content="text/html charset=UTF-8"/>
   <title> <%= title %> </title>
+  <!--[if gte IE 7]>
+    <style type="text/css">@import url(http://www.kiezatlas.de/maps/embed/landmaps-ie.css);</style>
+  <![endif]-->
   <link rel="stylesheet" type="text/css" href="http://www.kiezatlas.de/maps/embed/landmaps.css"/>
   <script type="text/javascript" src="http://www.kiezatlas.de/maps/embed/kiezatlas.js"></script>
+  <!-- This is a comment, without comment -->
   <!-- <script type="text/javascript" src="../pages/be.de/kiezatlas.js"></script> -->
   <!-- <link rel="stylesheet" type="text/css" href="../pages/be.de/landmaps.css"/> -->
   <!-- http://openlayers.org/api/2.9/OpenLayers.js // 2.9 or 2.9.1? -->
@@ -65,6 +69,7 @@
     var markerLayer = "";
     // gui elements
     var sideBarVisible = true;
+    var fullWindow = false;
     var debug = false;
     if (debug) {
       var debug_window = window.open('','','width=400,height=600,scrollbars=1');
@@ -73,14 +78,10 @@
     var gKey = 'ABQIAAAADev2ctFkze28KEcta5b4WBSQDgFJvORzMhuwLQZ9zEDMQLdVUhTWXHB2vS0W0TdlEbDiH_qzhBEZ5A';
     //
     jQuery(document).ready(function() {
-      if (window.location.toString().indexOf("berlin.de") != -1) {
-        onBerlinDe = true;
-        // headerGap = 63;
-        baseUrl = "http://www.berlin.de/atlas/";
-        SERVICE_URL = baseUrl + "rpc/";
-      } else {
-        onBerlinDe = false;
-      }
+      // if (window.location.toString().indexOf("berlin.de") != -1) {
+      onBerlinDe = true;
+      baseUrl = "http://www.berlin.de/atlas/";
+      SERVICE_URL = baseUrl + "rpc/";
       // register resize
       jQuery(window).resize(function() { handleResize(); });
       if (onBerlinDe & workspaceCriterias.result.length > 4) districtNames = workspaceCriterias.result[4].categories;
@@ -106,9 +107,9 @@
         // clusters = findInitialClusters(gMarkers);
         // createVectorizedMarkerLayer(gMarkers, map);
         initLayerAllFeatures(gMarkers, map);
-        initBerlinDistrictsLayer();
+        // initBerlinDistrictsLayer();
         reSetMarkers(myNewLayer);
-        inputFieldBehaviour();
+        // inputFieldBehaviour();
         // check if a special projectId was given through the entry url
         if (linkTo != 'null') {
           selectAndShowInMap(linkTo, false);
@@ -142,7 +143,8 @@
 		      </form>
 		    </div>
 		    <div id="headerButtons">
-		      <!-- <div id="mapMarkerButtons" style="position: relative; top: 5px; left: 70px; visibility: visible;">-->
+            <img id="fullWindowButton" title="Volle Fenstergr&ouml;&szlig;e nutzen" onclick="javascript:toggleFullWindow()" width="16" height="16"
+              src="http://www.kiezatlas.de/maps/embed/img/fullscreen-16.png" alt="Volle Fenstergr&ouml;&szlig;e nutzen"/>
 			    <img id="resizeButton" title="Seitenleiste ausblenden" onclick="javascript:handleSideBar()" width="15" height="15" src="http://www.kiezatlas.de/maps/embed/img/go-last.png" alt="Seitenleiste ausblenden"/>
 		    <!-- </div> -->
 		    </div>
@@ -174,9 +176,11 @@
 		    <div id="sideBarCriterias"></div>
 		    <div id="sideBarCategories"></div>
         <div id="progContainer"></div>
-      </div>
-      <div id="kafooter">
-        <a href="http://www.berlin.de/buergeraktiv/">Impressum</a> und <a href="http://ehrenamt.index.de">Haftungshinweise</a><br/><b> powered by <a href="http://www.kiezatlas.de">Kiezatlas</a></b>
+        <div id="kafooter">
+          <a href="http://www.berlin.de/buergeraktiv/">Impressum</a> und 
+          <a href="http://ehrenamt.index.de">Haftungshinweise</a><br/><b> powered by
+          <a href="http://www.kiezatlas.de">Kiezatlas</a></b>
+        </div>
       </div>
       <!-- <a id="helpFont" alt="Hilfe anzeigen" text="Hilfe anzeigen" href="javascript:help();">zur Hilfe</a> -->
       <div id="sideBarControl"></div> <!-- onclick="javascript:handleSideBar();" -->

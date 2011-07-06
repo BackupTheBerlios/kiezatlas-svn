@@ -13,6 +13,7 @@ import de.deepamehta.service.TopicBeanField;
 import de.deepamehta.service.web.DeepaMehtaServlet;
 import de.deepamehta.service.web.RequestParameter;
 import de.deepamehta.topics.TypeTopic;
+import de.deepamehta.util.DeepaMehtaUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -335,7 +336,6 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
       Vector allTopics = cm.getViewTopics(map.getID(), 1);
       System.out.println(">>> ListServlet got request to export \"" + mapAlias + "\" with " + instType.getName() + " ("+ allTopics.size() +")");
       // ### ToDo render approximate waiting time into the displayed result webpage
-      // String absoluteFileNamePath = "/home/monty/source/deepaMehta/install/client/documents/"+mapAlias+".csv"; // ### hardcoded
       String absoluteFileNamePath = "/home/jrichter/deepamehta/install/client/documents/"+mapAlias+".csv"; // ### hardcoded
       File fileToWrite = new File(absoluteFileNamePath); //
       // Time
@@ -351,16 +351,16 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
               // check wether the file is pretty fresh or not
               System.out.println("  > file already exists and\"" + absoluteFileNamePath + "\"");
               System.out.println("  > and system knows that now it's " + now + " and the file was touched " + fileToWrite.lastModified());
-              if (now-21600000 < touched) { // timestamp is smaller than now minus 10 000 seconds
-                  session.setAttribute("title", "Die Daten sind aktueller als 6 Stunden und werden daher vorerst nicht wieder aktualisiert.");
-              } else {
+              // if (now-21600000 < touched) { // timestamp is smaller than now minus 10 000 seconds
+                 //  session.setAttribute("title", "Die Daten sind aktueller als 6 Stunden und werden daher vorerst nicht wieder aktualisiert.");
+              // } else {
                   // go ahead and write the file
                   worker = new Thread(new DownloadWorker(as, cm, map, absoluteFileNamePath));
                   // start the worker to export the map to the document-repository
                   worker.start();
                   // System.out.println(">> File is going to be written, data is older than 6hrs and the user requested so");
                   session.setAttribute("title", "In wenigen Minuten stehen die aktuellsten Daten des Stadtplans zum Download bereit");
-              }
+              // }
           } else {
               // go ahead and write the file
               worker = new Thread(new DownloadWorker(as, cm, map, absoluteFileNamePath));
@@ -418,11 +418,13 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 				String instTypeID = getInstTypeID(session);
 				Vector insts = cm.getTopicIDs(instTypeID, cityMapID, true);		// sortByTopicName=true
 				Vector topicBeans = new Vector();
+        System.out.println("ListServlet.DEBUG: starting to create " + insts.size() + " topicBeans...: " + DeepaMehtaUtils.getTime(true) );
 				for (int i = 0; i < insts.size(); i++) {
           // Creates TopicBean
 					TopicBean topic = as.createTopicBean(insts.get(i).toString(), 1);
 					topicBeans.add(topic);
 				}
+        System.out.println("ListServlet.DEBUG: finished creating " + insts.size() + " topicBeans..." + DeepaMehtaUtils.getTime(true));
         //
 				setCachedTopicList(topicBeans, session);
 				System.out.println(">>> refreshed "+topicBeans.size()+" topics for the fat list");
@@ -448,9 +450,9 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 				// System.out.println(">>> used cached or filtered topic list");
 				session.setAttribute("notifications", directives.getNotifications());
 			}
-            System.out.println(">>>> Runtime has: " + Runtime.getRuntime().maxMemory()/1024/1024 + "mb " +
-                    " of max, " + Runtime.getRuntime().totalMemory()/1024/1024 + " of total, " +
-                    ""+Runtime.getRuntime().freeMemory()/1024/1024 +" in memory");
+      System.out.println(">>>> Runtime has: " + Runtime.getRuntime().maxMemory()/1024/1024 + "mb " +
+              " of max, " + Runtime.getRuntime().totalMemory()/1024/1024 + " of total, " +
+              ""+Runtime.getRuntime().freeMemory()/1024/1024 +" in memory");
 			// prepare the correct mailto link
 			if(getFilterField(session) != null) {
 				Vector beans = getListedTopics(session);

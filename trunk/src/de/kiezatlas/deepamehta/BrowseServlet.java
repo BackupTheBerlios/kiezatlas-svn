@@ -216,19 +216,40 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 			String instTypeID = getInstitutionType(session).getID();
 			String searchMode = getSearchMode(session);
 			Vector insts;
-            // enable the rendering of enumeration
-            session.setAttribute("enumerationFlag", true);
+      Vector taggedInsts;
+      Hashtable propertyFilter;
+      // enable the rendering of enumeration
+      session.setAttribute("enumerationFlag", true);
 			if (searchMode.equals(SEARCHMODE_BY_NAME)) {
 				insts = cm.getViewTopics(mapID, 1, instTypeID, getSearchValue(session));
+        if (!getSearchValue(session).equals("")) {
+          propertyFilter = new Hashtable();
+          propertyFilter.put(PROPERTY_TAGFIELD, getSearchValue(session));
+          taggedInsts = cm.getTopics(getInstitutionType(session).getID(), propertyFilter, mapID);
+          for (int k = 0; k < taggedInsts.size(); k++) {
+            BaseTopic taggedTopic = (BaseTopic) taggedInsts.get(k);
+            Vector pts = cm.getViewTopics(mapID, 1, instTypeID, taggedTopic.getName());
+            System.out.println("newSearchMode fetched additionally " + pts.size() + " tagged Institutions byName!");
+            if (pts.size() >= 1) {
+              if (!insts.contains(pts.get(0))) {
+                insts.add(pts.get(0));
+                System.out.println("newSearchMode added fetched PresentableTopic => " + ((BaseTopic)pts.get(0)).getName() + " !byName");
+              } else {
+                System.out.println("newSearchMode skipped fetched PresentableTopic => " + ((BaseTopic)pts.get(0)).getName() + " !byName");
+              }
+            } // insts.add(new PresentableTopic(topic, new Point()));
+          }
+          session.setAttribute("taggedInstitutions", taggedInsts);
+        }
 				// hotspots
 				setHotspots(insts, ICON_HOTSPOT, session);
-                session.setAttribute("selectedCatId", "");
+        session.setAttribute("selectedCatId", "");
 			} else {
 				String catID = params.getValue("id");
 				insts = cm.getRelatedViewTopics(mapID, 1, catID, ASSOCTYPE_ASSOCIATION, instTypeID, 1);	// ### copy in setCategoryHotspots()
 				// hotspots + return the index of the current CatID in the multi-dimensional hotspot vector
 				int catIndex = setSearchedCategoryHotspots(session, catID);
-                session.setAttribute("selectedCatId", ""+catIndex+"");
+        session.setAttribute("selectedCatId", ""+catIndex+"");
 			}
 			session.setAttribute("institutions", insts);
 			// categories & addresses
@@ -528,7 +549,7 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 		Vector presentables = new Vector(topics);
 		presentables.insertElementAt(as.getCorporateWebBaseURL() + FILESERVER_ICONS_PATH + icon, 0);
 		hotspots.addElement(presentables);
-		// ### System.out.println("Have to handle clusters in here");
+		// 
 		makeCluster(hotspots, cluster);
 		session.setAttribute("cluster", cluster);
 		session.setAttribute("hotspots", hotspots);
@@ -621,9 +642,9 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 	}
 
 	private PresentableTopic findPT(PresentableTopic pt, Vector hotspots) {
-		for(int p=0; p < hotspots.size(); p++){
-			Vector scnd = (Vector)hotspots.get(p);
-			for(int o=1; o < scnd.size(); o++){
+		for (int p=0; p < hotspots.size(); p++) {
+			Vector scnd = (Vector) hotspots.get(p);
+			for (int o=1; o < scnd.size(); o++) {
 				PresentableTopic toCheck = (PresentableTopic) scnd.get(o);
 				if (toCheck.getGeometry().equals(pt.getGeometry()) & (!toCheck.getID().equals(pt.getID()))) {
 					// if the topics don't have the same id but have the same point, they belong together

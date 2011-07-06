@@ -147,41 +147,38 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
         String query = parameters[0];
         String topicmapId = parameters[1];
         String workspaceId = parameters[2];
-        // String topicmapId = parameters[2];
         query = query.substring(2, query.length()-1);
         topicmapId = topicmapId.substring(2, topicmapId.length()-1);
         workspaceId = workspaceId.substring(2, workspaceId.length()-2);
-        // LOG System.out.println("INFO: query: " + query + ", " + "workspaceId: " + workspaceId);
         Vector criterias = getKiezCriteriaTypes(workspaceId);
         BaseTopic geoType = getWorkspaceGeoType(workspaceId);
-        Hashtable props = new Hashtable();
-        props.put(PROPERTY_NAME, query);
-        // String typeID, Hashtable propertyFilter, String topicmapID
-        // getTopics: String typeID, String nameFilter, Hashtable propertyFilter, String relatedTopicID
-        Vector results = cm.getTopics(geoType.getID(), props, topicmapId, false);
-        /*Vector topicsToQuery = cm.getViewTopics(topicmapId, 1);
-        Vector streetResults = new Vector();
-        for (int i = 0; i < topicsToQuery.size(); i++) {
-            BaseTopic topic = (BaseTopic) topicsToQuery.get(i);
-            // if (topic.getName().indexOf(query) != -1) results.add(topic); // by name
-            Vector addresses = cm.getRelatedTopics(topic.getID(), ASSOCTYPE_ASSOCIATION, TOPICTYPE_ADDRESS, 2);
-            for (int j = 0; j < addresses.size(); j++) {
-                BaseTopic addressTopic = (BaseTopic) addresses.get(j);
-                String streetName = as.getTopicProperty(addressTopic, PROPERTY_STREET);
-                if (streetName.indexOf(query) != -1) {
-                    streetResults.add(topic);
-                    // System.out.println(">>>> streetFound + " + streetName+ " for " + topic.getName());
-                }
-            }
-        }*/
-        // results.addAll(streetResults);
-        System.out.println(">>>> found " + results.size() + " by name");// +" named and "+streetResults.size()+ " streetnames like " + query);
+        // perform search
+        Vector results = cm.getViewTopics(topicmapId, 1, geoType.getID(), query);
+        if (!query.equals("")) {
+          Hashtable propertyFilter = new Hashtable();
+          propertyFilter.put(PROPERTY_TAGFIELD, query);
+          Vector taggedInsts = cm.getTopics(geoType.getID(), propertyFilter, topicmapId);
+          for (int k = 0; k < taggedInsts.size(); k++) {
+            BaseTopic taggedTopic = (BaseTopic) taggedInsts.get(k);
+            Vector pts = cm.getViewTopics(topicmapId, 1, geoType.getID(), taggedTopic.getName());
+            System.out.println("newGeoSearchMode fetched additionally " + pts.size() + " tagged Institutions byName!");
+            if (pts.size() >= 1) {
+              if (!results.contains(pts.get(0))) { // prevent doublings..
+                results.add(pts.get(0));
+                System.out.println("newGeoSearchMode added fetched PresentableTopic => " + ((BaseTopic)pts.get(0)).getName() + " !byName");
+              } else {
+                System.out.println("newGeoSearchMode skipped fetched PresentableTopic => " + ((BaseTopic)pts.get(0)).getName() + " !byName");
+              }
+            } // insts.add(new PresentableTopic(topic, new Point()));
+          }
+        }
+        System.out.println(">>>> found " + results.size() + " by name and tag");// +" named and "+streetResults.size()+ " streetnames like " + query);
         //
         result.append("[");
         for (int i=0; i < results.size(); i++) {
             BaseTopic topic = (BaseTopic) results.get(i);
             result.append(createSlimGeoObject(topic, criterias, new StringBuffer()));
-            if (results.indexOf(topic) == results.size()-1) {
+            if (results.indexOf(topic) == results.size()-1) { // does not allow doublings
                 result.append("]");
             } else {
                 result.append(", ");

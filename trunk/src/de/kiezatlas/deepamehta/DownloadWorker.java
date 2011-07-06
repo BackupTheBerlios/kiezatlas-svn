@@ -54,7 +54,8 @@ public class DownloadWorker extends Thread implements Runnable {
             InputStreamReader isr = new InputStreamReader(fis, "ISO-8859-1");
             File fileToWrite = new File(filePath);
             fileToWrite.delete(); // delete the former file and start to write the new one
-            FileOutputStream fout = new FileOutputStream(filePath, true);
+            System.out.println("DownloadWorker.fileToWrite: \""+fileToWrite.getAbsolutePath()+"\" still exists: " + fileToWrite.exists());
+            FileOutputStream fout = new FileOutputStream(fileToWrite.getAbsolutePath(), false);
             OutputStreamWriter out = new OutputStreamWriter(fout, "ISO-8859-1");
             while(isr.ready()) {
                 out.write(isr.read());

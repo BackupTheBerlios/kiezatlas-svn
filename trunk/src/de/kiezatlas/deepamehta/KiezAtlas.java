@@ -140,6 +140,8 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	static final String PROPERTY_COMMENT_AUTHOR = "Autor";
 	static final String PROPERTY_COMMENT_DATE = "Datum";
 	static final String PROPERTY_COMMENT_TIME = "Uhrzeit";
+  //
+  static final String PROPERTY_TAGFIELD = "Stichworte";
 	//
 	static final String PROPERTY_TARGET_WEBALIAS = "Target Web Alias";
 	//
@@ -279,7 +281,7 @@ public interface KiezAtlas extends DeepaMehtaConstants {
   public static final String ACTION_RESET_CRITERIAS = "resetCritCats";
   // Maps Servlets
   public static final String ACTION_GEO_CODE = "geoCode";
-
+  
 
 
 

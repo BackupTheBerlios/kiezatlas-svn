@@ -3,8 +3,7 @@
 --- Intro Importer Config Topic
 -------------------------------
 
---- TODO: Fixing patch Assocation ID from ka-1.6.7.sql change ID of Assocation from 1 of the 2 Assocs 
----       the one which is the citymap's new "pp-ka-password"-property frmo 'a-ka-125' to 'a-ka-126'
+--- NOTE: "a-ka-133" is the last assocId in use in this patch
 
 --- create topic type "Importer Settings" ---
 

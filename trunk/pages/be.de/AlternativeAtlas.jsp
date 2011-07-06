@@ -104,7 +104,7 @@
         initLayerAllFeatures(gMarkers, map);
         initBerlinDistrictsLayer();
         reSetMarkers(myNewLayer);
-        inputFieldBehaviour();
+        // inputFieldBehaviour();
         // check if a special projectId was given through the entry url
         if (linkTo != 'null') {
           selectAndShowInMap(linkTo, false);

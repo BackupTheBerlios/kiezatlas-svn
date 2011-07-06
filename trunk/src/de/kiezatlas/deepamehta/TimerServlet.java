@@ -52,7 +52,7 @@ public class TimerServlet implements Servlet, ApplicationServiceHost {
   public static final String EVENTMAP_TO_PUBLISH = "t-453286";
   
   public void init(ServletConfig config) throws ServletException {
-    System.out.println("DEBUG: Starting to initialize the SlimerServlet...");
+    System.out.println("DEBUG: Starting to initialize the TimerServlet...");
     sc = config.getServletContext();
     // --- create application service ---
 	  String service = sc.getInitParameter("service");
