@@ -195,6 +195,13 @@
     }
     var footerHeight = 35; // ### FIXME: to be removed
     var sideBarHeight = mapH - critHeight - footerHeight;
+    if (workspaceCriterias.length == 3) {
+      sideBarHeight = sideBarHeight + 20;
+    } else if (workspaceCriterias.length > 4) {
+      sideBarHeight = sideBarHeight - 20;
+    } else { // workspaceCriterias is not available at that early stage
+      sideBarHeight = sideBarHeight - 20;
+    }
     jQuery("#sideBarCategories").css("height", sideBarHeight);
     jQuery("#sideBarCategories").css("width", sideW - 7);
     // get the position for our footer-div, which is placed outside #sideBar at labs-maps and inside at berlin.de
@@ -416,6 +423,7 @@
     // address related stuff follows
     var cityName = getTopicCity(givenTopic);
     var street = getTopicAddress(givenTopic);
+    var originId = getTopicOriginId(givenTopic);
     if (cityName == " Berlin" || cityName == "Berlin" || onBerlinDe) { // ### FIXME sloppy
       var publicTransportURL = 'http://www.fahrinfo-berlin.de/Stadtplan/index?query=' + street +
         '&search=Suchen&formquery=&address=true';
@@ -499,7 +507,12 @@
     }
     resultHandler.append(propertyList);
     //
-    updatePermaLink(baseUrl+mapAlias+"?topicId="+givenTopic.id);
+    if (onProjectMap || onEventMap) {
+      // every day changing id's use the originId instead.
+      updatePermaLink(baseUrl+mapAlias+"?linkTo="+originId);
+    } else {
+      updatePermaLink(baseUrl+mapAlias+"?topicId="+givenTopic.id);
+    }
   }
   
   /**
@@ -717,8 +730,8 @@
   function initCriteriaList() {
     jQuery("#progContainer").hide();
     var critListElement = jQuery("#sideBarCriterias");
-    var onEventMap = (mapTitle.indexOf("Veranstaltungen Ehrenamt Berlin") != -1) ? true : false;
-    var onProjectMap = (mapTitle.indexOf("Ehrenamt Berlin") != -1) ? true : false;
+    onEventMap = (mapTitle.indexOf("Veranstaltungen Ehrenamt Berlin") != -1) ? true : false;
+    onProjectMap = (mapTitle.indexOf("Ehrenamt Berlin") != -1) ? true : false;
     var tabsHtml = "";
     if (onBerlinDe && onEventMap) {
       tabsHtml = '<div id="navigation-helper" '
@@ -751,9 +764,14 @@
       } else {
         critLinkList += '<tr valign="top">';
       }
-      critLinkList += '<td onclick="javascript:updateCategoryList(' + i + ');" align="right" class="critLinkNormal">'
-        + critName + '</td>';
-      if (crtCritIndex == i) {
+      if (onBerlinDe && crtCritIndex == i) {
+        critLinkList += '<td onclick="javascript:updateCategoryList(' + i + ');" align="right" class="critLinkNormal selectedCriteria">'
+          + critName + '</td>';
+      } else {
+        critLinkList += '<td onclick="javascript:updateCategoryList(' + i + ');" align="right" class="critLinkNormal">'
+          + critName + '</td>';
+      }
+      if (!onBerlinDe && crtCritIndex == i) {
         critLinkList += '<td align="left">&#8226;</td></tr>';
       } else {
         critLinkList += '<td></td></tr>';
@@ -1154,13 +1172,24 @@
       }
     }
     if (myNewLayer != null) myNewLayer.redraw();
+    // re-use list of all currently selected marker-groups/categories to build a permalink
+    var categoryString = "?catIds=";
+    for ( var mi = 0; mi < markerGroupIds.length; mi++ ) {
+      categoryString += markerGroupIds[mi] + "%2C";
+    }
+    // check for the case, where all are deselected..
+    if (markerGroupIds.length > 0) {
+      updatePermaLink(baseUrl+mapAlias+categoryString);
+    } else {
+      updatePermaLink(baseUrl+mapAlias);
+    }
   }
 
   function showTopicFeatures(topicListToShow, catIdToShow) {
     // log("..starting to show "+topicListToShow.length+"Features");
     // var boundingFeatures = new Array();
     var catIconURL = "";
-    if(catIdToShow != "") {
+    if( catIdToShow != "" ) {
       catIconURL = getCatIconURL(catIdToShow);
     }
     if (debug) log("catIconToShow is "+catIconURL);
@@ -1180,7 +1209,7 @@
           if ( clusterFeature != null ) {
             // on this position there is already a feature drawn, make it a cluster or at least append it
             // clusterFeature.data.cluster.push(featureToShow.data);
-            if (featureToShow.data.cluster == null) { // is a new cluster
+            if ( featureToShow.data.cluster == null ) { // is a new cluster
               var newCluster = new Array();
               // check if data.cluster is an Array of feature.data objects ???
               if ( clusterFeature.data.cluster == null ) { // starting new cluster
@@ -1188,7 +1217,7 @@
                 newCluster.push(featureToShow.data);
                 if (debug) log("> starting a cluster at " + pos + " with " + clusterFeature.data.topicName + " / " + featureToShow.data.topicName);
               } else {
-                for(j=0;j<clusterFeature.data.cluster.length;j++) {
+                for( j=0; j < clusterFeature.data.cluster.length; j++ ) {
                  newCluster.push(clusterFeature.data.cluster[j]);
                 } // building new cluster through appending
                 newCluster.push(featureToShow.data);
@@ -1241,6 +1270,12 @@
       }
     }
     if (myNewLayer != null) myNewLayer.redraw();
+    // re-use list of all currently selected marker-groups/categories to build a permalink
+    var categoryString = "?catIds=";
+    for (var mi = 0; mi < markerGroupIds.length; mi++ ) {
+      categoryString += markerGroupIds[mi] + "%2C";
+    }
+    updatePermaLink(baseUrl+mapAlias+categoryString);
   }
 
   /** operates on the original mapTopics result from the mapservice */
@@ -1999,6 +2034,15 @@
     return "";
   }
 
+  function getTopicOriginId(topic) {
+    for (var i=0; i < topic.properties.length; i++) {
+      if (topic.properties[i].name == "OriginId") {
+        return topic.properties[i].value; // + ' Berlin<br/>';
+      }
+    }
+    return "";
+  }
+
   function getTopicCity(topic) {
     for (var at=0; at < topic.properties.length; at++) {
       // resultHandler.append('<tr><td>'+topic.properties[i].label+'</td><td>'+topic.properties[i].value+'</td></tr>');
@@ -2025,7 +2069,7 @@
       var skip = false;
       if (lat == 0.0 || lng == 0.0) {
         skip = true;
-      } else if (lng < 0.0 || lng > 360.0) {
+      } else if (lng < -180.0 || lng > 180.0) {
         skip = true;
       } else if (lat < -90.0 || lat > 90.0) {
         skip = true;

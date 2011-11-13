@@ -46,7 +46,9 @@ background:#3F5DA6;
 #kiezatlas #navPanel{ position: absolute; left: 5px; bottom: 50px;}
 #kiezatlas #sideBar { position: absolute; border-top: 0px solid #4170d4; border-bottom: 1px solid #4170d4; border-right: 1px solid #4170D4; border-left: 1px solid #4170D4; background:#fff; }
 #kiezatlas #sideBarCriterias { position:relative; left:5px; top:3px; cursor:pointer; }
-#kiezatlas #sideBarCategories { position:relative; left:5px; top:10px; overflow:auto; }
+#kiezatlas #sideBarCategories { position:relative; left:5px; top: 5px; overflow:auto; }
+#kiezatlas #sideBarCategories a { text-decoration: none; }
+#kiezatlas #sideBarCategories a:hover { text-decoration: underline; }
 #kiezatlas #sideBarControl { position: absolute; width:5px; top:29px; background: #4170D4; }
 #kiezatlas #progContainer { position:absolute; top:45%; left:35%; width:50%; height:50%; opacity: 0.6; }
 #kiezatlas #kafooter { background: #fff; height:35px; position:absolute; bottom: 3px; }
@@ -63,8 +65,14 @@ background:#3F5DA6;
 #kiezatlas table { border-collapse: separate; border-spacing: 0px; font-size: 100%; }
 /** some classy definitions */
 .redTitle a, .redTitle a:hover, .redTitle a:-webkit-any-link { color: #b60033; }
+#navigation-helper a:hover { text-decoration: underline; color: #e50033; opacity: 1.0; }
+#navigation-helper a { text-decoration: none; color: #3660b8; opacity: 0.7; }
+#navigation-helper { color: #e50033; }
+#kiezatlas .critLinkNormal { text-decoration: none; color: #3660b8; padding: 1px; color: #3660b8; opacity:0.7; }
+#kiezatlas .critLinkNormal:hover { text-decoration: underline; color: #e50033; opacity: 1.0; }
+#kiezatlas .selectedCriteria, #kiezatlas .selectedCriteria a:hover { color: #e50033; opacity: 1.0; text-decoration: none !important; }
 #kiezatlas .berlinMapName { position: relative; left: 3em; top: 0px; width: 145px; height: 30px; background: url("/.img/bde/menubar-grey-bg.gif") repeat-x scroll 0 0 #6C6C6C; border-top: 0px solid #fff; border-left: 1px solid #fff; border-right: 1px solid #fff; border-bottom: 0px solid #fff; }
-#kiezatlas .critLinkNormal { text-decoration: underline; }
+/** #kiezatlas .critLinkNormal { text-decoration: underline; } */
 #kiezatlas .catRowDeselected { background: #fff; }
 #kiezatlas .catRowSelected { background: #E6EDFF; }
 #kiezatlas .iconCell { text-align: center; padding-top:4px; }

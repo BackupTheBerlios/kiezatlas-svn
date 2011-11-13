@@ -11,6 +11,7 @@
   String searchTerm = (String) session.getAttribute("searchTerm");
 	String originId = (String) session.getAttribute("originId");
 	String topicId = (String) session.getAttribute("topicId");
+  String catIds = (String) session.getAttribute("categories");
 	String baseLayer = (String) session.getAttribute("baseLayer");
 	Integer critIndex = (Integer) session.getAttribute("critIndex");
   //
@@ -43,6 +44,8 @@
     var baseLayer = '<%= baseLayer %>';
     var workspaceId = '<%= workspace.getID() %>';
     var crtCritIndex = <%= critIndex %>;
+    var cats = '<%= catIds %>';
+    var catIds = cats.split(",");
     var searchTerm = '<%= searchTerm %>';
     var linkTo = '<%= originId %>';
     var linkToTopicId = '<%= topicId %>';
@@ -87,6 +90,8 @@
       if (onBerlinDe & workspaceCriterias.result.length > 4) districtNames = workspaceCriterias.result[4].categories;
       setWorkspaceInfos();
       setCityMapName(mapTitle);
+      var onEventMap = (mapTitle.indexOf("Veranstaltungen Ehrenamt Berlin") != -1) ? true : false;
+      var onProjectMap = (mapTitle.indexOf("Ehrenamt Berlin") != -1) ? true : false;
       // check if a special criteria was set through an entry url
       if (crtCritIndex >= workspaceCriterias.result.length) {
         crtCritIndex = 0;// workspaceCriterias.result.length;
@@ -109,19 +114,29 @@
         initLayerAllFeatures(gMarkers, map);
         // initBerlinDistrictsLayer();
         reSetMarkers(myNewLayer);
+        if (onEventMap) showAllMarker();
         // inputFieldBehaviour();
         // check if a special projectId was given through the entry url
         if (linkTo != 'null') {
           selectAndShowInMap(linkTo, false);
         } else if (linkToTopicId != 'null') {
           selectAndShowInMap(linkToTopicId, true);
+        } else if (catIds.length > 0) {
+          for (var catIdx = 0; catIdx < catIds.length; catIdx++) {
+            var catId = catIds[catIdx];
+            // catId = catId.replace("%2C", "");
+            // alert("catIds: " + catIds + " toggle : \"" + catId + "\"");
+            // pre-select the categories encoded in url
+            toggleMarkerGroups(catId);
+          }
         }
         if (searchTerm != 'null') {
           searchRequest(searchTerm);
         }
         map.events.register("zoomend", map, redrawAfterZoomOperation);
         map.raiseLayer(myNewLayer);
-        if (jQuery.browser.msie) handleResize();
+        // if (jQuery.browser.msie)
+        handleResize();
       });
     });
   </script>

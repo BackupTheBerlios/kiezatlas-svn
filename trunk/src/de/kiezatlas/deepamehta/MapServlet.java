@@ -73,6 +73,7 @@ public class MapServlet extends DeepaMehtaServlet implements KiezAtlas {
         if (params.getParameter("critId") != null) critIndex = Integer.parseInt(params.getParameter("critId"))-1; // [0]
         session.setAttribute("originId", params.getParameter("linkTo")); // linkTo here for backwards compatibility rsn
         session.setAttribute("topicId", params.getParameter("topicId"));
+        session.setAttribute("categories", params.getParameter("catIds"));
         session.setAttribute("baseLayer", params.getParameter("baseLayer"));
         session.setAttribute("critIndex", critIndex);
         session.setAttribute("searchTerm", params.getParameter("search"));
