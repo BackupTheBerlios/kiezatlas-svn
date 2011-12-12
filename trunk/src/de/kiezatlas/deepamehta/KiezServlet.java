@@ -37,6 +37,8 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
             result = getWorkspaceCriterias(params);
         } else if ( remoteMethod.equals("getWorkspaceInfos") ) {
             result = getWorkspaceInfos(params);
+        } else if ( remoteMethod.equals("getCityMaps") ) {
+            result = getCityMaps(params);
         } else if ( remoteMethod.equals("searchGeoObjects") ) {
             result = searchTopics(params, directives);
         } else if ( remoteMethod.equals("geoCode") ) {
@@ -133,6 +135,25 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
     }
 
     /**
+     * Serializes Workspace Infos into JSON
+     *
+     * @param params
+     * @return
+     */
+    private String getCityMaps(String params)
+    {
+        System.out.println(">>>> getCityMaps(" + params + ")");
+        String parameters[] = params.split(":");
+        String workspaceId = parameters[0];
+        StringBuffer messages = null;
+        StringBuffer result = new StringBuffer("{\"result\": ");
+        String infos = createCityMaps(workspaceId.substring(2, workspaceId.length()-2));
+        result.append(infos);
+        result.append(", \"error\": " + messages + "}");
+        return result.toString();
+    }
+
+    /**
      * search for topic property name and returns a list of slim geo objects as
      * results
      *
@@ -161,18 +182,15 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
           for (int k = 0; k < taggedInsts.size(); k++) {
             BaseTopic taggedTopic = (BaseTopic) taggedInsts.get(k);
             Vector pts = cm.getViewTopics(topicmapId, 1, geoType.getID(), taggedTopic.getName());
-            System.out.println("newGeoSearchMode fetched additionally " + pts.size() + " tagged Institutions byName!");
             if (pts.size() >= 1) {
               if (!results.contains(pts.get(0))) { // prevent doublings..
                 results.add(pts.get(0));
-                System.out.println("newGeoSearchMode added fetched PresentableTopic => " + ((BaseTopic)pts.get(0)).getName() + " !byName");
               } else {
-                System.out.println("newGeoSearchMode skipped fetched PresentableTopic => " + ((BaseTopic)pts.get(0)).getName() + " !byName");
               }
             } // insts.add(new PresentableTopic(topic, new Point()));
           }
         }
-        System.out.println(">>>> found " + results.size() + " by name and tag");// +" named and "+streetResults.size()+ " streetnames like " + query);
+        System.out.println("   > found " + results.size() + " by name and tag");// +" named and "+streetResults.size()+ " streetnames like " + query);
         //
         result.append("[");
         for (int i=0; i < results.size(); i++) {
@@ -344,13 +362,48 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
         return object.toString();
     }
 
+
+    private String createCityMaps(String workspaceId)
+    {
+        StringBuffer object = new StringBuffer();
+        String workspaceName = as.getTopicProperty(workspaceId, 1, PROPERTY_NAME);
+        BaseTopic wsMap = as.getRelatedTopic(workspaceId, ASSOCTYPE_AGGREGATION, TOPICTYPE_TOPICMAP, 2, true);
+        //
+        object.append("{\"name\": \"" + workspaceName + "\",");
+        object.append("\"id\": \"" + workspaceId + "\",");
+        object.append("\"maps\": [");
+        Vector cityMaps = cm.getViewTopics(wsMap.getID(), 1, TOPICTYPE_CITYMAP);
+        System.out.println("   > found : " + cityMaps.size() + " citymaps");
+        for(int p = 0; p < cityMaps.size(); p++) {
+            BaseTopic cityMap = (BaseTopic) cityMaps.get(p);
+            String id, name, webAlias = "";
+            id = cityMap.getID();
+            name = cityMap.getName();
+            webAlias = as.getTopicProperty(cityMap, PROPERTY_WEB_ALIAS);
+            object.append("{");
+            if (!webAlias.equals("")) {
+              object.append("\"id\": \"" + id + "\", ");
+              object.append("\"name\": \"" + toJSON(name) + "\", ");
+              object.append("\"alias\": \"" + webAlias + "\" ");
+              //
+            }
+            if(cityMaps.indexOf(cityMap) == cityMaps.size() - 1)
+                  object.append("}");
+              else
+                  object.append("},");
+        }
+        object.append("]");
+        object.append("}");
+        return object.toString();
+    }
+
     private String createSlimGeoObject(BaseTopic topic, Vector criterias, StringBuffer messages)
     {
         StringBuffer object = new StringBuffer();
         //
         String latitude = as.getTopicProperty(topic, "LAT"); // ### get an interface place for this final string value
         String longnitude = as.getTopicProperty(topic, "LONG"); // ### get an interface place for this final string value
-        String originId = as.getTopicProperty(topic, ImportServlet.PROPERTY_PROJECT_ORIGIN_ID);
+        String originId = as.getTopicProperty(topic, PROPERTY_PROJECT_ORIGIN_ID);
         if(latitude.equals("") && longnitude.equals(""))
         {
             latitude = "0.0";

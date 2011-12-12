@@ -189,11 +189,11 @@ public class EditServlet extends DeepaMehtaServlet implements KiezAtlas {
 		}
 		return fileNames;
 	}
-	
+
 	static String getFileChooserFieldName(FileItem item) {
 		String fieldName = item.getFieldName();
 		int pos = fieldName.lastIndexOf(":");
-		return pos != -1 ? fieldName.substring(pos + 1) : fieldName; 
+		return pos != -1 ? fieldName.substring(pos + 1) : fieldName;
 	}
 
 	// ###
@@ -201,7 +201,7 @@ public class EditServlet extends DeepaMehtaServlet implements KiezAtlas {
 		int pos = path.lastIndexOf('\\');
 		return pos != -1 ? path.substring(pos + 1) : path;
 	}
-	
+
 	static String getFileExtension(String path) {
 		int pos = path.lastIndexOf('.');
 		return pos != -1 ? path.substring(pos + 1) : "";
@@ -233,7 +233,7 @@ public class EditServlet extends DeepaMehtaServlet implements KiezAtlas {
 		if (image != null) {
 			String imagefile = as.getTopicProperty(image, PROPERTY_FILE);
 			if (imagefile.length() > 0) {
-                // yes, users store pdf or docs as object's logo image into the system, 
+                // yes, users store pdf or docs as object's logo image into the system,
                 // we have to adjust the path so that they can see what they're doing
                 if (imagefile.indexOf("png") != -1 || imagefile.indexOf("jpg") != -1 || imagefile.indexOf("gif") != -1 ||
                         imagefile.indexOf("PNG") != -1 || imagefile.indexOf("JPG") != -1 || imagefile.indexOf("GIF") != -1) {

@@ -55,6 +55,7 @@ public class MapServlet extends DeepaMehtaServlet implements KiezAtlas {
 
   private final String urlStr = "http://www.kiezatlas.de/rpc/";
   // private final String urlStr = "http://localhost:8080/kiezatlas/rpc/";
+  // private final String urlStr = "http://212.87.44.116:8080/rpc/";
   private final String charset = "ISO-8859-1";
 
 
@@ -68,19 +69,35 @@ public class MapServlet extends DeepaMehtaServlet implements KiezAtlas {
 				if (pathInfo == null || pathInfo.length() == 1) {
 					throw new DeepaMehtaException("Fehler in URL");
 				}
+        String[] elements = pathInfo.split("/");
+        Hashtable requested = parseRequestedPath(elements);
+        if (requested != null) {
+          session.setAttribute("originId", requested.get("linkTo")); // linkTo here for backwards compatibility rsn
+          session.setAttribute("topicId", requested.get("geo"));
+          session.setAttribute("categories", requested.get("categories"));
+          session.setAttribute("baseLayer", requested.get("layer"));
+          session.setAttribute("critIndex", requested.get("criteria"));
+          session.setAttribute("searchTerm", requested.get("search"));
+        }
+        // overrides pathinfo url settings just parsed.. for backwards compatibility reasons
         // application states represented in URL - just passing params to javascript
         Integer critIndex = 0;
-        if (params.getParameter("critId") != null) critIndex = Integer.parseInt(params.getParameter("critId"))-1; // [0]
-        session.setAttribute("originId", params.getParameter("linkTo")); // linkTo here for backwards compatibility rsn
-        session.setAttribute("topicId", params.getParameter("topicId"));
-        session.setAttribute("categories", params.getParameter("catIds"));
-        session.setAttribute("baseLayer", params.getParameter("baseLayer"));
-        session.setAttribute("critIndex", critIndex);
-        session.setAttribute("searchTerm", params.getParameter("search"));
+        if (params.getParameter("critId") != null) {
+          critIndex = Integer.parseInt(params.getParameter("critId"))-1;
+        } // [0]
+        if (params.getParameter("linkTo") != null) session.setAttribute("originId", params.getParameter("linkTo")); // linkTo here for backwards compatibility rsn
+        if (params.getParameter("topicId") != null) session.setAttribute("topicId", params.getParameter("topicId"));
+        if (params.getParameter("catIds") != null) session.setAttribute("categories", params.getParameter("catIds"));
+        if (params.getParameter("baseLayer") != null) session.setAttribute("baseLayer", params.getParameter("baseLayer"));
+        if (params.getParameter("search") != null) session.setAttribute("searchTerm", params.getParameter("search"));
+        if (session.getAttribute("critIndex") == null) session.setAttribute("critIndex", critIndex);
         //
 				String alias = pathInfo.substring(1);
         if (pathInfo.indexOf("&") != -1) {
           alias = pathInfo.substring(1, pathInfo.indexOf("&"));
+        } else if (pathInfo.indexOf("/", 1) != -1) {
+          // if / behind mapname... slice map-alias out
+          alias = elements[1];
         }
         session.setAttribute("mapAlias", alias);
 				BaseTopic mapTopic = CityMapTopic.lookupCityMap(alias, true, as); // throwIfNotFound=true
@@ -318,52 +335,6 @@ public class MapServlet extends DeepaMehtaServlet implements KiezAtlas {
 		}
 	}
 
-	// ---
-
-	private void sendNotificationEmail(String instID, String commentID) {
-		try {
-			GeoObjectTopic inst = (GeoObjectTopic) as.getLiveTopic(instID, 1);
-			// "from"
-			String from = as.getEmailAddress("t-rootuser");		// ###
-			if (from == null || from.equals("")) {
-				throw new DeepaMehtaException("email address of root user is unknown");
-			}
-			// "to"
-			BaseTopic email = inst.getEmail();
-			if (email == null || email.getName().equals("")) {
-				throw new DeepaMehtaException("email address of \"" + inst.getName() + "\" is unknown");
-			}
-			String to = email.getName();
-			// "subject"
-			String subject = "Kiezatlas: neuer Forumsbeitrag für \"" + inst.getName() + "\"";
-			// "body"
-			Hashtable comment = cm.getTopicData(commentID, 1);
-			String body = "Dies ist eine automatische Benachrichtigung von www.kiezatlas.de\r\r" +
-				"Im Forum der Einrichtung \"" + inst.getName() + "\" wurde ein neuer Kommentar eingetragen:\r\r" +
-				"------------------------------\r" +
-				comment.get(PROPERTY_TEXT) + "\r\r" +
-				"Autor: " + comment.get(PROPERTY_COMMENT_AUTHOR) + "\r" +
-				"Email: " + comment.get(PROPERTY_EMAIL_ADDRESS) + "\r" +
-				"Datum: " + comment.get(PROPERTY_COMMENT_DATE) + "\r" +
-				"Uhrzeit: " + comment.get(PROPERTY_COMMENT_TIME) + "\r" +
-				"------------------------------\r\r" +
-				"Im Falle des Mißbrauchs: In der \"Forum Administration\" ihres persönlichen Kiezatlas-Zugangs haben " +
-				"Sie die Möglichkeit, einzelne Kommentare zu löschen, bzw. das Forum ganz zu deaktivieren.\r" +
-				"www.kiezatlas.de:8080/edit/" + inst.getWebAlias() + "\r\r" +
-				"Mit freundlichen Grüßen\r" +
-				"ihr Kiezatlas-Team";
-			//
-			System.out.println(">>> send notification email");
-			System.out.println("  > SMTP server: \"" + as.getSMTPServer() + "\"");	// as.getSMTPServer() throws DME
-			System.out.println("  > from: \"" + from + "\"");
-			System.out.println("  > to: \"" + to + "\"");
-			// send email
-			EmailTopic.sendMail(as.getSMTPServer(), from, to, subject, body);		// EmailTopic.sendMail() throws DME
-		} catch (Exception e) {
-			System.out.println("*** notification email not send (" + e + ")");
-		}
-	}
-  
   private String getWorkspaceHomepage(String workspaceId, Session session) {
     String homepageURL = "";
     //
@@ -748,6 +719,35 @@ public class MapServlet extends DeepaMehtaServlet implements KiezAtlas {
 	}
 
 	// ---
+
+  private Hashtable parseRequestedPath(String[] elements) {
+    Hashtable result = new Hashtable();
+    for (int i = 0; i < elements.length; i++) {
+      String key = elements[i];
+      try { // ### if one nomen has no attributes, the whole request fails
+        if (key.equals("layer")) {
+          result.put("layer", elements[i+1]);
+        } else if (key.equals("p")) {
+          result.put("geo", elements[i+1]);
+        } else if (key.equals("linkTo")) {
+          result.put("linkTo", elements[i+1]);
+        } else if (key.equals("categories")) {
+          result.put("categories", elements[i+1]);
+        } else if (key.equals("criteria")) {
+          result.put("criteria", Integer.parseInt(elements[i+1])-1);
+        } else if (key.equals("search")) {
+          result.put("search", elements[i+1]);
+        } else {
+          // skip this..
+        }
+      } catch (ArrayIndexOutOfBoundsException ex) {
+        return null;
+      }
+    }
+    // System.out.println("DEBUG: pathInfo.layer: \"" + result.get("layer") + "\" geoObject: \"" + result.get("geo") +"\" category: \"" +
+       //  result.get("category") + "\" criteria: \"" + result.get("criteria") + "\" search: \"" + result.get("search") + "\"");
+    return result;
+  }
 
 	private BaseTopic getCityMap(Session session) {
 		return (BaseTopic) session.getAttribute("map");

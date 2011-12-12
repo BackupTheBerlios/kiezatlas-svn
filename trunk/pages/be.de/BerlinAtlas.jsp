@@ -65,6 +65,8 @@
     var districtNames = [];
     var markerGroupIds = new Array();
     var helpVisible = false;
+    // 
+    // var kiezatlas = new kiezatlas();
     // var slimWidth = false;
     // var totalWidth = 1000; // 953
     var map = "";
@@ -88,8 +90,6 @@
       // register resize
       jQuery(window).resize(function() { handleResize(); });
       if (onBerlinDe & workspaceCriterias.result.length > 4) districtNames = workspaceCriterias.result[4].categories;
-      setWorkspaceInfos();
-      setCityMapName(mapTitle);
       var onEventMap = (mapTitle.indexOf("Veranstaltungen Ehrenamt Berlin") != -1) ? true : false;
       var onProjectMap = (mapTitle.indexOf("Ehrenamt Berlin") != -1) ? true : false;
       // check if a special criteria was set through an entry url
@@ -97,17 +97,19 @@
         crtCritIndex = 0;// workspaceCriterias.result.length;
       }
       // cityMap setup
-      bounds = calculateInitialBounds();
+      bounds = calculateInitialBounds(mapTopics);
       // after the dom is loaded we can init our parts of the app
       jQuery(window).load(function() {
         document.namespaces;
+        setWorkspaceInfos(workspaceHomepage, workspaceLogo, workspaceImprint, mapTitle);
+        setCityMapName(mapTitle);
         handleResize(); // do the layout
         renderCritCatListing(crtCritIndex);
         // updateCategoryList(crtCritIndex);
         // setup mapObject and layers
-        openLayersInit(bounds);
+        openLayersInit(bounds, baseLayer);
         // create an array of OpenLayoers.Marker based on mapTopics
-        gMarkers = setupOpenMarkers();
+        gMarkers = setupOpenMarkers(mapTopics);
         // initialize Features and their control
         // clusters = findInitialClusters(gMarkers);
         // createVectorizedMarkerLayer(gMarkers, map);

@@ -49,6 +49,11 @@
         <include name="images/*"/>
         <include name="pages/*"/>
         <include name="pages/be.de/*"/>
+	<include name="pages/be.de/211/*"/>
+        <include name="pages/be.de/211/img/*"/>
+        <include name="pages/be.de/211/theme/*"/>
+	<include name="pages/be.de/211/theme/default/*"/>
+	<include name="pages/be.de/211/theme/default/img/*"/>
         <include name="pages/be.de/img/*"/>
         <include name="pages/be.de/theme/*"/>
         <include name="pages/be.de/proxies/*"/>

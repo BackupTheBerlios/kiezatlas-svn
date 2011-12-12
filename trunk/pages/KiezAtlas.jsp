@@ -36,10 +36,17 @@
 		switch (servlet) {
 		case KiezAtlas.SERVLET_EDIT:
 			BaseTopic geo = (BaseTopic) session.getAttribute("geo");
-			title = title + " - " + geo.getName();
+			if (geo != null) {
+        title = title + " - " + geo.getName();
+      } else {
+        title = title + " - Neuer Eintrag";
+      }
 			break;
 		case KiezAtlas.SERVLET_LIST:
 			title = title + " - Listenzugang";
+			break;
+    case KiezAtlas.SERVLET_WORKSPACE:
+			title = title + " - Workspacezugang";
 			break;
 		case KiezAtlas.SERVLET_MAPS:
 			title = title + " - Stadtplanzugang";

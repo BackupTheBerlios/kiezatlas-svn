@@ -506,7 +506,7 @@ OpenLayers.Control.LayerSwitcher =
         OpenLayers.Element.addClass(this.layersDiv, "layersDiv");
         // base layer div
         this.baseLbl = document.createElement("div");
-        this.baseLbl.innerHTML = OpenLayers.i18n("Sie haben die Wahl:");
+        this.baseLbl.innerHTML = OpenLayers.i18n("Kartenmaterial:");
         OpenLayers.Element.addClass(this.baseLbl, "baseLbl");
        
         this.baseLayersDiv = document.createElement("div");

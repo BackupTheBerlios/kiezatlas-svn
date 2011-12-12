@@ -5,12 +5,12 @@ import de.deepamehta.DeepaMehtaConstants;
 
 
 /**
- * Kiezatlas 1.6.7<br>
+ * Kiezatlas 1.6.8.3<br>
  * Requires DeepaMehta 2.0b8.
  * <p>
- * Last change: 2.11.2010<br>
- * J&ouml;rg Richter<br>
- * jri@deepamehta.de
+ * Last change: 23.11.2011<br>
+ * J&ouml;rg Richter / Malte Rei&szlig;ig<br>
+ * jri@deepamehta.de / mre@deepamehta.de
  */
 public interface KiezAtlas extends DeepaMehtaConstants {
 
@@ -159,6 +159,7 @@ public interface KiezAtlas extends DeepaMehtaConstants {
   static final String PROPERTY_PROJECT_ORIGIN_ID = "OriginId";
   static final String PROPERTY_PROJECT_LAST_MODIFIED = "Timestamp";
   static final String PROPERTY_PROJECT_ORGANISATION = "Organisation";
+  static final String PROPERTY_WORKSPACE_ALIAS = "Workspace Web Alias";
 
 
 	// -----------------------
@@ -217,6 +218,7 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	public static final int SERVLET_IMPORT = 5;
 	public static final int SERVLET_MAPS = 6;
 	public static final int SERVLET_ATLAS = 7;
+  public static final int SERVLET_WORKSPACE = 8;
 
 
 
@@ -258,6 +260,8 @@ public interface KiezAtlas extends DeepaMehtaConstants {
 	public static final String ACTION_ACTIVATE_FORUM = "activateForum";
 	public static final String ACTION_DEACTIVATE_FORUM = "deactivateForum";
 	public static final String ACTION_DELETE_COMMENT = "deleteComment";
+  // workspace
+  public static final String ACTION_SHOW_WORKSPACE_FORM = "showWorkspaceForm";
 	// list servlet
 	public static final String ACTION_SHOW_INSTITUTIONS = "showInstitutions";
 	public static final String ACTION_SHOW_INSTITUTIONS_SLIM = "showSlimInstitution";
@@ -325,6 +329,11 @@ public interface KiezAtlas extends DeepaMehtaConstants {
   static final String PAGE_GEO_FORUM = "GeoObjectForum";
   static final String PAGE_COMMENT_FORM = "CommentForm";
   static final String PAGE_MAP_LOGIN = "MapLogin";
+  // workspace
+  static final String PAGE_WORKSPACE_LOGIN = "WorkspaceObjectLogin";
+  static final String PAGE_WORKSPACE_FORM = "WorkspaceObjectForm";
+  static final String PAGE_WORKSPACE_OBJECT_ADDED = "WorkspaceObjectAdded";
+  static final String PAGE_WORKSPACE_ERROR = "error";
   // edit
   static final String PAGE_GEO_LOGIN = "GeoObjectLogin";
   static final String PAGE_GEO_HOME = "GeoObjectHome";

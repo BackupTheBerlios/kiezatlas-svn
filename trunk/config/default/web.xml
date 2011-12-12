@@ -72,6 +72,12 @@
 	</servlet>
 
 	<servlet>
+		<servlet-name>Workspace Servlet</servlet-name>
+		<description>Workspace Servlet Controller</description>
+		<servlet-class>de.kiezatlas.deepamehta.WorkspaceServlet</servlet-class>
+	</servlet>
+
+	<servlet>
 		<servlet-name>List Servlet</servlet-name>
 		<description>List Servlet Controller</description>
 		<servlet-class>de.kiezatlas.deepamehta.ListServlet</servlet-class>
@@ -111,6 +117,22 @@
 	  <load-on-startup>0</load-on-startup>
 	</servlet>
 
+  <servlet>
+    <servlet-name>resource-servlet</servlet-name>
+    <servlet-class>
+      org.apache.catalina.servlets.DefaultServlet
+    </servlet-class>
+    <init-param>
+        <param-name>debug</param-name>
+        <param-value>0</param-value>
+    </init-param>
+    <init-param>
+        <param-name>listings</param-name>
+        <param-value>false</param-value>
+    </init-param>
+    <load-on-startup>1</load-on-startup>
+</servlet>
+
 	<!-- Define mappings that are used by the servlet container to
 		 translate a particular request URI (context-relative) to a
 		 particular servlet.
@@ -125,6 +147,11 @@
 	<servlet-mapping>
 		<servlet-name>Edit Servlet</servlet-name>
 		<url-pattern>/edit/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>Workspace Servlet</servlet-name>
+		<url-pattern>/submit/*</url-pattern>
 	</servlet-mapping>
 
 	<servlet-mapping>
@@ -151,6 +178,11 @@
 		<servlet-name>Map Servlet</servlet-name>
 		<url-pattern>/map/*</url-pattern>
 	</servlet-mapping>
+
+  <servlet-mapping>
+      <servlet-name>resource-servlet</servlet-name>
+      <url-pattern>/</url-pattern>
+  </servlet-mapping>
 
 	<!-- Define the default session timeout for your application,
 		 in minutes.

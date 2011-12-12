@@ -14,6 +14,8 @@
 	String catIds = (String) session.getAttribute("categories");
   String baseLayer = (String) session.getAttribute("baseLayer");
 	Integer critIndex = (Integer) session.getAttribute("critIndex");
+  String basePath = "http://localhost:8080/kiezatlas";
+  // String basePath = "http://www.kiezatlas.de";
   //
   String title = "Kiezatlas Stadtplan - " + map.getName();
 
@@ -22,15 +24,24 @@
 <head>
   <meta http-equiv="content-type" content="text/html charset=UTF-8"/>
   <title> <%= title %> </title>
-  <link rel="stylesheet" type="text/css" href="../pages/be.de/maps.css"/>
-  <script type="text/javascript" src="../pages/be.de/kiezatlas.js"></script>
-  <!-- http://openlayers.org/api/2.9/OpenLayers.js // 2.9 or 2.9.1? -->
-  <script type="text/javascript" src="../pages/be.de/OpenLayers.js"></script>
-  <script type="text/javascript" src="../pages/be.de/CustomLayerSwitcher.js"></script>
-  <script type="text/javascript" src="../pages/be.de/jquery.min.js"></script>
+  <!--[if gte IE 7]>
+    <link rel="stylesheet" href="<%= basePath %>/pages/be.de/maps-ie.css" type="text/css">
+  <![endif]-->
+  <style type="text/css">
+    @import url('<%= basePath %>/pages/be.de/maps-mini.css') handheld, screen and (max-device-width: 800px);
+  </style>
+  <link rel="stylesheet" href="<%= basePath %>/pages/be.de/maps.css" type="text/css">
+  <link rel="stylesheet" href="<%= basePath %>/pages/be.de/211/theme/default/style.css" type="text/css">
+  <link rel="stylesheet" href="<%= basePath %>/pages/be.de/211/theme/default/google.css" type="text/css">
+  <script src="http://maps.google.com/maps/api/js?v=3.5&amp;key=ABQIAAAAfPcn9RYcEecc-d1iHvHCIRTIIy1nlKSG8dPHOYwqi5UhuTLB2hT534VlXBVGCIqcQXQ-a4z45J0w6A&amp;sensor=false"></script>
+  <script type="text/javascript" src="<%= basePath %>/pages/be.de/211/OpenLayers.js"></script>
+  <script type="text/javascript" src="<%= basePath %>/pages/be.de/CustomLayerSwitcher.js"></script>
+  <script type="text/javascript" src="<%= basePath %>/pages/be.de/jquery.min.js"></script>
+  <script type="text/javascript" src="<%= basePath %>/pages/be.de/kiezatlas.js"></script>
   <!-- <script type="text/javascript" src="../pages/be.de/jquery-1.3.2.js"></script>-->
-  <script type="text/javascript" src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAyg-5-YjVJ1InfpWX9gsTuxRa7xhKv6UmZ1sBua05bF3F2fwOehRUiEzUjBmCh76NaeOoCu841j1qnQ"></script>
+  <!-- <script type="text/javascript" src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAyg-5-YjVJ1InfpWX9gsTuxRa7xhKv6UmZ1sBua05bF3F2fwOehRUiEzUjBmCh76NaeOoCu841j1qnQ"></script> -->
   <script type="text/javascript">
+    var basePath = '<%= basePath %>';
     var mapTitle = '<%= map.getName() %>';
     var mapAlias = '<%= mapAlias %>';
     var topicId = '<%= map.getID() %>'; // unlike the topicId param from the requestURL
@@ -46,6 +57,8 @@
     // body
     var mapTopics = <%= mapTopics %>; // null; //eval('(' + <?php echo json_encode($mapTopics) ?> + ')');
     var workspaceCriterias = <%= workspaceCriterias %>; // eval('(' + <?php echo json_encode($workspaceCriterias) ?> + ')');
+    kiezatlas.setCityMapId(topicId);
+    kiezatlas.setWorkspaceCriterias(workspaceCriterias);
     // var workspaceInfos = null;
     var workspaceHomepage = '<%= workspaceHomepage %>';
     var workspaceLogo = '<%= workspaceLogo %>';
@@ -67,11 +80,14 @@
     var markerLayer = "";
     // gui elements
     var sideBarVisible = true;
+    // 
     var debug = false;
     if (debug) {
       var debug_window = window.open('','','width=400,height=600,scrollbars=1');
     }
-    var gKey = 'ABQIAAAAyg-5-YjVJ1InfpWX9gsTuxRa7xhKv6UmZ1sBua05bF3F2fwOehRUiEzUjBmCh76NaeOoCu841j1qnQ';
+    // 212: ABQIAAAAfPcn9RYcEecc-d1iHvHCIRTIIy1nlKSG8dPHOYwqi5UhuTLB2hT534VlXBVGCIqcQXQ-a4z45J0w6A
+    // var gKey = 'ABQIAAAAyg-5-YjVJ1InfpWX9gsTuxRa7xhKv6UmZ1sBua05bF3F2fwOehRUiEzUjBmCh76NaeOoCu841j1qnQ';
+    var gKey = 'ABQIAAAAfPcn9RYcEecc-d1iHvHCIRTIIy1nlKSG8dPHOYwqi5UhuTLB2hT534VlXBVGCIqcQXQ-a4z45J0w6A';
     //
     jQuery(document).ready(function() {
       // register resize
@@ -84,8 +100,7 @@
         onBerlinDe = false;
       }
       if (onBerlinDe & workspaceCriterias.result.length > 4) districtNames = workspaceCriterias.result[4].categories;
-      setWorkspaceInfos();
-      setCityMapName('<%= map.getName() %>'); // fetch and set CityMapName
+      // ### the following two are used in kiezatlas.js..
       var onEventMap = (mapTitle.indexOf("Veranstaltungen Ehrenamt Berlin") != -1) ? true : false;
       var onProjectMap = (mapTitle.indexOf("Ehrenamt Berlin") != -1) ? true : false;
       // check if a special criteria was set through an entry url
@@ -93,24 +108,28 @@
         crtCritIndex = 0;// workspaceCriterias.result.length;
       }
       // cityMap setup
-      bounds = calculateInitialBounds();
+      bounds = calculateInitialBounds(mapTopics);
       // after the dom is loaded we can init our parts of the app
       jQuery(window).load(function() {
         // if (console != undefined) console.log("testLog...");
         document.namespaces; // some curios ie workaround for openlayers
+        setWorkspaceInfos(workspaceHomepage, workspaceLogo, workspaceImprint, mapTitle);
+        setCityMapNameWs(mapTitle, workspaceId);
+        // setCityMapNameWs(mapTitle, workspaceId);
         handleResize(); // do the layout
         // setup mapObject and layers
-        openLayersInit(bounds);
+        openLayersInit(bounds, baseLayer);
         // ...
-        renderCritCatListing(crtCritIndex);
+        /// renderCritCatListing(crtCritIndex);
+        renderCritCatListing(crtCritIndex); //, baseUrl, mapAlias, workspaceCriterias, crtCritIndex, mapTitle, onBerlinDe);
         // create an array of OpenLayoers.Marker based on mapTopics
-        gMarkers = setupOpenMarkers();
+        gMarkers = setupOpenMarkers(mapTopics);
         // initialize Features and their control
         initLayerAllFeatures(gMarkers, map);
-        initBerlinDistrictsLayer();
-        reSetMarkers(myNewLayer);
+        initBerlinDistrictsLayer(basePath + "/pages/be.de/img");
         // inputFieldBehaviour();
         // check if a special projectId was given through the entry url
+        reSetMarkers(myNewLayer);
         if (linkTo != 'null') {
           selectAndShowInMap(linkTo, false);
         } else if (linkToTopicId != 'null') {
@@ -118,14 +137,15 @@
         } else if (catIds.length > 0) {
           for (var catIdx = 0; catIdx < catIds.length; catIdx++) {
             var catId = catIds[catIdx];
-            // catId = catId.replace("%2C", "");
-            // alert("catIds: " + catIds + " toggle : \"" + catId + "\"");
             // pre-select the categories encoded in url
             toggleMarkerGroups(catId);
           }
-        }
-        if (searchTerm != 'null') {
+        } else if (searchTerm != 'null') {
           searchRequest(searchTerm);
+        }
+        // show all markers at the beginning for these two scenarios..
+        if (onProjectMap || onEventMap) {
+          showAllMarker();
         }
         map.events.register("zoomend", map, redrawAfterZoomOperation);
         // map.maxExtent = bounds;
@@ -138,22 +158,23 @@
   <body>
     <div id="kiezatlas" style="visibility: hidden;">
       <div id="kaheader">
-		    <div id="mapName"></div>
 		    <div id="focusInput">
 		      <form id="autoLocateInputField" action="javascript:focusRequest()">
-			    <label for="streetNameField">Umkreissuche</label>
-			    <input id="streetNameField" type="text" size="18" value="Stra&szlig;enname / Hnr."/>
+            <label for="streetNameField">In der N&auml;he von</label>
+            <input id="streetNameField" type="text" size="18" value="Stra&szlig;enname / Hnr."/>
+            <label for="streetNameField">im</label>
+            <span id="mapName"></span>
 		      </form>
 		    </div>
+        <div id="cityMapDialog" style="visibility: hidden;"></div>
 		    <div id="searchInput">
 		      <form id="searchForm" action="javascript:searchRequest()">
 			    <label for="searchInputField">Suche</label>
-			    <input id="searchInputField" type="text" value="Einsatzm&#246;glichkeit" size="15"/>
+			    <input id="searchInputField" type="text" value="Name / Stichwort" size="15"/>
 		      </form>
 		    </div>
 		    <div id="headerButtons">
-		      <!-- <div id="mapMarkerButtons" style="position: relative; top: 5px; left: 70px; visibility: visible;">-->
-			    <img id="resizeButton" title="Seitenleiste ausblenden" onclick="javascript:handleSideBar()" src="../pages/be.de/img/go-last.png" alt="Seitenleiste ausblenden">
+			    <img id="resizeButton" title="Seitenleiste ausblenden" onclick="javascript:handleSideBar()" src="<%= basePath %>/pages/be.de/img/go-last.png" alt="Seitenleiste ausblenden">
 		    <!-- </div> -->
 		    </div>
       </div>
@@ -162,21 +183,23 @@
       <div id="permaLink" style="visibility: hidden;" onclick="javascript:selectPermalink()">
           <input id="permaInputLink" type="text" value=""/>
       </div>
-      <!-- <div id="permaLinkLabel" style="visibility: hidden;" onclick="javascript:selectPermalink()">Copy & Paste URL:</div> -->
       <div id="mapControl">&nbsp;
         <a href="javascript:showPermaLink();" id="permaLinkHref">
-		      <img border="0" src="../pages/be.de/img/gnome_permalink.png" title="Permalink anzeigen" alt="Permalink-Symbol" width="16" height="16">
+          Permalink
         </a>
         <a href="javascript:showAllMarker();" id="toggleMarkerHref">
-          <img border="0" src="../pages/be.de/img/FreiwilligenAgentur.png" title="Alle Markierer einblenden" alt="Markierer-Symbol" width="15" height="15">
+          <!-- <img border="0" src="../pages/be.de/img/FreiwilligenAgentur.png" title="Alle Markierer einblenden" alt="Markierer-Symbol" width="15" height="15"> -->
+          Alles einblenden
         </a>
         <!-- <img border="0" id="divider" src="img/division.png" title="" width="1" height="10"> -->
 		      <!-- <a href="javascript:removeAllMarker();" style="text-decoration: none;">> Alle ausblenden</a> <br/>-->
 		    <a href="javascript:updateVisibleBounds(null, true, null, true);" id="resetMarkerHref">
-		      <img border="0" src="../pages/be.de/img/Stop.png" title="zurücksetzen der Kartenansicht und Informationsebenen" alt="Reset-Symbol" width="15" height="15">
+		      <!-- <img border="0" src="../pages/be.de/img/Stop.png" title="zurücksetzen der Kartenansicht und Informationsebenen" alt="Reset-Symbol" width="15" height="15"> -->
+          Karte zur&uuml;cksetzen
         </a>
+        <img src="http://www.kiezatlas.de/client/images/dropdown-btn.png" title="Mehr.." alt="Button: Mehr..">
         <!-- <img border="0"atlas id="divider" src="img/division.png" title="" width="1" height="10"> -->
-        <span id="moreLabel">&nbsp;Mehr..</span>
+        <!--  <span id="moreLabel">&nbsp;Mehr..</span> -->
         <div id="mapSwitcher" style="position: absolute; visibility: hidden;"></div>
       </div>
       <div id="memu" style="visibility:hidden;"></div>
@@ -187,7 +210,8 @@
         <div id="progContainer"></div>
       </div>
       <div id="kafooter">
-        <a href="http://www.berlin.de/buergeraktiv/">Impressum</a> und <a href="http://ehrenamt.index.de">Haftungshinweise</a><br/><b> powered by <a href="http://www.kiezatlas.de">Kiezatlas</a></b>
+        <a href="http://www.berlin.de/buergeraktiv/">Impressum</a> und <a href="http://ehrenamt.index.de">Haftungshinweise</a><br/>
+        <b> powered by <a href="http://www.kiezatlas.de">Kiezatlas</a></b>
       </div>
       <div id="sideBarControl"></div> <!-- onclick="javascript:handleSideBar();" onclick="javascript:showDialog(false)"  -->
       <div id="dialogMessage" style="visibility: hidden;" title="Dialog schlie&szlig;en">

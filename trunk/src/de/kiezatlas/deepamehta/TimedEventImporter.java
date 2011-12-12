@@ -75,25 +75,25 @@ public class TimedEventImporter implements Job, DeepaMehtaConstants, KiezAtlas {
               + DeepaMehtaUtils.getTime().toString());
       BaseTopic settings = getImporterSettingsTopic(); // 
       if (settings != null) {
-        contentReportRecipient = as.getTopicProperty(settings, PROPERTY_IMPORT_CONTENT_REPORT);
-        serviceReportRecipient = as.getTopicProperty(settings, PROPERTY_IMPORT_SERVICE_REPORT);
-        iconCatMap = as.getTopicProperty(settings, PROPERTY_ICONS_MAP);
-        System.out.println("[EventJob] set to run for \"" + contentReportRecipient + "\" " +
-                "errors are reported to " + serviceReportRecipient + " iconsMap available ? "
-                + (iconCatMap.length() > 0));
+          contentReportRecipient = as.getTopicProperty(settings, PROPERTY_IMPORT_CONTENT_REPORT);
+          serviceReportRecipient = as.getTopicProperty(settings, PROPERTY_IMPORT_SERVICE_REPORT);
+          iconCatMap = as.getTopicProperty(settings, PROPERTY_ICONS_MAP);
+          System.out.println("[EventJob] set to run for \"" + contentReportRecipient + "\" " +
+              "errors are reported to " + serviceReportRecipient + " iconsMap available ? "
+              + (iconCatMap.length() > 0));
       } else { System.out.println("[EventJob] ERROR while loading settings for workspace " + workspaceId); }
       // work here
       String ehrenamtXml = sendGetRequest(serviceUrl, "");
       if (ehrenamtXml != null) {
-        System.out.println("[EventJob] loaded data.. and is now scheduled to 06:15 AM.. for cityMapID: " + cityMapId);
-        // delete former import
-        clearCriterias();
-        // clears workspace if new topics are available
-        clearImport();
-        // store and publish new topics
-        Vector topicIds = parseAndStoreData(ehrenamtXml);
-        //
-        publishData(topicIds);
+          System.out.println("[EventJob] loaded data.. and is now scheduled to 06:15 AM.. for cityMapID: " + cityMapId);
+          // delete former import
+          clearCriterias();
+          // clears workspace if new topics are available
+          clearImport();
+          // store and publish new topics
+          Vector topicIds = parseAndStoreData(ehrenamtXml);
+          //
+          publishData(topicIds);
       }
     }
 
@@ -105,35 +105,38 @@ public class TimedEventImporter implements Job, DeepaMehtaConstants, KiezAtlas {
     private BaseTopic getImporterSettingsTopic() {
         Vector workspaces = as.getRelatedTopics(workspaceId, ASSOCTYPE_ASSOCIATION, TOPICTYPE_IMPORTER_SETTINGS, 1);
         if (workspaces.size() >= 1) {
-          BaseTopic settings = (BaseTopic) workspaces.get(0);
-          return settings;
+            BaseTopic settings = (BaseTopic) workspaces.get(0);
+            return settings;
         }
         return null;
     }
 
     private void publishData(Vector topicIds) {
-        System.out.println("[EventJob] is starting to gather coordinates and publish \""+topicIds.size()+"\" topics into : " + cm.getTopic(cityMapId, 1).getName());// + " " +
+        System.out.println("[EventJob] is starting to gather coordinates and publish \"" + topicIds.size() +
+            "\" topics into : " + cm.getTopic(cityMapId, 1).getName());// + " " +
         Vector unusable = new Vector(); // collection of GeoObjects with GPS Data
         for (int i = 0; i < topicIds.size(); i++) {
             GeoObjectTopic baseTopic = (GeoObjectTopic) as.getLiveTopic(((String)topicIds.get(i)), 1);
-            // System.out.println("[GPSINFO] is LAT: " + as.getTopicProperty(baseTopic, PROPERTY_GPS_LAT) + " LON: " + as.getTopicProperty(baseTopic, PROPERTY_GPS_LONG));
+            // System.out.println("[GPSINFO] is LAT: " + as.getTopicProperty(baseTopic, PROPERTY_GPS_LAT) + " LON: "
+            // + as.getTopicProperty(baseTopic, PROPERTY_GPS_LONG));
             BaseTopic addressTopic = baseTopic.getAddress();
             if (as.getTopicProperty(baseTopic.getID(), 1, PROPERTY_GPS_LAT).equals("")) {
-                System.out.println("[EventJob] WARNING ***  \""+addressTopic.getName()+"\" is without GPS Data... dropping placement in CityMap");
+                System.out.println("[EventJob] WARNING ***  \"" + addressTopic.getName() +
+                    "\" is without GPS Data... dropping placement in CityMap");
                 // ###TODO: Report Functionality
                 unusable.add(baseTopic); //
             } else if (as.getTopicProperty(addressTopic, PROPERTY_STREET).equals("über Gute-Tat.de")) {
                 unusable.add(baseTopic);
             } else {
-                // System.out.println(">>>> creating ViewTopic for " + baseTopic.getName() + " (" + baseTopic.getID() + ")" );
                 as.createViewTopic(cityMapId, 1, null, baseTopic.getID(), 1, 0, 0, false);
             }
-            // System.out.println(">>> ready to publish geoObject " +baseTopic.getName()+" ("+baseTopic.getID()+")");
         }
         int validEntries = topicIds.size() - unusable.size();
         //
-        System.out.println("[EventJob] stored " + validEntries + " in public cityMap \"" +as.getTopicProperty(cityMapId, 1, PROPERTY_WEB_ALIAS)+ "\"");
-        System.out.println("[EventJob] skipped " + unusable.size() + " unlocatable \""+getWorkspaceGeoType(workspaceId).getName()+"\"");
+        System.out.println("[EventJob] stored " + validEntries + " in public cityMap \"" 
+            + as.getTopicProperty(cityMapId, 1, PROPERTY_WEB_ALIAS)+ "\"");
+        System.out.println("[EventJob] skipped " + unusable.size() + " unlocatable \"" 
+            + getWorkspaceGeoType(workspaceId).getName()+"\"");
         sendNotificationEmail(unusable);
         //
     }
@@ -179,12 +182,14 @@ public class TimedEventImporter implements Job, DeepaMehtaConstants, KiezAtlas {
             //
         }
         //
-        System.out.println("[EventJob] "+allRelatedTopics.size()+" relatedTopics to be deleted (just if one entry has no associations)---");
+        System.out.println("[EventJob] " + allRelatedTopics.size() + " relatedTopics to be deleted (just "
+            + " if one entry has no associations)---");
         for (int k = 0; k < allRelatedTopics.size(); k++) {
             BaseTopic relTopic = (BaseTopic) allRelatedTopics.get(k);
             //
             if (cm.getAssociationIDs(relTopic.getID(), 1).size() > 0) {
-               // System.out.println(">>> relTopic ("+relTopic.getID()+") \""+relTopic.getName()+"\" not to delete, has "+cm.getAssociationIDs(relTopic.getID(), 1).size()+" other associations");
+                // System.out.println(">>> relTopic ("+relTopic.getID()+") \"" + relTopic.getName()
+                // + "\" not to delete, has "+cm.getAssociationIDs(relTopic.getID(), 1).size()+" other associations");
             } else {
                directiveDeletion(relTopic.getID());
             }
@@ -226,7 +231,8 @@ public class TimedEventImporter implements Job, DeepaMehtaConstants, KiezAtlas {
         NodeList listOfProjects = doc.getElementsByTagName("project");
         int amountOfProjects = listOfProjects.getLength();
         System.out.println("");
-        System.out.println(" --- Import started at "+DeepaMehtaUtils.getTime() +" for a total no of " + amountOfProjects + " " + getWorkspaceGeoType(workspaceId).getName());
+        System.out.println(" --- Import started at "+DeepaMehtaUtils.getTime() +" for a total no of "
+            + amountOfProjects + " " + getWorkspaceGeoType(workspaceId).getName());
         // for(int s = 0; s < listOfProjects.getLength(); s++){
         System.out.println(" -- ");
         System.out.println("");
@@ -234,14 +240,13 @@ public class TimedEventImporter implements Job, DeepaMehtaConstants, KiezAtlas {
         // iterate over projects
         for(int p = 0; p < amountOfProjects; p++) {
             // fields of each project
-            String projectName = "", eventDescription = "", originId = "", contactPerson = "", projectUrl = "", postcode = "", streetNr = "", bezirk = "", orgaName = "",
-                    orgaWebsite = "", orgaContact = "", timeStamp = "";
+            String projectName = "", eventDescription = "", originId = "", contactPerson = "", projectUrl = "", 
+                postcode = "", streetNr = "", bezirk = "", orgaName = "", orgaWebsite = "", orgaContact = "",
+                timeStamp = "";
             Vector zielgruppen = new Vector();
             NodeList projectDetail = listOfProjects.item(p).getChildNodes();
-            // System.out.println(">> projectDetail has childs in number : " + projectDetail.getLength());
             for (int i = 0; i < projectDetail.getLength(); i++) {
                 Node node = projectDetail.item(i);
-                // System.out.println(">>> node is " + node.getNodeName() + " : " + node.getNodeValue() + " (" + node.getNodeType()+")");
                 if (node.hasChildNodes()) {
                     NodeList details = node.getChildNodes();
                     for (int j = 0; j < details.getLength(); j++) {
@@ -276,7 +281,8 @@ public class TimedEventImporter implements Job, DeepaMehtaConstants, KiezAtlas {
                                             // System.out.println("> zielgruppen: "); // + anotherNode.getNodeValue());
                                             zielgruppen = readInCategories(anotherNode.getNodeValue());
                                         } else {
-                                            System.out.println("*** EventJob found unknown category for a POI while importing from ehrenamt.");
+                                            System.out.println("*** [EventJob] found unknown category for a POI while "
+                                                + "importing from ehrenamt.");
                                         }
                                     }
                                 } else {
@@ -317,11 +323,12 @@ public class TimedEventImporter implements Job, DeepaMehtaConstants, KiezAtlas {
             }
             // projectData was gathered
             // store information per project now
-            String topicID = saveProjectData(originId, projectName, eventDescription, contactPerson, projectUrl, postcode, streetNr, bezirk,
-                        orgaName, orgaWebsite, orgaContact, timeStamp, zielgruppen);
+            String topicID = saveProjectData(originId, projectName, eventDescription, contactPerson, 
+                projectUrl, postcode, streetNr, bezirk, orgaName, orgaWebsite, orgaContact, timeStamp, zielgruppen);
             topicIds.add(topicID);
         }//end of for loop with p for projects
-        System.out.println("[EventJob] stored data at "+DeepaMehtaUtils.getTime() +" for a total no of " + amountOfProjects + " " + getWorkspaceGeoType(workspaceId).getName());
+        System.out.println("[EventJob] stored data at "+DeepaMehtaUtils.getTime() +" for a total no of "
+            + amountOfProjects + " " + getWorkspaceGeoType(workspaceId).getName());
     } catch (SAXParseException err) {
            System.out.println ("** Parsing error" + ", line "
              + err.getLineNumber () + ", column " + err.getColumnNumber() + ", message: " + err.getMessage());
@@ -341,7 +348,8 @@ public class TimedEventImporter implements Job, DeepaMehtaConstants, KiezAtlas {
      *  reusing existing addresses, webpages and persons
      *  building up the categorySystem by each item which is in some categories
      */
-    private String saveProjectData(String originId, String eventName, String eventDescr, String contactPerson, String projectUrl, String postcode, String streetNr, String bezirk, String orgaName,
+    private String saveProjectData(String originId, String eventName, String eventDescr, String contactPerson,
+            String projectUrl, String postcode, String streetNr, String bezirk, String orgaName,
             String orgaWebsite, String orgaContact, String timeStamp, Vector zielgruppen) {
         String topicId = "";
         String address = streetNr + ", " + postcode + " " + bezirk;
@@ -496,7 +504,8 @@ public class TimedEventImporter implements Job, DeepaMehtaConstants, KiezAtlas {
                 DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
                 Document doc = docBuilder.parse(new InputSource(new StringReader(result)));
             } catch(UnknownHostException uke) {
-                System.out.println("*** TimedEventJob could not load the xml data to import from " + endpoint + " message is: " + uke.getMessage());
+                System.out.println("*** TimedEventJob could not load the xml data to import from " + endpoint
+                    + " message is: " + uke.getMessage());
                 return null;
                 // done();
             } catch (SAXParseException saxp) {
