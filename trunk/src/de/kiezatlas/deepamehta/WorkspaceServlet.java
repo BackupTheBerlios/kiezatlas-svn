@@ -1,9 +1,12 @@
 package de.kiezatlas.deepamehta;
 
+import de.deepamehta.AmbiguousSemanticException;
 import de.kiezatlas.deepamehta.topics.GeoObjectTopic;
 //
 import de.deepamehta.BaseTopic;
 import de.deepamehta.DeepaMehtaException;
+import de.deepamehta.OrderedItem;
+import de.deepamehta.PropertyDefinition;
 import de.deepamehta.service.ApplicationService;
 import de.deepamehta.service.CorporateDirectives;
 import de.deepamehta.service.Session;
@@ -26,7 +29,7 @@ import org.apache.commons.fileupload.FileItem;
  * Kiezatlas 1.6.8.3<br>
  * Requires DeepaMehta 2.0b8.
  * <p>
- * Last change: 23.11.2011<br>
+ * Last change: 02.01.2012<br>
  * Malte Rei&szlig;ig<br>
  * mre@deepamehta.de
  */
@@ -82,6 +85,15 @@ public class WorkspaceServlet extends DeepaMehtaServlet implements KiezAtlas {
       BaseTopic user = null;
       try {
         user = as.getTopic(TOPICTYPE_USER, userProperty, null, directives);
+        if (!user.getName().equals(username)) {
+          System.out.println("*** ERROR: usernames do not match/ no username given for .." + user.getName());
+          session.setAttribute("error", "Login incorrect");
+          return PAGE_WORKSPACE_ERROR;
+        } else if (!as.getTopicProperty(user, PROPERTY_PASSWORD).equals(password)) {
+          System.out.println("*** ERROR: passwords do not match/ no passsword given for .." + user.getName());
+          session.setAttribute("error", "Login incorrect");
+          return PAGE_WORKSPACE_ERROR;
+        }
       } catch(DeepaMehtaException ex) {
         System.out.println("User is NOT available or credentials are not correct.. ");
         session.setAttribute("error", "Login incorrect");
@@ -89,7 +101,7 @@ public class WorkspaceServlet extends DeepaMehtaServlet implements KiezAtlas {
       }
       // ### and is user related to this workpsace in the role of submitter
       if (user != null) {
-        System.out.println("User is available and credentials are correct.. ");
+        session.setAttribute("user", user);
         // ### generate form for the GeoObject-Topictype of this workspace..
         // GeoObjectTopic topic = as.createTopic(, "");
         // load current workspace..
@@ -141,13 +153,15 @@ public class WorkspaceServlet extends DeepaMehtaServlet implements KiezAtlas {
       String geoObjectId = "";
       try {
         geoObjectId = createTopic(geoType.getID(), params, session, directives); // skip citymap
+        // equip our new object with a random webalias...
+        as.setTopicProperty(geoObjectId, 1, PROPERTY_WEB_ALIAS, UUID.randomUUID().toString());
       } catch (DeepaMehtaException ex) {
         System.out.println("*** Error catched along... should redirect to form with UDPATE_GEO..");
       }
       // 
       for (int i=0; i<cityMaps.length; i++) {
         String cityMapId = cityMaps[i];
-        System.out.println("cityMaps to publish this object to.. " + cityMapId);
+        System.out.println("DEBUG: cityMaps to publish this object to.. " + cityMapId);
         // --- place in city map ---
         // Note: the geo object is placed in city map before it is actually created.
         // This way YADE-based autopositioning can perform through geo object's propertiesChanged() hook.
@@ -159,13 +173,30 @@ public class WorkspaceServlet extends DeepaMehtaServlet implements KiezAtlas {
 			setGPSCoordinates(geo, directives); //{ // loads gps coordinates
       // --- store image ---
 			// EditServlet.writeFiles(params.getUploads(), geo.getImage(), as);
-      sendNotificationEmail("mre@newthinking.de", geoObjectId, ws);
+      //
+      BaseTopic user = (BaseTopic) session.getAttribute("user");
+      String userMailbox = "";
+      if (user != null && as.getMailboxURL(user.getID()) != null) {
+        userMailbox = as.getMailboxURL(user.getID());
+      }
+      // double check..
+      if (userMailbox.equals("")) { // cannot be null anymore..
+        BaseTopic emailTopic = null;
+        try {
+          emailTopic = (BaseTopic) as.getRelatedTopic(user.getID(), ASSOCTYPE_ASSOCIATION, 2, true);
+        } catch (AmbiguousSemanticException aex) {
+          //
+          emailTopic = aex.getDefaultTopic();
+        }
+        if (emailTopic != null) {
+          userMailbox = emailTopic.getName();
+        }
+      }
+      sendNotificationEmail(userMailbox, geoObjectId, ws);
       return PAGE_WORKSPACE_OBJECT_ADDED;
 		} else if (action.equals(ACTION_UPDATE_GEO)) {
 			GeoObjectTopic geo = getGeoObject(session);
 			// --- update geo object ---
-      // TODO: write notification mail with dataset...
-      // TODo: Abkuerzungen für PropName finden... ?
 			updateTopic(geo.getType(), params, session, directives);
 			// --- store image ---
 			writeFiles(params.getUploads(), geo.getImage(), as);
@@ -198,6 +229,8 @@ public class WorkspaceServlet extends DeepaMehtaServlet implements KiezAtlas {
 	private void sendNotificationEmail(String mailbox, String topicId, BaseTopic workspace) {
 		try {
 			GeoObjectTopic inst = (GeoObjectTopic) as.getLiveTopic(topicId, 1);
+      BaseTopic geoType = getWorkspaceGeoType(workspace.getID());
+      TypeTopic topicType = (TypeTopic) as.getLiveTopic(geoType);
 			// "from"
 			String from = as.getEmailAddress("t-rootuser");		// ###
 			if (from == null || from.equals("")) {
@@ -205,20 +238,52 @@ public class WorkspaceServlet extends DeepaMehtaServlet implements KiezAtlas {
 			}
 			// "to"
 			BaseTopic email = inst.getEmail();
+      String to = "";
 			if (email == null || email.getName().equals("")) {
-				throw new DeepaMehtaException("email address of \"" + inst.getName() + "\" is unknown");
+        // use given mailbox
+        System.out.println("User MAILBOX : " + mailbox);
+        to = mailbox;
+        // throw new DeepaMehtaException("email address of \"" + inst.getName() + "\" is unknown");
 			} else {
-        System.out.println("EMAil of Author is.... " + email.getName());
+        // use institution mailbox..
+        to = email.getName();
       }
-			String to = email.getName();
 			// "subject"
-			String subject = "Kiezatlas: Neuer Datensatz \"" + inst.getName() + "\"";
+			String subject = "Kiezatlas: Neuer Datensatz";
 			// "body"
+      // Hashtable props = formType.getProperties();
+      StringBuffer topicBody = new StringBuffer("");
+      try {
+        Vector hiddenProps = as.triggerHiddenProperties(topicType);		// may return null
+        Enumeration items = topicType.getDefinition().elements();
+        while (items.hasMoreElements()) {
+          OrderedItem item = (OrderedItem) items.nextElement();
+          if (item instanceof PropertyDefinition) {
+            PropertyDefinition propDef = (PropertyDefinition) item;
+            String propName = propDef.getPropertyName();
+            String propLabel = as.triggerPropertyLabel(propDef, topicType, topicType.getID());
+            String propValue = topicId != null ? as.getTopicProperty(topicId, 1, propName) : "";
+            // Note: the hook returns _parameter names_ and the page delivers _field labels_
+            // if (hiddenProps == null || !hiddenProps.contains(propName)) {
+            // }
+            if (propLabel.equals("LONG") || propLabel.equals("LAT") || propLabel.equals("Password") || propLabel.equals("Name") ||
+                propLabel.equals("Owner ID") || propLabel.equals("Locked Geometry") || propLabel.equals("YADE x") || propLabel.equals("YADE y")
+                || propLabel.equals("Stichworte") || propLabel.equals("Description") || propLabel.equals("Icon")) {
+
+            } else {
+              topicBody.append(""+propLabel+":" + propValue +"\r");
+            }
+          }
+        }
+      } catch (NullPointerException ex) {
+        System.out.println("ERROR: sendNotificationMail.. " + topicBody.toString() + " message: \r-------" +
+                "\r" + ex.getMessage());
+      }
 			Hashtable topic = cm.getTopicData(topicId, 1);
 			String body = "Dies ist eine automatische Benachrichtigung von www.kiezatlas.de\r\r" +
 				"Im Workspace \"" + workspace.getName() + "\" wurde in ihrem Namen der folgende Datensatz neu eingetragen:\r\r"+
 				"------------------------------\r" +
-				topic.get(PROPERTY_NAME) + "\r\r" +
+				topic.get("Trägerident") + "\r\r" + topicBody.toString() +
 				// "Autor: " + topic.get(PROPERTY_) + "\r" +
 				// "Email: " + topic.get(PROPERTY_) + "\r" +
 				// "Datum: " + topic.get(PROPERTY_) + "\r" +
@@ -226,7 +291,7 @@ public class WorkspaceServlet extends DeepaMehtaServlet implements KiezAtlas {
 				"------------------------------\r\r" +
 				"Im Falle des Mißbrauchs: Kontakieren Sie bitte den Kiez-Administrator vom " +
         workspace.getName() + " Workspace.\r" +
-				"Die Kontakt-Email ist support@kiezatlas.de \r" +
+				"Die Kontakt-Email ist Thomas.Moser@ba-ts.berlin.de \r" +
 				"\r\r" +
 				"Mit freundlichen Grüßen\r" +
 				"ihr Kiezatlas-Team";

@@ -24,12 +24,12 @@ import org.apache.commons.fileupload.FileItem;
 
 
 /**
- * Kiezatlas 1.6<br>
+ * Kiezatlas 1.6.8.3<br>
  * Requires DeepaMehta 2.0b8.
  * <p>
- * Last change: 8.7.2008<br>
- * J&ouml;rg Richter<br>
- * jri@deepamehta.de
+ * Last change: 02.08.2009<br>
+ * J&ouml;rg Richter<br> / Malte Rei&szlig;
+ * jri@deepamehta.de / mre@deepamehta.de
  */
 public class EditServlet extends DeepaMehtaServlet implements KiezAtlas {
 

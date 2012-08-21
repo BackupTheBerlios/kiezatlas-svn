@@ -70,19 +70,35 @@ public class AtlasServlet extends DeepaMehtaServlet implements KiezAtlas {
 				if (pathInfo == null || pathInfo.length() == 1) {
 					throw new DeepaMehtaException("Fehler in URL");
 				}
+        String[] elements = pathInfo.split("/");
+        Hashtable requested = parseRequestedPath(elements);
+        if (requested != null) {
+          session.setAttribute("originId", requested.get("linkTo")); // linkTo here for backwards compatibility rsn
+          session.setAttribute("topicId", requested.get("geo"));
+          session.setAttribute("categories", requested.get("categories"));
+          session.setAttribute("baseLayer", requested.get("layer"));
+          session.setAttribute("critIndex", requested.get("criteria"));
+          session.setAttribute("searchTerm", requested.get("search"));
+        }
+        // overrides pathinfo url settings just parsed.. for backwards compatibility reasons
         // application states represented in URL - just passing params to javascript
         Integer critIndex = 0;
-        if (params.getParameter("critId") != null) critIndex = Integer.parseInt(params.getParameter("critId"))-1;
-        session.setAttribute("originId", params.getParameter("linkTo"));
-        session.setAttribute("topicId", params.getParameter("topicId"));
-        session.setAttribute("categories", params.getParameter("catIds"));
-        session.setAttribute("baseLayer", params.getParameter("baseLayer"));
-        session.setAttribute("critIndex", critIndex);
-        session.setAttribute("searchTerm", params.getParameter("search"));
-				//
+        if (params.getParameter("critId") != null) {
+          critIndex = Integer.parseInt(params.getParameter("critId"))-1;
+        } // [0]
+        if (params.getParameter("linkTo") != null) session.setAttribute("originId", params.getParameter("linkTo")); // linkTo here for backwards compatibility rsn
+        if (params.getParameter("topicId") != null) session.setAttribute("topicId", params.getParameter("topicId"));
+        if (params.getParameter("catIds") != null) session.setAttribute("categories", params.getParameter("catIds"));
+        if (params.getParameter("baseLayer") != null) session.setAttribute("baseLayer", params.getParameter("baseLayer"));
+        if (params.getParameter("search") != null) session.setAttribute("searchTerm", params.getParameter("search"));
+        if (session.getAttribute("critIndex") == null) session.setAttribute("critIndex", critIndex);
+        //
 				String alias = pathInfo.substring(1);
         if (pathInfo.indexOf("&") != -1) {
           alias = pathInfo.substring(1, pathInfo.indexOf("&"));
+        } else if (pathInfo.indexOf("/", 1) != -1) {
+          // if / behind mapname... slice map-alias out
+          alias = elements[1];
         }
         session.setAttribute("mapAlias", alias);
 				BaseTopic mapTopic = CityMapTopic.lookupCityMap(alias, true, as); // throwIfNotFound=true
@@ -94,8 +110,6 @@ public class AtlasServlet extends DeepaMehtaServlet implements KiezAtlas {
         } else {
           return PAGE_MAP_LOGIN;
         }
-        // session.setAttribute("workspaceInfos", workspaceInfos);
-        //
 			} catch (DeepaMehtaException e) {
 				System.out.println("*** BrowseServlet.performAction(): " + e);
 				session.setAttribute("error", e.getMessage());
@@ -794,7 +808,39 @@ public class AtlasServlet extends DeepaMehtaServlet implements KiezAtlas {
 		return getCurrentCriteria(session).selectedCategoryIDs;
 	}
 
-    private void initSelectedCatAttribute(Session session) {
-        session.setAttribute("selectedCatId", null); // necessary for the new cityMap
+  private void initSelectedCatAttribute(Session session) {
+      session.setAttribute("selectedCatId", null); // necessary for the new cityMap
+  }
+
+  // ---
+
+  private Hashtable parseRequestedPath(String[] elements) {
+    Hashtable result = new Hashtable();
+    for (int i = 0; i < elements.length; i++) {
+      String key = elements[i];
+      try { // ### if one nomen has no attributes, the whole request fails
+        if (key.equals("layer")) {
+          result.put("layer", elements[i+1]);
+        } else if (key.equals("p")) {
+          result.put("geo", elements[i+1]);
+        } else if (key.equals("linkTo")) {
+          result.put("linkTo", elements[i+1]);
+        } else if (key.equals("categories")) {
+          result.put("categories", elements[i+1]);
+        } else if (key.equals("criteria")) {
+          result.put("criteria", Integer.parseInt(elements[i+1])-1);
+        } else if (key.equals("search")) {
+          result.put("search", elements[i+1]);
+        } else {
+          // skip this..
+        }
+      } catch (ArrayIndexOutOfBoundsException ex) {
+        return null;
+      }
     }
+    // System.out.println("DEBUG: pathInfo.layer: \"" + result.get("layer") + "\" geoObject: \"" + result.get("geo") +"\" category: \"" +
+       //  result.get("category") + "\" criteria: \"" + result.get("criteria") + "\" search: \"" + result.get("search") + "\"");
+    return result;
+  }
+  
 }

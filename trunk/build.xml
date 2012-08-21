@@ -11,7 +11,7 @@
 	<property name="build" location="build"/>
 
 	<!-- <property name="dm.base-dir" location="/home/tito/source/deepaMehtaTrunk"/> --> <!-- for mre -->
-	<property name="dm.base-dir" location="../deepaMehta/"/>
+	<property name="dm.base-dir" location="../../deepaMehta/"/>
 
 	<import file="${dm.base-dir}/config.xml" />
 
@@ -24,7 +24,7 @@
 			<classpath>
 				<pathelement location="${server}/DeepaMehtaService.jar"/>
 				<pathelement location="${server}/DeepaMehtaTopics.jar"/>
-				<pathelement location="../deepaMehta/libs/commons-fileupload-1.0.jar"/>
+				<pathelement location="../../deepaMehta/libs/commons-fileupload-1.0.jar"/>
 				<pathelement location="libs/quartz-1.8.4.jar"/>
 				<pathelement location="${web.servlet.lib}"/>
 			</classpath>
@@ -49,11 +49,11 @@
         <include name="images/*"/>
         <include name="pages/*"/>
         <include name="pages/be.de/*"/>
-	<include name="pages/be.de/211/*"/>
+        <include name="pages/be.de/211/*"/>
         <include name="pages/be.de/211/img/*"/>
         <include name="pages/be.de/211/theme/*"/>
-	<include name="pages/be.de/211/theme/default/*"/>
-	<include name="pages/be.de/211/theme/default/img/*"/>
+        <include name="pages/be.de/211/theme/default/*"/>
+        <include name="pages/be.de/211/theme/default/img/*"/>
         <include name="pages/be.de/img/*"/>
         <include name="pages/be.de/theme/*"/>
         <include name="pages/be.de/proxies/*"/>

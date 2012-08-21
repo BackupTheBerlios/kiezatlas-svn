@@ -84,6 +84,11 @@ body {
 .info-container {
 }
 
+/* DeepaMehta form generator: the help text placed in a line above label and input field */
+.form-helptext {
+  font-size: small; color: #999;
+}
+
 /* DeepaMehta info generator: a label/content pair */
 .info {
 }

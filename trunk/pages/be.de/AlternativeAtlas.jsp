@@ -33,7 +33,7 @@
   <link rel="stylesheet" href="<%= basePath %>/pages/be.de/maps.css" type="text/css">
   <link rel="stylesheet" href="<%= basePath %>/pages/be.de/211/theme/default/style.css" type="text/css">
   <link rel="stylesheet" href="<%= basePath %>/pages/be.de/211/theme/default/google.css" type="text/css">
-  <script src="http://maps.google.com/maps/api/js?v=3.5&amp;key=ABQIAAAAfPcn9RYcEecc-d1iHvHCIRTIIy1nlKSG8dPHOYwqi5UhuTLB2hT534VlXBVGCIqcQXQ-a4z45J0w6A&amp;sensor=false"></script>
+  <!-- script src="http://maps.google.com/maps/api/js?v=3.5&amp;key=AIzaSyAPiDLMJnA9__sseouoOZM8Nx8IEunjpdw&amp;sensor=false"></script-->
   <script type="text/javascript" src="<%= basePath %>/pages/be.de/211/OpenLayers.js"></script>
   <script type="text/javascript" src="<%= basePath %>/pages/be.de/CustomLayerSwitcher.js"></script>
   <script type="text/javascript" src="<%= basePath %>/pages/be.de/jquery.min.js"></script>
@@ -94,11 +94,7 @@
       jQuery(window).resize(function() {
         handleResize();
       });
-      if (window.location.toString().indexOf("berlin.de") != -1) {
-        onBerlinDe = true;
-      } else {
-        onBerlinDe = false;
-      }
+      onBerlinDe = false;
       if (onBerlinDe & workspaceCriterias.result.length > 4) districtNames = workspaceCriterias.result[4].categories;
       // ### the following two are used in kiezatlas.js..
       var onEventMap = (mapTitle.indexOf("Veranstaltungen Ehrenamt Berlin") != -1) ? true : false;
@@ -130,7 +126,9 @@
         // inputFieldBehaviour();
         // check if a special projectId was given through the entry url
         reSetMarkers(myNewLayer);
-        if (linkTo != 'null') {
+        if (searchTerm != 'null') {
+          searchRequest(searchTerm);
+        } else if (linkTo != 'null') {
           selectAndShowInMap(linkTo, false);
         } else if (linkToTopicId != 'null') {
           selectAndShowInMap(linkToTopicId, true);
@@ -140,8 +138,6 @@
             // pre-select the categories encoded in url
             toggleMarkerGroups(catId);
           }
-        } else if (searchTerm != 'null') {
-          searchRequest(searchTerm);
         }
         // show all markers at the beginning for these two scenarios..
         if (onProjectMap || onEventMap) {

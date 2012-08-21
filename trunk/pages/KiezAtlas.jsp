@@ -1,3 +1,5 @@
+<%@page import="java.net.URLEncoder"%>
+<%@page import="java.net.URL"%>
 <%@ page import="de.kiezatlas.deepamehta.KiezAtlas" %>
 <%@ page import="de.kiezatlas.deepamehta.GeoObject" %>
 <%@ page import="de.kiezatlas.deepamehta.topics.GeoObjectTopic" %>
@@ -217,7 +219,9 @@
 		StringBuffer html = new StringBuffer();
 		// render fahr-info link if address is in berlin
 		if (city.startsWith("Berlin") && isSet(street)) {
-			String mapURL = "http://www.fahrinfo-berlin.de/Stadtplan/index?query=" + street + "&search=Suchen&formquery=&address=true";
+      String target = URLEncoder.encode(street + " " + postalCode + " " + city, "ISO-8859-1");
+			// String mapURL = "http://www.fahrinfo-berlin.de/Stadtplan/index?query=" + target + "&search=Suchen&formquery=&address=true";
+      String mapURL = "http://www.fahrinfo-berlin.de/fahrinfo/bin/query.exe/d?Z=" + target + "&REQ0JourneyStopsZA1=2&start=1";
 			String imageLink = " <a href=\"" + mapURL + "\" target=\"_blank\"><img src=\"../images/fahrinfo.gif\" border=\"0\" " +
 				"hspace=\"20\"></a>";
 			html.append(street + imageLink + "<br>" + postalCode + " " + city + googleLink(street, postalCode, city));

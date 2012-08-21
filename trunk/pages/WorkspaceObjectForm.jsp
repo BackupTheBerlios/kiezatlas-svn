@@ -5,8 +5,10 @@
 	static String[] hiddenProps = {
 		KiezAtlas.PROPERTY_ICON,
 		KiezAtlas.PROPERTY_ADMINISTRATION_INFO,
-		KiezAtlas.PROPERTY_LAST_MODIFIED,
-    "Description",
+		KiezAtlas.PROPERTY_LAST_MODIFIED, 
+    "Straﬂe", KiezAtlas.PROPERTY_STREET, "Postleitzahl", KiezAtlas.PROPERTY_CITY, KiezAtlas.PROPERTY_TAGFIELD,
+    KiezAtlas.PROPERTY_GPS_LONG, KiezAtlas.PROPERTY_GPS_LAT, KiezAtlas.PROPERTY_PASSWORD, KiezAtlas.PROPERTY_WEB_ALIAS,
+    "Description", "Image", "YADE x", "YADE y", "Telefon", "Stra&szlig;e",
 		"Forum Aktivierung",	/* can't use PROPERTY_FORUM_ACTIVITION because */
 								/* relabled by GeoObjectTopic's propertyLabel() hook */
 		"Title", "Content",

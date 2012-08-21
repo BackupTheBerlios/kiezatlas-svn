@@ -12,6 +12,8 @@
    * TODO: code cleanup, improving some wording on method signatures, some error handling
    * TODO: relies on some icons and scripts at http://www.kiezatlas.de/maps/embed/ ### if (onBerlinDe)
    * INFO: getters/checkers return "null" as a negative result/ error
+   *
+   * NOTES: 
    */
 
 
@@ -36,12 +38,11 @@
   var lastStreetName = "";
   var debugUI = false;
   // deployment default settings
-  var onBerlinDe = false;
+  var onBerlinDe = false; // ### fix for berlinde
   var fullWindow = false;
   var headerGap = 0;
-  // var oldKey = "ABQIAAAAyg-5-YjVJ1InfpWX9gsTuxRa7xhKv6UmZ1sBua05bF3F2fwOehRUiEzUjBmCh76NaeOoCu841j1qnQ";
-  var kiezKey = "ABQIAAAAfPcn9RYcEecc-d1iHvHCIRTIIy1nlKSG8dPHOYwqi5UhuTLB2hT534VlXBVGCIqcQXQ-a4z45J0w6A";
-  var berlinKey = "ABQIAAAADev2ctFkze28KEcta5b4WBSQDgFJvORzMhuwLQZ9zEDMQLdVUhTWXHB2vS0W0TdlEbDiH_qzhBEZ5A";
+  var kiezKey = "AIzaSyAPiDLMJnA9__sseouoOZM8Nx8IEunjpdw";
+  var berlinKey = "AIzaSyAPiDLMJnA9__sseouoOZM8Nx8IEunjpdw";
   var propFooterMessage = "";
   var helpLink = "";
   var baseUrl = SERVER_URL + "/map/";
@@ -129,7 +130,6 @@
       var history_entry = {state: state, url: link};
       // push history entry
       window.history.pushState(history_entry.state, null, history_entry.url);
-      // alert("Pushing historyEntry : " + JSON.stringify(history_entry));
     }
 
     this.getCategory = function(categoryId) {
@@ -174,29 +174,65 @@
         }
       });
     }
+    if (onBerlinDe) {
+      // SERVER_URL = "http://localhost:8080/kiezatlas";
+      SERVER_URL = "http://212.87.44.116:8080";
+      baseUrl = SERVER_URL + "/atlas/";
+      SERVICE_URL = baseUrl + "rpc/";
+    }
     // General Map Options
+    // OpenLayers.IMAGE_RELOAD_ATTEMPTS = 3;
     var options = {
       projection: new OpenLayers.Projection("EPSG:900913"),
       displayProjection: new OpenLayers.Projection("EPSG:4326"), units: "m",
-      maxResolution: 156543.0339, numZoomLevels: 25 // to initialize map without controls controls: []
+      maxResolution: 156543.0339, numZoomLevels: 18 // to initialize map without controls controls: []
       // maxExtent: openBounds // an internal error occurs when using OpenStreetMap BaseLayer togegher with maxExtent
     };
     map = new OpenLayers.Map('map', options);
+    // ### Note that TMS-Layers have different projections
+    // var mapnik = new OpenLayers.Layer.TMS("OpenStreetMap", "http://tah.openstreetmap.org/Tiles/tile/", {
     // BaseLayer
+    var mapnik = new OpenLayers.Layer.OSM("OpenStreetMap", "http://b.tile.openstreetmap.de/tiles/osmde/", {
+      type: 'png', getURL: osm_getTileURL, displayOutsideMaxExtent: false,
+      attribution: 'Tile server sponsored by STRATO / <b>Europe only</b> / <a href="http://www.openstreetmap.de/germanstyle.html">About style</a>',
+      maxExtent: new OpenLayers.Bounds(-20037508.34, -20037508.34, 20037508.34, 20037508.34)
+    });
+    // <iframe width='500' height='300' frameBorder='0' src='http://a.tiles.mapbox.com/v3/kiezatlas.map-feifsq6f.html#3/0/0'></iframe>
+    var mapbox = new OpenLayers.Layer.XYZ("MapBox Streets",
+        [
+            "http://a.tiles.mapbox.com/v3/kiezatlas.map-feifsq6f/${z}/${x}/${y}.png",
+            "http://b.tiles.mapbox.com/v3/kiezatlas.map-feifsq6f/${z}/${x}/${y}.png",
+            "http://c.tiles.mapbox.com/v3/kiezatlas.map-feifsq6f/${z}/${x}/${y}.png",
+            "http://d.tiles.mapbox.com/v3/kiezatlas.map-feifsq6f/${z}/${x}/${y}.png"
+        ], {
+            attribution: "Tiles &copy; <a href='http://mapbox.com/'>MapBox</a> | " +
+                "Data &copy; <a href='http://www.openstreetmap.org/'>OpenStreetMap</a> " +
+                "and contributors, CC-BY-SA",
+            sphericalMercator: true,
+            wrapDateLine: true,
+            transitionEffect: "resize",
+            buffer: 1,
+            numZoomLevels: 17
+        }
+    );
+    /** Backup of old MapServer Configuration..
     var mapnik = new OpenLayers.Layer.TMS("OpenStreetMap", "http://tile.openstreetmap.org/", {
       type: 'png', getURL: osm_getTileURL, displayOutsideMaxExtent: false,
       attribution: '<a href="http://www.openstreetmap.org/">OpenStreetMap</a>',
       maxExtent: new OpenLayers.Bounds(-20037508.34, -20037508.34, 20037508.34, 20037508.34)
       // note: maxExtent error, this bounds cannot be smaller than the whole world, otherwise projection error occurs ??
-    });
-    var googleBaseLayer = new OpenLayers.Layer.Google("Google Streets", {numZoomLevels: 25, animationEnabled: true,
-      // sphericalMercator:true, << obsolete  maxExtent: openBounds, << cannot be set..
-      termsOfUse: jQuery("#kafooter").get(0), poweredBy: jQuery("#kafooter").get(0)
-    });
+    }); **/
+
     if (baseLayer == "osm") {
-      map.addLayers([ mapnik, googleBaseLayer ]);
+      map.addLayers([ mapnik ]); // googleBaseLayer
     } else {
-      map.addLayers([ googleBaseLayer, mapnik ]);
+      //
+      /* var googleBaseLayer = new OpenLayers.Layer.Google("Google Streets", { numZoomLevels: 25, animationEnabled: true,
+        // sphericalMercator:true, << obsolete  maxExtent: openBounds, << cannot be set..
+        termsOfUse: jQuery("#kafooter").get(0), poweredBy: jQuery("#kafooter").get(0)
+        googleBaseLayer,
+      }); **/
+      map.addLayers([ mapnik, mapbox ]);
     }
     // event binding for the new hover controlMenu ### ToDo: find a better place for this
     jQuery("#mapControl").bind("mouseover", overMapControl);
@@ -213,13 +249,19 @@
       // a parental control must be added to the map
       // map.addControl(nav);
       //
-      panel = new OpenLayers.Control.Panel( {div: document.getElementById("navPanel")});
+      // panel = new OpenLayers.Control.Panel( {div: document.getElementById("navPanel"), zoomWorldIcon: false });
+      // panel = new OpenLayers.Control.PanPanel( { "zoomWorldIcon": false, "zoomStopHeight": 4, "panIcons": true});
       myLayerSwitcher = new OpenLayers.Control.LayerSwitcher({
         'div':OpenLayers.Util.getElement('mapSwitcher'), activeColor: "white"
       });
+      zoomBox = new OpenLayers.Control.ZoomBox();
+      // but here, we remove the default panzoom control again
+      var controls = map.getControlsByClass("OpenLayers.Control.PanZoom");
+      map.removeControl(controls[0]);
       // 
       map.addControl(myLayerSwitcher);
-      map.addControl(panel);
+      map.addControl(zoomBox);
+      // map.addControl(panel);
       reSetMarkers();
     }
   }
@@ -229,24 +271,26 @@
    * notes: does handle our basic html-layout-wireframe in 3 variations, plus all for internet explorer
    **/
   function setLayout(fullH, fullW) {
-    // onBerlinDe: fixed Width, downed under from Top, adjusted sideBarHeight, 
+    // onBerlinDe: fixed Width, downed under from Top, adjusted sideBarHeight,
     var sideW = 320;
     if (onBerlinDe && jQuery.browser.msie && !fullWindow) {
       // start with windows fix
-      jQuery("#kaheader").css("height", "40px");
+      // jQuery("#kaheader").css("height", "40px");
       jQuery("#kaheader").css("top", 153);
       // jQuery("#kafooter").css("bottom", 2);
-      jQuery("#focusAlternatives").css("top", 166);
+      jQuery("#focusAlternatives").css("top", 182);
       jQuery("#permaLink").css("top", 182);
       jQuery("#sideBar").css("width", sideW + 2);
       jQuery("#bo_header #main_navigation").css("width", 1036);
     } else if (jQuery.browser.msie && !onBerlinDe) { // maps-labs on ie
-      jQuery("#kaheader").css("height", "40px");
+      // jQuery("#kaheader").css("height", "40px");
       jQuery("#focusInput").css("top", 9);
       // jQuery("#focusInput input textarea").css("padding-top", 2);
       jQuery("#searchInput").css("top", 9);
       jQuery("#OpenLayers.Control.LayerSwitcher_44_layersDiv").css("left", -137);
       // jQuery("#searchInput input textarea").css("padding-top", 2);
+    } else if (onBerlinDe) {
+      jQuery("#kaheader").css("top", 143);
     }
     //
     // var topHeight = jQuery("#kaheader").css("height");
@@ -260,10 +304,15 @@
       fullW = 1037 - 1; // else fullW = fullW - 7;
       jQuery("#kiezatlas").css("width", fullW);
       jQuery("#kiezatlas").css("height", mapH + 153);
+      // jQuery("#kaheader").css("top", 153);
     } else if (onBerlinDe && fullWindow) {
       fullW = fullW - 1;
-      mapH = mapH - 5;
+      fullH = fullH - 1;
+      // mapH = mapH - 15;
       jQuery("#kiezatlas").css("width", fullW);
+      jQuery("#kaheader").css("top", 0);
+      // jQuery("#focusAlternatives").css("top", 182);
+      // jQuery("#permaLink").css("top", 182);
     }
     // kiezatlas alternative labs specific
     var mapW = mapW = fullW - sideW - 6; // border fullW - sideW - 7;
@@ -274,57 +323,92 @@
     jQuery("#map").css("width", mapW);
     jQuery("#map").css("height", mapH);
     //
-    jQuery("#mapControl").css("left", mapW - 378);
     jQuery("#mapControl").css("top", startHeight + topHeight);
     // more berlin.de specific
     if (onBerlinDe && !fullWindow) {
-      jQuery("#focusInput").css("left", 240);
-      jQuery("#focusAlternatives").css("top", 166);
-      jQuery("#focusAlternatives").css("left", 310);
-      jQuery("#permaLink").css("left", 275);
-      jQuery("#headerButtons").css("left", fullW - 46);
+      // jQuery("#focusInput").css("left", 240);
+      // jQuery("#focusAlternatives").css("top", 166);
+      // jQuery("#focusAlternatives").css("left", 310);
+      // jQuery("#permaLink").css("left", 275);
+      jQuery("#headerButtons").css("left", fullW - 56);
+      jQuery("#mapControl").css("left", mapW - 377);
+      jQuery("#sideBar").css("top", topHeight + startHeight + 1);
+      jQuery("#sideBarControl").css("top", topHeight + startHeight + 1);
+      jQuery("#permaLink").css("top", topHeight + startHeight);
+      jQuery("#focusInput").css("top", 5);
+      jQuery("#searchInput").css("top", 5);
     } else if (onBerlinDe && fullWindow) {
-      //
-      jQuery("#headerButtons").css("left", fullW - 46);
-      jQuery("#focusAlternatives").css("top", topHeight);
-      jQuery("#permaLink").css("top", topHeight + 8);
-      jQuery("#permaLink").css("left", window);
+      // align at top without startHeight
+      mapH = fullH - topHeight;
+      jQuery("#map").css("height", mapH);
+      jQuery("#map").css("top", topHeight + 1);
+      jQuery("#headerButtons").css("left", fullW - 56);
+      jQuery("#focusAlternatives").css("top", topHeight + 1);
+      jQuery("#permaLink").css("top", topHeight);
+      jQuery("#mapControl").css("top", topHeight);
+      jQuery("#mapControl").css("left", mapW - 377  );
+      jQuery("#focusInput").css("top", 4);
+      jQuery("#searchInput").css("top", 4);
+      jQuery("#sideBar").css("top", topHeight + 1)
+      jQuery("#sideBarControl").css("top", topHeight + 1);
     } else {
       jQuery("#focusInput").css("left", 45);
       jQuery("#focusAlternatives").css("left", 144);
       jQuery("#headerButtons").css("left", fullW - 30);
+      jQuery("#mapControl").css("left", mapW - 378);
+      jQuery("#sideBar").css("top", topHeight + startHeight + 1);
+      jQuery("#sideBarControl").css("top", topHeight + startHeight + 1);
+    }
+    //
+    if (onBerlinDe && jQuery.browser.msie) {
+      jQuery("#map").css("top", jQuery("#map").position().top - 5);
+      // jQuery("#headerButtons").css("left", fullW - 56);
+      jQuery("#mapControl").css("top", jQuery("#map").position().top - 1);
+      jQuery("#mapControl").css("left", jQuery("#mapControl").position().left  + 10);
+      jQuery("#sideBar").css("top", jQuery("#map").position().top);
+      jQuery("#sideBarControl").css("top", jQuery("#map").position().top);
+      jQuery("#permaLink").css("top", jQuery("#map").position().top - 1);
+      jQuery("#focusInput").css("top", 5);
+      jQuery("#searchInput").css("top", 5);
+      jQuery("#focusInput input").css("padding", 2);
+      jQuery("#searchInput input").css("padding", 2);
+      jQuery("#permaLink input").css("padding", 2);
+      jQuery(".layersDiv").css("left", -2);
+      jQuery("#mapSwitcher").css("top", jQuery("#mapSwitcher").position().top - 3);
+      // jQuery("#mapSwitcher").css("left", jQuery("#mapSwitcher").position().top -4);
     }
     //
     jQuery("#searchInput").css("left", fullW - sideW + 30);
+    jQuery("#sideBar").css("height", mapH - 1);
     // sidebarControl is 5px fat
     jQuery("#sideBarControl").css("left", mapW);
     jQuery("#sideBarControl").css("height", mapH);
-    jQuery("#sideBarControl").css("top", topHeight + startHeight + 1);
     jQuery("#sideBarControl").css("width", 5);
+
     //
-    jQuery("#sideBar").css("top", topHeight + startHeight + 1);
-    jQuery("#sideBar").css("height", mapH - 1);
     jQuery("#sideBar").css("left", mapW + 4);
     // set width and perform a jquery show('fast')
     setSideBarWidth(sideW);
     jQuery("#sideBarCriterias").css("width", sideW - 5);
-    jQuery("#resizeButton").attr("height", jQuery("#kaheader").height()-4);
-    jQuery("#resizeButton").attr("width", jQuery("#kaheader").height()-4);
+    if (!onBerlinDe) {
+      jQuery("#resizeButton").attr("height", jQuery("#kaheader").height()-4);
+      jQuery("#resizeButton").attr("width", jQuery("#kaheader").height()-4);
+    }
     //
     var critHeight = jQuery("#sideBarCriterias").height();
     if (critHeight == 0 || isNaN(critHeight)) {
-      critHeight = 110;
+      critHeight = 110; // minimum height of logo and name in sidebar
     } else {
-      critHeight = critHeight + 5;
+      critHeight = critHeight + 5; // approximating height of logo-/header-area within sidebar
     }
     var footerHeight = 35; // ### FIXME: to be removed
     var sideBarHeight = mapH - critHeight - footerHeight;
     if (workspaceCriterias.length == 3) {
       sideBarHeight = sideBarHeight + 20;
     } else if (workspaceCriterias.length > 4) {
-      sideBarHeight = sideBarHeight - 20;
-    } else { // workspaceCriterias is not available at that early stage
-      sideBarHeight = sideBarHeight - 20;
+      sideBarHeight = sideBarHeight - 28;
+    } else { // workspaceCriterias is not yet available
+      sideBarHeight = sideBarHeight - 28;
     }
     jQuery("#sideBarCategories").css("height", sideBarHeight);
     jQuery("#sideBarCategories").css("width", sideW - 7);
@@ -332,11 +416,15 @@
     var fWidth = sideW - 6;
     var fOrientation = mapW - 3;
     jQuery("#kafooter").css("width", fWidth - 15);
-    if (!onBerlinDe) {
-      jQuery("#kafooter").css("left", fOrientation + 10);
-    } else {
-      jQuery("#kafooter").css("left", 5);
+    if (onBerlinDe && !fullWindow) {
+      jQuery("#kafooter").css("top", mapH + startHeight);
+    } else if (onBerlinDe && fullWindow) {
+      jQuery("#kafooter").css("top", mapH);
     }
+    if (onBerlinDe && jQuery.browser.msie) {
+      jQuery("#kafooter").css("top", jQuery("#kafooter").position().top - 12);
+    }
+    jQuery("#kafooter").css("left", fOrientation + 25);
     jQuery("#layersDiv").css("left", -19);
     if (!sideBarToggle && onBerlinDe) {
       // if sidebar is toggled away and user wants to get into fullscreen mode
@@ -390,11 +478,16 @@
       jQuery("#helpFont").hide("fast");
       // jQuery("#kafooter").css("opacity", "0.4");
       jQuery("#kafooter").css("background", "transparent");
-      jQuery("#kafooter").css("bottom", 30);
+      jQuery("#kafooter").css("top", jQuery("#kafooter").position().top - 20);
       // jQuery("#kafooter").show();
       jQuery("#resizeButton").attr("src", "http://www.kiezatlas.de/maps/embed/img/go-first.png");
-      jQuery("#resizeButton").attr("height", parseInt(jQuery("#kaheader").css("height"))-4);
-      jQuery("#resizeButton").attr("width", parseInt(jQuery("#kaheader").css("height"))-4);
+      if (!onBerlinDe) {
+        jQuery("#resizeButton").attr("height", parseInt(jQuery("#kaheader").css("height"))-4);
+        jQuery("#resizeButton").attr("width", parseInt(jQuery("#kaheader").css("height"))-4);
+      } else {
+        jQuery("#resizeButton").attr("height", 20);
+        jQuery("#resizeButton").attr("width", 20);
+      }
       jQuery("#resizeButton").attr("title", "Seitenleiste einblenden");
       sideBarToggle = false;
     } else {
@@ -404,11 +497,17 @@
       sideBarToggle = true;
   	  jQuery("#helpFont").show("fast");
       jQuery("#kafooter").css("background", "white");
-      jQuery("#kafooter").css("bottom", 3);
+      // jQuery("#kafooter").css("bottom", 3);
+      jQuery("#kafooter").css("top", jQuery("#kafooter").position().top + 20);
       // 
       jQuery("#resizeButton").attr("src", "http://www.kiezatlas.de/maps/embed/img/go-last.png");
-      jQuery("#resizeButton").attr("height", parseInt(jQuery("#kaheader").css("height"))-4);
-      jQuery("#resizeButton").attr("width", parseInt(jQuery("#kaheader").css("height"))-4);
+      if (!onBerlinDe) {
+        jQuery("#resizeButton").attr("height", parseInt(jQuery("#kaheader").css("height"))-4);
+        jQuery("#resizeButton").attr("width", parseInt(jQuery("#kaheader").css("height"))-4);
+      } else {
+        jQuery("#resizeButton").attr("height", 20);
+        jQuery("#resizeButton").attr("width", 20);
+      }
       jQuery("#resizeButton").attr("title", "Seitenleiste ausblenden");
   	  // 
       handleResize(breitSeite);
@@ -429,6 +528,7 @@
       handleResize(); // substract the top-height from overall height..
     } else {
       jQuery("#kiezatlas").css("z-index", "1");
+      jQuery("#kiezatlas").css("top", "0px");
       jQuery("#kaheader").css("top", "0px");
       fullWindow = true;
       handleResize(windowWidth());
@@ -476,6 +576,7 @@
       newLink = newLink.replace("/layer/osm", "");
       newLink = newLink.replace("/layer/osm", "");
     }
+    //
     permaLink = newLink;
     kiezatlas.push_history(newState, newLink);
     jQuery("#permaInputLink").val(permaLink);
@@ -641,7 +742,7 @@
 
 
   //
-  // --- Handling of alternatives after a focusRequest() 
+  // --- Handling of geolocated street alternatives as a result of a GET focusRequest() 
   //
   
   /**
@@ -884,14 +985,17 @@
     var street = getTopicAddress(givenTopic);
     var originId = getTopicOriginId(givenTopic);
     if (cityName == " Berlin" || cityName == "Berlin" || onBerlinDe) { // ### FIXME sloppy
-      var publicTransportURL = 'http://www.fahrinfo-berlin.de/Stadtplan/index?query=' + street +
-        '&search=Suchen&formquery=&address=true';
+      var postalCode = getTopicPostalCode(givenTopic);
+      var target = street + "%20" + postalCode + "%20" + cityName;
+      var publicTransportURL = "http://www.fahrinfo-berlin.de/fahrinfo/bin/query.exe/d?Z=" + target + "&REQ0JourneyStopsZA1=2&start=1";
+      // var publicTransportURL = 'http://www.fahrinfo-berlin.de/Stadtplan/index?query=' + street +
+        // '&search=Suchen&formquery=&address=true';
       var imageLink = '<a href="'+ publicTransportURL + '" target="_blank">'
         + '<img src=\"'+IMAGES_URL+'fahrinfo.gif" border="0" hspace="20"/></a>';
       if (onBerlinDe || topicId == "t-331302") { // ehrenamt map datasets have no city property
-        resultHandler.append(''+getTopicPostalCode(givenTopic) + ' Berlin<br/>');
+        resultHandler.append(''+ postalCode + ' Berlin<br/>');
       } else {
-        resultHandler.append(''+getTopicPostalCode(givenTopic) + ' ' + cityName + '<br/>');
+        resultHandler.append(''+ postalCode + ' ' + cityName + '<br/>');
       }
       resultHandler.append('' + street + '&nbsp;' + imageLink + '<p/>');
     } else {
@@ -1017,17 +1121,17 @@
   function initCriteriaList() {
     jQuery("#progContainer").hide();
     var critListElement = jQuery("#sideBarCriterias");
-    onEventMap = (mapTitle.indexOf("Veranstaltungen Ehrenamt Berlin") != -1) ? true : false;
+    onEventMap = (mapTitle.indexOf("Veranstaltungen Ehrenamt") != -1) ? true : false;
     onProjectMap = (mapTitle.indexOf("Ehrenamt Berlin") != -1) ? true : false;
     var tabsHtml = "";
     if (onBerlinDe && onEventMap) {
       tabsHtml = '<div id="navigation-helper" '
-          + 'style="border-bottom: 1px dashed #e8e8e8; padding-left: 4px; padding-bottom: 3px; padding-top:0px; padding-right: 4px;">'
+          + 'style="border-bottom: 1px dashed #e8e8e8; padding-left: 7px; padding-bottom: 8px; padding-top:3px; padding-right: 4px;">'
           + '<a href="'+ baseUrl +'ehrenamt" title="Zum Einsatzstadtplan wechseln">Einsatzorte</a>&nbsp;|&nbsp;'
           + 'Veranstaltungen Heute</div>';
     } else if (onBerlinDe && onProjectMap) {
       tabsHtml = '<div id="navigation-helper" '
-          + 'style="border-bottom: 1px dashed #e8e8e8; padding-left: 4px; padding-bottom: 3px; padding-top:0px; padding-right: 4px;">'
+          + 'style="border-bottom: 1px dashed #e8e8e8; padding-left: 7px; padding-bottom: 8px; padding-top:3px; padding-right: 4px;">'
           + 'Einsatzorte&nbsp;|&nbsp;'
           + '<a href="'+ baseUrl +'veranstaltungen-ehrenamt" title="Zum Veranstaltungsstadtplan wechseln">Veranstaltungen Heute</a></div>';
     }
@@ -1052,10 +1156,10 @@
         critLinkList += '<tr valign="top">';
       }
       if (onBerlinDe && crtCritIndex == i) {
-        critLinkList += '<td onclick="javascript:updateCategoryList(' + i + ');" align="right" class="critLinkNormal selectedCriteria">'
-          + critName + '</td>';
+        critLinkList += '<td onclick="javascript:updateCategoryList(' + i + ');" class="critLinkNormal selectedCriteria">'
+          + '<img src="http://www.berlin.de/_bde/css/list_bullet.png"/>&nbsp;' + critName + '</td>';
       } else {
-        critLinkList += '<td onclick="javascript:updateCategoryList(' + i + ');" align="right" class="critLinkNormal">'
+        critLinkList += '<td onclick="javascript:updateCategoryList(' + i + ');" class="critLinkNormal">'
           + critName + '</td>';
       }
       if (!onBerlinDe && crtCritIndex == i) {
@@ -1077,6 +1181,11 @@
     // set the correct images
     // if (workspaceInfos != null) setCustomWorkspaceInfos(); else setDefaultWorkspaceInfos();
     setWorkspaceInfos(workspaceHomepage, workspaceLogo, workspaceImprint, mapTitle);
+    if (onEventMap) {
+      // ### FIXME: make use of kiezatlas.mapTopics and thereofre initalize them earlier...
+      var countHtml = '&nbsp;&nbsp;&nbsp;Insgesamt <b>' + mapTopics.result.topics.length + '</b> Veranstaltungen Heute<p></p>';
+      jQuery("#sideBarCriterias").append(countHtml);
+    }
   }
 
   /**
@@ -1188,7 +1297,8 @@
         // looping over all cats of a crit
         var catIcon = [workspaceCriterias.result['' + crtCritIndex + ''].categories[i].catIcon];
         var catName = [workspaceCriterias.result['' + crtCritIndex + ''].categories[i].catName];
-        var catId = new String([workspaceCriterias.result['' + crtCritIndex + ''].categories[i].catId]);
+        // var catId = new String([workspaceCriterias.result['' + crtCritIndex + ''].categories[i].catId]);
+        var catId = workspaceCriterias.result['' + crtCritIndex + ''].categories[i].catId;
         var catCSS = "catRowDeselected";
         if (isCategoryVisible(catId)) {
           catCSS = "catRowSelected";
@@ -1205,45 +1315,30 @@
         jQuery("#toggleHref-"+catId).attr('href', 'javascript:toggleMarkerGroups("' + catId + '");');
         jQuery("#catHref-"+catId).attr('href', 'javascript:showCatInSideBar("' + catId + '", "'+catName+'");');
         // registering ui effects
-        // jQuery("#toggleHref-"+catId).attr('mouseenter', 'hoverCatButton("' + catId + '")');
-        // jQuery("#toggleHref-"+catId).attr('onmouseclick', 'toggleMarkerGroups("' + catId + '")');
-        // jQuery("#toggleHref-"+catId).attr('mouseleave', 'outCatButton("' + catId + '")');
-        // jQuery("#toggleHref-"+catId).mouseenter(hoverCatButton('"' + catId + '"'));
-        // jQuery("#toggleHref-"+catId).click(toggleMarkerGroups('"' + catId + '"'));
-        // jQuery("#toggleHref-"+catId).mouseleave(outCatButton('"' + catId + '"'));
-        // jQuery("#toggleHref-"+catId).hover(hoverCatButton('"' + catId + '"'), outCatButton('"' + catId + '"'));
+        jQuery("#toggleHref-"+catId).hover(inCatButton, outCatButton);
       }
     }
   }
 
 
-  function hoverCatButton(catRow) {
-    jQuery('#catRow-'+catRow).attr("class", "catRowSelected");
-    //
-    jQuery("#toggleHref-"+catRow).attr('href', 'javascript:toggleMarkerGroups("' + catRow + '");');
-    // jQuery("#toggleHref-"+catRow).click('onmouseclick', 'toggleMarkerGroups("' + catRow + '")');
-    // jQuery("#toggleHref-"+catRow).attr('mouseenter', 'hoverCatButton("' + catRow + '")');
-    // jQuery("#toggleHref-"+catRow).click(toggleMarkerGroups('"' + catRow + '"'));
-    // jQuery("#toggleHref-"+catRow).attr('mouseleave', 'outCatButton("' + catRow + '")');
-    // jQuery("#toggleHref-"+catRow).hover(hoverCatButton('"' + catRow + '"'), outCatButton('"' + catRow + '"'));
-    // jQuery("#toggleHref-"+catId).mouseenter(hoverCatButton('"' + catId + '"'));
-    // jQuery("#toggleHref-"+catId).click(toggleMarkerGroups('"' + catId + '"'));
-    // jQuery("#toggleHref-"+catId).mouseleave(outCatButton('"' + catId + '"'));
-    // jQuery("#toggleHref-"+catRow).mouseover(hoverCatButton('"' + catRow + '"'));
-    // jQuery("#toggleHref-"+catRow).click(toggleMarkerGroups('"' + catRow + '"'));
-    // jQuery("#toggleHref-"+catRow).mouseout(outCatButton('"' + catRow + '"'));
+  function inCatButton(event) {
+    var catId = event.target.id.replace("catIconRow-","");
+    var categoryVisible = isCategoryVisible(catId);
+    if (!categoryVisible) {
+      var row = jQuery("#" + event.target.id).closest("tr");
+      row.removeClass("catRowDeselected");
+      row.addClass("catRowSelected");
+    } // if cat is visible, do nothing
   }
 
-  function outCatButton(catRow) {
-    jQuery('#catRow-'+catRow).attr("class", "catRowDeselected");
-    //
-    jQuery("#toggleHref-"+catRow).attr('href', 'javascript:toggleMarkerGroups("' + catRow + '");');
-    // jQuery("#toggleHref-"+catRow).attr('mouseenter', 'hoverCatButton("' + catRow + '")');
-    // jQuery("#toggleHref-"+catRow).click(toggleMarkerGroups('"' + catRow + '"'));
-    // jQuery("#toggleHref-"+catRow).attr('mouseleave', 'outCatButton("' + catRow + '")');
-    // jQuery("#toggleHref-"+catId).mouseenter(hoverCatButton('"' + catId + '"'));
-    // jQuery("#toggleHref-"+catId).click(toggleMarkerGroups('"' + catId + '"'));
-    // jQuery("#toggleHref-"+catRow).hover(hoverCatButton('"' + catRow + '"'), outCatButton('"' + catRow + '"'));
+  function outCatButton(event) {
+    var catId = event.target.id.replace("catIconRow-","");
+    var categoryVisible = isCategoryVisible(catId);
+    if (!categoryVisible) {
+      var row = jQuery("#" + event.target.id).closest("tr");
+      row.removeClass("catRowSelected");
+      row.addClass("catRowDeselected");
+    } // else do nothing..
   }
 
   /** sets imprint, homepage and logo link associated with the current workspaceInfos */
@@ -1256,8 +1351,12 @@
       footerMessage = '<b><a href="http://www.kiezatlas.de">Kiezatlas</a></b> '
 	      + 'is powered by <a href="http://www.deepamehta.de">DeepaMehta</a>';
     }
-    var footer = '<span id="footerPrint"><a href="javascript:openThisPrintView()">' 
-      + '<img src="'+ICONS_URL+'printer.png">' + '&nbsp;Druckansicht</a></span>';
+    // var footer = '';
+    // if (!onBerlinDe) {
+    var footer = '<span id="footerPrint"><a href="javascript:openThisPrintView()">'
+        + '<img src="'+ICONS_URL+'printer.png" alt="Druckansicht" title="Druckansicht"></a></span>'; // Druckansicht
+    // }
+    // 
     footer += '<span id="footerImprint"><a href="'+workspaceImprint+'">Impressum / Haftungshinweise</a></span>';
     footer += '<span id="footerPoweredBy">'+footerMessage+'</span>';
     jQuery("#kafooter").html(footer);
@@ -1277,9 +1376,11 @@
 
   function openThisPrintView() {
     // i got all my objects represengint the apps current-state right here so..
-    var printingWindow = window.open(basePath + "/pages/be.de/PrintAtlas.html");
-    // w.myVariable = thisIsAnObject;
-
+    if (onBerlinDe) {
+      window.open(baseUrl + "pages/PrintAtlas.html");
+    } else {
+      window.open("http://www.kiezatlas.de/pages/be.de/PrintAtlas.html"); 
+    }
   }
 
   function isCategoryVisible(myCatId) {
@@ -1449,7 +1550,8 @@
           + ' <a href="http://www.berlin.de/buergeraktiv/ehrenamtsnetz/angebote/'
           + 'index.cfm?dateiname=ea_projekt_beschreibung.cfm&cfide=0.304475484697&&anwender_id=5&id=0&ehrenamt_id=0&projekt_id='
           + originId +'&seite=1&organisation_id=0">vorherigen Seite.</a><br/>';
-          helpHtmlOne += '<br/> Sie k&ouml;nnen nat&uuml;rlich auch in dieser Ansicht weiter nach <a href="javascript:updateCategoryList(1);">Einsatzm&ouml;glichkeiten</a> in ihrer Umgebung navigieren.';
+        helpHtmlOne += '<br/> Sie k&ouml;nnen nat&uuml;rlich auch in dieser Ansicht weiter nach '
+          + '<a href="javascript:updateCategoryList(1);">Einsatzm&ouml;glichkeiten</a> in ihrer Umgebung navigieren.';
         jQuery("#sideBarCategories").html(helpHtmlOne);
     } else {
       // log("linking in and showing " + feature.data.topicName);
@@ -1476,6 +1578,8 @@
     var handler = jQuery("#sideBarCategories");
     handler.empty();
     jQuery("#progContainer").show("fast");
+    // do ajax topicbean GET and render results into the given container
+    // Topic ID, jQuery (DOM) Element, Browser History
     getGeoObjectInfo(topicId, handler, dontUpdateHistoryState);
     //
     /** var topicFeature = checkDrawnFeaturesForTopicId(topicId);
@@ -1505,10 +1609,9 @@
 
   function toggleMarkerGroups(category, skipHistoryUpdate) {
     showDialog(false);
-    //var catId = "t-"+category;
-    var catSelected = jQuery("#catRow-"+category).attr("class");
-    // log('toggleMarkerGroup ' +category+ ' is ' + catSelected);
-    if (catSelected == "catRowDeselected") {
+    var catSelected = isCategoryVisible(category);
+    // 
+    if (!catSelected) {
       // catId was not selected, but is now
       // add catId to our little helper list
       markerGroupIds.push(category);
@@ -1591,9 +1694,9 @@
       }
       // check for the case, where all are deselected..
       if (markerGroupIds.length > 0) {
-        updatePermaLink(baseUrl+mapAlias+baseString+categoryString, {name: "hideCategoryGroup", parameter: categoryString});
+        updatePermaLink(baseUrl+mapAlias+"/criteria/"+(parseInt(crtCritIndex)+1)+baseString+categoryString, {name: "hideCategoryGroup", parameter: categoryString});
       } else {
-        updatePermaLink(baseUrl+mapAlias, {name: "", parameter: ""});
+        updatePermaLink(baseUrl+mapAlias+"/criteria/"+(parseInt(crtCritIndex)+1), {name: "", parameter: ""});
       }
     }
   }
@@ -1647,9 +1750,9 @@
               // clusterFeature.attributes.renderer = "circle";
               // clusterFeature.attributes.renderer = "icon";
               clusterFeature.attributes.marker = "hotspot";
-              clusterFeature.attributes.size = "20";
+              clusterFeature.attributes.size = "23";
               if (onBerlinDe) {
-                clusterFeature.attributes.label = "mehrere Einsatzmöglichkeiten";
+                clusterFeature.attributes.label = "mehrere Einsatzm\u00F6glichkeiten";
               } else {
                 clusterFeature.attributes.label = "Hotspot";
               }
@@ -1658,22 +1761,22 @@
             } else {
               clusterFeature.attributes.marker = "hotspot";
               // clusterFeature.attributes.renderer = "icon";
-              clusterFeature.attributes.size = "20";
+              clusterFeature.attributes.size = "23";
               clusterFeature.attributes.iconUrl = ICONS_URL+catIconURL;
               clusterFeature.renderIntent = "default";
             }
             // boundingFeatures.push(clusterFeature);
           } else {
-            // normal show
+            // normal show, default style of icon
             featureToShow = checkFeatureById(id);
             //featureToShow.attributes.renderer = "icon";
             if ( catIconURL == "" || catIconURL == "blackdot.gif" ) { // http://www.kiezatlas.de/client/icons/
-              featureToShow.attributes.size = "15";
+              featureToShow.attributes.size = "20";
               featureToShow.attributes.iconUrl = ICONS_URL+"locationPointer.png";
               featureToShow.renderIntent = "default";
             } else {
               featureToShow.attributes.renderer = "icon";
-              featureToShow.attributes.size = "15";
+              featureToShow.attributes.size = "20";
               featureToShow.attributes.iconUrl = ICONS_URL+catIconURL;
               featureToShow.renderIntent = "default";
             }
@@ -1691,7 +1794,7 @@
       for (var mi = 0; mi < markerGroupIds.length; mi++ ) {
         categoryString += markerGroupIds[mi] + "%2C";
       }
-      updatePermaLink(baseUrl+mapAlias+baseString+categoryString, {name: "showCategoryGroup", parameter: categoryString}); 
+      updatePermaLink(baseUrl+mapAlias+"/criteria/"+(parseInt(crtCritIndex)+1)+baseString+categoryString, {name: "showCategoryGroup", parameter: categoryString});
     }
   }
 
@@ -1806,7 +1909,7 @@
         label : "${name}", fontSize: "12px", fontStyle: "bold",
         fontFamily: "Arial,Helvetica,sans-serif", fontColor: "#B60033"}
     });
-    var pathToFile = "http://www.kiezatlas.de/maps/embed/img/districts.kml";
+    var pathToFile = "pages/be.de/img/districts.kml";
     if (baseUrl != undefined) {
       pathToFile = baseUrl + "/districts.kml";
     }
@@ -1849,8 +1952,8 @@
     var symbolizer = OpenLayers.Util.applyDefaults( myStyle, OpenLayers.Feature.Vector.style["default"]);
     var myStyleMap = new OpenLayers.StyleMap({
       "default": symbolizer, "enumeration": textStyle, // cursor: "pointer",
-      "select": {strokeColor:"red", fillOpacity: "1", fillColor:"white", strokeWidth: 2 , graphicWidth: 21},
-      "temporary": {strokeColor:"white", fillOpacity: "1", fillColor: "blue", strokeWidth: 2, graphicWidth: 23}
+      "select": {strokeColor:"red", fillOpacity: "1", fillColor:"white", strokeWidth: 2 , graphicWidth: 23},
+      "temporary": {strokeColor:"white", fillOpacity: "1", fillColor: "blue", strokeWidth: 2, graphicWidth: 25}
     });
     //"hotspot": {pointRadius: 8}});
     var lookup = {
@@ -1901,7 +2004,7 @@
           // no menu just label
           var marker = e.feature.attributes.marker;
           if (marker == "hotspot") {
-            e.feature.attributes.label = "mehrere Einsatzmoeglichkeiten";
+            e.feature.attributes.label = "mehrere Einsatzm\u00F6glichkeiten";
           }
         },
         // ### ToDo: mostly unused and to be removed
@@ -1956,7 +2059,7 @@
       allFeatures[i].cluster = null;
       allFeatures[i].attributes.iconUrl = ""; // not to show feature after initializing
       // allFeatures[i].attributes.renderer = "circle"; // = "blackdot.gif"; // not to show feature after initializing
-      allFeatures[i].attributes.size = "15";
+      allFeatures[i].attributes.size = "15"; // item-style when geoobject is directly called from outside www
       allFeatures[i].attributes.label = points[i].topicName;
       allFeatures[i].renderIntent = "default"; // not to show feature after initializing
       // add new feature
@@ -2370,7 +2473,7 @@
     if (crtHeightFromTop > 0) { // leaving fullWindow onBerlinDe-Hack
       fHeight = fHeight - crtHeightFromTop;
     }
-    if ( width != null) {
+    if (width != null) {
       fWidth = width;
     }
     setLayout(fHeight, fWidth - 1);
@@ -2571,11 +2674,6 @@
   }
   
   function overMapControl() {
-    if (onBerlinDe) {
-      jQuery("#mapControl").css("height", 105);
-    } else {
-      // jQuery("#mapControl").css("height", 145);
-    }
     toggleMapControl();
   }
   
@@ -2675,9 +2773,17 @@
   }
 
   function setCityMapNameWs(title, workspaceId) {
-    jQuery("#mapName").html('Stadtplan <span class="mapTitle"><a id=\"cityMapLink\" href=\"\">' + title
-      + '&nbsp;<img src="'+IMAGES_URL+'dropdown-btn.png"></a></span>');
-    jQuery("#cityMapLink").attr("href", 'javascript:getPublishedCityMaps("'+workspaceId+'")');
+    // jQuery("#mapName").html('Stadtplan <span class="mapTitle"><a id=\"cityMapLink\" href=\"\">' + title
+      // + '&nbsp;<img src="'+IMAGES_URL+'dropdown-btn.png"></a></span>');
+    onEventMap = (mapTitle.indexOf("Veranstaltungen Ehrenamt") != -1) ? true : false;
+    onProjectMap = (mapTitle.indexOf("Ehrenamt Berlin") != -1) ? true : false;
+    if (!onProjectMap && !onEventMap) {
+      jQuery("#mapName").html('Stadtplan <span class="mapTitle"><a id=\"cityMapLink\" href=\"\">' + title
+        + '&nbsp;<img src="'+IMAGES_URL+'dropdown-btn.png"></a></span>');
+      jQuery("#cityMapLink").attr("href", 'javascript:getPublishedCityMaps("'+workspaceId+'")');
+    } else {
+      jQuery("#mapName").html('Stadtplan <span class="mapTitle">' + title + '</span>');
+    }
     // jQuery("#topicRow-"+resultBaseTopic.id).attr('onclick', 'javascript:showTopicInMap("' + resultBaseTopic.id + '");');
     // jQuery("#topicRowHref-"+resultBaseTopic.id).attr('href', 'javascript:showTopicInMap("' + resultBaseTopic.id + '");');
   }
