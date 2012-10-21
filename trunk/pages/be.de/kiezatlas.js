@@ -157,6 +157,29 @@
       }
     }
 
+
+    /** a get and show method implemented as
+     *  an asynchronous call which renders the html directly into the main window when the result has arrived **/
+    this.getPublishedMobileCityMaps = function(workspaceId) {
+      var url = SERVICE_URL;
+      var body = '{"method": "getMobileCityMaps", "params": ["' + workspaceId + '"]}';
+      jQuery.ajax({
+	      type: "POST",
+	      url: url,
+	      data: body,
+        beforeSend: function(xhr) {xhr.setRequestHeader("Content-Type", "application/json")},
+        dataType: 'json',
+	      success: function(obj) {
+          console.log("found the following mobile city maps")
+          console.log(obj.result)
+	      }, // end of success handler
+	      error: function(x, s, e){
+	        showDialog(true, "Ups, Sorry!", "Bei der Anfrage nach mobilen Stadtpl&auml;nen"
+            + " ist ein Übertragungsfehler aufgetreten. Bitte versuchen Sie es noch einmal.")
+	      }
+      });
+    }
+
   }
 
   /**

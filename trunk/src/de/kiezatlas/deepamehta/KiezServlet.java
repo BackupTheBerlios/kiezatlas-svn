@@ -25,7 +25,8 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
 
     // --- 3 Hooks overriden
 
-    protected String performPostRequest(String remoteMethod, String params, Session session, CorporateDirectives directives)
+    protected String performPostRequest(String remoteMethod, String params, 
+                                        Session session, CorporateDirectives directives)
     {
         // System.out.println("POST Request received... " + remoteMethod + ":" + params);
         String result = "";
@@ -39,6 +40,8 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
             result = getWorkspaceInfos(params);
         } else if ( remoteMethod.equals("getCityMaps") ) {
             result = getCityMaps(params);
+        } else if ( remoteMethod.equals("getMobileCityMaps") ) {
+            result = getMobileCityMaps(params);
         } else if ( remoteMethod.equals("searchGeoObjects") ) {
             result = searchTopics(params, directives);
         } else if ( remoteMethod.equals("geoCode") ) {
@@ -51,10 +54,12 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
 
     protected String performAction(String topicId, String params, Session session, CorporateDirectives directives)
     {
-        session.setAttribute("info", "<h3>Willkommen zu dem Kiezatlas Dienst unter "+as.getCorporateWebBaseURL()+"</h3>" +
-                "<br>F&uuml;r die Nutzung des Dienstes steht Entwicklern " +
-                "<a href=\"http://www.deepamehta.de/wiki/en/Application:_Web_Service\">hier</a> die Software Dokumentation zur Verfügung. " +
-                "Ein Beispiel zur Nutzung eines Kiezatlas Dienstes ist <a href=\"http://www.kiezatlas.de/maps/map.php?topicId=t-ka-schoeneberg&workspaceId=t-ka-workspace\">hier</a> abrufbar.");
+        session.setAttribute("info", "<h3>Willkommen zu dem Kiezatlas Dienst unter " 
+            + as.getCorporateWebBaseURL() + "</h3><br>F&uuml;r die Nutzung des Dienstes steht Entwicklern "
+            + "<a href=\"http://www.deepamehta.de/wiki/en/Application:_Web_Service\">hier</a> die Software "
+            + " Dokumentation zur Verfügung. Ein Beispiel zur Nutzung eines Kiezatlas Dienstes ist "
+            + "<a href=\"http://www.kiezatlas.de/maps/map.php?topicId=t-ka-schoeneberg&workspaceId=t-ka-workspace\">"
+            + "hier</a> abrufbar.");
         return PAGE_SERVE;
     }
 
@@ -154,6 +159,23 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
     }
 
     /**
+     * Serializes Infos on mobile CityMaps into JSON
+     *
+     * @param params
+     * @return
+     */
+    private String getMobileCityMaps(String params)
+    {
+        System.out.println(">>>> getMobileCityMaps()");
+        StringBuffer messages = null;
+        StringBuffer result = new StringBuffer("{\"result\": ");
+        String infos = createMobileCityMaps();
+        result.append(infos);
+        result.append(", \"error\": " + messages + "}");
+        return result.toString();
+    }
+
+    /**
      * search for topic property name and returns a list of slim geo objects as
      * results
      *
@@ -190,7 +212,8 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
             } // insts.add(new PresentableTopic(topic, new Point()));
           }
         }
-        System.out.println("   > found " + results.size() + " by name and tag");// +" named and "+streetResults.size()+ " streetnames like " + query);
+        // +" named and "+streetResults.size()+ " streetnames like " + query);
+        System.out.println("   > found " + results.size() + " by name and tag");
         //
         result.append("[");
         for (int i=0; i < results.size(); i++) {
@@ -228,16 +251,11 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
         BaseTopic geoType = (BaseTopic) getWorkspaceGeoType(workspaceId);
         Vector criterias = getKiezCriteriaTypes(workspaceId);
         Vector allTopics = cm.getTopics(geoType.getID(), new Hashtable(), mapId);
-        //System.out.println(">>> " + topics.size() +" topics for map " + mapTopic.getName() + " of type : " + mapTopic.getType());
         System.out.println(">>> " + allTopics.size() +" within current map");
-        //for(int t = 0; t < allTopics.size(); t++)
         for(int i = 0; i< allTopics.size(); i++) {
             BaseTopic topic = (BaseTopic) allTopics.get(i);
-            // System.out.println("    e: " + topic.getName());
             String geo  = createSlimGeoObject(topic, criterias, messages);
-            // System.out.println("geo: " + geo);
             mapTopics.append(geo);
-            // mapTopics.append("}");
             if(allTopics.indexOf(topic) != allTopics.size() - 1) {
                 mapTopics.append(",");
             }
@@ -265,7 +283,8 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
             // Website url to open
             String url = "http://maps.googleapis.com/maps/api/geocode/json?address=" + query + "&sensor=false";
             System.out.println("GeoCode =>\"" + url + "\"");
-            // String url = "http://maps.google.com/maps/geo?q="+query+"&output=json&oe=utf8&sensotr=false&key="+key+locale;
+            // String url = "http://maps.google.com/maps/geo?q="
+              // + query + "&output=json&oe=utf8&sensotr=false&key="+key+locale;
             URLConnection connection = new URL(url).openConnection();
             connection.setRequestProperty("Content-Type", "application/json");
             connection.setRequestProperty("Charset", "ISO-8859-1");
@@ -309,9 +328,11 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
             if (locale.equals("")) {
               locale = "de";
             }
-            String url = "http://maps.google.com/maps/geo?q=" + query + "&oe=utf8&key="+key+"&output=json&sensotr=false&gl="+locale;
+            String url = "http://maps.google.com/maps/geo?q="
+              + query + "&oe=utf8&key="+key+"&output=json&sensotr=false&gl="+locale;
             System.out.println("OldGeoCode =>\"" + url + "\"");
-            // String url = "http://maps.google.com/maps/geo?q="+query+"&output=json&oe=utf8&sensotr=false&key="+key+locale;
+            // String url = "http://maps.google.com/maps/geo?q="
+              // + query + "&output=json&oe=utf8&sensotr=false&key="+key+locale;
             URLConnection connection = new URL(url).openConnection();
             connection.setRequestProperty("Content-Type", "application/json");
             connection.setRequestProperty("Charset", "ISO-8859-1");
@@ -349,9 +370,11 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
         //
         BaseTopic logo = as.getRelatedTopic(workspaceId, ASSOCTYPE_ASSOCIATION, TOPICTYPE_IMAGE, 2, true);
         if (logo != null) logoURL = as.getTopicProperty(logo, PROPERTY_FILE);
-        BaseTopic homepage = as.getRelatedTopic(workspaceId, KiezAtlas.ASSOCTYPE_HOMEPAGE_LINK, TOPICTYPE_WEBPAGE, 2, true);
+        BaseTopic homepage = as.getRelatedTopic(workspaceId, 
+          KiezAtlas.ASSOCTYPE_HOMEPAGE_LINK, TOPICTYPE_WEBPAGE, 2, true);
         if (homepage != null) homepageURL = as.getTopicProperty(homepage, PROPERTY_URL);
-        BaseTopic impressum = as.getRelatedTopic(workspaceId, KiezAtlas.ASSOCTYPE_IMPRESSUM_LINK, TOPICTYPE_WEBPAGE, 2, true);
+        BaseTopic impressum = as.getRelatedTopic(workspaceId, 
+          KiezAtlas.ASSOCTYPE_IMPRESSUM_LINK, TOPICTYPE_WEBPAGE, 2, true);
         if (impressum != null) impressumURL = as.getTopicProperty(impressum, PROPERTY_URL);
         //
         object.append("{\"name\": \"" + workspaceName + "\",");
@@ -397,12 +420,47 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
         return object.toString();
     }
 
+    private String createMobileCityMaps()
+    {
+        StringBuffer object = new StringBuffer();
+        Hashtable propertyFilter = new Hashtable();
+        propertyFilter.put(PROPERTY_MOBILE_CITYMAP, "on");
+        Vector mobileCityMaps = cm.getTopics("tt-ka-stadtplan", propertyFilter);
+        System.out.println("Requesting mobile citymaps, found " + mobileCityMaps.size() + " checked for mobile-client");
+        //
+        object.append("{\"name\": \"Mobile Stadtpl&auml;ne im KiezAtlas\",");
+        object.append("\"id\": \"0\",");
+        object.append("\"maps\": [");
+        for(int p = 0; p < mobileCityMaps.size(); p++) {
+            BaseTopic cityMap = (BaseTopic) mobileCityMaps.get(p);
+            String id, name, webAlias = "";
+            id = cityMap.getID();
+            name = cityMap.getName();
+            webAlias = as.getTopicProperty(cityMap, PROPERTY_WEB_ALIAS);
+            object.append("{");
+            // if citymaps have their "mobile citymap"-flag set
+            if (!webAlias.equals("")) {
+              object.append("\"id\": \"" + id + "\", ");
+              object.append("\"name\": \"" + toJSON(name) + "\", ");
+              object.append("\"alias\": \"" + webAlias + "\" ");
+              //
+            }
+            if(mobileCityMaps.indexOf(cityMap) == mobileCityMaps.size() - 1)
+                  object.append("}");
+              else
+                  object.append("},");
+        }
+        object.append("]");
+        object.append("}");
+        return object.toString();
+    }
+
     private String createSlimGeoObject(BaseTopic topic, Vector criterias, StringBuffer messages)
     {
         StringBuffer object = new StringBuffer();
         //
         String latitude = as.getTopicProperty(topic, "LAT"); // ### get an interface place for this final string value
-        String longnitude = as.getTopicProperty(topic, "LONG"); // ### get an interface place for this final string value
+        String longnitude = as.getTopicProperty(topic, "LONG"); // ### get an interface place for this final string
         String originId = as.getTopicProperty(topic, PROPERTY_PROJECT_ORIGIN_ID);
         if(latitude.equals("") && longnitude.equals(""))
         {
@@ -558,8 +616,8 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
             objectList.append("{\"critId\": \"" + searchCriteria.criteria.getID() + "\", ");
             objectList.append("\"critName\": \"" + toJSON(searchCriteria.criteria.getName()) + "\", ");
             objectList.append("\"categories\": [");
-            Vector categories = cm.getTopics(searchCriteria.criteria.getID(), null, new Hashtable(), null, null, true); // sort
-            // String typeID, String nameFilter, Hashtable propertyFilter, String relatedTopicID, String assocTypeID, boolean sortByTopicName
+            // sorted query
+            Vector categories = cm.getTopics(searchCriteria.criteria.getID(), null, new Hashtable(), null, null, true);
             for (int c = 0; c < categories.size(); c++) {
                 objectList.append("{");
                 objectList.append("\"catId\":");

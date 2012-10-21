@@ -160,7 +160,8 @@ public interface KiezAtlas extends DeepaMehtaConstants {
   static final String PROPERTY_PROJECT_LAST_MODIFIED = "Timestamp";
   static final String PROPERTY_PROJECT_ORGANISATION = "Organisation";
   static final String PROPERTY_WORKSPACE_ALIAS = "Workspace Web Alias";
-
+  // KiezAtlas-App Property to publish citymaps in html5 mobile client
+  static final String PROPERTY_MOBILE_CITYMAP = "Mobiler Stadtplan";
 
 	// -----------------------
 	// --- Property Values ---
