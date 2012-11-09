@@ -40,153 +40,154 @@ import java.util.*;
 
 
 /**
- * Kiezatlas 1.6.7<br>
- * Requires DeepaMehta 2.0b8
+ * Kiezatlas 1.6.10<br>
+ * Requires DeepaMehta 2.0b8-rev388
  * <p>
- * Last change: 22.11.2010<br>
+ * Last change: 09.11.2012<br>
  * Malte Rei&szlig;ig <br>
- * mre@deepamehta.de
+ * <mre@deepamehta.de>
  */
 public class AtlasServlet extends DeepaMehtaServlet implements KiezAtlas {
 
-  
-
-    // --
-    // --- KiezAtlas Service Settings / berlin.de City Map Servlet
-    // --
 
 
-
-    // private final String urlStr = "http://www.kiezatlas.de/rpc/";
-    private final String urlStr = "http://localhost:8080/kiezatlas/rpc/";
-    private final String charset = "ISO-8859-1";
-    String topicmapId = "";
+	// --
+	// --- KiezAtlas Service Settings / berlin.de City Map Servlet
+	// --
 
 
 
-	protected String performAction(String action, RequestParameter params, Session session, CorporateDirectives directives)
-																									throws ServletException {
+	// private final String urlStr = "http://www.kiezatlas.de/rpc/";
+	private final String urlStr = "http://localhost:8080/kiezatlas/rpc/";
+	private final String charset = "ISO-8859-1";
+
+	String topicmapId = "is-set-to-current-topicmap-id-of-request"; // used by new getLastModified impl
+
+
+
+	protected String performAction(String action, RequestParameter params, Session session, 
+									CorporateDirectives directives) throws ServletException {
 		if (action == null) {
-            try {
-                String pathInfo = params.getPathInfo();
-                // error check
-                if (pathInfo == null || pathInfo.length() == 1) {
-                    throw new DeepaMehtaException("Fehler in URL");
-                }
-                String[] elements = pathInfo.split("/");
-                Hashtable requested = parseRequestedPath(elements);
-                if (requested != null) {
-                    session.setAttribute("originId", requested.get("linkTo")); // linkTo here for backwards compatibility rsn
-                    session.setAttribute("topicId", requested.get("geo"));
-                    session.setAttribute("categories", requested.get("categories"));
-                    session.setAttribute("baseLayer", requested.get("layer"));
-                    session.setAttribute("critIndex", requested.get("criteria"));
-                    session.setAttribute("searchTerm", requested.get("search"));
-                }
-                // overrides pathinfo url settings just parsed.. for backwards compatibility reasons
-                // application states represented in URL - just passing params to javascript
-                Integer critIndex = 0;
-                if (params.getParameter("critId") != null) {
-                    critIndex = Integer.parseInt(params.getParameter("critId"))-1;
-                } // [0]
-                if (params.getParameter("linkTo") != null) session.setAttribute("originId", params.getParameter("linkTo")); // linkTo here for backwards compatibility rsn
-                if (params.getParameter("topicId") != null) session.setAttribute("topicId", params.getParameter("topicId"));
-                if (params.getParameter("catIds") != null) session.setAttribute("categories", params.getParameter("catIds"));
-                if (params.getParameter("baseLayer") != null) session.setAttribute("baseLayer", params.getParameter("baseLayer"));
-                if (params.getParameter("search") != null) session.setAttribute("searchTerm", params.getParameter("search"));
-                if (session.getAttribute("critIndex") == null) session.setAttribute("critIndex", critIndex);
-                //
-                String alias = pathInfo.substring(1);
-                if (pathInfo.indexOf("&") != -1) {
-                    alias = pathInfo.substring(1, pathInfo.indexOf("&"));
-                } else if (pathInfo.indexOf("/", 1) != -1) {
-                    // if / behind mapname... slice map-alias out
-                    alias = elements[1];
-                }
-                session.setAttribute("mapAlias", alias);
-                BaseTopic mapTopic = CityMapTopic.lookupCityMap(alias, true, as); // throwIfNotFound=true
-                setCityMap(mapTopic, session);
-                if (!CityMapTopic.isProtected(mapTopic, as)) {
-                    //
-                    initCityMap(session);
-                    return PAGE_BERLIN_ATLAS;
-                } else {
-                    return PAGE_MAP_LOGIN;
-                }
-            } catch (DeepaMehtaException e) {
-                System.out.println("*** BrowseServlet.performAction(): " + e);
-                session.setAttribute("error", e.getMessage());
-                return PAGE_ERROR;
-            }
-        }
+			try {
+				String pathInfo = params.getPathInfo();
+				// error check
+				if (pathInfo == null || pathInfo.length() == 1) {
+					throw new DeepaMehtaException("Fehler in URL");
+				}
+				String[] elements = pathInfo.split("/");
+				Hashtable requested = parseRequestedPath(elements);
+				if (requested != null) {
+					session.setAttribute("originId", requested.get("linkTo")); // linkTo here for backwards compatibility rsn
+					session.setAttribute("topicId", requested.get("geo"));
+					session.setAttribute("categories", requested.get("categories"));
+					session.setAttribute("baseLayer", requested.get("layer"));
+					session.setAttribute("critIndex", requested.get("criteria"));
+					session.setAttribute("searchTerm", requested.get("search"));
+				}
+				// overrides pathinfo url settings just parsed.. for backwards compatibility reasons
+				// application states represented in URL - just passing params to javascript
+				Integer critIndex = 0;
+				if (params.getParameter("critId") != null) {
+					critIndex = Integer.parseInt(params.getParameter("critId"))-1;
+				} // [0]
+				if (params.getParameter("linkTo") != null) session.setAttribute("originId", params.getParameter("linkTo")); // linkTo here for backwards compatibility rsn
+				if (params.getParameter("topicId") != null) session.setAttribute("topicId", params.getParameter("topicId"));
+				if (params.getParameter("catIds") != null) session.setAttribute("categories", params.getParameter("catIds"));
+				if (params.getParameter("baseLayer") != null) session.setAttribute("baseLayer", params.getParameter("baseLayer"));
+				if (params.getParameter("search") != null) session.setAttribute("searchTerm", params.getParameter("search"));
+				if (session.getAttribute("critIndex") == null) session.setAttribute("critIndex", critIndex);
+				//
+				String alias = pathInfo.substring(1);
+				if (pathInfo.indexOf("&") != -1) {
+					alias = pathInfo.substring(1, pathInfo.indexOf("&"));
+				} else if (pathInfo.indexOf("/", 1) != -1) {
+					// if / behind mapname... slice map-alias out
+					alias = elements[1];
+				}
+				session.setAttribute("mapAlias", alias);
+				BaseTopic mapTopic = CityMapTopic.lookupCityMap(alias, true, as); // throwIfNotFound=true
+				setCityMap(mapTopic, session);
+				if (!CityMapTopic.isProtected(mapTopic, as)) {
+					//
+					initCityMap(session);
+					return PAGE_BERLIN_ATLAS;
+				} else {
+					return PAGE_MAP_LOGIN;
+				}
+			} catch (DeepaMehtaException e) {
+				System.out.println("*** BrowseServlet.performAction(): " + e);
+				session.setAttribute("error", e.getMessage());
+				return PAGE_ERROR;
+			}
+		}
 
-        // session timeout?
-        if (getCityMap(session) == null) {
-            System.out.println("*** Session Expired ***");
-            session.setAttribute("error", "Timeout: Kiezatlas wurde mehr als " +
-                ((WebSession) session).session.getMaxInactiveInterval() / 60 + " Minuten nicht benutzt");
-            return PAGE_ERROR;
-        }
+		// session timeout?
+		if (getCityMap(session) == null) {
+			System.out.println("*** Session Expired ***");
+			session.setAttribute("error", "Timeout: Kiezatlas wurde mehr als " +
+				((WebSession) session).session.getMaxInactiveInterval() / 60 + " Minuten nicht benutzt");
+			return PAGE_ERROR;
+		}
 
-        // login
-        if (action.equals(ACTION_TRY_LOGIN)) {
-            String password = params.getValue("password");
-            if (CityMapTopic.passwordCorrect(getCityMap(session), as, password)) {
-                initCityMap(session);
-                return PAGE_BERLIN_ATLAS;
-            } else {
-                return PAGE_MAP_LOGIN;
-            }
-        } else if (action.equals(ACTION_SEARCH)) {
-            // search
-            setSearchMode(SEARCHMODE_BY_NAME, session);
-            setSearchValue(params.getValue("search"), session);
-            return PAGE_GEO_LIST;
-        // show
-        } else if (action.equals(ACTION_SHOW_CATEGORIES)) {
-            String critNr = params.getValue("critNr");
-            setSearchMode(critNr, session);
-            session.setAttribute("defaultCriteria", critNr);
-            return PAGE_CATEGORY_LIST;
-        // select
-        } else if (action.equals(ACTION_SELECT_CATEGORY)) {
-            Vector selCats = getSelectedCats(session);
-            String catID = params.getValue("id");
-            toggle(selCats, catID);
-            return PAGE_CATEGORY_LIST;
-        // search by
-        } else if (action.equals(ACTION_SEARCH_BY_CATEGORY)) {
-            // needed for "cross-links" ### criterias in geo info are not rendered as links anymore
-            String critNr = params.getValue("critNr");
-            if (critNr != null) {
-                setSearchMode(critNr, session);
-            }
-            //
-            String catID = params.getValue("id");
-            setSearchValue(as.getLiveTopic(catID, 1).getName(), session);
-            // ### setSearchMode(SEARCHMODE_BY_CATEGORY, session);		// needed for "cross-links"
-            Vector selCats = getSelectedCats(session);
-            switchOn(selCats, catID);
-            return PAGE_GEO_LIST;
-        // info
-        } else if (action.equals(ACTION_SHOW_GEO_INFO)) {
-        // ### should also set the current HotspotMarker (e.g. after searchByCategory)
-                String geoID = params.getValue("id");
-            setSelectedGeo(geoID, session);
-            TopicBean topicBean = as.createTopicBean(geoID, 1);
-            session.setAttribute("topicBean", topicBean);
-            String imagePath = as.getCorporateWebBaseURL() + FILESERVER_IMAGES_PATH;
-            session.setAttribute("imagePath", imagePath);
-            GeoObjectTopic geo = (GeoObjectTopic) as.getLiveTopic(geoID, 1);
-            boolean isForumActivated = geo.isForumActivated();
-            session.setAttribute("forumActivition", isForumActivated ? SWITCH_ON : SWITCH_OFF);
-            if (isForumActivated) {
-                session.setAttribute("commentCount", new Integer(geo.getComments().size()));
-            }
-            return PAGE_GEO_INFO;
-            // show forum if wanted
-        }
-        return PAGE_ERROR;
+		// login
+		if (action.equals(ACTION_TRY_LOGIN)) {
+			String password = params.getValue("password");
+			if (CityMapTopic.passwordCorrect(getCityMap(session), as, password)) {
+				initCityMap(session);
+				return PAGE_BERLIN_ATLAS;
+			} else {
+				return PAGE_MAP_LOGIN;
+			}
+		} else if (action.equals(ACTION_SEARCH)) {
+			// search
+			setSearchMode(SEARCHMODE_BY_NAME, session);
+			setSearchValue(params.getValue("search"), session);
+			return PAGE_GEO_LIST;
+		// show
+		} else if (action.equals(ACTION_SHOW_CATEGORIES)) {
+			String critNr = params.getValue("critNr");
+			setSearchMode(critNr, session);
+			session.setAttribute("defaultCriteria", critNr);
+			return PAGE_CATEGORY_LIST;
+		// select
+		} else if (action.equals(ACTION_SELECT_CATEGORY)) {
+			Vector selCats = getSelectedCats(session);
+			String catID = params.getValue("id");
+			toggle(selCats, catID);
+			return PAGE_CATEGORY_LIST;
+		// search by
+		} else if (action.equals(ACTION_SEARCH_BY_CATEGORY)) {
+			// needed for "cross-links" ### criterias in geo info are not rendered as links anymore
+			String critNr = params.getValue("critNr");
+			if (critNr != null) {
+				setSearchMode(critNr, session);
+			}
+			//
+			String catID = params.getValue("id");
+			setSearchValue(as.getLiveTopic(catID, 1).getName(), session);
+			// ### setSearchMode(SEARCHMODE_BY_CATEGORY, session);		// needed for "cross-links"
+			Vector selCats = getSelectedCats(session);
+			switchOn(selCats, catID);
+			return PAGE_GEO_LIST;
+		// info
+		} else if (action.equals(ACTION_SHOW_GEO_INFO)) {
+		// ### should also set the current HotspotMarker (e.g. after searchByCategory)
+			String geoID = params.getValue("id");
+			setSelectedGeo(geoID, session);
+			TopicBean topicBean = as.createTopicBean(geoID, 1);
+			session.setAttribute("topicBean", topicBean);
+			String imagePath = as.getCorporateWebBaseURL() + FILESERVER_IMAGES_PATH;
+			session.setAttribute("imagePath", imagePath);
+			GeoObjectTopic geo = (GeoObjectTopic) as.getLiveTopic(geoID, 1);
+			boolean isForumActivated = geo.isForumActivated();
+			session.setAttribute("forumActivition", isForumActivated ? SWITCH_ON : SWITCH_OFF);
+			if (isForumActivated) {
+				session.setAttribute("commentCount", new Integer(geo.getComments().size()));
+			}
+			return PAGE_GEO_INFO;
+			// show forum if wanted
+		}
+		return PAGE_ERROR;
     }
 
     protected void preparePage(String page, RequestParameter params, Session session, CorporateDirectives directives) {
@@ -195,8 +196,8 @@ public class AtlasServlet extends DeepaMehtaServlet implements KiezAtlas {
 			Vector selectedCats = getSelectedCats(session);
 			session.setAttribute("categories", categories);
 			session.setAttribute("selectedCats", selectedCats);
-      // disable enumeration rendering
-      session.setAttribute("enumerationFlag", false);
+			// disable enumeration rendering
+			session.setAttribute("enumerationFlag", false);
 			// hotspots
 			setCategoryHotspots(session);
 			// clear marker
@@ -207,19 +208,19 @@ public class AtlasServlet extends DeepaMehtaServlet implements KiezAtlas {
 			String instTypeID = getInstitutionType(session).getID();
 			String searchMode = getSearchMode(session);
 			Vector insts;
-            // enable the rendering of enumeration
-            session.setAttribute("enumerationFlag", true);
+			// enable the rendering of enumeration
+			session.setAttribute("enumerationFlag", true);
 			if (searchMode.equals(SEARCHMODE_BY_NAME)) {
 				insts = cm.getViewTopics(mapID, 1, instTypeID, getSearchValue(session));
 				// hotspots
 				setHotspots(insts, ICON_HOTSPOT, session);
-                session.setAttribute("selectedCatId", "");
+				session.setAttribute("selectedCatId", "");
 			} else {
 				String catID = params.getValue("id");
 				insts = cm.getRelatedViewTopics(mapID, 1, catID, ASSOCTYPE_ASSOCIATION, instTypeID, 1);	// ### copy in setCategoryHotspots()
 				// hotspots + return the index of the current CatID in the multi-dimensional hotspot vector
 				int catIndex = setSearchedCategoryHotspots(session, catID);
-                session.setAttribute("selectedCatId", ""+catIndex+"");
+				session.setAttribute("selectedCatId", ""+catIndex+"");
 			}
 			session.setAttribute("institutions", insts);
 			// categories & addresses
@@ -251,108 +252,110 @@ public class AtlasServlet extends DeepaMehtaServlet implements KiezAtlas {
 			session.setAttribute("geoComments", getSelectedGeo(session).getCommentBeans());
 		}
 	}
-    
-    protected long getLastModified(HttpServletRequest req) {
-        String dateProperty = as.getTopicProperty(this.topicmapId, 1, PROPERTY_LAST_UPDATED);
-        long lastModified = new Date().getTime();
-        if (!dateProperty.equals("")) lastModified = new Date(Long.parseLong(dateProperty)).getTime();
-        return lastModified;
-    }
+
+	protected long getLastModified(HttpServletRequest req) {
+		String dateProperty = as.getTopicProperty(this.topicmapId, 1, PROPERTY_LAST_UPDATED);
+		long lastModified = new Date().getTime();
+		if (!dateProperty.equals("")) lastModified = new Date(Long.parseLong(dateProperty)).getTime();
+		return lastModified;
+	}
 
 
-  
+
 	// *****************
 	// *** Utilities ***
 	// *****************
 
-  private String getMapTopics(String mapId, String workspaceId, Session session) {
-    String result = null;
-    try {
-        // Send data
-        URL url = new URL(urlStr);
-        String query = "{\"method\": \"getMapTopics\", \"params\": [\"" + mapId + "\" , \"" + workspaceId + "\"]}";
-        URLConnection connection = new URL(urlStr).openConnection();
-        connection.setDoOutput(true); // Triggers POST.
-        // connection.setRequestProperty("Accept-Charset", charset);
-        connection.setRequestProperty("Content-Type", "application/json;charset=" + charset);
-        OutputStream output = null;
-        output = connection.getOutputStream();
-        output.write(query.getBytes(charset));
-        // Get the response
-        BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream(), charset)); //
-        String line = "";
-        if (rd.ready()) {
-          line = rd.readLine();
-        }
-        result = line;
-        rd.close();
-        return result;
-    } catch(UnknownHostException uke) {
-        System.out.println("*** [ATLAS] could not load CityMap-Data from " + urlStr + " cause is: " + uke.getCause());
-        return null;
-        // done();
-    } catch (Exception ex) {
-        System.out.println("*** [ATLAS] Servletencountered problem: " + ex.getMessage());
-        return null;
-    }
-  }
+	private String getMapTopics(String mapId, String workspaceId, Session session) {
+		String result = null;
+		try {
+			// Send data
+			URL url = new URL(urlStr);
+			String query = "{\"method\": \"getMapTopics\", \"params\": [\"" + mapId + "\" , \"" + workspaceId + "\"]}";
+			URLConnection connection = new URL(urlStr).openConnection();
+			connection.setDoOutput(true); // Triggers POST.
+			// connection.setRequestProperty("Accept-Charset", charset);
+			connection.setRequestProperty("Content-Type", "application/json;charset=" + charset);
+			OutputStream output = null;
+			output = connection.getOutputStream();
+			output.write(query.getBytes(charset));
+			// Get the response
+			BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream(), charset)); //
+			String line = "";
+			if (rd.ready()) {
+				line = rd.readLine();
+			}
+			result = line;
+			rd.close();
+			return result;
+		} catch(UnknownHostException uke) {
+			System.out.println("*** [ATLAS] couldn't load CityMapData from " + urlStr + " cause is: " + uke.getCause());
+			return null;
+			// done();
+		} catch (Exception ex) {
+			System.out.println("*** [ATLAS] Servletencountered problem: " + ex.getMessage());
+			return null;
+		}
+	}
 
-  private String getKiezCriterias(String mapId, Session session) {
-    String result = null;
-    try {
-        // Send data
-        URL url = new URL(urlStr);
-        String query = "{\"method\": \"getWorkspaceCriterias\", \"params\": [\"" + mapId + "\"]}";
-        // url.s
-        URLConnection connection = new URL(urlStr).openConnection();
-        connection.setDoOutput(true); // Triggers POST.
-        // connection.setRequestProperty("Accept-Charset", charset);
-        connection.setRequestProperty("Content-Type", "application/json;charset=" + charset);
-        OutputStream output = null;
-        output = connection.getOutputStream();
-        output.write(query.getBytes(charset));
-        // Get the response
-        BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream(), charset)); //
-        String line = "";
-        if (rd.ready()) {
-          line = rd.readLine();
-        }
-        result = line;
-        return result;
-    } catch(UnknownHostException uke) {
-        System.out.println("*** [ATLAS] could not load CityMap-Data from " + urlStr + " message is: " + uke.getCause());
-        return null;
-        // done();
-    } catch (UnsupportedEncodingException ex) {
-        System.out.println("*** [AtlasServlet] Servlet encountered unsupportedEncoding : " + ex.getMessage());
-        return null;
-    } catch (IOException ex) {
-        System.out.println("*** [AtlasServlet] Servlet encountered ioException : " + ex.getMessage());
-        return null;
-    }
-  }
+	private String getKiezCriterias(String mapId, Session session) {
+		String result = null;
+		try {
+			// Send data
+			URL url = new URL(urlStr);
+			String query = "{\"method\": \"getWorkspaceCriterias\", \"params\": [\"" + mapId + "\"]}";
+			// url.s
+			URLConnection connection = new URL(urlStr).openConnection();
+			connection.setDoOutput(true); // Triggers POST.
+			// connection.setRequestProperty("Accept-Charset", charset);
+			connection.setRequestProperty("Content-Type", "application/json;charset=" + charset);
+			OutputStream output = null;
+			output = connection.getOutputStream();
+			output.write(query.getBytes(charset));
+			// Get the response
+			BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream(), charset)); //
+			String line = "";
+			if (rd.ready()) {
+				line = rd.readLine();
+			}
+			result = line;
+			return result;
+		} catch(UnknownHostException uke) {
+			System.out.println("*** [ATLAS] could not load CityMap-Data from " + urlStr + " message is: " + uke.getCause());
+			return null;
+			// done();
+		} catch (UnsupportedEncodingException ex) {
+			System.out.println("*** [AtlasServlet] Servlet encountered unsupportedEncoding : " + ex.getMessage());
+			return null;
+		} catch (IOException ex) {
+			System.out.println("*** [AtlasServlet] Servlet encountered ioException : " + ex.getMessage());
+			return null;
+		}
+	}
 
-  private String getWorkspaceHomepage(String workspaceId, Session session) {
-    String homepageURL = "";
-    //
-    BaseTopic homepage = as.getRelatedTopic(workspaceId, KiezAtlas.ASSOCTYPE_HOMEPAGE_LINK, TOPICTYPE_WEBPAGE, 2, true);
-    if (homepage != null) homepageURL = as.getTopicProperty(homepage, PROPERTY_URL);
-    return homepageURL;
-  }
+	private String getWorkspaceHomepage(String workspaceId, Session session) {
+		String homepageURL = "";
+		//
+		BaseTopic homepage = as.getRelatedTopic(workspaceId, KiezAtlas.ASSOCTYPE_HOMEPAGE_LINK,
+				TOPICTYPE_WEBPAGE, 2, true);
+		if (homepage != null) homepageURL = as.getTopicProperty(homepage, PROPERTY_URL);
+		return homepageURL;
+	}
 
-  private String getWorkspaceImprint(String workspaceId, Session session) {
-    String impressumURL = "";
-    BaseTopic impressum = as.getRelatedTopic(workspaceId, KiezAtlas.ASSOCTYPE_IMPRESSUM_LINK, TOPICTYPE_WEBPAGE, 2, true);
-    if (impressum != null) impressumURL = as.getTopicProperty(impressum, PROPERTY_URL);
-    return impressumURL;
-  }
+	private String getWorkspaceImprint(String workspaceId, Session session) {
+		String impressumURL = "";
+		BaseTopic impressum = as.getRelatedTopic(workspaceId, KiezAtlas.ASSOCTYPE_IMPRESSUM_LINK, 
+				TOPICTYPE_WEBPAGE, 2, true);
+		if (impressum != null) impressumURL = as.getTopicProperty(impressum, PROPERTY_URL);
+		return impressumURL;
+	}
 
-  private String getWorkspaceLogo(String workspaceId, Session session) {
-    String logoURL = "";
-    BaseTopic logo = as.getRelatedTopic(workspaceId, ASSOCTYPE_ASSOCIATION, TOPICTYPE_IMAGE, 2, true);
-    if (logo != null) logoURL = as.getTopicProperty(logo, PROPERTY_FILE);
-    return logoURL;
-  }
+	private String getWorkspaceLogo(String workspaceId, Session session) {
+		String logoURL = "";
+		BaseTopic logo = as.getRelatedTopic(workspaceId, ASSOCTYPE_ASSOCIATION, TOPICTYPE_IMAGE, 2, true);
+		if (logo != null) logoURL = as.getTopicProperty(logo, PROPERTY_FILE);
+		return logoURL;
+	}
 
 	private void toggle(Vector topicIDs, String topicID) {
 		if (topicIDs.contains(topicID)) {
@@ -424,20 +427,20 @@ public class AtlasServlet extends DeepaMehtaServlet implements KiezAtlas {
 
 	// --- Methods to maintain data in the session
 
-  private void initCityMap(Session session) {
-    //
-    BaseTopic map = getCityMap(session);
-    BaseTopic workspace = as.getTopicmapOwner(map.getID());
-    session.setAttribute("workspace", workspace);
-    String mapTopics = getMapTopics(map.getID(), workspace.getID(), session);
-    String workspaceCriterias = getKiezCriterias(map.getID(), session);
-    // String workspaceInfos = getWorkspaceInfos(workspaceId, session);
-    session.setAttribute("mapTopics", mapTopics);
-    session.setAttribute("workspaceCriterias", workspaceCriterias);
-    session.setAttribute("workspaceImprint", getWorkspaceImprint(workspace.getID(), session));
-    session.setAttribute("workspaceHomepage", getWorkspaceHomepage(workspace.getID(), session));
-    session.setAttribute("workspaceLogo", getWorkspaceLogo(workspace.getID(), session));
-  }
+	private void initCityMap(Session session) {
+		//
+		BaseTopic map = getCityMap(session);
+		BaseTopic workspace = as.getTopicmapOwner(map.getID());
+		session.setAttribute("workspace", workspace);
+		String mapTopics = getMapTopics(map.getID(), workspace.getID(), session);
+		String workspaceCriterias = getKiezCriterias(map.getID(), session);
+		// String workspaceInfos = getWorkspaceInfos(workspaceId, session);
+		session.setAttribute("mapTopics", mapTopics);
+		session.setAttribute("workspaceCriterias", workspaceCriterias);
+		session.setAttribute("workspaceImprint", getWorkspaceImprint(workspace.getID(), session));
+		session.setAttribute("workspaceHomepage", getWorkspaceHomepage(workspace.getID(), session));
+		session.setAttribute("workspaceLogo", getWorkspaceLogo(workspace.getID(), session));
+	}
 
 	private void setCityMap(BaseTopic map, Session session) {
 		String mapImage = as.getCorporateWebBaseURL() + FILESERVER_BACKGROUNDS_PATH +
@@ -565,10 +568,10 @@ public class AtlasServlet extends DeepaMehtaServlet implements KiezAtlas {
 		System.out.println("> \"hotspots\" stored in session: institutions for " + selCats.size() + " categories");
 	}
 
-    /**
-     * nearly the same to setCategoryHotspots, except that it
-     * takes a catID as an argument and returns it index in the enumeration
-     */
+	/**
+	 * nearly the same to setCategoryHotspots, except that it
+	 * takes a catID as an argument and returns it index in the enumeration
+	 */
 	private int setSearchedCategoryHotspots(Session session, String catId) {
 		String mapID = getCityMap(session).getID();
 		String instTypeID = getInstitutionType(session).getID();
@@ -577,11 +580,11 @@ public class AtlasServlet extends DeepaMehtaServlet implements KiezAtlas {
 		Vector hotspots = new Vector();
 		Vector cluster = new Vector();
 		Enumeration e = selCats.elements();
-        int catIndex = 0;
-        int finalCatIndex = 0;
+		int catIndex = 0;
+		int finalCatIndex = 0;
 		while (e.hasMoreElements()) {
 			String catID = (String) e.nextElement();
-            if (catId == catID) { finalCatIndex = catIndex; };
+			if (catId == catID) { finalCatIndex = catIndex; };
 			Vector presentables = cm.getRelatedViewTopics(mapID, 1, catID, ASSOCTYPE_ASSOCIATION, instTypeID, 1);
 			String icon;
 			if (getSearchMode(session).equals("0")) {	// ### first search criteria uses distinct visualization
@@ -594,13 +597,13 @@ public class AtlasServlet extends DeepaMehtaServlet implements KiezAtlas {
 			}
 			presentables.insertElementAt(as.getCorporateWebBaseURL() + FILESERVER_ICONS_PATH + icon, 0);
 			hotspots.addElement(presentables);
-            catIndex++;
+			catIndex++;
 		}
 		makeCluster(hotspots, cluster);
 		session.setAttribute("cluster", cluster);
 		session.setAttribute("hotspots", hotspots);
 		System.out.println("> \"hotspots\" stored in session: institutions for " + selCats.size() + " categories");
-        return finalCatIndex;
+		return finalCatIndex;
 	}
 
 	// ---
@@ -655,42 +658,40 @@ public class AtlasServlet extends DeepaMehtaServlet implements KiezAtlas {
 					}
 				}
 			}
-			// ### System.out.println("> \"clusters\": "+clusters.toString());
 		}
-        //removeClusteredHotspots(hotspots, clusters);
 	}
 
-    /** should remove a presentable from the hotspots vector when part of cluster
-     *  ### implement it the other way around
-     */
-    private void removeClusteredHotspots(Vector hotspots, Vector clusters) {
-        for (int i = 0; i < hotspots.size(); i++) {
-            Vector topics = (Vector) hotspots.get(i);
-            Vector doubled = new Vector();
-            for (int j = 1; j < topics.size(); j++) {
-                PresentableTopic topic = (PresentableTopic) topics.get(j);
-                if (isPartOfCluster(clusters, topic.getID())) {
-                    // topic is visible in cluster
-                    doubled.add(topic);
-                }
-            }
-            topics.removeAll(doubled);
-        }
-    }
+	/** should remove a presentable from the hotspots vector when part of cluster
+	 *  ### implement it the other way around
+	 */
+	private void removeClusteredHotspots(Vector hotspots, Vector clusters) {
+		for (int i = 0; i < hotspots.size(); i++) {
+			Vector topics = (Vector) hotspots.get(i);
+			Vector doubled = new Vector();
+			for (int j = 1; j < topics.size(); j++) {
+				PresentableTopic topic = (PresentableTopic) topics.get(j);
+				if (isPartOfCluster(clusters, topic.getID())) {
+					// topic is visible in cluster
+					doubled.add(topic);
+				}
+			}
+			topics.removeAll(doubled);
+		}
+	}
 
-    private boolean isPartOfCluster(Vector clusters, String topicId) {
-        for (int i = 0; i < clusters.size(); i++) {
-            Cluster object = (Cluster) clusters.get(i);
-            Vector topics = object.getPresentables();
-            for (int j = 0; j < topics.size(); j++) {
-                PresentableTopic topic = (PresentableTopic) topics.get(j);
-                if (topic.getID().equals(topicId)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
+	private boolean isPartOfCluster(Vector clusters, String topicId) {
+		for (int i = 0; i < clusters.size(); i++) {
+			Cluster object = (Cluster) clusters.get(i);
+			Vector topics = object.getPresentables();
+			for (int j = 0; j < topics.size(); j++) {
+				PresentableTopic topic = (PresentableTopic) topics.get(j);
+				if (topic.getID().equals(topicId)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 
 	private Cluster findAndCheckClusters(PresentableTopic currentPT, Vector clusters){
 			for (int c=0; c < clusters.size(); c++) {
@@ -820,39 +821,37 @@ public class AtlasServlet extends DeepaMehtaServlet implements KiezAtlas {
 		return getCurrentCriteria(session).selectedCategoryIDs;
 	}
 
-  private void initSelectedCatAttribute(Session session) {
-      session.setAttribute("selectedCatId", null); // necessary for the new cityMap
-  }
+	private void initSelectedCatAttribute(Session session) {
+		session.setAttribute("selectedCatId", null); // necessary for the new cityMap
+	}
 
-  // ---
+	// ---
 
-  private Hashtable parseRequestedPath(String[] elements) {
-    Hashtable result = new Hashtable();
-    for (int i = 0; i < elements.length; i++) {
-      String key = elements[i];
-      try { // ### if one nomen has no attributes, the whole request fails
-        if (key.equals("layer")) {
-          result.put("layer", elements[i+1]);
-        } else if (key.equals("p")) {
-          result.put("geo", elements[i+1]);
-        } else if (key.equals("linkTo")) {
-          result.put("linkTo", elements[i+1]);
-        } else if (key.equals("categories")) {
-          result.put("categories", elements[i+1]);
-        } else if (key.equals("criteria")) {
-          result.put("criteria", Integer.parseInt(elements[i+1])-1);
-        } else if (key.equals("search")) {
-          result.put("search", elements[i+1]);
-        } else {
-          // skip this..
-        }
-      } catch (ArrayIndexOutOfBoundsException ex) {
-        return null;
-      }
-    }
-    // System.out.println("DEBUG: pathInfo.layer: \"" + result.get("layer") + "\" geoObject: \"" + result.get("geo") +"\" category: \"" +
-       //  result.get("category") + "\" criteria: \"" + result.get("criteria") + "\" search: \"" + result.get("search") + "\"");
-    return result;
-  }
-  
+	private Hashtable parseRequestedPath(String[] elements) {
+		Hashtable result = new Hashtable();
+		for (int i = 0; i < elements.length; i++) {
+			String key = elements[i];
+			try { // ### if one nomen has no attributes, the whole request fails
+				if (key.equals("layer")) {
+					result.put("layer", elements[i+1]);
+				} else if (key.equals("p")) {
+				 	result.put("geo", elements[i+1]);
+				} else if (key.equals("linkTo")) {
+					result.put("linkTo", elements[i+1]);
+				} else if (key.equals("categories")) {
+					result.put("categories", elements[i+1]);
+				} else if (key.equals("criteria")) {
+					result.put("criteria", Integer.parseInt(elements[i+1])-1);
+				} else if (key.equals("search")) {
+					result.put("search", elements[i+1]);
+				} else {
+					// skip this..
+				}
+			} catch (ArrayIndexOutOfBoundsException ex) {
+				return null;
+			}
+		}
+		return result;
+	}
+
 }
