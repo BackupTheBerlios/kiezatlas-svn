@@ -3,22 +3,21 @@
 	BaseTopic map = (BaseTopic) session.getAttribute("map");
 	BaseTopic workspace = (BaseTopic) session.getAttribute("workspace");
 	String mapTopics = (String) session.getAttribute("mapTopics");
-  String workspaceCriterias = (String) session.getAttribute("workspaceCriterias");
-  String workspaceImprint = (String) session.getAttribute("workspaceImprint");
-  String workspaceLogo = (String) session.getAttribute("workspaceLogo");
-  String mapAlias = (String) session.getAttribute("mapAlias");
-  String workspaceHomepage = (String) session.getAttribute("workspaceHomepage");
+    String workspaceCriterias = (String) session.getAttribute("workspaceCriterias");
+    String workspaceImprint = (String) session.getAttribute("workspaceImprint");
+    String workspaceLogo = (String) session.getAttribute("workspaceLogo");
+    String mapAlias = (String) session.getAttribute("mapAlias");
+    String workspaceHomepage = (String) session.getAttribute("workspaceHomepage");
 	String searchTerm = (String) session.getAttribute("searchTerm");
 	String originId = (String) session.getAttribute("originId");
 	String topicId = (String) session.getAttribute("topicId");
 	String catIds = (String) session.getAttribute("categories");
-  String baseLayer = (String) session.getAttribute("baseLayer");
+    String baseLayer = (String) session.getAttribute("baseLayer");
 	Integer critIndex = (Integer) session.getAttribute("critIndex");
-  String basePath = "http://localhost:8080/kiezatlas";
-  // String basePath = "http://www.kiezatlas.de";
-  //
-  String title = "Kiezatlas Stadtplan - " + map.getName();
-
+    String basePath = "http://localhost:8080/kiezatlas";
+    // String basePath = "http://www.kiezatlas.de";
+    //
+    String title = "Kiezatlas Stadtplan - " + map.getName();
 %>
 <% startMaps(session, out); %>
 <head>
@@ -33,13 +32,11 @@
   <link rel="stylesheet" href="<%= basePath %>/pages/be.de/maps.css" type="text/css">
   <link rel="stylesheet" href="<%= basePath %>/pages/be.de/211/theme/default/style.css" type="text/css">
   <link rel="stylesheet" href="<%= basePath %>/pages/be.de/211/theme/default/google.css" type="text/css">
-  <!-- script src="http://maps.google.com/maps/api/js?v=3.5&amp;key=AIzaSyAPiDLMJnA9__sseouoOZM8Nx8IEunjpdw&amp;sensor=false"></script-->
+  <!-- script type="text/javascript" src="http://maps.google.com/maps/api/js?v=3&key=AIzaSyB3raVpLb3EPWfKOwCOvszGB86kCcQpA54&sensor=false"></script-->
   <script type="text/javascript" src="<%= basePath %>/pages/be.de/211/OpenLayers.js"></script>
   <script type="text/javascript" src="<%= basePath %>/pages/be.de/CustomLayerSwitcher.js"></script>
   <script type="text/javascript" src="<%= basePath %>/pages/be.de/jquery.min.js"></script>
-  <script type="text/javascript" src="<%= basePath %>/pages/be.de/kiezatlas.js"></script>
-  <!-- <script type="text/javascript" src="../pages/be.de/jquery-1.3.2.js"></script>-->
-  <!-- <script type="text/javascript" src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAyg-5-YjVJ1InfpWX9gsTuxRa7xhKv6UmZ1sBua05bF3F2fwOehRUiEzUjBmCh76NaeOoCu841j1qnQ"></script> -->
+  <script type="text/javascript" src="<%= basePath %>/pages/be.de/kiezatlas.js"></script>  
   <script type="text/javascript">
     var basePath = '<%= basePath %>';
     var mapTitle = '<%= map.getName() %>';
@@ -85,9 +82,6 @@
     if (debug) {
       var debug_window = window.open('','','width=400,height=600,scrollbars=1');
     }
-    // 212: ABQIAAAAfPcn9RYcEecc-d1iHvHCIRTIIy1nlKSG8dPHOYwqi5UhuTLB2hT534VlXBVGCIqcQXQ-a4z45J0w6A
-    // var gKey = 'ABQIAAAAyg-5-YjVJ1InfpWX9gsTuxRa7xhKv6UmZ1sBua05bF3F2fwOehRUiEzUjBmCh76NaeOoCu841j1qnQ';
-    var gKey = 'ABQIAAAAfPcn9RYcEecc-d1iHvHCIRTIIy1nlKSG8dPHOYwqi5UhuTLB2hT534VlXBVGCIqcQXQ-a4z45J0w6A';
     //
     jQuery(document).ready(function() {
       // register resize
@@ -190,7 +184,7 @@
         <!-- <img border="0" id="divider" src="img/division.png" title="" width="1" height="10"> -->
 		      <!-- <a href="javascript:removeAllMarker();" style="text-decoration: none;">> Alle ausblenden</a> <br/>-->
 		    <a href="javascript:updateVisibleBounds(null, true, null, true);" id="resetMarkerHref">
-		      <!-- <img border="0" src="../pages/be.de/img/Stop.png" title="zurücksetzen der Kartenansicht und Informationsebenen" alt="Reset-Symbol" width="15" height="15"> -->
+		      <!-- <img border="0" src="../pages/be.de/img/Stop.png" title="zurÃ¼cksetzen der Kartenansicht und Informationsebenen" alt="Reset-Symbol" width="15" height="15"> -->
           Karte zur&uuml;cksetzen
         </a>
         <img src="http://www.kiezatlas.de/client/images/dropdown-btn.png" title="Mehr.." alt="Button: Mehr..">

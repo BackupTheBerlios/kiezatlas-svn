@@ -18,6 +18,7 @@ import java.io.StringReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
+import java.util.Date;
 import java.util.Hashtable;
 import java.util.Vector;
 import javax.xml.parsers.DocumentBuilder;
@@ -137,6 +138,7 @@ public class TimedEventImporter implements Job, DeepaMehtaConstants, KiezAtlas {
             + as.getTopicProperty(cityMapId, 1, PROPERTY_WEB_ALIAS)+ "\"");
         System.out.println("[EventJob] skipped " + unusable.size() + " unlocatable \"" 
             + getWorkspaceGeoType(workspaceId).getName()+"\"");
+        as.setTopicProperty(cityMapId, 1, PROPERTY_LAST_UPDATED, "" + new Date().getTime() + "");
         sendNotificationEmail(unusable);
         //
     }

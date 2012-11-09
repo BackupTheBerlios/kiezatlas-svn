@@ -250,10 +250,9 @@
       map.addLayers([ mapnik ]); // googleBaseLayer
     } else {
       //
-      /* var googleBaseLayer = new OpenLayers.Layer.Google("Google Streets", { numZoomLevels: 25, animationEnabled: true,
+      /** var googleBaseLayer = new OpenLayers.Layer.Google("Google Streets", { numZoomLevels: 25, animationEnabled: true,
         // sphericalMercator:true, << obsolete  maxExtent: openBounds, << cannot be set..
-        termsOfUse: jQuery("#kafooter").get(0), poweredBy: jQuery("#kafooter").get(0)
-        googleBaseLayer,
+        termsOfUse: jQuery("#kafooter").get(0), poweredBy: jQuery("#kafooter").get(0) googleBaseLayer,
       }); **/
       map.addLayers([ mapnik, mapbox ]);
     }

@@ -26,6 +26,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
@@ -225,9 +226,17 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
 					e.getMessage() + ")");
 			}
 		}
-		// --- update timestamp ---
+		// --- update timestamp on topic level ---
 		cm.setTopicData(getID(), 1, PROPERTY_LAST_MODIFIED, DeepaMehtaUtils.getDate());
-		//
+        // --- update timestamp on city map level ---
+        Vector<BaseTopic> cityMaps = cm.getViews(getID(), 1, VIEWMODE_HIDDEN);
+        System.out.println("Topic is in " + cityMaps.size() + " city maps contained.");
+        // for the ease we now update this property for *all* citymaps a topic is part (also of the unpublished)
+        for (int i = 0; i < cityMaps.size(); i++) {
+            BaseTopic cityMap = cityMaps.get(i);
+            long lastUpdated = new Date().getTime();
+            as.setTopicProperty(cityMap, PROPERTY_LAST_UPDATED, "" + lastUpdated + "");
+        }
 		return directives;
 	}
 

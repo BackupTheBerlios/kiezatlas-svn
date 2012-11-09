@@ -3,23 +3,23 @@
 	BaseTopic map = (BaseTopic) session.getAttribute("map");
 	BaseTopic workspace = (BaseTopic) session.getAttribute("workspace");
 	String mapTopics = (String) session.getAttribute("mapTopics");
-  String workspaceCriterias = (String) session.getAttribute("workspaceCriterias");
-  String workspaceImprint = (String) session.getAttribute("workspaceImprint");
-  String workspaceLogo = (String) session.getAttribute("workspaceLogo");
-  String mapAlias = (String) session.getAttribute("mapAlias");
-  String workspaceHomepage = (String) session.getAttribute("workspaceHomepage");
+    String workspaceCriterias = (String) session.getAttribute("workspaceCriterias");
+    String workspaceImprint = (String) session.getAttribute("workspaceImprint");
+    String workspaceLogo = (String) session.getAttribute("workspaceLogo");
+    String mapAlias = (String) session.getAttribute("mapAlias");
+    String workspaceHomepage = (String) session.getAttribute("workspaceHomepage");
 	String searchTerm = (String) session.getAttribute("searchTerm");
 	String originId = (String) session.getAttribute("originId");
 	String topicId = (String) session.getAttribute("topicId");
 	String catIds = (String) session.getAttribute("categories");
-  String baseLayer = (String) session.getAttribute("baseLayer");
+    String baseLayer = (String) session.getAttribute("baseLayer");
 	Integer critIndex = (Integer) session.getAttribute("critIndex");
-  String basePath = "http://localhost:8080/kiezatlas";
-  // String basePath = "http://www.berlin.de/atlas";
-  // String basePath = "http://www.kiezatlas.de/maps/embed/012";
-  String resourcePath = "http://www.kiezatlas.de/maps/embed/012";
-  //
-  String title = "" + map.getName() + " im Kiezatlas";
+    String basePath = "http://localhost:8080/kiezatlas";
+    // String basePath = "http://www.berlin.de/atlas";
+    // String basePath = "http://www.kiezatlas.de/maps/embed/012";
+    String resourcePath = "http://www.kiezatlas.de/maps/embed/012";
+    //
+    String title = "" + map.getName() + " im Kiezatlas";
 
 %>
 <% startMaps(session, out); %>
@@ -197,7 +197,7 @@
         <!-- <img border="0" id="divider" src="img/division.png" title="" width="1" height="10"> -->
 		      <!-- <a href="javascript:removeAllMarker();" style="text-decoration: none;">> Alle ausblenden</a> <br/>-->
 		    <a href="javascript:updateVisibleBounds(null, true, null, true);" id="resetMarkerHref">
-		      <!-- <img border="0" src="../pages/be.de/img/Stop.png" title="zurücksetzen der Kartenansicht und Informationsebenen" alt="Reset-Symbol" width="15" height="15"> -->
+		      <!-- <img border="0" src="../pages/be.de/img/Stop.png" title="zurï¿½cksetzen der Kartenansicht und Informationsebenen" alt="Reset-Symbol" width="15" height="15"> -->
           Karte zur&uuml;cksetzen
         </a>
         <img src="http://www.kiezatlas.de/client/images/dropdown-btn.png" title="Mehr.." alt="Button: Mehr..">

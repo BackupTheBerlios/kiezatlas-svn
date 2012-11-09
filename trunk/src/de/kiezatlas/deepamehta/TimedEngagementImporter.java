@@ -18,6 +18,7 @@ import java.io.StringReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -163,6 +164,7 @@ public class TimedEngagementImporter implements Job, DeepaMehtaConstants, KiezAt
         //
         System.out.println("[EngagementJob] stored " + validEntries + " in public cityMap \"" +as.getTopicProperty(cityMapId, 1, PROPERTY_WEB_ALIAS)+ "\"");
         System.out.println("[EngagementJob] skipped " + unusable.size() + " unlocatable \""+getWorkspaceGeoType(workspaceId).getName()+"\" ");
+        as.setTopicProperty(cityMapId, 1, PROPERTY_LAST_UPDATED, "" + new Date().getTime() + "");
         sendNotificationEmail(unusable, false);
     }
 
