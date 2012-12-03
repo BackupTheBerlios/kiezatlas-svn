@@ -1,8 +1,10 @@
 package de.kiezatlas.deepamehta;
 
+import de.deepamehta.AmbiguousSemanticException;
 import de.deepamehta.BaseTopic;
 import de.deepamehta.service.*;
 import de.deepamehta.service.web.JSONRPCServlet;
+import de.deepamehta.topics.LiveTopic;
 import de.deepamehta.topics.TypeTopic;
 
 import de.kiezatlas.deepamehta.topics.CityMapTopic;
@@ -415,9 +417,21 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
 		object.append("{\"name\": \"Mobile Stadtpl&auml;ne im KiezAtlas\",");
 		object.append("\"id\": \"0\",");
 		object.append("\"maps\": [");
-		for(int p = 0; p < mobileCityMaps.size(); p++) {
+		for (int p = 0; p < mobileCityMaps.size(); p++) {
+            String id, name, webAlias, workspaceId = "";
 			BaseTopic cityMap = (BaseTopic) mobileCityMaps.get(p);
-			String id, name, webAlias = "";
+            LiveTopic cityMapLive = (LiveTopic) as.getLiveTopic(cityMap.getID(), 1);
+            Vector childs = as.getRelatedTopics(cityMapLive.getID(), ASSOCTYPE_DERIVATION, 2);
+            if (childs != null) {
+                for (int i = 0; i < childs.size(); i++) {
+                    BaseTopic subtopic = (BaseTopic) childs.get(i);
+                    BaseTopic workspace = as.getRelatedTopic(subtopic.getID(), ASSOCTYPE_PUBLISHING, TOPICTYPE_WORKSPACE, 2, true);
+                    if (workspace != null) {
+                        workspaceId = workspace.getID();
+                        break;
+                    }
+                }
+            }
 			id = cityMap.getID();
 			name = cityMap.getName();
 			webAlias = as.getTopicProperty(cityMap, PROPERTY_WEB_ALIAS);
@@ -426,7 +440,8 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
 			if (!webAlias.equals("")) {
 				object.append("\"id\": \"" + id + "\", ");
 				object.append("\"name\": \"" + toJSON(name) + "\", ");
-				object.append("\"alias\": \"" + webAlias + "\" ");
+				object.append("\"alias\": \"" + webAlias + "\", ");
+				object.append("\"workspaceId\": \"" + workspaceId + "\" ");
 				//
 			}
 			if(mobileCityMaps.indexOf(cityMap) == mobileCityMaps.size() - 1)

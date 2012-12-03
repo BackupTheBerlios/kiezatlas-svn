@@ -418,13 +418,11 @@ public class ListServlet extends DeepaMehtaServlet implements KiezAtlas {
 				String instTypeID = getInstTypeID(session);
 				Vector insts = cm.getTopicIDs(instTypeID, cityMapID, true);		// sortByTopicName=true
 				Vector topicBeans = new Vector();
-        System.out.println("ListServlet.DEBUG: starting to create " + insts.size() + " topicBeans...: " + DeepaMehtaUtils.getTime(true) );
 				for (int i = 0; i < insts.size(); i++) {
           // Creates TopicBean
 					TopicBean topic = as.createTopicBean(insts.get(i).toString(), 1);
 					topicBeans.add(topic);
 				}
-        System.out.println("ListServlet.DEBUG: finished creating " + insts.size() + " topicBeans..." + DeepaMehtaUtils.getTime(true));
         //
 				setCachedTopicList(topicBeans, session);
 				System.out.println(">>> refreshed "+topicBeans.size()+" topics for the fat list");

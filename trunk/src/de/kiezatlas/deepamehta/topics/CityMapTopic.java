@@ -22,10 +22,10 @@ import java.util.*;
 
 
 /**
- * Kiezatlas 1.6.7<br>
- * Requires DeepaMehta 2.0b8
+ * Kiezatlas 1.6.10<br>
+ * Requires DeepaMehta 2.0b8-rev388
  * <p>
- * Last change: 28.11.2010<br>
+ * Last change: 12.11.2012<br>
  * J&ouml;rg Richter / Malte Reißig<br>
  * jri@deepamehta.de / mre@deepamehta.de
  */
@@ -33,7 +33,7 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 
 
 
-	static final String VERSION = "1.6.8.2";
+	static final String VERSION = "1.6.10";
 	static {
 		System.out.println(">>> Kiezatlas " + VERSION);
 	}
@@ -151,7 +151,7 @@ public class CityMapTopic extends TopicMapTopic implements KiezAtlas {
 		return super.propertyChangeAllowed(propName, propValue, session, directives);
 	}
 
-
+    
 
 	// ----------------------
 	// --- Topicmap Hooks ---

@@ -37,10 +37,10 @@ import java.util.logging.Logger;
 
 
 /**
- * Kiezatlas 1.6.2<br>
- * Requires DeepaMehta 2.0b8
+ * Kiezatlas 1.6.10<br>
+ * Requires DeepaMehta 2.0b8-rev388
  * <p>
- * Last change: 19.8.2008<br>
+ * Last change: 12.11.2012<br>
  * J&ouml;rg Richter<br>
  * jri@deepamehta.de
  */
