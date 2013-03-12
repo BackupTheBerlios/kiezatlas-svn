@@ -3,24 +3,25 @@
 	BaseTopic map = (BaseTopic) session.getAttribute("map");
 	BaseTopic workspace = (BaseTopic) session.getAttribute("workspace");
 	String mapTopics = (String) session.getAttribute("mapTopics");
-    String workspaceCriterias = (String) session.getAttribute("workspaceCriterias");
-    String workspaceImprint = (String) session.getAttribute("workspaceImprint");
-    String workspaceLogo = (String) session.getAttribute("workspaceLogo");
-    String mapAlias = (String) session.getAttribute("mapAlias");
-    String workspaceHomepage = (String) session.getAttribute("workspaceHomepage");
+  String workspaceCriterias = (String) session.getAttribute("workspaceCriterias");
+  String workspaceImprint = (String) session.getAttribute("workspaceImprint");
+  String workspaceLogo = (String) session.getAttribute("workspaceLogo");
+  String mapAlias = (String) session.getAttribute("mapAlias");
+  String workspaceHomepage = (String) session.getAttribute("workspaceHomepage");
 	String searchTerm = (String) session.getAttribute("searchTerm");
 	String originId = (String) session.getAttribute("originId");
 	String topicId = (String) session.getAttribute("topicId");
 	String catIds = (String) session.getAttribute("categories");
-    String baseLayer = (String) session.getAttribute("baseLayer");
+  String baseLayer = (String) session.getAttribute("baseLayer");
 	Integer critIndex = (Integer) session.getAttribute("critIndex");
-    String basePath = "http://localhost:8080/kiezatlas";
-    // String basePath = "http://www.kiezatlas.de";
-    //
-    String title = "Kiezatlas Stadtplan - " + map.getName();
+  // String basePath = "http://localhost:8080/kiezatlas";
+  String basePath = "http://www.kiezatlas.de";
+  //
+  String title = "Kiezatlas Stadtplan - " + map.getName();
 %>
 <% startMaps(session, out); %>
 <head>
+  <!-- meta http-equiv="Content-type" content="text/html; charset=ISO-8859-15"/-->
   <meta http-equiv="content-type" content="text/html charset=UTF-8"/>
   <title> <%= title %> </title>
   <!--[if gte IE 7]>
@@ -36,7 +37,7 @@
   <script type="text/javascript" src="<%= basePath %>/pages/be.de/211/OpenLayers.js"></script>
   <script type="text/javascript" src="<%= basePath %>/pages/be.de/CustomLayerSwitcher.js"></script>
   <script type="text/javascript" src="<%= basePath %>/pages/be.de/jquery.min.js"></script>
-  <script type="text/javascript" src="<%= basePath %>/pages/be.de/kiezatlas.js"></script>  
+  <script type="text/javascript" src="<%= basePath %>/pages/be.de/kiezatlas.js"></script>
   <script type="text/javascript">
     var basePath = '<%= basePath %>';
     var mapTitle = '<%= map.getName() %>';
@@ -77,7 +78,7 @@
     var markerLayer = "";
     // gui elements
     var sideBarVisible = true;
-    // 
+    //
     var debug = false;
     if (debug) {
       var debug_window = window.open('','','width=400,height=600,scrollbars=1');
@@ -116,7 +117,7 @@
         gMarkers = setupOpenMarkers(mapTopics);
         // initialize Features and their control
         initLayerAllFeatures(gMarkers, map);
-        initBerlinDistrictsLayer(basePath + "/pages/be.de/img");
+        initBerlinDistrictsLayer();
         // inputFieldBehaviour();
         // check if a special projectId was given through the entry url
         reSetMarkers(myNewLayer);
@@ -140,75 +141,86 @@
         map.events.register("zoomend", map, redrawAfterZoomOperation);
         // map.maxExtent = bounds;
         map.raiseLayer(myNewLayer);
-        if (jQuery.browser.msie) handleResize(); // fix the layout for ie..
+        if (jQuery.browser.msie) handleResize(); // this fixes the layout for ie..
       });
     });
   </script>
 </head>
   <body>
     <div id="kiezatlas" style="visibility: hidden;">
+
       <div id="kaheader">
+
 		    <div id="focusInput">
 		      <form id="autoLocateInputField" action="javascript:focusRequest()">
             <label for="streetNameField">In der N&auml;he von</label>
-            <input id="streetNameField" type="text" size="18" value="Stra&szlig;enname / Hnr."/>
+            <input id="streetNameField" type="text" size="18" placeholder="Stra&szlig;enname / Hnr."/>
+            <a href="javascript:focusRequest()" class="go-focus">OK</a>
             <label for="streetNameField">im</label>
             <span id="mapName"></span>
 		      </form>
 		    </div>
+
         <div id="cityMapDialog" style="visibility: hidden;"></div>
+
 		    <div id="searchInput">
 		      <form id="searchForm" action="javascript:searchRequest()">
 			    <label for="searchInputField">Suche</label>
-			    <input id="searchInputField" type="text" value="Name / Stichwort" size="15"/>
+			    <input id="searchInputField" type="text" placeholder="Name / Stichwort" size="15"/>
+          <a href="javascript:searchRequest()" class="go-search">OK</a>
 		      </form>
 		    </div>
+
 		    <div id="headerButtons">
-			    <img id="resizeButton" title="Seitenleiste ausblenden" onclick="javascript:handleSideBar()" src="<%= basePath %>/pages/be.de/img/go-last.png" alt="Seitenleiste ausblenden">
-		    <!-- </div> -->
+			    <img id="resizeButton" title="Seitenleiste ausblenden"
+            onclick="javascript:handleSideBar()" src="<%= basePath %>/pages/be.de/img/go-last.png"
+            alt="Seitenleiste ausblenden">
 		    </div>
       </div>
+
       <div id="map"></div>
+
 	    <div id="focusAlternatives"></div>
-      <div id="permaLink" style="visibility: hidden;" onclick="javascript:selectPermalink()">
-          <input id="permaInputLink" type="text" value=""/>
-      </div>
+
       <div id="mapControl">&nbsp;
-        <a href="javascript:showPermaLink();" id="permaLinkHref">
-          Permalink
-        </a>
+
         <a href="javascript:showAllMarker();" id="toggleMarkerHref">
-          <!-- <img border="0" src="../pages/be.de/img/FreiwilligenAgentur.png" title="Alle Markierer einblenden" alt="Markierer-Symbol" width="15" height="15"> -->
           Alles einblenden
         </a>
-        <!-- <img border="0" id="divider" src="img/division.png" title="" width="1" height="10"> -->
-		      <!-- <a href="javascript:removeAllMarker();" style="text-decoration: none;">> Alle ausblenden</a> <br/>-->
 		    <a href="javascript:updateVisibleBounds(null, true, null, true);" id="resetMarkerHref">
-		      <!-- <img border="0" src="../pages/be.de/img/Stop.png" title="zurücksetzen der Kartenansicht und Informationsebenen" alt="Reset-Symbol" width="15" height="15"> -->
           Karte zur&uuml;cksetzen
         </a>
-        <img src="http://www.kiezatlas.de/client/images/dropdown-btn.png" title="Mehr.." alt="Button: Mehr..">
-        <!-- <img border="0"atlas id="divider" src="img/division.png" title="" width="1" height="10"> -->
-        <!--  <span id="moreLabel">&nbsp;Mehr..</span> -->
+        <span id="moreLabel">
+          &nbsp;Mehr..
+          <img src="http://www.kiezatlas.de/client/images/dropdown-btn.png" title="Mehr.." alt="Button: Mehr..">
+        </span>
         <div id="mapSwitcher" style="position: absolute; visibility: hidden;"></div>
+
       </div>
+
       <div id="memu" style="visibility:hidden;"></div>
+
       <div id="navPanel"></div>
+
       <div id="sideBar">
 		    <div id="sideBarCriterias"></div>
 		    <div id="sideBarCategories"></div>
         <div id="progContainer"></div>
       </div>
+
       <div id="kafooter">
         <a href="http://www.berlin.de/buergeraktiv/">Impressum</a> und <a href="http://ehrenamt.index.de">Haftungshinweise</a><br/>
         <b> powered by <a href="http://www.kiezatlas.de">Kiezatlas</a></b>
       </div>
-      <div id="sideBarControl"></div> <!-- onclick="javascript:handleSideBar();" onclick="javascript:showDialog(false)"  -->
+
+      <div id="sideBarControl"></div>
+
       <div id="dialogMessage" style="visibility: hidden;" title="Dialog schlie&szlig;en">
           <div id="closeDialog" onclick="javascript:showDialog(false)">(Dialog schlie&szlig;en)</div>
           <b id="modalTitle" class="redTitle"></b>
           <p id="modalMessage"></p>
       </div>
+
     </div>
   </body>
 </html>

@@ -54,8 +54,8 @@ public class MapServlet extends DeepaMehtaServlet implements KiezAtlas {
 	// --
 
 
-	// private final String urlStr = "http://www.kiezatlas.de/rpc/";
-	private final String urlStr = "http://localhost:8080/kiezatlas/rpc/";
+	private final String urlStr = "http://www.kiezatlas.de/rpc/";
+	// private final String urlStr = "http://localhost:8080/kiezatlas/rpc/";
 	// private final String urlStr = "http://212.87.44.116:8080/rpc/";
 	private final String charset = "ISO-8859-1";
 
@@ -63,7 +63,7 @@ public class MapServlet extends DeepaMehtaServlet implements KiezAtlas {
 
 
 
-	protected String performAction(String action, RequestParameter params, Session session, 
+	protected String performAction(String action, RequestParameter params, Session session,
 								CorporateDirectives directives) throws ServletException {
 		if (action == null) {
 			try {
@@ -122,7 +122,7 @@ public class MapServlet extends DeepaMehtaServlet implements KiezAtlas {
 		// session timeout?
 		if (getCityMap(session) == null) {
 			System.out.println("*** Session Expired ***");
-			session.setAttribute("error", "Timeout: Kiezatlas wurde mehr als " + 
+			session.setAttribute("error", "Timeout: Kiezatlas wurde mehr als " +
 					((WebSession) session).session.getMaxInactiveInterval() / 60 + " Minuten nicht benutzt");
 			return PAGE_ERROR;
 		}

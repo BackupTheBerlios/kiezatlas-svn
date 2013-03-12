@@ -1,6 +1,6 @@
-/* 
+/*
  * Kiezatlas Alternative Maps Interface - Kiezatlas Labs Stylesheet
- * 
+ *
  * @author Malte Reißig - mre@deepamehta.de (2011/11/21)
  */
 
@@ -31,19 +31,23 @@
 #focusInput input, #focusInput textarea { border: 1px solid #40B0E2; font-weight: bold; font-family:"Verdana", "Tahoma", "sans-serif"; font-size:13px; padding: 4px; background-color:#fff; color: #3f5da6; width:180px; }
 #searchInput { position: absolute; height: 30px; top:3px; font-family:"Verdana", "Tahoma", "sans-serif"; font-size:13px; color: #3f5da6; }
 /** #searchInput label { color: #40B0E2; } **/
-#searchInput input, #searchInput textarea { border: 1px solid #40B0E2; font-weight: bold; font-family:"Verdana", "Tahoma", "sans-serif"; font-size:13px; padding: 4px; background-color:#fff; color: #3f5da6; width:140px; }
+#searchInput input, #searchInput textarea { border: 1px solid #40B0E2; font-weight: bold; font-family:"Verdana", "Tahoma", "sans-serif"; font-size:13px; padding: 4px; background-color:#fff; color: #3f5da6; width:160px; }
 #headerButtons { position: absolute; top:1px; }
-#mapControl { position: absolute; vertical-align: top; height: 25px; padding-right: 10px; padding-top: 5px; color:#3F5DA6; background-color: #fff; font: 12px; font-family:"Verdana", "Tahoma", "sans-serif"; font-weight: bold; background-color: #fff; border: 1px solid #3f5da6; z-index: 1001; }
+#mapControl { position: absolute; vertical-align: top; height: 25px; padding-right: 10px; color:#3F5DA6; background-color: #fff; font-family:"Verdana", "Tahoma", "sans-serif"; font-weight: bold; background-color: #fff; border: 1px solid #3f5da6; z-index: 1001; }
+#moreLabel { cursor: pointer; padding: 5px; display: inline-block; padding-bottom: 6px; }
+#moreLabel:hover { text-decoration: underline; background-color: #3f5da6; color: #fff; }
+#moreLabel.selected { background-color: #3f5da6; color: #fff; }
 #mapControl a { color:#3f5da6; font-size: 12px; padding: 5px; }
 #mapControl img { cursor: pointer; }
-#resetMarkerHref { position: relative; top: 2px; }
-#toggleMarkerHref { position: relative; top: 2px; }
+
+a.go-search, a.go-focus { padding: 3px; padding-right: 5px; padding-top: 5px; position: relative; top: 0px; left: -30px; color: #3f5da6; font-size: 10px; font-weight: normal; }
+a.go-search:hover, a.go-focus:hover, a.go-search:focus, a.go-focus:focus { cursor: pointer; background-color: #3f5da6; color: #fff; text-decoration: none; }
 
 #dialogMessage { margin-left: auto; margin-right: auto; position: relative; top: 150px; width: 310px; height: 150px; background-color: #fff; border: 1px solid #3f5da6; cursor: pointer; }
 #modalTitle { position: relative; top: 5px; padding: 10px; margin-right: auto; margin-left: auto; width: 260px; }
 #modalMessage { padding: 10px; width: 290px; }
 #closeDialog { position: relative; top: 130px; left: 175px; }
-#mapSwitcher { font-family:"Verdana", "Tahoma", "sans-serif"; font-size: 12px; font-weight: bold; color: #3F5DA6 !important; position: absolute; top: 30px; }
+#mapSwitcher { font-family:"Verdana", "Tahoma", "sans-serif"; font-size: 12px; font-weight: bold; color: #3F5DA6 !important; position: absolute; top: 30px; width: 160px;}
 #memu { position: absolute; top: 4px; left: 10px; background-color: #fff; width:325px; font-family:"Verdana", "Tahoma", "sans-serif"; font-size:13px; opacity:0.8; padding: 5px; padding-left: 10px; color:#000099; }
 #memu a .hover { color:#3f5da6; }
 #map { position: absolute; left:0px; }

@@ -1,19 +1,19 @@
 
-  /** 
+  /**
    * This is the JavaScript Kiezatlas Citymap Client
-   * 
+   *
    * @author Malte Rei&szlig;ig (malte@deepamehta.org)
    * @license GPL v3
-   * 
+   *
    * @modified 16.May 2011
    *
    * @requires OpenLayers.js (2.9), jQuery(1.3.2 - 1.5.2).js
-   * 
+   *
    * TODO: code cleanup, improving some wording on method signatures, some error handling
    * TODO: relies on some icons and scripts at http://www.kiezatlas.de/maps/embed/ ### if (onBerlinDe)
    * INFO: getters/checkers return "null" as a negative result/ error
    *
-   * NOTES: 
+   * NOTES:
    */
 
 
@@ -22,8 +22,8 @@
   // --- Settings helping you to configure this script
   // --
 
-  // var SERVER_URL = "http://www.kiezatlas.de";
-  var SERVER_URL = "http://localhost:8080/kiezatlas";
+  var SERVER_URL = "http://www.kiezatlas.de";
+  // var SERVER_URL = "http://localhost:8080/kiezatlas";
   var SERVICE_URL = SERVER_URL + "/rpc/"; // to be used by the jquery ajax methods
   var ICONS_URL = "http://www.kiezatlas.de/client/icons/"; // to be used by all icons if not relative to this folder
   //
@@ -50,7 +50,7 @@
   var linkParams = [];
 
   var kiezatlas = new function() {
-    // 
+    //
     this.mapTopics = undefined;
     this.workspaceCriterias = undefined;
     this.cityMapId = undefined;
@@ -95,7 +95,7 @@
       if (!this.historyApiSupported) {
         return;
       } else {
-        // 
+        //
         if (state.name == "getGeoObjectInfo") {
           showTopicInMap(state.parameter);
           showTopicInSideBar(state.parameter, true);
@@ -117,12 +117,12 @@
           hideAllInfoWindows();
           searchRequest(state.parameter);
         }
-        // 
+        //
       }
     }
 
     this.push_history = function (state, link) {
-      // 
+      //
       if (!this.historyApiSupported) {
         return;
       }
@@ -145,7 +145,7 @@
       }
       return null;
     }
-    
+
     // ### FIXME migrate code into this object..
     // this.isHistoryEnabled = windows.history
     this.getCurrentBounds = function () {
@@ -155,29 +155,6 @@
       } else {
         return null;
       }
-    }
-
-
-    /** a get and show method implemented as
-     *  an asynchronous call which renders the html directly into the main window when the result has arrived **/
-    this.getPublishedMobileCityMaps = function(workspaceId) {
-      var url = SERVICE_URL;
-      var body = '{"method": "getMobileCityMaps", "params": ["' + workspaceId + '"]}';
-      jQuery.ajax({
-	      type: "POST",
-	      url: url,
-	      data: body,
-        beforeSend: function(xhr) {xhr.setRequestHeader("Content-Type", "application/json")},
-        dataType: 'json',
-	      success: function(obj) {
-          console.log("found the following mobile city maps")
-          console.log(obj.result)
-	      }, // end of success handler
-	      error: function(x, s, e){
-	        showDialog(true, "Ups, Sorry!", "Bei der Anfrage nach mobilen Stadtpl&auml;nen"
-            + " ist ein Übertragungsfehler aufgetreten. Bitte versuchen Sie es noch einmal.")
-	      }
-      });
     }
 
   }
@@ -199,7 +176,7 @@
     }
     if (onBerlinDe) {
       // SERVER_URL = "http://localhost:8080/kiezatlas";
-      SERVER_URL = "http://212.87.44.116:8080";
+      // SERVER_URL = "http://212.87.44.116:8080";
       baseUrl = SERVER_URL + "/atlas/";
       SERVICE_URL = baseUrl + "rpc/";
     }
@@ -256,9 +233,8 @@
       }); **/
       map.addLayers([ mapnik, mapbox ]);
     }
-    // event binding for the new hover controlMenu ### ToDo: find a better place for this
-    jQuery("#mapControl").bind("mouseover", overMapControl);
-    jQuery("#mapControl").bind("mouseout", outMapControl);
+
+    jQuery("#moreLabel").click(clickOnMore);
     // layerSwitcher, NavigationHistory, Panel
     map.zoomToExtent(bounds.transform(map.displayProjection, map.getProjectionObject()));
     // if (onBerlinDe) { map.zoomTo(LEVEL_OF_CITY_ZOOM); }
@@ -280,7 +256,7 @@
       // but here, we remove the default panzoom control again
       var controls = map.getControlsByClass("OpenLayers.Control.PanZoom");
       map.removeControl(controls[0]);
-      // 
+      //
       map.addControl(myLayerSwitcher);
       map.addControl(zoomBox);
       // map.addControl(panel);
@@ -289,38 +265,46 @@
   }
 
   /**
-   * craziest method ever - if (theres not something) else like that out there
-   * notes: does handle our basic html-layout-wireframe in 3 variations, plus all for internet explorer
-   **/
+   * The craziest method ever, undoubtly complete crap..
+   * .. dealing with the basic html-layout-wireframe in 3 variations here.
+   * note: and it relies on $.browser
+   * @see is called by handleResize()
+   */
   function setLayout(fullH, fullW) {
     // onBerlinDe: fixed Width, downed under from Top, adjusted sideBarHeight,
-    var sideW = 320;
+    var sideW = 321;
+
+    var $map = jQuery("#map");
+    var $mapControl = jQuery("#mapControl");
+    var $kaheader = jQuery("#kaheader");
+    var $sideBar = jQuery("#sideBar");
+    var $kafooter = jQuery("#kafooter");
+    var $mapSwitcher = jQuery("#mapSwitcher");
+    var $focusInput = jQuery("#focusInput");
+    var $searchInput = jQuery("#searchInput");
+
     if (onBerlinDe && jQuery.browser.msie && !fullWindow) {
       // start with windows fix
       // jQuery("#kaheader").css("height", "40px");
-      jQuery("#kaheader").css("top", 153);
+      $kaheader.css("top", 153);
       // jQuery("#kafooter").css("bottom", 2);
       jQuery("#focusAlternatives").css("top", 182);
-      jQuery("#permaLink").css("top", 182);
-      jQuery("#sideBar").css("width", sideW + 2);
+      // jQuery("#permaLink").css("top", 182);
+      $sideBar.css("width", sideW + 2);
       jQuery("#bo_header #main_navigation").css("width", 1036);
     } else if (jQuery.browser.msie && !onBerlinDe) { // maps-labs on ie
-      // jQuery("#kaheader").css("height", "40px");
-      jQuery("#focusInput").css("top", 9);
-      // jQuery("#focusInput input textarea").css("padding-top", 2);
-      jQuery("#searchInput").css("top", 9);
+      $focusInput.css("top", 9);
+      $searchInput.css("top", 9);
       jQuery("#OpenLayers.Control.LayerSwitcher_44_layersDiv").css("left", -137);
       // jQuery("#searchInput input textarea").css("padding-top", 2);
     } else if (onBerlinDe) {
-      jQuery("#kaheader").css("top", 143);
+      $kaheader.css("top", 143);
     }
-    //
-    // var topHeight = jQuery("#kaheader").css("height");
+
     var topHeight = 39;
-    var startHeight = jQuery("#kaheader").css("top");
-    // topHeight = parseInt(topHeight.substr(0, topHeight.length-2));
-    startHeight = parseInt(startHeight.substr(0, startHeight.length-2));
+    var startHeight = $kaheader.position().top;
     jQuery("#kiezatlas").css("visibility", "visible");
+
     // just on berlin.de
     if (onBerlinDe && !fullWindow) {
       fullW = 1037 - 1; // else fullW = fullW - 7;
@@ -332,20 +316,22 @@
       fullH = fullH - 1;
       // mapH = mapH - 15;
       jQuery("#kiezatlas").css("width", fullW);
-      jQuery("#kaheader").css("top", 0);
+      $kaheader.css("top", 0);
       // jQuery("#focusAlternatives").css("top", 182);
       // jQuery("#permaLink").css("top", 182);
     }
+
     // kiezatlas alternative labs specific
     var mapW = mapW = fullW - sideW - 6; // border fullW - sideW - 7;
     var mapH = fullH - topHeight - startHeight - 1; // current labs headerHeight
-    jQuery("#kaheader").css("width", fullW);
-    // 
-    jQuery("#map").css("top", startHeight + topHeight + 1);
-    jQuery("#map").css("width", mapW);
-    jQuery("#map").css("height", mapH);
+    $kaheader.css("width", fullW + 1);
     //
-    jQuery("#mapControl").css("top", startHeight + topHeight);
+    $map.css("top", startHeight + topHeight);
+    $map.css("width", mapW);
+    $map.css("height", mapH);
+    //
+    $mapControl.css("top", startHeight + topHeight);
+
     // more berlin.de specific
     if (onBerlinDe && !fullWindow) {
       // jQuery("#focusInput").css("left", 240);
@@ -353,70 +339,72 @@
       // jQuery("#focusAlternatives").css("left", 310);
       // jQuery("#permaLink").css("left", 275);
       jQuery("#headerButtons").css("left", fullW - 56);
-      jQuery("#mapControl").css("left", mapW - 377);
-      jQuery("#sideBar").css("top", topHeight + startHeight + 1);
+      $mapControl.css("left", mapW - 377);
+      if (jQuery.browser.webkit) $mapControl.css("left", 204);
+      $sideBar.css("top", topHeight + startHeight + 1);
       jQuery("#sideBarControl").css("top", topHeight + startHeight + 1);
-      jQuery("#permaLink").css("top", topHeight + startHeight);
-      jQuery("#focusInput").css("top", 5);
-      jQuery("#searchInput").css("top", 5);
+      // jQuery("#permaLink").css("top", topHeight + startHeight);
+      $focusInput.css("top", 5);
+      $searchInput.css("top", 5);
     } else if (onBerlinDe && fullWindow) {
       // align at top without startHeight
       mapH = fullH - topHeight;
-      jQuery("#map").css("height", mapH);
-      jQuery("#map").css("top", topHeight + 1);
+      $map.css("height", mapH);
+      $map.css("top", topHeight + 1);
       jQuery("#headerButtons").css("left", fullW - 56);
       jQuery("#focusAlternatives").css("top", topHeight + 1);
-      jQuery("#permaLink").css("top", topHeight);
-      jQuery("#mapControl").css("top", topHeight);
-      jQuery("#mapControl").css("left", mapW - 377  );
-      jQuery("#focusInput").css("top", 4);
-      jQuery("#searchInput").css("top", 4);
-      jQuery("#sideBar").css("top", topHeight + 1)
+      // jQuery("#permaLink").css("top", topHeight);
+      $mapControl.css("top", topHeight);
+      $mapControl.css("left", mapW - 377  );
+      $focusInput.css("top", 4);
+      $searchInput.css("top", 4);
+      $sideBar.css("top", topHeight + 1)
       jQuery("#sideBarControl").css("top", topHeight + 1);
     } else {
-      jQuery("#focusInput").css("left", 45);
+      // not on berlin.de
+      $focusInput.css("left", 45);
       jQuery("#focusAlternatives").css("left", 144);
       jQuery("#headerButtons").css("left", fullW - 30);
-      jQuery("#mapControl").css("left", mapW - 378);
-      jQuery("#sideBar").css("top", topHeight + startHeight + 1);
-      jQuery("#sideBarControl").css("top", topHeight + startHeight + 1);
+      $mapControl.css("left", mapW - 378);
+      $sideBar.css("top", topHeight + startHeight + 1);
+      jQuery("#sideBarControl").css("top", topHeight + startHeight);
     }
-    //
+    // on berlin.de with IE
     if (onBerlinDe && jQuery.browser.msie) {
-      jQuery("#map").css("top", jQuery("#map").position().top - 5);
+      var mapTop = $map.position().top;
+      $map.css("top", mapTop - 5);
       // jQuery("#headerButtons").css("left", fullW - 56);
-      jQuery("#mapControl").css("top", jQuery("#map").position().top - 1);
-      jQuery("#mapControl").css("left", jQuery("#mapControl").position().left  + 10);
-      jQuery("#sideBar").css("top", jQuery("#map").position().top);
-      jQuery("#sideBarControl").css("top", jQuery("#map").position().top);
-      jQuery("#permaLink").css("top", jQuery("#map").position().top - 1);
-      jQuery("#focusInput").css("top", 5);
-      jQuery("#searchInput").css("top", 5);
+      $mapControl.css("top", mapTop - 1);
+      $mapControl.css("left", $mapControl.position().left  + 10);
+      $sideBar.css("top", mapTop);
+      jQuery("#sideBarControl").css("top", mapTop - 1);
+      // jQuery("#permaLink").css("top", mapTop - 1);
+      $focusInput.css("top", 5);
+      $searchInput.css("top", 5);
       jQuery("#focusInput input").css("padding", 2);
       jQuery("#searchInput input").css("padding", 2);
-      jQuery("#permaLink input").css("padding", 2);
+      // jQuery("#permaLink input").css("padding", 2);
       jQuery(".layersDiv").css("left", -2);
-      jQuery("#mapSwitcher").css("top", jQuery("#mapSwitcher").position().top - 3);
-      // jQuery("#mapSwitcher").css("left", jQuery("#mapSwitcher").position().top -4);
+      $mapSwitcher.css("top", $mapSwitcher.position().top - 3);
     }
     //
-    jQuery("#searchInput").css("left", fullW - sideW + 30);
-    jQuery("#sideBar").css("height", mapH - 1);
+    $searchInput.css("left", fullW - sideW + 30);
+    $sideBar.css("height", mapH - 1);
     // sidebarControl is 5px fat
     jQuery("#sideBarControl").css("left", mapW);
     jQuery("#sideBarControl").css("height", mapH);
     jQuery("#sideBarControl").css("width", 5);
 
     //
-    jQuery("#sideBar").css("left", mapW + 4);
+    $sideBar.css("left", mapW  + 3);
     // set width and perform a jquery show('fast')
     setSideBarWidth(sideW);
     jQuery("#sideBarCriterias").css("width", sideW - 5);
     if (!onBerlinDe) {
-      jQuery("#resizeButton").attr("height", jQuery("#kaheader").height()-4);
-      jQuery("#resizeButton").attr("width", jQuery("#kaheader").height()-4);
+      jQuery("#resizeButton").attr("height", $kaheader.height()-4);
+      jQuery("#resizeButton").attr("width", $kaheader.height()-4);
     }
-    //
+    // some quick fixes for the content-area of the sidebar
     var critHeight = jQuery("#sideBarCriterias").height();
     if (critHeight == 0 || isNaN(critHeight)) {
       critHeight = 110; // minimum height of logo and name in sidebar
@@ -434,41 +422,62 @@
     }
     jQuery("#sideBarCategories").css("height", sideBarHeight);
     jQuery("#sideBarCategories").css("width", sideW - 7);
+
+    // some quick fixes for the footer-area in the sidebar
     // get the position for our footer-div, which is placed outside #sideBar at labs-maps and inside at berlin.de
     var fWidth = sideW - 6;
     var fOrientation = mapW - 3;
-    jQuery("#kafooter").css("width", fWidth - 15);
+    $kafooter.css("width", fWidth - 15);
+    // some quick fixes specific for berlin.de-layout
     if (onBerlinDe && !fullWindow) {
-      jQuery("#kafooter").css("top", mapH + startHeight);
+      $kafooter.css("top", mapH + startHeight);
     } else if (onBerlinDe && fullWindow) {
-      jQuery("#kafooter").css("top", mapH);
+      $kafooter.css("top", mapH);
     }
+    // some quick fix for IE in general
     if (onBerlinDe && jQuery.browser.msie) {
-      jQuery("#kafooter").css("top", jQuery("#kafooter").position().top - 12);
+      $kafooter.css("top", $kafooter.position().top - 12);
     }
-    jQuery("#kafooter").css("left", fOrientation + 25);
+    // some quick fixes for all layouts
+    $kafooter.css("left", fOrientation + 25);
     jQuery("#layersDiv").css("left", -19);
+
     if (!sideBarToggle && onBerlinDe) {
       // if sidebar is toggled away and user wants to get into fullscreen mode
       handleSideBar();
     }
+    // Fixing the new Map-Switcher (Layer Control Element) for alternative Maps
+    if(!onBerlinDe && jQuery.browser.opera) {
+      $mapSwitcher.css("position", "relative")
+      $mapSwitcher.css("top", "0px")
+      $mapSwitcher.css("left", "-78px")
+      // and fix header for opera in alternative maps
+      $focusInput.css("top", "5px")
+      $searchInput.css("top", "5px")
+      jQuery("#cityMapDialog").css("left", "419px")
+    } else if(!onBerlinDe && jQuery.browser.mozilla) {
+      $mapSwitcher.css("left", $mapSwitcher.position().left - 9)
+      $mapSwitcher.css("top", "25px")
+    } else if (!onBerlinDe && jQuery.browser.webkit) {
+      $mapSwitcher.css("position", "relative")
+      $mapSwitcher.css("top", "0px")
+      $mapSwitcher.css("left", "-23px")
+    }
   }
 
   /** handles layout for all print views */
-  function setPrintLayout(fullH, fullW, verticala4) {
+  function setPrintLayout(fullH, fullW, vertical) {
     // var sideW = 320;
     //
     // var topHeight = jQuery("#kaheader").css("height");
     var topHeight = 39;
-    var startHeight = jQuery("#kaheader").css("top");
-    // topHeight = parseInt(topHeight.substr(0, topHeight.length-2));
-    startHeight = parseInt(startHeight.substr(0, startHeight.length-2));
+    var startHeight = $("#kaheader").position().top;
     jQuery("#kiezatlas").css("visibility", "visible");
-    // 
+    //
     jQuery("#kiezatlas").css("height", fullH);
     jQuery("#kiezatlas").css("width", fullW);
     //
-    if (!verticala4) {
+    if (!vertical) {
       jQuery("#map").css("top", startHeight + topHeight + 1);
       jQuery("#map").css("width", 700);
       jQuery("#map").css("height", 450);
@@ -521,7 +530,7 @@
       jQuery("#kafooter").css("background", "white");
       // jQuery("#kafooter").css("bottom", 3);
       jQuery("#kafooter").css("top", jQuery("#kafooter").position().top + 20);
-      // 
+      //
       jQuery("#resizeButton").attr("src", "http://www.kiezatlas.de/maps/embed/img/go-last.png");
       if (!onBerlinDe) {
         jQuery("#resizeButton").attr("height", parseInt(jQuery("#kaheader").css("height"))-4);
@@ -531,7 +540,7 @@
         jQuery("#resizeButton").attr("width", 20);
       }
       jQuery("#resizeButton").attr("title", "Seitenleiste ausblenden");
-  	  // 
+  	  //
       handleResize(breitSeite);
     }
     // if (debug) log('[DEBUG] handleSidebar got: ' + e.type + ' at '+ posx+':'+posy + '');
@@ -567,22 +576,6 @@
     }
   }
 
-  /** gets' deprecated with ie 10**/
-  function showPermaLink(renderFlag) {
-    //
-    if (renderFlag == undefined) {
-      if (jQuery("#permaLink").css("visibility") == "hidden") {
-        jQuery("#permaLink").css("visibility", "visible");
-      } else {
-        jQuery("#permaLink").css("visibility", "hidden");
-      }
-    } else {
-      if (!renderFlag) {
-        jQuery("#permaLink").css("visibility", "hidden");
-      }
-    }
-  }
-
   function updatePermaLink(newLink, newState) {
     if (map.baseLayer != undefined && map.baseLayer.name == "OpenStreetMap") {
       // OpenStreetMap
@@ -599,22 +592,13 @@
       newLink = newLink.replace("/layer/osm", "");
     }
     //
-    permaLink = newLink;
     kiezatlas.push_history(newState, newLink);
-    jQuery("#permaInputLink").val(permaLink);
-    // 
-  }
-
-  function selectPermalink() {
-    jQuery("#permaInputLink").focus(function(){
-      this.select();
-    });
   }
 
 
-  // 
+  //
   // --- Client Side Requests (to proxy scripts)
-  // 
+  //
 
   /** a get and show method implemented as
    *  an asynchronous call which renders the html directly into the sidebar when the result has arrived **/
@@ -634,7 +618,7 @@
 	      var topic = obj.result;
         showGeoObjectInfo(topic, resultHandler, dontUpdateHistoryState);
 	    }, // end of success handler
-	    error: function(x, s, e){ 
+	    error: function(x, s, e){
 	      resultHandler.empty();
 	      resultHandler.append('&nbsp;&nbsp;<b>Projektbezogener &Uuml;bertragungsfehler</b><p/>');
 	      resultHandler.append('<table width="100%" cellpadding="2" cellspacing="0" id="sideBarCategoriesTable"><tr>'
@@ -704,7 +688,7 @@
   /**
    * sends an ajax request to the google geocoder through a proxy script
    * and moves the center / focuse of the mapTiles to the first result of coordinates
-   * 
+   *
    * ### TODO: improve the dynamic localization of the viewPortBias, try again to make use of mapBounds
    **/
   function focusRequest() {
@@ -745,7 +729,7 @@
         if (alternative_items.length == 1) {
           select_current_item();
           focus_current_item();
-          // 
+          //
         } else if (alternative_items.length > 1) {
           show_alternatives_list(jQuery("#focusAlternatives"));
           // select_alternative_item(autocomplete_item);
@@ -764,9 +748,9 @@
 
 
   //
-  // --- Handling of geolocated street alternatives as a result of a GET focusRequest() 
+  // --- Handling of geolocated street alternatives as a result of a GET focusRequest()
   //
-  
+
   /**
    * Alternatives List for focusRequest and mapNavigation
    * inspired by the plain_document.js implementation of the deepamehta3-client
@@ -815,7 +799,7 @@
       }
     });
   }
-  
+
   function select_current_item() {
     jQuery("#resultItem_" + autocomplete_item).css("background-color", "#E6EDFF");
     // autocomplete_item = atPos;
@@ -852,7 +836,7 @@
       }
     }
   }
-  
+
   function select_next_item(num) {
     jQuery("#resultItem_" + autocomplete_item).css("background-color", "#FFFFFF");
     if (num != null) {
@@ -862,7 +846,7 @@
     }
     jQuery("#resultItem_" + autocomplete_item).css("background-color", "#E6EDFF");
   }
-  
+
   function select_previous_item() {
     jQuery("#resultItem_" + autocomplete_item).css("background-color", "#FFFFFF");
     autocomplete_item--;
@@ -1105,10 +1089,10 @@
   }
 
 
-  // 
+  //
   // --- Sidebar Specific GUI Code
-  // 
-  
+  //
+
   function initResultList(resultObjects, lastQuery) {
     hideProgressFromSideBar();
     var topicIdsToShow = new Array();
@@ -1134,7 +1118,7 @@
     // showTopicsInMap(resultObjects);
     showTopicFeatures(topicIdsToShow, "");
   }
-  
+
   /**
    * depends on an available
    * function initCriteriaList (workspaceCriterias, crtCritIndex, mapTitle, mapAlias, onBerlinDe )
@@ -1170,7 +1154,7 @@
       + ' border="0" text="Das Kiezatlas Logo"/></a></td>';
     critLinkList += '<td></td><td></td>';
     critLinkList += '</tr>';
-    for (var i = 0; i < workspaceCriterias.result.length; i++) {  
+    for (var i = 0; i < workspaceCriterias.result.length; i++) {
       var critName = [workspaceCriterias.result[i].critName];
       if ( i == 0 && workspaceCriterias.result.length == 2) {
         critLinkList += '<tr valign="center">';
@@ -1228,7 +1212,7 @@
     sideBarCategories.append('<small>('+topicsToShow.length+ ' Objekte)</small><p/>');
     sideBarCategories.append('<table width="100%" cellpadding="2" cellspacing="0" id="sideBarCategoriesTable"></table>');
     for (var i = 0; i < topicsToShow.length; i++) {
-      jQuery("#sideBarCategoriesTable").append('<tr width="100%" class="topicRowDeselected">' 
+      jQuery("#sideBarCategoriesTable").append('<tr width="100%" class="topicRowDeselected">'
         + '<td width="20px" class="iconCell" valign="center" align="center">'
           + '<img src="http://www.berlin.de/imperia/md/images/system/icon_punkt_rot.gif"/></td>'
         +' <td><a href="#" id="topicRowHref-'+topicsToShow[i].id+'">'+topicsToShow[i].name+'</a></td></tr>');
@@ -1303,7 +1287,7 @@
     if (!skipHistoryUpdate) {
       updatePermaLink(baseUrl+mapAlias+"/criteria/"+(parseInt(criteria)+1), {name: "renderCritCatListing", parameter: parseInt(criteria)} ); // permalink: cause users start counting from 1
     }
-    // 
+    //
     initCriteriaList(); // based on crtCritIndex, also sets the WorkspaceInfos
     var sideBarCategories = jQuery("#sideBarCategories");
     sideBarCategories.empty();
@@ -1378,7 +1362,7 @@
     var footer = '<span id="footerPrint"><a href="javascript:openThisPrintView()">'
         + '<img src="'+ICONS_URL+'printer.png" alt="Druckansicht" title="Druckansicht"></a></span>'; // Druckansicht
     // }
-    // 
+    //
     footer += '<span id="footerImprint"><a href="'+workspaceImprint+'">Impressum / Haftungshinweise</a></span>';
     footer += '<span id="footerPoweredBy">'+footerMessage+'</span>';
     jQuery("#kafooter").html(footer);
@@ -1401,7 +1385,7 @@
     if (onBerlinDe) {
       window.open(baseUrl + "pages/PrintAtlas.html");
     } else {
-      window.open("http://www.kiezatlas.de/pages/be.de/PrintAtlas.html"); 
+      window.open("http://www.kiezatlas.de/pages/be.de/PrintAtlas.html");
     }
   }
 
@@ -1578,7 +1562,7 @@
     } else {
       // log("linking in and showing " + feature.data.topicName);
       // TODO: select some categories when user got linked in..
-      // TODO: createSlimGeoObject(has to assemble the crtierias with the help of CityMpa.getSeachCriteria() 
+      // TODO: createSlimGeoObject(has to assemble the crtierias with the help of CityMpa.getSeachCriteria()
       // to mach always to the first criteria);
       // NOTE: just works for the herewith fixed default 2
       // var topCatId = getTopicById(feature.data.topicId).criterias[1].categories[0];
@@ -1627,12 +1611,12 @@
       }
     }
     return topics;
-  }  
+  }
 
   function toggleMarkerGroups(category, skipHistoryUpdate) {
     showDialog(false);
     var catSelected = isCategoryVisible(category);
-    // 
+    //
     if (!catSelected) {
       // catId was not selected, but is now
       // add catId to our little helper list
@@ -1808,7 +1792,7 @@
       }
     }
     if (kiezatlas.layer != null) kiezatlas.layer.redraw();
-    /// 
+    ///
     if (!skipHistoryUpdate) {
       // re-use list of all currently selected marker-groups/categories to build a permalink
       var baseString = "/categories/";
@@ -1861,11 +1845,11 @@
     // log('showingMarkerGroup and catIdRow is now: ' + jQuery("#catRow-"+category).attr("class"));
     return topicsToShow;
   }
-  
-  /** toggles a OpenLayersMarker for a given topicId 
+
+  /** toggles a OpenLayersMarker for a given topicId
     * toggles a OpenLayersFeature on myNewLayer for a given topicId (it`s definitely already on the layer, just hide or show it)
     *
-    * addingNote: 
+    * addingNote:
     * TODO: use, react and maintain the hotspot list
     */
   function toggleMarkerById(topicId) {
@@ -1920,21 +1904,18 @@
   }
 
   /** TODO: cleanup... **/
-  function initBerlinDistrictsLayer(baseUrl) {
+  function initBerlinDistrictsLayer() {
     var dStyle = new OpenLayers.Style( {
       strokeColor: "#4170D4", strokeWidth: 1.5, fill: 0 //, cursor: "pointer"
     });
     var defaultStyle = OpenLayers.Util.applyDefaults( dStyle, OpenLayers.Feature.Vector.style["default"]);
     var dStyleMap = new OpenLayers.StyleMap({
-      "default": defaultStyle, 
+      "default": defaultStyle,
       "select": {strokeColor:"#B60033", strokeWidth: 2, fill: 0,
         label : "${name}", fontSize: "12px", fontStyle: "bold",
         fontFamily: "Arial,Helvetica,sans-serif", fontColor: "#B60033"}
     });
-    var pathToFile = "pages/be.de/img/districts.kml";
-    if (baseUrl != undefined) {
-      pathToFile = baseUrl + "/districts.kml";
-    }
+    var pathToFile = SERVER_URL + "/pages/be.de/img/districts.kml";
     var districtLayer = new OpenLayers.Layer.Vector("Bezirksgrenzen", {
       styleMap: dStyleMap, zIndexing: true,
       projection: map.displayProjection,
@@ -1963,10 +1944,10 @@
    **/
   function initLayerAllFeatures(points, mainMap) {
     var context = function(feature) {return feature;} // a magic line from somewhere..
-    var myStyle = new OpenLayers.Style( { 
-      graphicName: "circle", fillOpacity: "1", fillColor: "#378fe0", strokeColor: "blue", pointRadius: 5, 
-      graphicTitle: "${label}", labelYOffset: "7px", externalGraphic: "${iconUrl}", graphicWidth: "${size}", 
-      fontSize: "10px", fontFamily: "Verdana, Arial", fontColor: "#ffffff" }); //, cursor: "pointer"} );
+    var myStyle = new OpenLayers.Style( {
+      graphicName: "circle", fillOpacity: "1", fillColor: "#378fe0", strokeColor: "blue", pointRadius: 5,
+      graphicTitle: "${label}", labelYOffset: "7px", externalGraphic: "${iconUrl}", graphicWidth: "${size}",
+      fontSize: "10px", fontFamily: "Verdana, Arial", fontColor: "#ffffff"}); //, cursor: "pointer"} );
     var textStyle = new OpenLayers.Style( {
       graphicName: "circle", fillOpacity: "1", fillColor: "#378fe0", strokeColor: "#378fe0", pointRadius: 8,
       fontSize: "11px", fontWeight: "bold", labelXOffset: "-2px", fontFamily: "Verdana, Arial",
@@ -2075,8 +2056,8 @@
         new OpenLayers.Geometry.Point(points[i].lonlat.lon, points[i].lonlat.lat), {"marker": "normal", "label": ""}
       );
       allFeatures[i].data = {
-        topicName: points[i].topicName, topicId: points[i].topicId, defaultIcon: points[i].defaultIcon, 
-        lon:points[i].lonlat.lon, lat:points[i].lonlat.lat, originId: points[i].originId 
+        topicName: points[i].topicName, topicId: points[i].topicId, defaultIcon: points[i].defaultIcon,
+        lon:points[i].lonlat.lon, lat:points[i].lonlat.lat, originId: points[i].originId
       };
       allFeatures[i].cluster = null;
       allFeatures[i].attributes.iconUrl = ""; // not to show feature after initializing
@@ -2097,14 +2078,14 @@
   function setupOpenMarkers(mapTopics) {
     // var bounds = new GLatLngBounds();
     kiezatlas.setMapTopics(mapTopics);
-    // 
+    //
     gMarkers = new Array();
-    var size = new OpenLayers.Size(10,10);
+    var size = new OpenLayers.Size(13,13);
     var offset = new OpenLayers.Pixel(-(size.w/2), -size.h);
     var icon = new OpenLayers.Icon('http://www.kiezatlas.de/client/icons/redball-middle.png', size, offset);
     //
     /* if ( mapTopics.result.topics.length == 0) {// display to the user that the import failed and there is currently no data available
-      jQuery("#map").html('<div style="position: relative; top: 150px; left 30%; background-color:#999999;"></div>'); 
+      jQuery("#map").html('<div style="position: relative; top: 150px; left 30%; background-color:#999999;"></div>');
     };*/
     for (var i = 0; i < mapTopics.result.topics.length; i++) {
       var lng = [mapTopics.result.topics[i].long];
@@ -2118,7 +2099,7 @@
       }
       if (!skip) {
         var point = new OpenLayers.LonLat(parseFloat(lng), parseFloat(lat));
-        var name = [mapTopics.result.topics[i].name];  
+        var name = [mapTopics.result.topics[i].name];
         var id = [mapTopics.result.topics[i].id];
         var originId = [mapTopics.result.topics[i].originId];
         //var iconFile = [mapTopics.result.topics[i].icon]
@@ -2149,7 +2130,7 @@
   function makeHotspot(poi, allMarkers){
     var cluster = new Array();
     for(i=0; i<allMarkers.length; i++) {
-      if (parseFloat(poi.lonlat.lon) == parseFloat(allMarkers[i].lonlat.lon) 
+      if (parseFloat(poi.lonlat.lon) == parseFloat(allMarkers[i].lonlat.lon)
           && parseFloat(poi.lonlat.lat) == parseFloat(allMarkers[i].lonlat.lat)) {
         cluster.push(allMarkers[i]);
       } else {
@@ -2164,11 +2145,11 @@
     // after one match we`re a cluster
     return cluster;
   }
-  
+
   /** yet unused method */
   function checkLayerForFeatureOnPosition(lonlat) {
     for(i=0; i<myNewLayer.features.length; i++) {
-      if (parseFloat(myNewLayer.features[i].data.lon) == parseFloat(lonlat.lon) 
+      if (parseFloat(myNewLayer.features[i].data.lon) == parseFloat(lonlat.lon)
           && parseFloat(myNewLayer.features[i].data.lat) == parseFloat(lonlat.lat)) {
           // log("> clusterCheck found a featured position.. ");
         return myNewLayer.features[i];
@@ -2176,7 +2157,7 @@
     }
     return null;
   }
-  
+
   /** used for creating cluster*/
   function checkLayerForVisibleFeatureOnPosition(lonlat, topicId) {
     for ( i = 0; i < kiezatlas.layer.features.length; i++) {
@@ -2194,12 +2175,12 @@
     }
     return null;
   }
-  
+
   /** checks all features on a layer, if they are a cluster and if they contain already a specific topic */
   function checkIfAlreadyInCluster(topicId) {
     for (i=0; i<kiezatlas.layer.features.length; i++) {
-      // look in every feature on the layer which is a cluster ?? and 
-      // which is currently visible (there`ll never be an invisible cluster)?? 
+      // look in every feature on the layer which is a cluster ?? and
+      // which is currently visible (there`ll never be an invisible cluster)??
       if (kiezatlas.layer.features[i].cluster != null) {
         // parseFloat(lonlat.lon) && parseFloat(myNewLayer.features[i].data.lat) == parseFloat(lonlat.lat)) {
         for (k=0; k<kiezatlas.layer.features[i].cluster.length; k++) {
@@ -2212,7 +2193,7 @@
     // if (debug) log("> topicId is not in any cluster yet");
     return false;
   }
-  
+
   /** getFeature from Layer by topicId */
   function checkFeatureById(topicId) {
     if ( kiezatlas.layer != null ) {
@@ -2226,7 +2207,7 @@
     }
     return null;
   }
-  
+
   /** getFeature from Layer by topicId */
   function checkFeatureByOriginId(givenId) {
     for ( i=0; i < kiezatlas.layer.features.length; i++ ) {
@@ -2274,7 +2255,7 @@
     }
     return null;
   }
-  
+
   /** check all Drawn Features if they are a topicId or contain a topicId in their cluster*/
   function checkDrawnFeaturesForOriginId(originId) {
     //
@@ -2283,7 +2264,7 @@
         // just go on with the check if feature is currently visible
         if (kiezatlas.layer.features[i].data.originId == originId) {
           // check for direct topicId match
-          // log("found a feature "+ myNewLayer.features[i].id +" on myNewLayer.. displayStyle is:" 
+          // log("found a feature "+ myNewLayer.features[i].id +" on myNewLayer.. displayStyle is:"
           //   + myNewLayer.features[i].attributes);
           return kiezatlas.layer.features[i];
         } else if (kiezatlas.layer.features[i].data.cluster != null) {
@@ -2318,7 +2299,7 @@
     }
     // just make sure that there is not more than 1active PopUpWindow
     hideAllInfoWindows();
-    // var htmlString = '<b>' + featureData.topicName 
+    // var htmlString = '<b>' + featureData.topicName
     // + '</b><br/><a href=javascript:showTopicInSideBar("'+idString+'")>weitere Details</a>';
     var lonlat = new OpenLayers.LonLat(featureData.lon, featureData.lat);
     var popup = new OpenLayers.Popup.FramedCloud(
@@ -2347,24 +2328,24 @@
     var htmlString = '<b>' + featureData.topicName + '</b><br/><a href=javascript:showTopicInSideBar("'
       + idString+'")>weitere Details</a>';
     var lonlat = new OpenLayers.LonLat(featureData.lon, featureData.lat);
-    // 
+    //
     var popup = new OpenLayers.Popup.FramedCloud(
-      "infoPoop-"+featureData.topicId, 
-      lonlat, new OpenLayers.Size(250, 100), 
+      "infoPoop-"+featureData.topicId,
+      lonlat, new OpenLayers.Size(250, 100),
       htmlString, null, false);
     popup.keepInMap = true;
     // popup.panMapIfOutOfView = false;
     popup.autoSize = true;
     map.addPopup(popup);
   }
-  
+
   /** function deselectAllFeatures(callback) {
-    for (i=0; i<myNewLayer.selectedFeatures.length; i++) { 
+    for (i=0; i<myNewLayer.selectedFeatures.length; i++) {
       selectFeatureHandler.unselect(myNewLayer.selectedFeatures[i]);
     }
   } */
 
-  /** search _all_ clientside known markers for a double by coordinates 
+  /** search _all_ clientside known markers for a double by coordinates
     * useful to identify hotspots
     * TODO: find out if a markerLayer can check if a position is already used by marker
     */
@@ -2377,7 +2358,7 @@
     }
     return null;
   }
-  
+
   /** it may be the case that a given topicId is part of a category*/
   function getTopicById(topicId) {
     // printOut("searching through " + mapTopics.result.topics.length);
@@ -2406,7 +2387,7 @@
     }
     return null;
   }
-  
+
   //
   // --- Utility Methods for Style and Layout
   //
@@ -2439,7 +2420,7 @@
       jQuery(this).animate({width: 115}, 500);
     });
   }
-   
+
   function toggleWidth(e) {
       if (slimWidth) {
         slimWidth = false;
@@ -2447,11 +2428,11 @@
         slimWidth = true;
       }
       var fHeight = windowHeight();
-      var fWidth = windowWidth(); // ### formerly 1339;// 
+      var fWidth = windowWidth(); // ### formerly 1339;//
       setLayout(fHeight, fWidth - 2);
       // map.redraw();
   }
-  
+
   function setSideBarWidth(sideBarWidth) {
     // jQuery("#sideBarControl").attr('onclick','javascript:handleSideBar();');
     // jQuery("#sideBarControl").css("cursor", "e-resize");
@@ -2471,7 +2452,7 @@
     return document.body.clientHeight;
     return 0;
   }
-  
+
   function windowWidth() {
     if (self.innerWidth) {
       //log('innerWidth is' + self.innerWidth);
@@ -2504,7 +2485,7 @@
   function handlePrintLayout(verticala4) {
     var fWidth = 0;
     var fHeight = 0;
-    // 
+    //
     if (!verticala4) {
       fWidth = 1052;
       fHeight = 692;
@@ -2514,7 +2495,7 @@
     }
     setPrintLayout(fHeight, fWidth, verticala4);
   }
-  
+
   /** TODO: to show progress always in center and with a label .. */
   function showProgressInSideBar(progressVal) {
     // sideBarControl
@@ -2530,11 +2511,11 @@
   }
 
 
-  
+
   //
   // --- Topic Data Container Utilities
   //
-  
+
   /** TopicBeanField Util */
   function stripFieldsContaining(topic, fieldName) {
     var newProps = new Array();
@@ -2553,7 +2534,7 @@
     topic.properties = newProps;
     return topic;
   }
-  
+
   function getTopicAddress(topic) {
     for (var i=0; i < topic.properties.length; i++) {
       if (topic.properties[i].name == "Address / Street" && topic.properties[i].value != "") {
@@ -2566,7 +2547,7 @@
     }
     return "";
   }
-  
+
   function getImageSource(topic) {
     for (var i=0; i < topic.properties.length; i++) {
       if (topic.properties[i].name == "Image / File" && topic.properties[i].value != "") {
@@ -2608,10 +2589,10 @@
 
 
 
-  // 
-  // --- High Level CiyMap Functions 
-  // 
-  
+  //
+  // --- High Level CiyMap Functions
+  //
+
   function calculateInitialBounds(mapTopics) {
     var bounds = new OpenLayers.Bounds();
     for (var i = 0; i < mapTopics.result.topics.length; i++) {
@@ -2649,7 +2630,7 @@
     }
     return bounds;
   }
-  
+
   function getBoundsOfCurrentVisibleFeatures() {
     var bounds = new OpenLayers.Bounds();
     var counter = 0;
@@ -2670,7 +2651,7 @@
     }
     return bounds;
   }
-  
+
   /** sets the viewport on the map */
   function updateVisibleBounds(newBounds, resetMarkers, zoomLevel, resetSearch) {
     if (newBounds == null) {
@@ -2688,30 +2669,34 @@
     // reset the sidebar to the latest critIndex
     if (resetSearch) updateCategoryList(crtCritIndex);
   }
-  
+
   /** called by the CustomLayerSwitcher.onInputClick */
   function clickInfoForMapControlMenu() {
-    updatePermaLink(permaLink);
-    outMapControl();
+    // updatePermaLink(permaLink);
+    // outMapControl();
   }
-  
-  function overMapControl() {
-    toggleMapControl();
-  }
-  
-  function outMapControl() {
-    // jQuery("#mapControl").css("height", 20);
-    toggleMapControl();  
-  }
-  
-  function toggleMapControl() {
-    if (jQuery("#mapSwitcher").css("visibility") == "hidden") {
-      jQuery("#mapSwitcher").css("visibility", "visible");
+
+  /** **/
+  function clickOnMore(e) {
+    var $moreLabel = jQuery("#moreLabel")
+    var is_selected = $moreLabel.hasClass("selected")
+    if (is_selected) {
+      $moreLabel.removeClass("selected")
     } else {
-      jQuery("#mapSwitcher").css("visibility", "hidden");
+      $moreLabel.addClass("selected")
+    }
+    toggleMapControl()
+  }
+
+  function toggleMapControl() {
+    var $mapSwitcher = jQuery("#mapSwitcher")
+    if ($mapSwitcher.css("visibility") == "hidden") {
+      $mapSwitcher.css("visibility", "visible");
+    } else {
+      $mapSwitcher.css("visibility", "hidden");
     }
   }
-  
+
   /** show all topics as Features in myNewLayer and select all Categories in Sidebar */
   function showAllMarker() {
     if (!checkIfAllCategoriesSelected()) {
@@ -2724,7 +2709,7 @@
       selectAllCategories();
     }
   }
-  
+
   /** TODO: nearly redundant code to hideAllKiezatlasFeatures  */
   function reSetMarkers() {
     // if (myNewLayer != null) { // check for missing baseLayers
@@ -2734,7 +2719,7 @@
     // }
   }
 
-  /** TODO: redundant code to reSetMarkers  
+  /** TODO: redundant code to reSetMarkers
    * should be refactorde to hideAllMarker
    */
   function hideAllKiezatlasFeatures() {
@@ -2759,7 +2744,7 @@
   //
   // --- Other Little Helpers
   //
-  
+
   /** mapTile Function, not exactly clear what it does */
   function osm_getTileURL(bounds) {
     var res = this.map.getResolution();
@@ -2780,7 +2765,7 @@
     // markerLayer.setVisibility(true);
     kiezatlas.layer.setVisibility(true);
   }
-  
+
   function log(text) {
     if (debug) {
       // Note: the debug window might be closed meanwhile
@@ -2810,7 +2795,7 @@
     // jQuery("#topicRowHref-"+resultBaseTopic.id).attr('href', 'javascript:showTopicInMap("' + resultBaseTopic.id + '");');
   }
 
-  /** TODO: check what they actually need todo 
+  /** TODO: check what they actually need todo
    *  helper for the inputFields to send Requests to our Proxyscript with encoding the blanks
    */
   function urlencode(query) {
@@ -2818,7 +2803,7 @@
     var result = new String(query).replace(/ /g, "%20");
     return result
   }
-  
+
   /** helper functions to produce html links */
   function htmlReplace(val) {
     if(val.indexOf("http://") != -1) {
@@ -2828,11 +2813,11 @@
     }
     return val;
   }
-  
+
   function render_text(text) {
     return text.replace(/\n/g, "<br>")
   }
-  
+
   function makeWebpageLink(url, label) {
     if (onBerlinDe) urlMarkup = '<a href="'+url+'" target="_blank">Link zur T&auml;tigkeitsbeschreibung'
       + '<img src="/.img/ml/link_extern.gif" class="c7" alt="(externer Link)" border="0" height="11" width="12"/></a>';
@@ -2844,7 +2829,7 @@
     urlMarkup = '<a href="mailto:'+url+'" target="_blank">'+label+'</a>';
     return urlMarkup
   }
-  
+
   function hideAllInfoWindows() {
     if (map != undefined && map.popups != undefined) {
       for (var i=0; i < map.popups.length; i++) {
@@ -2853,7 +2838,7 @@
       }
     }
   }
-  
+
   function help() {
     if(!helpVisible) {
       var helpHtmlOne = '<img src="http://www.kiezatlas.de/maps/embed/img/sideBarHelper.png" id="helpPageOne" width="320" alt="Hilfetext Seite 1" '
@@ -2874,4 +2859,4 @@
       helpVisible = false;
     }
   }
-  
+

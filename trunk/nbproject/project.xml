@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://www.netbeans.org/ns/project/1">
+    <type>org.netbeans.modules.ant.freeform</type>
+    <configuration>
+        <general-data xmlns="http://www.netbeans.org/ns/freeform-project/1">
+            <name>Kiezatlas 1.x</name>
+        </general-data>
+        <general-data xmlns="http://www.netbeans.org/ns/freeform-project/2">
+            <!-- Do not use Project Properties customizer when editing this file manually. -->
+            <name>Kiezatlas 1.x</name>
+            <properties/>
+            <folders>
+                <source-folder>
+                    <label>src</label>
+                    <type>java</type>
+                    <location>src</location>
+                    <encoding>UTF-8</encoding>
+                </source-folder>
+                <source-folder>
+                    <label>db</label>
+                    <type>java</type>
+                    <location>db</location>
+                    <encoding>UTF-8</encoding>
+                </source-folder>
+                <source-folder>
+                    <label>pages</label>
+                    <type>java</type>
+                    <location>pages</location>
+                    <encoding>UTF-8</encoding>
+                </source-folder>
+                <source-folder>
+                    <label>Kiezatlas 1.x</label>
+                    <location>.</location>
+                    <encoding>UTF-8</encoding>
+                </source-folder>
+            </folders>
+            <ide-actions>
+                <action name="build">
+                    <target>build</target>
+                </action>
+                <action name="clean">
+                    <target>cleanup</target>
+                </action>
+                <action name="run">
+                    <target>deploy</target>
+                </action>
+                <action name="rebuild">
+                    <target>cleanup</target>
+                    <target>build</target>
+                </action>
+            </ide-actions>
+            <view>
+                <items>
+                    <source-folder style="packages">
+                        <label>src</label>
+                        <location>src</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>db</label>
+                        <location>db</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>pages</label>
+                        <location>pages</location>
+                    </source-folder>
+                    <source-file>
+                        <location>build.xml</location>
+                    </source-file>
+                </items>
+                <context-menu>
+                    <ide-action name="build"/>
+                    <ide-action name="rebuild"/>
+                    <ide-action name="clean"/>
+                    <ide-action name="run"/>
+                </context-menu>
+            </view>
+            <subprojects/>
+        </general-data>
+        <java-data xmlns="http://www.netbeans.org/ns/freeform-project-java/1">
+            <compilation-unit>
+                <package-root>src</package-root>
+                <classpath mode="compile">kiezatlas.jar:/home/malt/source/dm2/trunk/install/client/DeepaMehta.jar</classpath>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>db</package-root>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>pages</package-root>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+        </java-data>
+    </configuration>
+</project>

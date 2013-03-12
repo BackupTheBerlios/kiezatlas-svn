@@ -57,15 +57,15 @@ public class AtlasServlet extends DeepaMehtaServlet implements KiezAtlas {
 
 
 
-	// private final String urlStr = "http://www.kiezatlas.de/rpc/";
-	private final String urlStr = "http://localhost:8080/kiezatlas/rpc/";
+	private final String urlStr = "http://www.kiezatlas.de/rpc/";
+	// private final String urlStr = "http://localhost:8080/kiezatlas/rpc/";
 	private final String charset = "ISO-8859-1";
 
 	String topicmapId = "is-set-to-current-topicmap-id-of-request"; // used by new getLastModified impl
 
 
 
-	protected String performAction(String action, RequestParameter params, Session session, 
+	protected String performAction(String action, RequestParameter params, Session session,
 									CorporateDirectives directives) throws ServletException {
 		if (action == null) {
 			try {
@@ -344,7 +344,7 @@ public class AtlasServlet extends DeepaMehtaServlet implements KiezAtlas {
 
 	private String getWorkspaceImprint(String workspaceId, Session session) {
 		String impressumURL = "";
-		BaseTopic impressum = as.getRelatedTopic(workspaceId, KiezAtlas.ASSOCTYPE_IMPRESSUM_LINK, 
+		BaseTopic impressum = as.getRelatedTopic(workspaceId, KiezAtlas.ASSOCTYPE_IMPRESSUM_LINK,
 				TOPICTYPE_WEBPAGE, 2, true);
 		if (impressum != null) impressumURL = as.getTopicProperty(impressum, PROPERTY_URL);
 		return impressumURL;

@@ -18,7 +18,3 @@ INSERT INTO TopicProp VALUES ('pp-ka-workspace-alias', 1, 'Visualization', 'Inpu
 INSERT INTO Association VALUES ('at-composition', 1, 1, 'a-ka-138', '', 'tt-workspace', 1, 'pp-ka-workspace-alias', 1);
 INSERT INTO AssociationProp VALUES ('a-ka-138', 1, 'Ordinal Number', '109');
 
-
-
-
-

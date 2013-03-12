@@ -127,7 +127,7 @@
 
 	// atlas / maps
 	void startMaps(HttpSession session, JspWriter out) throws IOException {
-    String header = "<!-- This comment will put IE 6, 7 and 8 in quirks mode -->\r" +
+    String header = "<!-- This new comment shall put IE 6, 7 and 8 in quirks mode -->\r" +
       "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\r" +
       "<html xmlns=\"http://www.w3.org/1999/xhtml\">\r";
       out.println(header);

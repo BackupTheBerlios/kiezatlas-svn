@@ -3,27 +3,28 @@
 	BaseTopic map = (BaseTopic) session.getAttribute("map");
 	BaseTopic workspace = (BaseTopic) session.getAttribute("workspace");
 	String mapTopics = (String) session.getAttribute("mapTopics");
-    String workspaceCriterias = (String) session.getAttribute("workspaceCriterias");
-    String workspaceImprint = (String) session.getAttribute("workspaceImprint");
-    String workspaceLogo = (String) session.getAttribute("workspaceLogo");
-    String mapAlias = (String) session.getAttribute("mapAlias");
-    String workspaceHomepage = (String) session.getAttribute("workspaceHomepage");
+  String workspaceCriterias = (String) session.getAttribute("workspaceCriterias");
+  String workspaceImprint = (String) session.getAttribute("workspaceImprint");
+  String workspaceLogo = (String) session.getAttribute("workspaceLogo");
+  String mapAlias = (String) session.getAttribute("mapAlias");
+  String workspaceHomepage = (String) session.getAttribute("workspaceHomepage");
 	String searchTerm = (String) session.getAttribute("searchTerm");
 	String originId = (String) session.getAttribute("originId");
 	String topicId = (String) session.getAttribute("topicId");
 	String catIds = (String) session.getAttribute("categories");
-    String baseLayer = (String) session.getAttribute("baseLayer");
+  String baseLayer = (String) session.getAttribute("baseLayer");
 	Integer critIndex = (Integer) session.getAttribute("critIndex");
-    String basePath = "http://localhost:8080/kiezatlas";
-    // String basePath = "http://www.berlin.de/atlas";
-    // String basePath = "http://www.kiezatlas.de/maps/embed/012";
-    String resourcePath = "http://www.kiezatlas.de/maps/embed/012";
-    //
-    String title = "" + map.getName() + " im Kiezatlas";
+  // String basePath = "http://localhost:8080/kiezatlas";
+  String basePath = "http://www.berlin.de/atlas";
+  // String basePath = "http://www.kiezatlas.de/maps/embed/012";
+  String resourcePath = "http://www.kiezatlas.de/maps/embed/012";
+  //
+  String title = "" + map.getName() + " im Kiezatlas";
 
 %>
 <% startMaps(session, out); %>
 <head>
+  <!-- meta http-equiv="Content-type" content="text/html; charset=ISO-8859-15"/-->
   <meta http-equiv="content-type" content="text/html charset=UTF-8"/>
   <title> <%= title %> </title>
   <!--[if gte IE 7]>
@@ -32,13 +33,10 @@
   <link rel="stylesheet" href="<%= resourcePath %>/landmaps.css" type="text/css"> <!-- fix: needs absolute url for deployment -->
   <link rel="stylesheet" href="<%= resourcePath %>/theme/default/style.css" type="text/css"> <!-- fix: needs absolute url for deployment -->
   <link rel="stylesheet" href="<%= resourcePath %>/theme/default/google.css" type="text/css"> <!-- fix: needs absolute url for deployment -->
-  <!-- script src="http://maps.google.com/maps/api/js?v=3.5&amp;key=AIzaSyAPiDLMJnA9__sseouoOZM8Nx8IEunjpdw&amp;sensor=false"></script-->
   <script type="text/javascript" src="<%= resourcePath %>/OpenLayers.js"></script> <!-- fix: needs absolute url for deployment -->
   <script type="text/javascript" src="<%= resourcePath %>/CustomLayerSwitcher.js"></script> <!-- fix: needs absolute url for deployment -->
   <script type="text/javascript" src="<%= resourcePath %>/jquery.min.js"></script> <!-- fix: needs absolute url for deployment -->
   <script type="text/javascript" src="<%= resourcePath %>/kiezatlas.js"></script> <!-- fix: needs absolute url for deployment -->
-  <!-- <script type="text/javascript" src="../pages/be.de/jquery-1.3.2.js"></script>-->
-  <!-- <script type="text/javascript" src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAyg-5-YjVJ1InfpWX9gsTuxRa7xhKv6UmZ1sBua05bF3F2fwOehRUiEzUjBmCh76NaeOoCu841j1qnQ"></script> -->
   <script type="text/javascript">
     var basePath = '<%= basePath %>';
     var mapTitle = '<%= map.getName() %>';
@@ -123,11 +121,7 @@
         gMarkers = setupOpenMarkers(mapTopics);
         // initialize Features and their control
         initLayerAllFeatures(gMarkers, map);
-        if (onBerlinDe) {
-          initBerlinDistrictsLayer('<%= resourcePath %>' + "/img");
-        } else {
-          initBerlinDistrictsLayer(basePath + "/pages/be.de/img");
-        }
+        initBerlinDistrictsLayer();
         // inputFieldBehaviour();
         // check if a special projectId was given through the entry url
         reSetMarkers(myNewLayer);
@@ -162,7 +156,8 @@
 		    <div id="focusInput">
 		      <form id="autoLocateInputField" action="javascript:focusRequest()">
             <label for="streetNameField">In der N&auml;he von</label>
-            <input id="streetNameField" type="text" size="18" value="Stra&szlig;enname / Hnr."/>
+            <input id="streetNameField" type="text" size="18" placeholder="Stra&szlig;enname / Hnr."/>
+            <a href="javascript:focusRequest()" class="go-focus">OK</a>
             <label for="streetNameField">im</label>
             <span id="mapName"></span>
 		      </form>
@@ -171,7 +166,8 @@
 		    <div id="searchInput">
 		      <form id="searchForm" action="javascript:searchRequest()">
 			    <label for="searchInputField">Suche</label>
-			    <input id="searchInputField" type="text" value="Name / Stichwort" size="15"/>
+			    <input id="searchInputField" type="text" placeholder="Name / Stichwort" size="18"/>
+          <a href="javascript:searchRequest()" class="go-search">OK</a>
 		      </form>
 		    </div>
 		    <div id="headerButtons">
@@ -183,26 +179,17 @@
       </div>
       <div id="map"></div>
 	    <div id="focusAlternatives"></div>
-      <div id="permaLink" style="visibility: hidden;" onclick="javascript:selectPermalink()">
-          <input id="permaInputLink" type="text" value=""/>
-      </div>
       <div id="mapControl">&nbsp;
-        <a href="javascript:showPermaLink();" id="permaLinkHref">
-          Permalink
-        </a>
         <a href="javascript:showAllMarker();" id="toggleMarkerHref">
-          <!-- <img border="0" src="../pages/be.de/img/FreiwilligenAgentur.png" title="Alle Markierer einblenden" alt="Markierer-Symbol" width="15" height="15"> -->
           Alles einblenden
         </a>
-        <!-- <img border="0" id="divider" src="img/division.png" title="" width="1" height="10"> -->
-		      <!-- <a href="javascript:removeAllMarker();" style="text-decoration: none;">> Alle ausblenden</a> <br/>-->
 		    <a href="javascript:updateVisibleBounds(null, true, null, true);" id="resetMarkerHref">
-		      <!-- <img border="0" src="../pages/be.de/img/Stop.png" title="zur�cksetzen der Kartenansicht und Informationsebenen" alt="Reset-Symbol" width="15" height="15"> -->
           Karte zur&uuml;cksetzen
         </a>
-        <img src="http://www.kiezatlas.de/client/images/dropdown-btn.png" title="Mehr.." alt="Button: Mehr..">
-        <!-- <img border="0"atlas id="divider" src="img/division.png" title="" width="1" height="10"> -->
-        <!--  <span id="moreLabel">&nbsp;Mehr..</span> -->
+        <span id="moreLabel">
+          &nbsp;Mehr..
+          <img src="http://www.kiezatlas.de/client/images/dropdown-btn.png" title="Mehr.." alt="Button: Mehr..">
+        </span>
         <div id="mapSwitcher" style="position: absolute; visibility: hidden;"></div>
       </div>
       <div id="memu" style="visibility:hidden;"></div>

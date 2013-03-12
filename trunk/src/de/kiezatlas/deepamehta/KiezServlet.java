@@ -27,7 +27,7 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
 
 	// --- 3 Hooks overriden
 
-	protected String performPostRequest(String remoteMethod, String params, 
+	protected String performPostRequest(String remoteMethod, String params,
 									Session session, CorporateDirectives directives) {
 		String result = "";
 		if ( remoteMethod.equals("getMapTopics") ) {
@@ -53,7 +53,7 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
 	}
 
 	protected String performAction(String topicId, String params, Session session, CorporateDirectives directives) {
-		session.setAttribute("info", "<h3>Willkommen zu dem Kiezatlas Dienst unter " 
+		session.setAttribute("info", "<h3>Willkommen zu dem Kiezatlas Dienst unter "
 			+ as.getCorporateWebBaseURL() + "</h3><br>F&uuml;r die Nutzung des Dienstes steht Entwicklern "
 			+ "<a href=\"http://www.deepamehta.de/wiki/en/Application:_Web_Service\">hier</a> die Software "
 			+ " Dokumentation zur Verfügung. Ein Beispiel zur Nutzung eines Kiezatlas Dienstes ist "
@@ -159,7 +159,7 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
 	 * @return
 	 */
 	private String getMobileCityMaps(String params) {
-		System.out.println(">>>> getMobileCityMaps()");
+		System.out.println(">>>> getAllMobileCityMaps()");
 		StringBuffer messages = null;
 		StringBuffer result = new StringBuffer("{\"result\": ");
 		String infos = createMobileCityMaps();
@@ -177,6 +177,7 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
 	 * @return
 	 */
 	private String searchTopics(String params, CorporateDirectives directives) {
+    System.out.println(">>>> searchTopic(" + params + ")");
 		StringBuffer result = new StringBuffer("{\"result\": ");
 		StringBuffer messages = null;
 		String parameters[] = params.split(",");
@@ -205,7 +206,7 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
 			}
 		}
 		// +" named and "+streetResults.size()+ " streetnames like " + query);
-		System.out.println("   > found " + results.size() + " by name and tag");
+		System.out.println("    >> found " + results.size() + " by name and tag");
 		//
 		result.append("[");
 		for (int i=0; i < results.size(); i++) {
@@ -358,10 +359,10 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
 		//
 		BaseTopic logo = as.getRelatedTopic(workspaceId, ASSOCTYPE_ASSOCIATION, TOPICTYPE_IMAGE, 2, true);
 		if (logo != null) logoURL = as.getTopicProperty(logo, PROPERTY_FILE);
-		BaseTopic homepage = as.getRelatedTopic(workspaceId, 
+		BaseTopic homepage = as.getRelatedTopic(workspaceId,
 				KiezAtlas.ASSOCTYPE_HOMEPAGE_LINK, TOPICTYPE_WEBPAGE, 2, true);
 		if (homepage != null) homepageURL = as.getTopicProperty(homepage, PROPERTY_URL);
-		BaseTopic impressum = as.getRelatedTopic(workspaceId, 
+		BaseTopic impressum = as.getRelatedTopic(workspaceId,
 				KiezAtlas.ASSOCTYPE_IMPRESSUM_LINK, TOPICTYPE_WEBPAGE, 2, true);
 		if (impressum != null) impressumURL = as.getTopicProperty(impressum, PROPERTY_URL);
 		//
@@ -410,49 +411,58 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
 	private String createMobileCityMaps() {
 		StringBuffer object = new StringBuffer();
 		Hashtable propertyFilter = new Hashtable();
+        // all citymaps have their "mobile citymap"-flag set
 		propertyFilter.put(PROPERTY_MOBILE_CITYMAP, "on");
 		Vector mobileCityMaps = cm.getTopics("tt-ka-stadtplan", propertyFilter);
-		System.out.println("Requesting mobile citymaps, found " + mobileCityMaps.size() + " checked for mobile-client");
 		//
 		object.append("{\"name\": \"Mobile Stadtpl&auml;ne im KiezAtlas\",");
 		object.append("\"id\": \"0\",");
 		object.append("\"maps\": [");
 		for (int p = 0; p < mobileCityMaps.size(); p++) {
-            String id, name, webAlias, workspaceId = "";
-			BaseTopic cityMap = (BaseTopic) mobileCityMaps.get(p);
-            LiveTopic cityMapLive = (LiveTopic) as.getLiveTopic(cityMap.getID(), 1);
-            Vector childs = as.getRelatedTopics(cityMapLive.getID(), ASSOCTYPE_DERIVATION, 2);
-            if (childs != null) {
-                for (int i = 0; i < childs.size(); i++) {
-                    BaseTopic subtopic = (BaseTopic) childs.get(i);
-                    BaseTopic workspace = as.getRelatedTopic(subtopic.getID(), ASSOCTYPE_PUBLISHING, TOPICTYPE_WORKSPACE, 2, true);
-                    if (workspace != null) {
-                        workspaceId = workspace.getID();
-                        break;
-                    }
-                }
-            }
+      String id, name, webAlias, workspaceId = "";
+      BaseTopic cityMap = (BaseTopic) mobileCityMaps.get(p);
+      LiveTopic cityMapLive = (LiveTopic) as.getLiveTopic(cityMap.getID(), 1);
+      Vector childs = as.getRelatedTopics(cityMapLive.getID(), ASSOCTYPE_DERIVATION, 2);
+      // derived topics are related to the corresponding workspace..
+      if (childs != null) {
+          for (int i = 0; i < childs.size(); i++) {
+              BaseTopic subtopic = (BaseTopic) childs.get(i);
+              BaseTopic workspace = as.getRelatedTopic(subtopic.getID(), ASSOCTYPE_PUBLISHING, TOPICTYPE_WORKSPACE, 2, true);
+              if (workspace != null) {
+                  workspaceId = workspace.getID();
+                  break; // should be done with the outer for loop.. double check.
+              }
+          }
+      }
 			id = cityMap.getID();
 			name = cityMap.getName();
 			webAlias = as.getTopicProperty(cityMap, PROPERTY_WEB_ALIAS);
-			object.append("{");
-			// if citymaps have their "mobile citymap"-flag set
-			if (!webAlias.equals("")) {
+			// apend all citymaps who have the web alias set and are currently part of the workspace-topicmap
+			if (!webAlias.equals("") && isPublishedMobileCityMap(workspaceId, id)) {
+                object.append("{");
 				object.append("\"id\": \"" + id + "\", ");
 				object.append("\"name\": \"" + toJSON(name) + "\", ");
 				object.append("\"alias\": \"" + webAlias + "\", ");
 				object.append("\"workspaceId\": \"" + workspaceId + "\" ");
-				//
+                if(mobileCityMaps.indexOf(cityMap) == mobileCityMaps.size() - 1)
+                    object.append("}");
+                else
+                    object.append("},");
 			}
-			if(mobileCityMaps.indexOf(cityMap) == mobileCityMaps.size() - 1)
-				object.append("}");
-			else
-				object.append("},");
 		}
 		object.append("]");
 		object.append("}");
 		return object.toString();
 	}
+
+  private boolean isPublishedMobileCityMap(String workspaceId, String mobileCityMapId) {
+    BaseTopic workspaceMap = as.getRelatedTopic(workspaceId, ASSOCTYPE_AGGREGATION, TOPICTYPE_TOPICMAP, 2, true);
+    if (workspaceMap != null) {
+        int tv = cm.getViewTopicVersion(workspaceMap.getID(), 1, "", mobileCityMapId);
+        return (tv != 0) ? true : false;
+    }
+    return false;
+  }
 
 	private String createSlimGeoObject(BaseTopic topic, Vector criterias, StringBuffer messages) {
 		StringBuffer object = new StringBuffer();
