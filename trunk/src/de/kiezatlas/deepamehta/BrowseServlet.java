@@ -19,6 +19,7 @@ import de.deepamehta.PresentableTopic;
 import de.deepamehta.service.CorporateDirectives;
 import de.deepamehta.service.Session;
 import de.deepamehta.service.TopicBean;
+import de.deepamehta.service.TopicBeanField;
 import de.deepamehta.service.web.DeepaMehtaServlet;
 import de.deepamehta.service.web.RequestParameter;
 import de.deepamehta.service.web.WebSession;
@@ -28,6 +29,8 @@ import de.deepamehta.util.DeepaMehtaUtils;
 
 import de.kiezatlas.deepamehta.topics.CityMapTopic;
 import de.kiezatlas.deepamehta.topics.GeoObjectTopic;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 
@@ -63,15 +66,15 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 				}
 				//
 				String alias = pathInfo.substring(1);
-        BaseTopic map = CityMapTopic.lookupCityMap(alias, true, as); // throwIfNotFound=true
+				BaseTopic map = CityMapTopic.lookupCityMap(alias, true, as); // throwIfNotFound=true
 				setCityMap(map, session);
-        if (!CityMapTopic.isProtected(map, as)) {
-          //
-          initCityMap(session);
-          return PAGE_FRAMESET;
-        } else {
-          return PAGE_MAP_LOGIN;
-        }
+				if (!CityMapTopic.isProtected(map, as)) {
+					//
+					initCityMap(session);
+					return PAGE_FRAMESET;
+				} else {
+					return PAGE_MAP_LOGIN;
+				}
 			} catch (DeepaMehtaException e) {
 				System.out.println("*** BrowseServlet.performAction(): " + e);
 				session.setAttribute("error", e.getMessage());
@@ -86,18 +89,19 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 			return PAGE_ERROR;
 		}
 		//
-    if (action.equals(ACTION_TRY_LOGIN)) {
-      String password = params.getValue("password");
-      if (CityMapTopic.passwordCorrect(getCityMap(session), as, password)) {
-        initCityMap(session);
-        return PAGE_FRAMESET;
-      } else {
-        return PAGE_MAP_LOGIN;
-      }
-    } else if (action.equals(ACTION_INIT_FRAME)) {
+		if (action.equals(ACTION_TRY_LOGIN)) {
+			String password = params.getValue("password");
+			if (CityMapTopic.passwordCorrect(getCityMap(session), as, password)) {
+				initCityMap(session);
+				return PAGE_FRAMESET;
+			} else {
+				return PAGE_MAP_LOGIN;
+			}
+		} else if (action.equals(ACTION_INIT_FRAME)) {
 			String frame = params.getValue("frame");
+			// initialize frames
 			if (frame.equals(FRAME_LEFT)) {
-        return PAGE_CITY_MAP;
+				return PAGE_CITY_MAP;
 			} else if (frame.equals(FRAME_RIGHT)) {
 				// list categories of 1st search criteria, if there is a criteria at all
 				if (getCriterias(session).length > 0) {
@@ -151,10 +155,13 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 			return PAGE_GEO_LIST;
 		// info
 		} else if (action.equals(ACTION_SHOW_GEO_INFO)) {
-      // ### should also set the current HotspotMarker (e.g. after searchByCategory)
+		// ### should also set the current HotspotMarker (e.g. after searchByCategory)
 			String geoID = params.getValue("id");
 			setSelectedGeo(geoID, session);
 			TopicBean topicBean = as.createTopicBean(geoID, 1);
+			if (topicBean.getValue(KiezAtlas.PROPERTY_ADMINISTRATION_INFO).indexOf("lor/analysen/") != -1) {
+				topicBean = prepareNewLorPageLink(topicBean);
+			}
 			session.setAttribute("topicBean", topicBean);
 			String imagePath = as.getCorporateWebBaseURL() + FILESERVER_IMAGES_PATH;
 			session.setAttribute("imagePath", imagePath);
@@ -216,40 +223,40 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 			String instTypeID = getInstitutionType(session).getID();
 			String searchMode = getSearchMode(session);
 			Vector insts;
-      Vector taggedInsts;
-      Hashtable propertyFilter;
-      // enable the rendering of enumeration
-      session.setAttribute("enumerationFlag", true);
+			Vector taggedInsts;
+			Hashtable propertyFilter;
+			// enable the rendering of enumeration
+			session.setAttribute("enumerationFlag", true);
 			if (searchMode.equals(SEARCHMODE_BY_NAME)) {
 				insts = cm.getViewTopics(mapID, 1, instTypeID, getSearchValue(session));
-        if (!getSearchValue(session).equals("")) {
-          propertyFilter = new Hashtable();
-          propertyFilter.put(PROPERTY_TAGFIELD, getSearchValue(session));
-          taggedInsts = cm.getTopics(getInstitutionType(session).getID(), propertyFilter, mapID);
-          for (int k = 0; k < taggedInsts.size(); k++) {
-            BaseTopic taggedTopic = (BaseTopic) taggedInsts.get(k);
-            Vector pts = cm.getViewTopics(mapID, 1, instTypeID, taggedTopic.getName());
-            System.out.println("newSearchMode fetched additionally " + pts.size() + " tagged Institutions byName!");
-            if (pts.size() >= 1) {
-              if (!insts.contains(pts.get(0))) {
-                insts.add(pts.get(0));
-                System.out.println("newSearchMode added fetched PresentableTopic => " + ((BaseTopic)pts.get(0)).getName() + " !byName");
-              } else {
-                System.out.println("newSearchMode skipped fetched PresentableTopic => " + ((BaseTopic)pts.get(0)).getName() + " !byName");
-              }
-            } // insts.add(new PresentableTopic(topic, new Point()));
-          }
-          session.setAttribute("taggedInstitutions", taggedInsts);
-        }
+				if (!getSearchValue(session).equals("")) {
+				propertyFilter = new Hashtable();
+				propertyFilter.put(PROPERTY_TAGFIELD, getSearchValue(session));
+				taggedInsts = cm.getTopics(getInstitutionType(session).getID(), propertyFilter, mapID);
+				for (int k = 0; k < taggedInsts.size(); k++) {
+					BaseTopic taggedTopic = (BaseTopic) taggedInsts.get(k);
+					Vector pts = cm.getViewTopics(mapID, 1, instTypeID, taggedTopic.getName());
+					System.out.println("newSearchMode fetched additionally " + pts.size() + " tagged Institutions byName!");
+					if (pts.size() >= 1) {
+					if (!insts.contains(pts.get(0))) {
+						insts.add(pts.get(0));
+						System.out.println("newSearchMode added fetched PresentableTopic => " + ((BaseTopic)pts.get(0)).getName() + " !byName");
+					} else {
+						System.out.println("newSearchMode skipped fetched PresentableTopic => " + ((BaseTopic)pts.get(0)).getName() + " !byName");
+					}
+					} // insts.add(new PresentableTopic(topic, new Point()));
+				}
+				session.setAttribute("taggedInstitutions", taggedInsts);
+				}
 				// hotspots
 				setHotspots(insts, ICON_HOTSPOT, session);
-        session.setAttribute("selectedCatId", "");
+				session.setAttribute("selectedCatId", "");
 			} else {
 				String catID = params.getValue("id");
 				insts = cm.getRelatedViewTopics(mapID, 1, catID, ASSOCTYPE_ASSOCIATION, instTypeID, 1);	// ### copy in setCategoryHotspots()
 				// hotspots + return the index of the current CatID in the multi-dimensional hotspot vector
 				int catIndex = setSearchedCategoryHotspots(session, catID);
-        session.setAttribute("selectedCatId", ""+catIndex+"");
+				session.setAttribute("selectedCatId", ""+catIndex+"");
 			}
 			session.setAttribute("institutions", insts);
 			// categories & addresses
@@ -289,17 +296,17 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 	// *****************
 
 
-  private void initCityMap(Session session) {
-      initInstitutaionType(session);	// relies on city map
-      initSearchCriterias(session);	// relies on city map
-      initShapeTypes(session);		// relies on city map
-      initStylesheet(session);		// relies on city map
-      initSiteLogo(session);			// relies on city map
-      initSiteLinks(session);			// relies on city map
-      initSelectedCatAttribute(session);
-      //
-      updateShapes(session);			// relies on shape types;
-  }
+	private void initCityMap(Session session) {
+		initInstitutaionType(session);	// relies on city map
+		initSearchCriterias(session);	// relies on city map
+		initShapeTypes(session);		// relies on city map
+		initStylesheet(session);		// relies on city map
+		initSiteLogo(session);			// relies on city map
+		initSiteLinks(session);			// relies on city map
+		initSelectedCatAttribute(session);
+		//
+		updateShapes(session);			// relies on shape types;
+	}
 
 	private void toggle(Vector topicIDs, String topicID) {
 		if (topicIDs.contains(topicID)) {
@@ -443,7 +450,6 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 		if (homepageLink != null) {
 			String homepageURL = as.getTopicProperty(homepageLink, PROPERTY_URL);
 			session.setAttribute("homepageURL", homepageURL);
-			System.out.println(">>> \"homepageURL\" stored in session: \"" + homepageURL + "\"");
 		} else {
 			// ### session.setAttribute("homepageURL", "");
 			System.out.println("*** NO HOMEPAGE LINK FOUND (there is no webpage topic assigned to the Kiez-Atlas workspace)");
@@ -453,14 +459,12 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 		if (impressumLink != null) {
 			String impressumURL = as.getTopicProperty(impressumLink, PROPERTY_URL);
 			session.setAttribute("impressumURL", impressumURL);
-			System.out.println(">>> \"impressumURL\" stored in session: \"" + impressumURL + "\"");
 		} else {
 			// ### session.setAttribute("impressumLink", "");
 			System.out.println("*** NO IMPRESSUM LINK FOUND (there is no webpage topic assigned to the Kiez-Atlas workspace)");
 		}
-    String webAlias = as.getTopicProperty(getCityMap(session), PROPERTY_WEB_ALIAS);
-    session.setAttribute("webAlias", webAlias);
-    System.out.println(">>> \"webAlias\" stored in session: \"" + webAlias + "\"");
+		String webAlias = as.getTopicProperty(getCityMap(session), PROPERTY_WEB_ALIAS);
+		session.setAttribute("webAlias", webAlias);
 	}
 
 	private void setSelectedGeo(String geoID, Session session) {
@@ -549,7 +553,7 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 		Vector presentables = new Vector(topics);
 		presentables.insertElementAt(as.getCorporateWebBaseURL() + FILESERVER_ICONS_PATH + icon, 0);
 		hotspots.addElement(presentables);
-		// 
+		//
 		makeCluster(hotspots, cluster);
 		session.setAttribute("cluster", cluster);
 		session.setAttribute("hotspots", hotspots);
@@ -708,6 +712,29 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 		} catch (Throwable e) {
 			System.out.println("*** BrowseServlet.updateShapes(): " + e);
 		}
+	}
+
+	private TopicBean prepareNewLorPageLink(TopicBean topicBean) {
+		// start migrating all links in the system to the new lor-pages
+		String lorId = null;
+		String adminInfo = topicBean.getValue(KiezAtlas.PROPERTY_ADMINISTRATION_INFO);
+		Pattern pattern = Pattern.compile("(<a href=\"\\D+)(/analysen/)(\\d+)(.pdf)(\\D+)(target=\"_blank\">)(\\D+)(</a>)");
+		Matcher matcher = pattern.matcher(adminInfo);
+		while (matcher.find()) {
+			Pattern idPattern = Pattern.compile("(\\d+)");
+			Matcher idMatch = idPattern.matcher(matcher.group());
+			while (idMatch.find()) { lorId = idMatch.group(); }
+			if (lorId != null) {
+				String before = adminInfo.substring(0, matcher.start());
+				String link = "<a href=\"http://jugendserver.spinnenwerk.de/~lor/seiten/2012/06/?lor="
+					+ lorId + "\" target=\"_blank\">Sozialdaten Planungsraum</a>";
+				String after = adminInfo.substring(matcher.end());
+				adminInfo = before + link + after;
+				TopicBeanField adminField = topicBean.getField(KiezAtlas.PROPERTY_ADMINISTRATION_INFO);
+				adminField.value = adminInfo; // migration sucessfull
+			}
+		}
+		return topicBean;
 	}
 
 	// ---

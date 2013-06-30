@@ -980,6 +980,7 @@
     hideProgressFromSideBar();
     resultHandler.empty();
     var imgSrc = getImageSource(givenTopic);
+    var akteurImg = getAkteurImageSource(givenTopic);
     if (imgSrc != "undefined") {
       imgSrc = IMAGES_URL + imgSrc;
       // var imgWidth = jQuery("#sideBar").css("width");
@@ -990,7 +991,8 @@
     var cityName = getTopicCity(givenTopic);
     var street = getTopicAddress(givenTopic);
     var originId = getTopicOriginId(givenTopic);
-    if (cityName == " Berlin" || cityName == "Berlin" || onBerlinDe) { // ### FIXME sloppy
+    if (cityName == " Berlin" || cityName == "Berlin" || onBerlinDe || topicId == "t-1223527") { // ### FIXME sloppy
+      if (topicId == "t-1223527") cityName = "Berlin"
       var postalCode = getTopicPostalCode(givenTopic);
       var target = street + "%20" + postalCode + "%20" + cityName;
       var publicTransportURL = "http://www.fahrinfo-berlin.de/fahrinfo/bin/query.exe/d?Z=" + target + "&REQ0JourneyStopsZA1=2&start=1";
@@ -1026,6 +1028,7 @@
     givenTopic = stripFieldsContaining(givenTopic, "Description");
     givenTopic = stripFieldsContaining(givenTopic, "Timestamp");
     givenTopic = stripFieldsContaining(givenTopic, "OriginId");
+    givenTopic = stripFieldsContaining(givenTopic, "Akteur Logo");
     var propertyList = '<p>'; //<table width="100%" cellpadding="2" border="0"><tbody>';
     for (var i=0; i < givenTopic.properties.length; i++) {
       // propertyList += '<tr>';
@@ -1075,6 +1078,10 @@
         propertyList += '</span></p>';
       }
       propertyList += '</p>';
+    }
+    if (akteurImg != "undefined") {
+      akteurImg = IMAGES_URL + akteurImg;
+      propertyList += '<br/><img src="'+akteurImg+'"/>';
     }
     resultHandler.append(propertyList);
     //
@@ -2551,6 +2558,15 @@
   function getImageSource(topic) {
     for (var i=0; i < topic.properties.length; i++) {
       if (topic.properties[i].name == "Image / File" && topic.properties[i].value != "") {
+        return topic.properties[i].value;
+      }
+    }
+    return "undefined";
+  }
+
+  function getAkteurImageSource(topic) {
+    for (var i=0; i < topic.properties.length; i++) {
+      if (topic.properties[i].name == "Akteur Logo" && topic.properties[i].value != "") {
         return topic.properties[i].value;
       }
     }

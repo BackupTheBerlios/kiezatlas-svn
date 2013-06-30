@@ -499,6 +499,9 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
 		StringBuffer bean = new StringBuffer();
 		//
 		TopicBean topicBean = as.createTopicBean(topic.getID(), 1);
+		if (topicBean.getValue(KiezAtlas.PROPERTY_ADMINISTRATION_INFO).indexOf("lor/analysen/") != -1) {
+			topicBean = prepareNewLorPageLink(topicBean);
+		}
 		removeCredentialInformation(topicBean);
 		String topicName = removeQuotationMarksFromNames(topicBean.name);
 		bean.append("{\"id\": \"" + topicBean.id + "\",");
@@ -542,6 +545,29 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
 		bean.append("]");
 		bean.append("}");
 		return bean.toString();
+	}
+
+	private TopicBean prepareNewLorPageLink(TopicBean topicBean) {
+		// start migrating all links in the system to the new lor-pages
+		String lorId = null;
+		String adminInfo = topicBean.getValue(KiezAtlas.PROPERTY_ADMINISTRATION_INFO);
+		Pattern pattern = Pattern.compile("(<a href=\"\\D+)(/analysen/)(\\d+)(.pdf)(\\D+)(target=\"_blank\">)(\\D+)(</a>)");
+		Matcher matcher = pattern.matcher(adminInfo);
+		while (matcher.find()) {
+			Pattern idPattern = Pattern.compile("(\\d+)");
+			Matcher idMatch = idPattern.matcher(matcher.group());
+			while (idMatch.find()) { lorId = idMatch.group(); }
+			if (lorId != null) {
+				String before = adminInfo.substring(0, matcher.start());
+				String link = "<a href=\"http://jugendserver.spinnenwerk.de/~lor/seiten/2012/06/?lor="
+					+ lorId + "\" target=\"_blank\">Sozialdaten Planungsraum</a>";
+				String after = adminInfo.substring(matcher.end());
+				adminInfo = before + link + after;
+				TopicBeanField adminField = topicBean.getField(KiezAtlas.PROPERTY_ADMINISTRATION_INFO);
+				adminField.value = adminInfo; // migration sucessfull
+			}
+		}
+		return topicBean;
 	}
 
 	private TopicBean removeCredentialInformation(TopicBean topicBean) {

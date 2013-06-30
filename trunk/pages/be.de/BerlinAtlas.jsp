@@ -3,23 +3,23 @@
 	BaseTopic map = (BaseTopic) session.getAttribute("map");
 	BaseTopic workspace = (BaseTopic) session.getAttribute("workspace");
 	String mapTopics = (String) session.getAttribute("mapTopics");
-  String workspaceCriterias = (String) session.getAttribute("workspaceCriterias");
-  String workspaceImprint = (String) session.getAttribute("workspaceImprint");
-  String workspaceLogo = (String) session.getAttribute("workspaceLogo");
-  String mapAlias = (String) session.getAttribute("mapAlias");
-  String workspaceHomepage = (String) session.getAttribute("workspaceHomepage");
+	String workspaceCriterias = (String) session.getAttribute("workspaceCriterias");
+	String workspaceImprint = (String) session.getAttribute("workspaceImprint");
+	String workspaceLogo = (String) session.getAttribute("workspaceLogo");
+	String mapAlias = (String) session.getAttribute("mapAlias");
+	String workspaceHomepage = (String) session.getAttribute("workspaceHomepage");
 	String searchTerm = (String) session.getAttribute("searchTerm");
 	String originId = (String) session.getAttribute("originId");
 	String topicId = (String) session.getAttribute("topicId");
 	String catIds = (String) session.getAttribute("categories");
-  String baseLayer = (String) session.getAttribute("baseLayer");
+	String baseLayer = (String) session.getAttribute("baseLayer");
 	Integer critIndex = (Integer) session.getAttribute("critIndex");
-  // String basePath = "http://localhost:8080/kiezatlas";
-  String basePath = "http://www.berlin.de/atlas";
-  // String basePath = "http://www.kiezatlas.de/maps/embed/012";
-  String resourcePath = "http://www.kiezatlas.de/maps/embed/012";
-  //
-  String title = "" + map.getName() + " im Kiezatlas";
+	// String basePath = "http://localhost:8080/kiezatlas";
+	String basePath = "http://www.berlin.de/atlas";
+	// String basePath = "http://www.kiezatlas.de/maps/embed/012";
+	String resourcePath = "http://www.kiezatlas.de/maps/embed/012";
+	//
+	String title = "" + map.getName() + " im Kiezatlas";
 
 %>
 <% startMaps(session, out); %>
@@ -154,13 +154,13 @@
     <div id="kiezatlas" style="visibility: hidden;">
       <div id="kaheader">
 		    <div id="focusInput">
-		      <form id="autoLocateInputField" action="javascript:focusRequest()">
-            <label for="streetNameField">In der N&auml;he von</label>
-            <input id="streetNameField" type="text" size="18" placeholder="Stra&szlig;enname / Hnr."/>
-            <a href="javascript:focusRequest()" class="go-focus">OK</a>
-            <label for="streetNameField">im</label>
-            <span id="mapName"></span>
-		      </form>
+                <form id="autoLocateInputField">
+                    <label for="streetNameField">In der N&auml;he von</label>
+                    <input id="streetNameField" disabled="true" type="text" size="18" placeholder="Stra&szlig;enname / Hnr."/>
+                    <a class="go-focus">OK</a>
+                    <label for="streetNameField">im</label>
+                    <span id="mapName"></span>
+                </form>
 		    </div>
         <div id="cityMapDialog" style="visibility: hidden;"></div>
 		    <div id="searchInput">
