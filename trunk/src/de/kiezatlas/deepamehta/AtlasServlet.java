@@ -57,8 +57,8 @@ public class AtlasServlet extends DeepaMehtaServlet implements KiezAtlas {
 
 
 
-	private final String urlStr = "http://www.kiezatlas.de/rpc/";
-	// private final String urlStr = "http://localhost:8080/kiezatlas/rpc/";
+	private final String SERVICE_URL = "http://www.kiezatlas.de/rpc/";
+	// private final String SERVICE_URL = "http://localhost:8080/kiezatlas/rpc/";
 	private final String charset = "ISO-8859-1";
 
 	String topicmapId = "is-set-to-current-topicmap-id-of-request"; // used by new getLastModified impl
@@ -270,9 +270,9 @@ public class AtlasServlet extends DeepaMehtaServlet implements KiezAtlas {
 		String result = null;
 		try {
 			// Send data
-			URL url = new URL(urlStr);
+			URL url = new URL(SERVICE_URL);
 			String query = "{\"method\": \"getMapTopics\", \"params\": [\"" + mapId + "\" , \"" + workspaceId + "\"]}";
-			URLConnection connection = new URL(urlStr).openConnection();
+			URLConnection connection = new URL(SERVICE_URL).openConnection();
 			connection.setDoOutput(true); // Triggers POST.
 			// connection.setRequestProperty("Accept-Charset", charset);
 			connection.setRequestProperty("Content-Type", "application/json;charset=" + charset);
@@ -289,7 +289,7 @@ public class AtlasServlet extends DeepaMehtaServlet implements KiezAtlas {
 			rd.close();
 			return result;
 		} catch(UnknownHostException uke) {
-			System.out.println("*** [ATLAS] couldn't load CityMapData from " + urlStr + " cause is: " + uke.getCause());
+			System.out.println("*** [ATLAS] couldn't load CityMapData from " + SERVICE_URL + " cause is: " + uke.getCause());
 			return null;
 			// done();
 		} catch (Exception ex) {
@@ -302,10 +302,10 @@ public class AtlasServlet extends DeepaMehtaServlet implements KiezAtlas {
 		String result = null;
 		try {
 			// Send data
-			URL url = new URL(urlStr);
+			URL url = new URL(SERVICE_URL);
 			String query = "{\"method\": \"getWorkspaceCriterias\", \"params\": [\"" + mapId + "\"]}";
 			// url.s
-			URLConnection connection = new URL(urlStr).openConnection();
+			URLConnection connection = new URL(SERVICE_URL).openConnection();
 			connection.setDoOutput(true); // Triggers POST.
 			// connection.setRequestProperty("Accept-Charset", charset);
 			connection.setRequestProperty("Content-Type", "application/json;charset=" + charset);
@@ -321,7 +321,7 @@ public class AtlasServlet extends DeepaMehtaServlet implements KiezAtlas {
 			result = line;
 			return result;
 		} catch(UnknownHostException uke) {
-			System.out.println("*** [ATLAS] could not load CityMap-Data from " + urlStr + " message is: " + uke.getCause());
+			System.out.println("*** [ATLAS] could not load CityMap-Data from " + SERVICE_URL + " message is: " + uke.getCause());
 			return null;
 			// done();
 		} catch (UnsupportedEncodingException ex) {

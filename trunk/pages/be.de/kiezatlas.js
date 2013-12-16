@@ -616,7 +616,7 @@
       dataType: 'json',
 	    success: function(obj) {
 	      var topic = obj.result;
-        showGeoObjectInfo(topic, resultHandler, dontUpdateHistoryState);
+          showGeoObjectInfo(topic, resultHandler, dontUpdateHistoryState);
 	    }, // end of success handler
 	    error: function(x, s, e){
 	      resultHandler.empty();
@@ -990,29 +990,33 @@
     // address related stuff follows
     var cityName = getTopicCity(givenTopic);
     var street = getTopicAddress(givenTopic);
+    var postalCode = getTopicPostalCode(givenTopic);
     var originId = getTopicOriginId(givenTopic);
+    var imageLink = "";
     if (cityName == " Berlin" || cityName == "Berlin" || onBerlinDe || topicId == "t-1223527") { // ### FIXME sloppy
       if (topicId == "t-1223527") cityName = "Berlin"
-      var postalCode = getTopicPostalCode(givenTopic);
-      var target = street + "%20" + postalCode + "%20" + cityName;
-      var publicTransportURL = "http://www.fahrinfo-berlin.de/fahrinfo/bin/query.exe/d?Z=" + target + "&REQ0JourneyStopsZA1=2&start=1";
-      // var publicTransportURL = 'http://www.fahrinfo-berlin.de/Stadtplan/index?query=' + street +
-        // '&search=Suchen&formquery=&address=true';
-      var imageLink = '<a href="'+ publicTransportURL + '" target="_blank">'
-        + '<img src=\"'+IMAGES_URL+'fahrinfo.gif" border="0" hspace="20"/></a>';
+      // assemble berlin fahrinfo link
+      imageLink = createBerlinFahrinfoLink(street, cityName, postalCode);
+      //
       if (onBerlinDe || topicId == "t-331302") { // ehrenamt map datasets have no city property
         resultHandler.append(''+ postalCode + ' Berlin<br/>');
       } else {
         resultHandler.append(''+ postalCode + ' ' + cityName + '<br/>');
       }
       resultHandler.append('' + street + '&nbsp;' + imageLink + '<p/>');
-    } else {
+    } else { // not berlin
       if (topicId == "t-331302") { // ehrenamt map on datasets have no city property
         resultHandler.append(''+getTopicPostalCode(givenTopic) + ' Berlin<br/>');
       } else {
         resultHandler.append(''+getTopicPostalCode(givenTopic) + ' ' + cityName + '<br/>');
       }
-      resultHandler.append('' + street + '<p/>');
+      // maybe oberhausen
+      if (cityName.indexOf("Oberhausen") != -1) {
+        imageLink = createOberhausenFahrinfoLink(street, cityName, postalCode);
+        resultHandler.append('' + street + '&nbsp;' + imageLink + '<p/>');
+      } else {
+        resultHandler.append('' + street + '<p/>');
+      }
     }
     // stripping unwanted fields of the data container
     givenTopic = stripFieldsContaining(givenTopic, "LAT");
@@ -1046,7 +1050,11 @@
       if (givenTopic.properties[i].type == 0) {
         if (givenTopic.properties[i].label.indexOf("Barrierefrei") == -1) {
           // ordinary rendering for DM Property Type Single Value
-          propertyList += '<span class="propertyField">'+givenTopic.properties[i].value+'</span></p>';
+          var formattedValue = givenTopic.properties[i].value + ""
+          if (formattedValue.indexOf("\r") != -1 || formattedValue.indexOf("\n") != -1) {
+              formattedValue = replaceLF(formattedValue)
+          }
+          propertyList += '<span class="propertyField">'+formattedValue+'</span></p>';
         } else {
           // special rendering for the "BARRIERFREE_ACCESS"-Property
           if (givenTopic.properties[i].value == "") {
@@ -1093,6 +1101,35 @@
         updatePermaLink(baseUrl+mapAlias+"/p/"+givenTopic.id, {name: "getGeoObjectInfo", parameter: givenTopic.id});
       }
     }
+
+    function replaceLF(value) {
+      value = value.replace("\r\n", "<br/>");
+      value = value.replace("\r", "<br/>");
+      value = value.replace("\n", "<br/>");
+      return value;
+    }
+
+    function createBerlinFahrinfoLink(street, cityName, postalCode) {
+        var target = street + "%20" + postalCode + "%20" + cityName;
+        var publicTransportURL = "http://www.fahrinfo-berlin.de/fahrinfo/bin/query.exe/d?Z=" + target + "&REQ0JourneyStopsZA1=2&start=1";
+        var link = '<a href="'+ publicTransportURL + '" target="_blank">'
+            + '<img src=\"'+IMAGES_URL+'fahrinfo.gif" border="0" hspace="20"/></a>';
+        return link;
+    }
+
+    function createOberhausenFahrinfoLink(street, cityName, postalCode) {
+        var target = ""
+        if (typeof postalCode !== "undefined") {
+            target = "&place_destination=" + postalCode + "%20" + cityName + "&name_destination=" + street;
+        } else {
+            target = "&place_destination=" + cityName + "&name_destination=" + street;
+        }
+        var publicTransportURL = "http://www.efa.de/gvh/XSLT_TRIP_REQUEST2?language=de" + target + "&type_destination=address&sessionID=0"
+        var link = '<a href="'+ publicTransportURL + '" target="_blank">'
+            + '<img src=\"'+IMAGES_URL+'fahrinfo.gif" border="0" hspace="20"/></a>';
+        return link;
+    }
+
   }
 
 
@@ -2594,9 +2631,9 @@
   function getTopicCity(topic) {
     for (var at=0; at < topic.properties.length; at++) {
       // resultHandler.append('<tr><td>'+topic.properties[i].label+'</td><td>'+topic.properties[i].value+'</td></tr>');
-      if (topic.properties[at].name == "Address / City") {
+      if (topic.properties[at].name === "Address / City") {
         return topic.properties[at].value; // + ' Berlin<br/>';
-      } else if (topic.properties[at].name == "Stadt") {
+      } else if (topic.properties[at].name === "Stadt") {
         return topic.properties[at].value;
       }
     }

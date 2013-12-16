@@ -47,13 +47,13 @@
 		case KiezAtlas.SERVLET_LIST:
 			title = title + " - Listenzugang";
 			break;
-    case KiezAtlas.SERVLET_WORKSPACE:
+        case KiezAtlas.SERVLET_WORKSPACE:
 			title = title + " - Workspacezugang";
 			break;
 		case KiezAtlas.SERVLET_MAPS:
 			title = title + " - Stadtplanzugang";
 			break;
-    case KiezAtlas.SERVLET_IMPORT:
+        case KiezAtlas.SERVLET_IMPORT:
 			title = title + " - Importzugang";
 			break;
 		}

@@ -54,8 +54,8 @@ public class MapServlet extends DeepaMehtaServlet implements KiezAtlas {
 	// --
 
 
-	private final String urlStr = "http://www.kiezatlas.de/rpc/";
-	// private final String urlStr = "http://localhost:8080/kiezatlas/rpc/";
+    private final String SERVICE_URL = "http://www.kiezatlas.de/rpc/";
+	// private final String SERVICE_URL = "http://localhost:8080/kiezatlas/rpc/";
 	// private final String urlStr = "http://212.87.44.116:8080/rpc/";
 	private final String charset = "ISO-8859-1";
 
@@ -267,9 +267,9 @@ public class MapServlet extends DeepaMehtaServlet implements KiezAtlas {
 		String result = null;
 		try {
 			// Send data
-			URL url = new URL(urlStr);
+			URL url = new URL(SERVICE_URL);
 			String query = "{\"method\": \"getMapTopics\", \"params\": [\"" + mapId + "\" , \"" + workspaceId + "\"]}";
-			URLConnection connection = new URL(urlStr).openConnection();
+			URLConnection connection = new URL(SERVICE_URL).openConnection();
 			connection.setDoOutput(true); // Triggers POST.
 			// connection.setRequestProperty("Accept-Charset", charset);
 			connection.setRequestProperty("Content-Type", "application/json;charset=" + charset);
@@ -286,7 +286,7 @@ public class MapServlet extends DeepaMehtaServlet implements KiezAtlas {
 			rd.close();
 			return result;
 		} catch(UnknownHostException uke) {
-			System.out.println("*** [MapServlet] could not load the json data to import from " + urlStr + " message is: " + uke.getMessage());
+			System.out.println("*** [MapServlet] could not load the json data to import from " + SERVICE_URL + " message is: " + uke.getMessage());
 			return null;
 			// done();
 		} catch (Exception ex) {
@@ -299,10 +299,10 @@ public class MapServlet extends DeepaMehtaServlet implements KiezAtlas {
 		String result = null;
 		try {
 			// Send data
-			URL url = new URL(urlStr);
+			URL url = new URL(SERVICE_URL);
 			String query = "{\"method\": \"getWorkspaceCriterias\", \"params\": [\"" + mapId + "\"]}";
 			// url.s
-			URLConnection connection = new URL(urlStr).openConnection();
+			URLConnection connection = new URL(SERVICE_URL).openConnection();
 			connection.setDoOutput(true); // Triggers POST.
 			// connection.setRequestProperty("Accept-Charset", charset);
 			connection.setRequestProperty("Content-Type", "application/json;charset=" + charset);
@@ -318,7 +318,7 @@ public class MapServlet extends DeepaMehtaServlet implements KiezAtlas {
 			result = line;
 			return result;
 		} catch(UnknownHostException uke) {
-			System.out.println("*** [MapServlet] could not load the json data to import from " + urlStr + " message is: " + uke.getMessage());
+			System.out.println("*** [MapServlet] could not load the json data to import from " + SERVICE_URL + " message is: " + uke.getMessage());
 			return null;
 			// done();
 		} catch (UnsupportedEncodingException ex) {

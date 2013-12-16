@@ -1,5 +1,9 @@
 package de.kiezatlas.deepamehta.topics;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import de.kiezatlas.deepamehta.Comment;
 import de.kiezatlas.deepamehta.KiezAtlas;
 
@@ -23,6 +27,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.lang.String;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
@@ -200,7 +205,7 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
                         "ist folgender Fehler aufgetreten: "+ex, new Integer(NOTIFICATION_ERROR));
             }
 
-			
+
 		}
 		return super.propertyChangeAllowed(propName, propValue, session, directives);
 	}
@@ -578,12 +583,13 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
         //
         String givenAddress = getAddressString();
         if (givenAddress.equals("")) return new String[4]; // skip gps fetch for just " Berlin" without a street
-        StringBuffer requestUrl = new StringBuffer("http://maps.google.com/maps/geo?");
-        requestUrl.append("q=");
+        // StringBuffer requestUrl = new StringBuffer("http://maps.google.com/maps/geo?");
+        StringBuffer requestUrl = new StringBuffer("https://maps.googleapis.com/maps/api/geocode/json?");
+        requestUrl.append("address=");
         requestUrl.append(convertAddressForRequest(givenAddress));
-        // requested. put and remove address
-        // TODO: adapt to new Google Geocode API v3
-        requestUrl.append("&output=csv&oe=utf8&sensotr=false&key=ABQIAAAAyg-5-YjVJ1InfpWX9gsTuxRa7xhKv6UmZ1sBua05bF3F2fwOehRUiEzUjBmCh76NaeOoCu841j1qnQ&gl=de");
+        // as maps-api documentation says, geocoding up to 2500 address does not require an api key at all
+        // https://developers.google.com/maps/documentation/geocoding/ and https://developers.google.com/maps/faq
+        requestUrl.append("&sensor=false&region=de"); // key=" +key+ " &output=csv
         for (int i = 0; i < 3; i++) {
             try {
                 //String http = URLEncoder.encode(requestUrl.toString(), "UTF-8");
@@ -593,18 +599,27 @@ public class GeoObjectTopic extends LiveTopic implements KiezAtlas{
                                     new InputStreamReader(
                                     con.getInputStream()));
                 String inputLine;
+                StringBuffer response = new StringBuffer();
                 while ((inputLine = in.readLine()) != null) {
-                    // System.out.println("[DEBUG] GeoCodeResponse: " + inputLine);
-                    String[] points = inputLine.split(",");
-                    if (points[2].equals("0") && points[3].equals("0")) {
-                        System.out.println("[WARNING] .. geoCoder is lazy, could not locate GeoObjects ("+this.getAddressString()+") G coordinates, trying again " + i);
-                    } else {
-                        return points;
-                    }
+                    response.append(inputLine);
                 }
                 in.close();
+                // parse coordinates of the very first result item
+                JsonParser parser = new JsonParser();
+                JsonElement result = parser.parse(response.toString());
+                JsonObject object = result.getAsJsonObject();
+                JsonObject first_result = object.getAsJsonArray("results").get(0).getAsJsonObject();
+                String latitude = first_result.getAsJsonObject("geometry").getAsJsonObject("location").get("lat").getAsString();
+                String longitude = first_result.getAsJsonObject("geometry").getAsJsonObject("location").get("lng").getAsString();
+                System.out.println("[GeoObjectTopic]: Fetched location \"" + latitude + "\", \""+longitude+"\" for "
+                        + givenAddress + " via Gecoding at Google Maps Api v3");
+                String[] points = new String[4];
+                points[2] = latitude;
+                points[3] = longitude;
+                return points;
             } catch (IOException e) {
-                directives.add(DIRECTIVE_SHOW_MESSAGE, "The Google GeoCoder could not be connected. This GeoObject has no GPS Coordinates.", new Integer(NOTIFICATION_ERROR));
+                directives.add(DIRECTIVE_SHOW_MESSAGE, "The Google GeoCoder could not be connected. "
+                    + "This GeoObject has no GPS Coordinates.", new Integer(NOTIFICATION_ERROR));
                 e.printStackTrace();
                 return new String[4];
             }

@@ -499,7 +499,8 @@ public class KiezServlet extends JSONRPCServlet implements KiezAtlas {
 		StringBuffer bean = new StringBuffer();
 		//
 		TopicBean topicBean = as.createTopicBean(topic.getID(), 1);
-		if (topicBean.getValue(KiezAtlas.PROPERTY_ADMINISTRATION_INFO).indexOf("lor/analysen/") != -1) {
+		String adminInfo = topicBean.getValue(KiezAtlas.PROPERTY_ADMINISTRATION_INFO);
+		if (adminInfo != null && adminInfo.indexOf("lor/analysen/") != -1) {
 			topicBean = prepareNewLorPageLink(topicBean);
 		}
 		removeCredentialInformation(topicBean);

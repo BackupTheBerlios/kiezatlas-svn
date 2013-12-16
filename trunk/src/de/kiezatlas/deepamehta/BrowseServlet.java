@@ -159,7 +159,8 @@ public class BrowseServlet extends DeepaMehtaServlet implements KiezAtlas {
 			String geoID = params.getValue("id");
 			setSelectedGeo(geoID, session);
 			TopicBean topicBean = as.createTopicBean(geoID, 1);
-			if (topicBean.getValue(KiezAtlas.PROPERTY_ADMINISTRATION_INFO).indexOf("lor/analysen/") != -1) {
+			String adminInfo = topicBean.getValue(KiezAtlas.PROPERTY_ADMINISTRATION_INFO);
+			if (adminInfo != null && adminInfo.indexOf("lor/analysen/") != -1) {
 				topicBean = prepareNewLorPageLink(topicBean);
 			}
 			session.setAttribute("topicBean", topicBean);
